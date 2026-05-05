@@ -84,17 +84,13 @@ Current schema-backed v0.1 artifacts:
 | Artifact | Purpose | Current status |
 | --- | --- | --- |
 | `PolicyDecision` | Captures policy outcome such as allow/deny/review-before-prepare with scope/tool facts. | Schema + fixture validation. |
+| `PreparedExecutionSpec` | Captures the concrete execution shape prepared before approval. | Schema + synthetic fixture validation. |
+| `RedactedPreparedExecutionSpec` | Public/auditor-safe prepared execution view with explicit public-safety/redaction flags. | Schema + proof fixture validation. |
 | `ApprovedExecutionSpec` | Captures the approved execution shape and execution truth expected by a runtime executor. | Schema + fixture validation. |
 | `ExecutionReceipt` | Compact, public-safe summary of dry-run/execution outcome. | Schema + fixture validation. |
 | `EvidenceBundle` | Public-safe evidence/non-claim summary for the proof trace. | Schema + fixture validation. |
 | `ScopeFidelityReport` | Static review of target host vs hosts detected in normalized args/execution plan. | Schema + builder + CLI + fixture. |
 | `SecurityContractValidationReceipt` | Receipt showing which local/public-safe SCL validation checks ran. | Schema + builder + CLI. |
-
-Current non-schema artifact in the proof fixture:
-
-| Artifact | Purpose | Current status |
-| --- | --- | --- |
-| `prepared_execution_spec.redacted.json` | Public/auditor-facing view of a prepared execution shape. | Fixture + redaction helper. Dedicated schema is still future work. |
 
 See [`SPEC.md`](SPEC.md) and [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md) for more detail.
 
@@ -133,6 +129,14 @@ sclite validate examples/security-contract-proof
 Validate one artifact against a schema:
 
 ```bash
+sclite validate-artifact \
+  --schema prepared_execution_spec.v0.1 \
+  examples/prepared-execution-spec/prepared_execution_spec.json
+
+sclite validate-artifact \
+  --schema redacted_prepared_execution_spec.v0.1 \
+  examples/security-contract-proof/prepared_execution_spec.redacted.json
+
 sclite validate-artifact \
   --schema approved_execution_spec.v0.1 \
   examples/security-contract-proof/approved_execution_spec.json
@@ -209,6 +213,7 @@ It does **not** resolve DNS, follow redirects, inspect files loaded at runtime, 
 .
 ├── schemas/                         # top-level schemas for reviewers/tools
 ├── examples/                        # clean synthetic public-safe examples
+│   ├── prepared-execution-spec/      # standalone prepared spec fixture
 ├── sclite/                          # Python package
 │   ├── schemas/                     # packaged schema copies
 │   ├── examples/                    # packaged example copies
@@ -259,7 +264,6 @@ Important non-claims:
 
 Likely future work, not present v0.1 guarantees:
 
-- dedicated schema for `PreparedExecutionSpec` and `RedactedPreparedExecutionSpec`;
 - canonical JSON/hash helpers;
 - optional receipt signing or hash-chain support;
 - stronger redaction policy/receipt artifacts;

@@ -11,6 +11,7 @@ from sclite.validation import validate_fixture_dir
 
 PACKAGE_ROOT = Path(sclite.__file__).resolve().parent
 PACKAGE_FIXTURE_DIR = PACKAGE_ROOT / 'examples' / 'security-contract-proof'
+PACKAGE_PREPARED_FIXTURE = PACKAGE_ROOT / 'examples' / 'prepared-execution-spec' / 'prepared_execution_spec.json'
 
 
 def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
@@ -20,6 +21,32 @@ def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
 def test_internal_scl_package_validates_copied_schema_artifact() -> None:
     approved = json.loads((PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json').read_text(encoding='utf-8'))
     artifacts.validate_artifact(approved, 'approved_execution_spec.v0.1')
+
+
+def test_prepared_execution_spec_schema_validates_public_safe_fixture() -> None:
+    prepared = json.loads(PACKAGE_PREPARED_FIXTURE.read_text(encoding='utf-8'))
+    artifacts.validate_artifact(prepared, 'prepared_execution_spec.v0.1')
+    assert prepared['artifact_type'] == 'prepared_execution_spec'
+    assert prepared['resolved_tool'] == 'http_probe'
+
+
+def test_redacted_prepared_execution_spec_schema_validates_public_safe_fixture() -> None:
+    redacted = json.loads((PACKAGE_FIXTURE_DIR / 'prepared_execution_spec.redacted.json').read_text(encoding='utf-8'))
+    artifacts.validate_artifact(redacted, 'redacted_prepared_execution_spec.v0.1')
+    assert redacted['artifact_type'] == 'redacted_prepared_execution_spec'
+    assert redacted['public_safety']['live_target_execution'] is False
+    assert redacted['redaction']['credentials_included'] is False
+
+
+def test_redacted_prepared_execution_spec_schema_rejects_raw_output_claim() -> None:
+    redacted = json.loads((PACKAGE_FIXTURE_DIR / 'prepared_execution_spec.redacted.json').read_text(encoding='utf-8'))
+    redacted['public_safety']['raw_stdout_stderr_included'] = True
+    try:
+        artifacts.validate_artifact(redacted, 'redacted_prepared_execution_spec.v0.1')
+    except artifacts.JsonSchemaValidationError as exc:
+        assert 'raw_stdout_stderr_included' in str(exc)
+    else:  # pragma: no cover - assertion guard
+        raise AssertionError('schema should reject public raw stdout/stderr claims')
 
 
 def test_fixture_is_synthetic_not_redacted_private_runtime_export() -> None:

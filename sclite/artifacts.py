@@ -8,6 +8,9 @@ from .redaction import sanitize_public_artifact
 
 
 POLICY_DECISION_SCHEMA_VERSION = '2026-04-27.policy-decision.v0.1'
+PREPARED_EXECUTION_SPEC_VERSION = '2026-03-18.prepared.v1'
+PREPARED_EXECUTION_SPEC_ARTIFACT_TYPE = 'prepared_execution_spec'
+REDACTED_PREPARED_EXECUTION_SPEC_ARTIFACT_TYPE = 'redacted_prepared_execution_spec'
 APPROVED_EXECUTION_SPEC_VERSION = '2026-03-18.approved.v1'
 EXECUTION_RECEIPT_ARTIFACT_TYPE = 'execution_receipt'
 EVIDENCE_BUNDLE_SCHEMA_VERSION = '2026-04-28.evidence-bundle.v0.1'
@@ -39,6 +42,8 @@ PROOF_TRACE_FILES = [
 
 SCHEMA_FILES = {
     'policy_decision.v0.1': 'policy_decision.v0.1.schema.json',
+    'prepared_execution_spec.v0.1': 'prepared_execution_spec.v0.1.schema.json',
+    'redacted_prepared_execution_spec.v0.1': 'redacted_prepared_execution_spec.v0.1.schema.json',
     'approved_execution_spec.v0.1': 'approved_execution_spec.v0.1.schema.json',
     'execution_receipt.v0.1': 'execution_receipt.v0.1.schema.json',
     'evidence_bundle.v0.1': 'evidence_bundle.v0.1.schema.json',
@@ -353,8 +358,8 @@ def proof_trace_manifest() -> Dict[str, Dict[str, str]]:
         },
         REDACTED_PREPARED_EXECUTION_SPEC_FILE: {
             'kind': 'json',
-            'schema': '',
-            'schema_version': '2026-03-18.prepared.v1',
+            'schema': 'schemas/redacted_prepared_execution_spec.v0.1.schema.json',
+            'schema_version': PREPARED_EXECUTION_SPEC_VERSION,
         },
         APPROVED_EXECUTION_SPEC_FILE: {
             'kind': 'json',
@@ -404,6 +409,24 @@ def validate_public_proof_trace_artifacts(artifacts: Dict[str, Any]) -> List[str
 
     prepared = _expect_dict(artifacts, REDACTED_PREPARED_EXECUTION_SPEC_FILE, errors)
     if prepared:
+        if prepared.get('artifact_type') != REDACTED_PREPARED_EXECUTION_SPEC_ARTIFACT_TYPE:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:artifact_type')
+        if prepared.get('spec_version') != PREPARED_EXECUTION_SPEC_VERSION:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:spec_version')
+        redaction = prepared.get('redaction') if isinstance(prepared.get('redaction'), dict) else {}
+        safety = prepared.get('public_safety') if isinstance(prepared.get('public_safety'), dict) else {}
+        if redaction.get('raw_stdout_stderr_included') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:raw_stdout_stderr_redaction')
+        if redaction.get('credentials_included') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:credentials_redaction')
+        if redaction.get('private_paths_included') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:private_paths_redaction')
+        if safety.get('live_target_execution') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:live_target_execution')
+        if safety.get('raw_live_evidence_included') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:raw_live_evidence')
+        if safety.get('raw_stdout_stderr_included') is not False:
+            errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:raw_stdout_stderr')
         if any(secret in str(prepared) for secret in ('private-researcher-handle', 'session=abc', str(repo_root()))):
             errors.append(f'{REDACTED_PREPARED_EXECUTION_SPEC_FILE}:public_sanitization')
 

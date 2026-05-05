@@ -34,7 +34,7 @@ A governed runtime can use SCL like this:
 
 3. **Prepare execution shape**
    - Runtime compiles a concrete tool/action shape.
-   - Runtime may produce a private prepared spec and a redacted public/auditor view.
+   - Runtime may produce a `PreparedExecutionSpec` and a `RedactedPreparedExecutionSpec` public/auditor view.
 
 4. **Approve**
    - Reviewer/auditor/owner policy approves or rejects the concrete execution shape.
@@ -98,7 +98,7 @@ Bad carrier behavior:
 A carrier-agnostic engine that consumes SCL could expose endpoints such as:
 
 - `POST /policy/decide` -> `PolicyDecision`
-- `POST /execution/prepare` -> prepared spec + redacted view
+- `POST /execution/prepare` -> `PreparedExecutionSpec` + `RedactedPreparedExecutionSpec`
 - `POST /execution/approve` -> `ApprovedExecutionSpec`
 - `POST /scope-fidelity` -> `ScopeFidelityReport`
 - `POST /execution/receipt` -> `ExecutionReceipt`
