@@ -60,8 +60,8 @@ A governed runtime can use SCL like this:
 ## Minimal Python integration
 
 ```python
-from scl.artifacts import validate_artifact
-from scl.scope_fidelity import build_scope_fidelity_report_from_approved_spec
+from sclite.artifacts import validate_artifact
+from sclite.scope_fidelity import build_scope_fidelity_report_from_approved_spec
 
 # approved_spec is a dict produced by your runtime.
 validate_artifact(approved_spec, "approved_execution_spec.v0.1")

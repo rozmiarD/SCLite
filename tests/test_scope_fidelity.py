@@ -5,11 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scl import artifacts
-from scl.scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
+from sclite import artifacts
+from sclite.scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 
 
-PACKAGE_ROOT = Path(__import__('scl').__file__).resolve().parent
+PACKAGE_ROOT = Path(__import__('sclite').__file__).resolve().parent
 APPROVED_FIXTURE = PACKAGE_ROOT / 'examples' / 'security-contract-proof' / 'approved_execution_spec.json'
 
 
@@ -81,7 +81,7 @@ def test_scope_fidelity_cli_fail_on_review_exit_code() -> None:
         [
             sys.executable,
             '-m',
-            'scl.cli',
+            'sclite.cli',
             'scope-fidelity',
             '--target',
             'https://example.com',

@@ -120,10 +120,10 @@ In this package, the CLI emits it for fixture validation. A larger runtime may p
 Run:
 
 ```bash
-python -m scl.cli validate examples/security-contract-proof
-python -m scl.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
-python -m scl.cli scope-fidelity --approved-spec examples/security-contract-proof/approved_execution_spec.json --fail-on review
-python -m scl.cli validation-receipt examples/security-contract-proof
+python -m sclite.cli validate examples/security-contract-proof
+python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.cli scope-fidelity --approved-spec examples/security-contract-proof/approved_execution_spec.json --fail-on review
+python -m sclite.cli validation-receipt examples/security-contract-proof
 ```
 
 A passing result means the local synthetic fixture matches the current schemas/invariants. It does not mean the project executed tools or found a vulnerability.
