@@ -14,7 +14,7 @@ The fixture uses the reserved documentation host `example.com`, dry-run semantic
 Validate it with:
 
 ```bash
-python -m scl.cli validate examples/security-contract-proof
+python -m sclite.cli validate examples/security-contract-proof
 ```
 
 Non-claims:

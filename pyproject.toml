@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "security-contract-layer"
+name = "sclite"
 version = "0.1.0"
-description = "JSON-first security contract artifacts, validation, and public-safe proof fixtures"
+description = "Lightweight Security Contract Layer artifacts, validation, and public-safe proof fixtures"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -24,14 +24,15 @@ dev = [
 ]
 
 [project.scripts]
-scl = "scl.cli:main"
+sclite = "sclite.cli:main"
+scl = "sclite.cli:main"
 
 [tool.setuptools]
-packages = ["scl"]
+packages = ["sclite"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-scl = [
+sclite = [
   "schemas/*.json",
   "examples/security-contract-proof/*.json",
   "examples/security-contract-proof/*.md",

@@ -3,13 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import scl
-from scl import artifacts
-from scl.redaction import redact_prepared_spec
-from scl.validation import validate_fixture_dir
+import sclite
+from sclite import artifacts
+from sclite.redaction import redact_prepared_spec
+from sclite.validation import validate_fixture_dir
 
 
-PACKAGE_ROOT = Path(scl.__file__).resolve().parent
+PACKAGE_ROOT = Path(sclite.__file__).resolve().parent
 PACKAGE_FIXTURE_DIR = PACKAGE_ROOT / 'examples' / 'security-contract-proof'
 
 

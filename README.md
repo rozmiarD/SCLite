@@ -1,6 +1,11 @@
-# Security Contract Layer
+# SCLite
 
-Security Contract Layer (SCL) is a small, JSON-first contract layer for making security/agentic execution reviewable before and after a tool run.
+[![CI](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Lightweight Security Contract Layer for auditable AI/security execution contracts.
+
+SCLite (Security Contract Layer) is a small, JSON-first contract layer for making security/agentic execution reviewable before and after a tool run.
 
 It is currently a **draft v0.1** Python package, CLI, schema set, and fixture bundle. It does **not** execute tools, prove authorization, prove live vulnerabilities, or replace a runtime. It gives runtimes and carriers a common artifact shape for answering questions like:
 
@@ -95,6 +100,18 @@ See [`SPEC.md`](SPEC.md) and [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md) for more d
 
 ## Installation
 
+Once published to PyPI, the intended install path is:
+
+```bash
+pip install sclite
+```
+
+Install directly from GitHub after the repo is public:
+
+```bash
+pip install git+https://github.com/rozmiarD/SCLite.git
+```
+
 From a local checkout:
 
 ```bash
@@ -110,13 +127,13 @@ Runtime dependencies are intentionally empty for v0.1. The `dev` extra installs 
 Validate the public-safe proof fixture:
 
 ```bash
-python -m scl.cli validate examples/security-contract-proof
+sclite validate examples/security-contract-proof
 ```
 
 Validate one artifact against a schema:
 
 ```bash
-python -m scl.cli validate-artifact \
+sclite validate-artifact \
   --schema approved_execution_spec.v0.1 \
   examples/security-contract-proof/approved_execution_spec.json
 ```
@@ -124,7 +141,7 @@ python -m scl.cli validate-artifact \
 Generate a Scope Fidelity report from the approved spec fixture:
 
 ```bash
-python -m scl.cli scope-fidelity \
+sclite scope-fidelity \
   --approved-spec examples/security-contract-proof/approved_execution_spec.json \
   --fail-on review
 ```
@@ -132,7 +149,7 @@ python -m scl.cli scope-fidelity \
 Emit a validation receipt for the proof fixture:
 
 ```bash
-python -m scl.cli validation-receipt examples/security-contract-proof
+sclite validation-receipt examples/security-contract-proof
 ```
 
 Run tests:
@@ -146,7 +163,7 @@ python -m pytest -q
 Build a static Scope Fidelity report:
 
 ```python
-from scl.scope_fidelity import build_scope_fidelity_report, validate_scope_fidelity_report
+from sclite.scope_fidelity import build_scope_fidelity_report, validate_scope_fidelity_report
 
 report = build_scope_fidelity_report(
     target="https://example.com",
@@ -164,7 +181,7 @@ Validate an artifact:
 ```python
 import json
 from pathlib import Path
-from scl.artifacts import validate_artifact
+from sclite.artifacts import validate_artifact
 
 artifact = json.loads(Path("examples/security-contract-proof/approved_execution_spec.json").read_text())
 validate_artifact(artifact, "approved_execution_spec.v0.1")
@@ -192,7 +209,7 @@ It does **not** resolve DNS, follow redirects, inspect files loaded at runtime, 
 .
 ├── schemas/                         # top-level schemas for reviewers/tools
 ├── examples/                        # clean synthetic public-safe examples
-├── scl/                             # Python package
+├── sclite/                          # Python package
 │   ├── schemas/                     # packaged schema copies
 │   ├── examples/                    # packaged example copies
 │   ├── artifacts.py                 # schema loading, validation, proof-trace helpers
@@ -203,10 +220,12 @@ It does **not** resolve DNS, follow redirects, inspect files loaded at runtime, 
 │   └── cli.py                       # CLI entrypoint
 ├── tests/                           # package tests
 ├── SPEC.md                          # draft v0.1 spec narrative
+├── .github/workflows/ci.yml         # GitHub Actions validation
+├── CHANGELOG.md                     # release notes
 └── PUBLICATION_CHECKLIST.md         # pre-publish safety checklist
 ```
 
-Top-level `schemas/` and `examples/` are duplicated into `scl/` package data so both humans and installed Python code can access them.
+Top-level `schemas/` and `examples/` are duplicated into `sclite/` package data so both humans and installed Python code can access them.
 
 ## Integration model
 

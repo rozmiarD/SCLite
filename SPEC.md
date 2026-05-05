@@ -1,4 +1,4 @@
-# Security Contract Layer v0.1 Draft Spec
+# SCLite / Security Contract Layer v0.1 Draft Spec
 
 Status: **draft v0.1**. This document describes the current package and schema bundle. It is not a standard, protocol, or compliance framework.
 

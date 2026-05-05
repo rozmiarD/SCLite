@@ -1,0 +1,9 @@
+# Changelog
+
+## 0.1.0 - draft candidate
+
+- Initial SCLite package candidate.
+- Adds schema-backed public-safe artifacts for the v0.1 proof trace.
+- Adds `sclite` CLI with fixture validation, artifact validation, Scope Fidelity reports, and validation receipts.
+- Adds synthetic public-safe examples and tests.
+- Adds MIT license and package metadata for a future `pip install sclite` publication path.

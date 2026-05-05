@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://security-contract-layer.local/schemas/scope_fidelity_report.v0.1.schema.json",
+  "$id": "https://sclite.local/schemas/scope_fidelity_report.v0.1.schema.json",
   "title": "Security Contract Layer ScopeFidelityReport v0.1",
   "description": "Static, public-safe host-binding review artifact for comparing a target host against hosts detected in normalized arguments and execution-plan steps. This is not live target execution and does not prove authorization.",
   "type": "object",
