@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Sequence
 
-from .artifacts import validate_artifact
+from .artifacts import build_artifact_hash, validate_artifact
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .validation import package_root, validate_fixture_dir, validation_receipt_main
 
@@ -38,6 +38,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     artifact_cmd = sub.add_parser('validate-artifact', help='validate one JSON artifact against an SCL schema')
     artifact_cmd.add_argument('--schema', required=True, help='schema name or schema path, for example approved_execution_spec.v0.1')
     artifact_cmd.add_argument('artifact', help='path to a JSON artifact')
+
+    hash_cmd = sub.add_parser('hash-artifact', help='emit a deterministic canonical JSON SHA-256 descriptor for one artifact')
+    hash_cmd.add_argument('artifact', help='path to a JSON artifact')
+    hash_cmd.add_argument('--schema', help='optional schema name/path to validate before hashing')
+    hash_cmd.add_argument('--format', choices=['json', 'digest'], default='json')
 
     scope_cmd = sub.add_parser('scope-fidelity', help='build a static ScopeFidelityReport from an approved spec or explicit fields')
     scope_cmd.add_argument('--approved-spec', help='path to an approved_execution_spec JSON artifact')
@@ -71,6 +76,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         value = json.loads(artifact_path.read_text(encoding='utf-8'))
         validate_artifact(value, str(args.schema))
         print(f'security_contract_artifact_ok:{artifact_path}')
+        return 0
+
+    if args.command == 'hash-artifact':
+        artifact_path = Path(str(args.artifact))
+        value = json.loads(artifact_path.read_text(encoding='utf-8'))
+        if args.schema:
+            validate_artifact(value, str(args.schema))
+        descriptor = build_artifact_hash(value)
+        if args.format == 'digest':
+            print(descriptor['digest'])
+        else:
+            print(json.dumps(descriptor, indent=2, sort_keys=True))
         return 0
 
     if args.command == 'scope-fidelity':

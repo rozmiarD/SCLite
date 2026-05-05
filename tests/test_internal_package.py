@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import sclite
@@ -47,6 +49,46 @@ def test_redacted_prepared_execution_spec_schema_rejects_raw_output_claim() -> N
         assert 'raw_stdout_stderr_included' in str(exc)
     else:  # pragma: no cover - assertion guard
         raise AssertionError('schema should reject public raw stdout/stderr claims')
+
+
+def test_artifact_canonicalization_is_stable_for_key_order_and_unicode() -> None:
+    first = {'b': ['żuraw', {'z': 1, 'a': True}], 'a': 'example'}
+    second = {'a': 'example', 'b': ['żuraw', {'a': True, 'z': 1}]}
+    assert artifacts.canonicalize_artifact(first) == artifacts.canonicalize_artifact(second)
+    assert artifacts.artifact_sha256(first) == artifacts.artifact_sha256(second)
+    descriptor = artifacts.build_artifact_hash(first)
+    assert descriptor['canonicalization'] == 'sclite-json-v0.1'
+    assert descriptor['algorithm'] == 'sha256'
+    assert len(descriptor['digest']) == 64
+    assert descriptor['canonical_bytes'] == len(artifacts.canonical_artifact_bytes(first))
+
+
+def test_artifact_hash_changes_when_artifact_changes() -> None:
+    base = {'artifact_type': 'example', 'value': 1}
+    changed = {'artifact_type': 'example', 'value': 2}
+    assert artifacts.artifact_sha256(base) != artifacts.artifact_sha256(changed)
+
+
+def test_hash_artifact_cli_emits_same_digest_as_helper() -> None:
+    approved_path = PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json'
+    approved = json.loads(approved_path.read_text(encoding='utf-8'))
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'hash-artifact',
+            '--schema',
+            'approved_execution_spec.v0.1',
+            '--format',
+            'digest',
+            str(approved_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.stdout.strip() == artifacts.artifact_sha256(approved)
 
 
 def test_fixture_is_synthetic_not_redacted_private_runtime_export() -> None:

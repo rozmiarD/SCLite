@@ -101,6 +101,27 @@ Current limitations:
 - SCLite does not enforce runtime-wide mandatory execution through this path;
 - v0.1 has no signature/hash-chain binding to previous artifacts.
 
+
+### Artifact canonicalization and hash descriptor
+
+Helper functions: `canonicalize_artifact`, `canonical_artifact_bytes`, `artifact_sha256`, and `build_artifact_hash` in `sclite.artifacts`.
+
+CLI: `sclite hash-artifact`.
+
+Purpose: provide deterministic content addressing for JSON-compatible SCLite artifacts. The v0.1 canonicalization uses compact UTF-8 JSON with sorted object keys, preserved Unicode, and no NaN/Infinity values. The hash descriptor records:
+
+- `canonicalization`: `sclite-json-v0.1`;
+- `algorithm`: `sha256`;
+- `digest`: lowercase SHA-256 hex digest;
+- `canonical_bytes`: byte length of the canonical representation.
+
+Current limitations:
+
+- this is not an RFC 8785/JCS implementation;
+- this is not a signature or identity proof;
+- this does not prove authorization or artifact provenance;
+- this does not create a tamper-proof hash-chain by itself.
+
 ### ExecutionReceipt
 
 Schema: `schemas/execution_receipt.v0.1.schema.json`
