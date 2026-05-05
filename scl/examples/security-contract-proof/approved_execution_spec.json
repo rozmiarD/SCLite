@@ -1,0 +1,107 @@
+{
+  "spec_version": "2026-03-18.approved.v1",
+  "target": "https://example.com",
+  "target_host": "example.com",
+  "target_in_scope": true,
+  "action_type": "single_probe",
+  "capability": "http_metadata_probe",
+  "task_family": "demo_contract_validation",
+  "execution_mode": "dry_run",
+  "resolved_planner_profiles": [
+    "public_demo"
+  ],
+  "resolved_tool": "http_probe",
+  "tool_candidates": [
+    "http_probe"
+  ],
+  "normalized_args": [
+    "https://example.com"
+  ],
+  "execution_plan": [
+    {
+      "tool": "http_probe",
+      "role": "contract_demo",
+      "args": [
+        "https://example.com"
+      ]
+    }
+  ],
+  "arg_hosts_detected": [
+    "example.com"
+  ],
+  "execution_plan_hosts_detected": [
+    "example.com"
+  ],
+  "all_hosts_detected": [
+    "example.com"
+  ],
+  "mismatched_hosts_detected": [],
+  "target_host_match_status": "exact",
+  "request_shape_hygiene_status": "clean",
+  "request_shape_hygiene_reason": "single_public_demo_host",
+  "request_shape_hygiene_source": "synthetic_fixture",
+  "scope_facts": {
+    "target": "https://example.com",
+    "target_host": "example.com",
+    "target_in_scope": true
+  },
+  "approval": {
+    "decision": "approve",
+    "reason": "scope_and_policy_allow",
+    "reason_code": "approve_in_scope_dry_run",
+    "constraints": {
+      "dry_run": true
+    },
+    "approval_source": "synthetic_policy_fixture",
+    "owner_override_applied": false,
+    "approval_transform_chain": []
+  },
+  "execution_truth": {
+    "artifact_type": "approved_execution_spec",
+    "resolved_tool": "http_probe",
+    "normalized_args": [
+      "https://example.com"
+    ],
+    "execution_plan": [
+      {
+        "tool": "http_probe",
+        "role": "contract_demo",
+        "args": [
+          "https://example.com"
+        ]
+      }
+    ],
+    "command_preview": [
+      "http_probe",
+      "https://example.com"
+    ],
+    "command_input_summary": {
+      "preview_source": "synthetic_fixture",
+      "target_delivery_mode": "argv",
+      "tool": "http_probe",
+      "role": "contract_demo",
+      "stdin_present": false
+    },
+    "execution_input_summaries": [
+      {
+        "tool": "http_probe",
+        "target_delivery_mode": "argv",
+        "stdin_present": false
+      }
+    ],
+    "arg_hosts_detected": [
+      "example.com"
+    ],
+    "execution_plan_hosts_detected": [
+      "example.com"
+    ],
+    "all_hosts_detected": [
+      "example.com"
+    ],
+    "mismatched_hosts_detected": [],
+    "target_host_match_status": "exact",
+    "request_shape_hygiene_status": "clean",
+    "request_shape_hygiene_reason": "single_public_demo_host",
+    "request_shape_hygiene_source": "synthetic_fixture"
+  }
+}

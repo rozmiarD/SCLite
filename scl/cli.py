@@ -1,0 +1,123 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any, Dict, Sequence
+
+from .artifacts import validate_artifact
+from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
+from .validation import package_root, validate_fixture_dir, validation_receipt_main
+
+
+def _load_json_object(path: Path) -> Dict[str, Any]:
+    value = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(value, dict):
+        raise ValueError(f'{path}: JSON root is not an object')
+    return value
+
+
+def _scope_fidelity_exit_code(verdict: str, fail_on: str) -> int:
+    if fail_on == 'none':
+        return 0
+    if fail_on == 'fail' and verdict == 'fail':
+        return 2
+    if fail_on == 'review' and verdict in {'review', 'fail'}:
+        return 2
+    return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description='Security Contract Layer validation CLI.')
+    sub = parser.add_subparsers(dest='command', required=True)
+
+    validate_cmd = sub.add_parser('validate', help='validate a public-safe SCL proof fixture directory')
+    validate_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
+
+    artifact_cmd = sub.add_parser('validate-artifact', help='validate one JSON artifact against an SCL schema')
+    artifact_cmd.add_argument('--schema', required=True, help='schema name or schema path, for example approved_execution_spec.v0.1')
+    artifact_cmd.add_argument('artifact', help='path to a JSON artifact')
+
+    scope_cmd = sub.add_parser('scope-fidelity', help='build a static ScopeFidelityReport from an approved spec or explicit fields')
+    scope_cmd.add_argument('--approved-spec', help='path to an approved_execution_spec JSON artifact')
+    scope_cmd.add_argument('--target', help='target URL/host when not using --approved-spec')
+    scope_cmd.add_argument('--normalized-arg', action='append', default=[], help='argument scalar to inspect; repeatable')
+    scope_cmd.add_argument('--plan-step-json', action='append', default=[], help='execution_plan step JSON object; repeatable')
+    scope_cmd.add_argument('--target-in-scope', choices=['true', 'false', 'unknown'], default='unknown')
+    scope_cmd.add_argument('--source-artifact', default='', help='source artifact label/path for the report')
+    scope_cmd.add_argument('--fail-on', choices=['none', 'fail', 'review'], default='fail', help='return exit code 2 when verdict reaches this threshold')
+    scope_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
+
+    receipt_cmd = sub.add_parser('validation-receipt', help='validate an SCL fixture directory and emit a validation receipt')
+    receipt_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
+    receipt_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
+
+    args = parser.parse_args(argv)
+    if args.command == 'validate':
+        fixture_dir = Path(str(args.fixture_dir))
+        if not fixture_dir.is_absolute():
+            fixture_dir = (Path.cwd() / fixture_dir).resolve()
+        errors = validate_fixture_dir(fixture_dir)
+        if errors:
+            for error in errors:
+                print(error, file=sys.stderr)
+            return 1
+        print(f'security_contract_fixtures_ok:{fixture_dir}')
+        return 0
+
+    if args.command == 'validate-artifact':
+        artifact_path = Path(str(args.artifact))
+        value = json.loads(artifact_path.read_text(encoding='utf-8'))
+        validate_artifact(value, str(args.schema))
+        print(f'security_contract_artifact_ok:{artifact_path}')
+        return 0
+
+    if args.command == 'scope-fidelity':
+        if args.approved_spec:
+            approved_path = Path(str(args.approved_spec))
+            spec = _load_json_object(approved_path)
+            report = build_scope_fidelity_report_from_approved_spec(spec, source_artifact=args.source_artifact or str(approved_path))
+        else:
+            if not args.target:
+                print('scope-fidelity requires --approved-spec or --target', file=sys.stderr)
+                return 2
+            plan = []
+            for item in args.plan_step_json:
+                value = json.loads(str(item))
+                if not isinstance(value, dict):
+                    print('--plan-step-json must decode to a JSON object', file=sys.stderr)
+                    return 2
+                plan.append(value)
+            target_in_scope = None if args.target_in_scope == 'unknown' else args.target_in_scope == 'true'
+            report = build_scope_fidelity_report(
+                target=str(args.target),
+                normalized_args=list(args.normalized_arg or []),
+                execution_plan=plan,
+                target_in_scope=target_in_scope,
+                source_artifact=str(args.source_artifact or 'cli'),
+            )
+        validate_scope_fidelity_report(report)
+        if args.format == 'markdown':
+            shape = report['request_shape']
+            print('# Scope Fidelity Report')
+            print('')
+            print(f"verdict: `{report['verdict']}`")
+            print(f"target_host: `{report['target_host']}`")
+            print(f"match_status: `{shape['target_host_match_status']}`")
+            print(f"hygiene_status: `{shape['request_shape_hygiene_status']}`")
+            print(f"reason: `{shape['request_shape_hygiene_reason']}`")
+        else:
+            print(json.dumps(report, indent=2, sort_keys=True))
+        return _scope_fidelity_exit_code(str(report['verdict']), str(args.fail_on))
+
+    if args.command == 'validation-receipt':
+        forwarded = [str(args.fixture_dir), '--format', args.format]
+        return validation_receipt_main(forwarded)
+
+    parser.error('unknown command')
+    return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
