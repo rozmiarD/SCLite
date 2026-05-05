@@ -1,0 +1,28 @@
+{
+  "spec_version": "2026-03-18.prepared.v1",
+  "target": "https://example.com",
+  "target_host": "example.com",
+  "target_in_scope": true,
+  "action_type": "single_probe",
+  "resolved_tool": "http_probe",
+  "normalized_args": [
+    "https://example.com"
+  ],
+  "execution_plan": [
+    {
+      "tool": "http_probe",
+      "role": "contract_demo",
+      "args": [
+        "https://example.com"
+      ]
+    }
+  ],
+  "scope_facts": {
+    "target": "https://example.com",
+    "target_host": "example.com",
+    "target_in_scope": true
+  },
+  "request_shape_hygiene_status": "clean",
+  "target_host_match_status": "exact",
+  "public_fixture_note": "Synthetic fixture authored for public validation; no private runtime fields were copied."
+}

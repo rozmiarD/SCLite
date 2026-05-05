@@ -1,0 +1,29 @@
+{
+  "schema_version": "2026-04-27.policy-decision.v0.1",
+  "decision": "allow_prepare",
+  "reason_code": "scope_and_policy_allow",
+  "reasons": [
+    "target_in_scope",
+    "tool_allowed",
+    "dry_run_only"
+  ],
+  "scope_facts": {
+    "target": "https://example.com",
+    "target_host": "example.com",
+    "target_in_scope": true
+  },
+  "tool_facts": {
+    "resolved_tool": "http_probe",
+    "action_type": "single_probe"
+  },
+  "approval_required": false,
+  "constraints": {
+    "dry_run": true,
+    "network_effect": "none"
+  },
+  "redaction_required": true,
+  "compatibility": {
+    "pass": true,
+    "reason": "scope_and_policy_allow"
+  }
+}

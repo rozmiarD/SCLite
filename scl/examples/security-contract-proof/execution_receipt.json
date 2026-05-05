@@ -1,0 +1,22 @@
+{
+  "artifact_type": "execution_receipt",
+  "runtime_mode": "demo",
+  "status": "dry-run",
+  "returncode": 0,
+  "reason": "synthetic_fixture_no_execution",
+  "execution_source": "synthetic_fixture",
+  "dry_run": true,
+  "compiled_action": {
+    "tool": "http_probe",
+    "target": "https://example.com"
+  },
+  "command_input_summary": {
+    "target_delivery_mode": "argv",
+    "tool": "http_probe",
+    "stdin_present": false
+  },
+  "planned_command_count": 1,
+  "executed_command_count": 0,
+  "stdout_present": false,
+  "stderr_present": false
+}
