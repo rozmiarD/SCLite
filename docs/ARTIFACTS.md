@@ -7,7 +7,8 @@ This guide explains the v0.1 artifacts in practical reviewer language. It mirror
 | Artifact | File in example | Schema-backed? | Built/validated by this package? |
 | --- | --- | --- | --- |
 | `PolicyDecision` | `examples/security-contract-proof/policy_decision.json` | Yes | Validated |
-| Redacted prepared spec | `examples/security-contract-proof/prepared_execution_spec.redacted.json` | No dedicated schema yet | Loaded as fixture |
+| `PreparedExecutionSpec` | `examples/prepared-execution-spec/prepared_execution_spec.json` | Yes | Validated |
+| `RedactedPreparedExecutionSpec` | `examples/security-contract-proof/prepared_execution_spec.redacted.json` | Yes | Validated |
 | `ApprovedExecutionSpec` | `examples/security-contract-proof/approved_execution_spec.json` | Yes | Validated |
 | `ExecutionReceipt` | `examples/security-contract-proof/execution_receipt.json` | Yes | Built/validated |
 | `EvidenceBundle` | `examples/security-contract-proof/evidence_bundle.json` | Yes | Built/validated |
@@ -34,13 +35,30 @@ What it cannot show by itself:
 - a full bug bounty scope policy;
 - proof that a later runtime respected the decision.
 
-## Redacted prepared spec
+## PreparedExecutionSpec
 
-The redacted prepared spec is a public/auditor-facing view of a prepared execution shape.
+A `PreparedExecutionSpec` captures the concrete execution shape before approval. It is useful when a reviewer wants to inspect the target, resolved tool, normalized arguments, execution plan, and static host-binding summaries before an approval artifact exists.
 
-In v0.1 this package treats it as part of the proof fixture, but there is not yet a dedicated schema. That is intentional: runtime-specific prepared specs can include fields this small core should not own yet.
+What it can show:
 
-Useful future work: define `prepared_execution_spec.v0.1` and `redacted_prepared_execution_spec.v0.1` once the neutral field set is clearer.
+- declared target and target host;
+- whether the producer considered the target in scope;
+- resolved tool and normalized args;
+- execution-plan steps;
+- scope facts and request-shape hygiene summaries.
+
+What it cannot show by itself:
+
+- approval authority;
+- live execution truth;
+- legal authorization;
+- cryptographic binding to a policy decision.
+
+## RedactedPreparedExecutionSpec
+
+A `RedactedPreparedExecutionSpec` is a public/auditor-safe view of a prepared execution shape. It validates the same reviewable target/tool/plan core and also requires explicit redaction/public-safety flags.
+
+It should not include raw stdout/stderr, credentials, private paths, or live target evidence. The schema requires public-safety booleans to remain false for those claims, but a runtime still needs real upstream redaction and secret scanning.
 
 ## ApprovedExecutionSpec
 
@@ -121,6 +139,8 @@ Run:
 
 ```bash
 python -m sclite.cli validate examples/security-contract-proof
+python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
+python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.cli scope-fidelity --approved-spec examples/security-contract-proof/approved_execution_spec.json --fail-on review
 python -m sclite.cli validation-receipt examples/security-contract-proof

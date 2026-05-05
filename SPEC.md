@@ -47,23 +47,34 @@ Current limitations:
 - does not define a full policy engine;
 - does not cryptographically bind to later artifacts.
 
-### PreparedExecutionSpec / redacted prepared spec
+### PreparedExecutionSpec
 
-Current fixture: `prepared_execution_spec.redacted.json`
+Schema: `schemas/prepared_execution_spec.v0.1.schema.json`
 
-Purpose: show a public/auditor-safe view of a prepared execution shape before approval.
+Example: `examples/prepared-execution-spec/prepared_execution_spec.json`
 
-Current status:
+Purpose: capture the concrete execution shape prepared before approval. This is where target, target host, tool, normalized arguments, execution plan, scope facts, and static host-binding summaries become reviewable.
 
-- represented in fixtures;
-- generic redaction helper exists;
-- no dedicated v0.1 schema in this package yet.
+Current limitations:
+
+- validates shape, not execution authority;
+- does not define every runtime-specific preparation field;
+- does not prove legal authorization or live target ownership;
+- has no signature/hash-chain binding to policy or approval artifacts.
+
+### RedactedPreparedExecutionSpec
+
+Schema: `schemas/redacted_prepared_execution_spec.v0.1.schema.json`
+
+Proof fixture: `examples/security-contract-proof/prepared_execution_spec.redacted.json`
+
+Purpose: provide a public/auditor-safe view of a prepared execution shape before approval. It keeps the reviewable target/tool/argument/plan shape while requiring explicit redaction and public-safety flags.
 
 Current limitations:
 
 - redaction is conservative but not a complete secret scanner;
-- this package does not build runtime-specific prepared specs;
-- runtime-specific redaction can be stronger than SCL's generic helper.
+- this package validates redaction claims but cannot prove private data never existed upstream;
+- runtime-specific redaction can be stronger than SCLite's generic helper.
 
 ### ApprovedExecutionSpec
 
@@ -86,8 +97,8 @@ Important fields include:
 
 Current limitations:
 
-- SCL validates shape; it does not execute the spec;
-- SCL does not enforce runtime-wide mandatory execution through this path;
+- SCLite validates shape; it does not execute the spec;
+- SCLite does not enforce runtime-wide mandatory execution through this path;
 - v0.1 has no signature/hash-chain binding to previous artifacts.
 
 ### ExecutionReceipt

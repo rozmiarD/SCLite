@@ -9,7 +9,7 @@ description = "Lightweight Security Contract Layer artifacts, validation, and pu
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{ name = "Ravenclaw Security Contract Layer maintainers" }]
+authors = [{ name = "SCLite maintainers" }]
 keywords = ["security", "contracts", "validation", "evidence", "governance"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -56,6 +56,8 @@ sclite = [
   "examples/security-contract-proof/*.md",
   "examples/scope-fidelity-report/*.json",
   "examples/scope-fidelity-report/*.md",
+  "examples/prepared-execution-spec/*.json",
+  "examples/prepared-execution-spec/*.md",
 ]
 
 [tool.pytest.ini_options]
