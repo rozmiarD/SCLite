@@ -89,6 +89,7 @@ Current schema-backed v0.1 artifacts:
 | `ApprovedExecutionSpec` | Captures the approved execution shape and execution truth expected by a runtime executor. | Schema + fixture validation. |
 | `ExecutionReceipt` | Compact, public-safe summary of dry-run/execution outcome. | Schema + fixture validation. |
 | `EvidenceBundle` | Public-safe evidence/non-claim summary for the proof trace. | Schema + fixture validation. |
+| Artifact hash descriptor | Deterministic SHA-256 over SCLite canonical JSON for content addressing. | Helper + CLI + tests. |
 | `ScopeFidelityReport` | Static review of target host vs hosts detected in normalized args/execution plan. | Schema + builder + CLI + fixture. |
 | `SecurityContractValidationReceipt` | Receipt showing which local/public-safe SCL validation checks ran. | Schema + builder + CLI. |
 
@@ -142,6 +143,14 @@ sclite validate-artifact \
   examples/security-contract-proof/approved_execution_spec.json
 ```
 
+Hash one artifact with deterministic SCLite canonical JSON + SHA-256:
+
+```bash
+sclite hash-artifact \
+  --schema approved_execution_spec.v0.1 \
+  examples/security-contract-proof/approved_execution_spec.json
+```
+
 Generate a Scope Fidelity report from the approved spec fixture:
 
 ```bash
@@ -180,16 +189,20 @@ validate_scope_fidelity_report(report)
 print(report["verdict"])  # "pass"
 ```
 
-Validate an artifact:
+Validate and hash an artifact:
 
 ```python
 import json
 from pathlib import Path
-from sclite.artifacts import validate_artifact
+from sclite.artifacts import artifact_sha256, build_artifact_hash, validate_artifact
 
 artifact = json.loads(Path("examples/security-contract-proof/approved_execution_spec.json").read_text())
 validate_artifact(artifact, "approved_execution_spec.v0.1")
+print(artifact_sha256(artifact))
+print(build_artifact_hash(artifact))
 ```
+
+The hash helper is deterministic content addressing, not a signature, identity proof, authorization proof, or tamper-proof audit chain.
 
 ## Scope Fidelity in plain language
 
@@ -264,7 +277,7 @@ Important non-claims:
 
 Likely future work, not present v0.1 guarantees:
 
-- canonical JSON/hash helpers;
+- optional receipt signing or hash-chain support;
 - optional receipt signing or hash-chain support;
 - stronger redaction policy/receipt artifacts;
 - adapters/reference integrations in separate packages;

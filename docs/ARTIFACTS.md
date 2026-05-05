@@ -13,6 +13,7 @@ This guide explains the v0.1 artifacts in practical reviewer language. It mirror
 | `ExecutionReceipt` | `examples/security-contract-proof/execution_receipt.json` | Yes | Built/validated |
 | `EvidenceBundle` | `examples/security-contract-proof/evidence_bundle.json` | Yes | Built/validated |
 | Evidence summary | `examples/security-contract-proof/evidence_summary.md` | Markdown, no schema | Loaded as fixture |
+| Artifact hash descriptor | Any JSON artifact | No schema in v0.1 | Built by helper/CLI |
 | `ScopeFidelityReport` | `examples/scope-fidelity-report/scope_fidelity_report.json` | Yes | Built/validated |
 | `SecurityContractValidationReceipt` | CLI output | Yes | Built/validated |
 
@@ -109,6 +110,19 @@ Review it for:
 - source artifacts;
 - public-safety flags.
 
+
+## Artifact hash descriptor
+
+SCLite can emit a deterministic SHA-256 descriptor for any JSON-compatible artifact:
+
+```bash
+sclite hash-artifact --schema approved_execution_spec.v0.1 examples/security-contract-proof/approved_execution_spec.json
+```
+
+The helper canonicalizes JSON with sorted keys, compact separators, preserved Unicode, and UTF-8 bytes, then hashes those bytes with SHA-256. The descriptor is useful for content addressing, fixture comparison, and lightweight reviewer references.
+
+It is not a signature, identity proof, authorization proof, or tamper-proof audit chain. A runtime that needs provenance must add signing/identity controls outside this helper.
+
 ## ScopeFidelityReport
 
 A `ScopeFidelityReport` is a static host-binding review artifact.
@@ -142,6 +156,7 @@ python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.cli hash-artifact --schema approved_execution_spec.v0.1 examples/security-contract-proof/approved_execution_spec.json
 python -m sclite.cli scope-fidelity --approved-spec examples/security-contract-proof/approved_execution_spec.json --fail-on review
 python -m sclite.cli validation-receipt examples/security-contract-proof
 ```

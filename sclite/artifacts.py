@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
@@ -17,6 +18,8 @@ EVIDENCE_BUNDLE_SCHEMA_VERSION = '2026-04-28.evidence-bundle.v0.1'
 EVIDENCE_BUNDLE_ARTIFACT_TYPE = 'evidence_bundle'
 DEMO_PROOF_MODE = 'dry_run_contract_proof'
 PUBLIC_DEMO_TARGET_HOST = 'example.com'
+ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
+ARTIFACT_HASH_ALGORITHM = 'sha256'
 
 POLICY_DECISION_FILE = 'policy_decision.json'
 REDACTED_PREPARED_EXECUTION_SPEC_FILE = 'prepared_execution_spec.redacted.json'
@@ -169,6 +172,37 @@ def validate_schema_ref(schema_ref: str, value: Any, *, root: Path | None = None
 def validate_artifact(value: Any, schema_name: str, *, root: Path | None = None) -> None:
     """Validate one artifact against a named SCL schema."""
     validate_schema_ref(schema_name, value, root=root)
+
+
+def canonicalize_artifact(value: Any) -> str:
+    """Return deterministic compact JSON for a JSON-compatible artifact.
+
+    The v0.1 canonicalization is intentionally small: UTF-8 JSON with sorted
+    object keys, compact separators, preserved Unicode, and no NaN/Infinity.
+    It is a content-addressing helper, not a signature or tamper-proof proof.
+    """
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+
+
+def canonical_artifact_bytes(value: Any) -> bytes:
+    """Return UTF-8 bytes for the v0.1 canonical JSON representation."""
+    return canonicalize_artifact(value).encode('utf-8')
+
+
+def artifact_sha256(value: Any) -> str:
+    """Return SHA-256 hex digest over v0.1 canonical artifact bytes."""
+    return hashlib.sha256(canonical_artifact_bytes(value)).hexdigest()
+
+
+def build_artifact_hash(value: Any) -> Dict[str, Any]:
+    """Return a public-safe hash descriptor for one JSON-compatible artifact."""
+    canonical = canonical_artifact_bytes(value)
+    return {
+        'canonicalization': ARTIFACT_CANONICALIZATION_VERSION,
+        'algorithm': ARTIFACT_HASH_ALGORITHM,
+        'digest': hashlib.sha256(canonical).hexdigest(),
+        'canonical_bytes': len(canonical),
+    }
 
 
 def build_execution_receipt_artifact(pipeline_data: Dict[str, Any]) -> Dict[str, Any]:
