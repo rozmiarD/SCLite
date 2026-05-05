@@ -8,15 +8,29 @@ version = "0.1.0"
 description = "Lightweight Security Contract Layer artifacts, validation, and public-safe proof fixtures"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Ravenclaw Security Contract Layer maintainers" }]
 keywords = ["security", "contracts", "validation", "evidence", "governance"]
 classifiers = [
-  "License :: OSI Approved :: MIT License",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/rozmiarD/SCLite"
+Repository = "https://github.com/rozmiarD/SCLite"
+Issues = "https://github.com/rozmiarD/SCLite/issues"
+Changelog = "https://github.com/rozmiarD/SCLite/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/rozmiarD/SCLite#readme"
 
 [project.optional-dependencies]
 dev = [
@@ -28,8 +42,12 @@ sclite = "sclite.cli:main"
 scl = "sclite.cli:main"
 
 [tool.setuptools]
-packages = ["sclite"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sclite", "sclite.*"]
+namespaces = false
 
 [tool.setuptools.package-data]
 sclite = [
