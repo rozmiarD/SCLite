@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 
 SENSITIVE_VALUE_KEYS = {
@@ -19,6 +20,10 @@ SENSITIVE_VALUE_KEYS = {
 
 PUBLIC_REDACTION_PLACEHOLDER = '<redacted>'
 PATH_REDACTION_PLACEHOLDER = '<local_path_omitted>'
+REDACTION_POLICY_ARTIFACT_TYPE = 'redaction_policy'
+REDACTION_POLICY_SCHEMA_VERSION = 'v0.1'
+REDACTION_RECEIPT_ARTIFACT_TYPE = 'redaction_receipt'
+REDACTION_RECEIPT_SCHEMA_VERSION = 'v0.1'
 
 
 def _repo_root() -> Path:
@@ -79,3 +84,133 @@ def redact_prepared_spec(value: Any) -> Any:
     This generic helper is for SCL fixture and CLI safety checks only.
     """
     return sanitize_public_artifact(value)
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def build_default_redaction_policy(*, policy_id: str = 'sclite-public-safe-v0.1') -> Dict[str, Any]:
+    """Return SCLite's default public-safe redaction policy descriptor."""
+    rules = [
+        {
+            'rule_id': 'sensitive_value_keys',
+            'description': 'Redact values for common secret-bearing keys such as token, secret, authorization, cookie, and password.',
+            'applies_to': sorted(SENSITIVE_VALUE_KEYS),
+            'action': 'replace_value',
+            'replacement': PUBLIC_REDACTION_PLACEHOLDER,
+        },
+        {
+            'rule_id': 'raw_stdout_stderr',
+            'description': 'Omit raw stdout/stderr content from public artifacts.',
+            'applies_to': ['stdout', 'stderr'],
+            'action': 'omit_or_replace',
+            'replacement': '<omitted_for_public_demo>',
+        },
+        {
+            'rule_id': 'local_paths',
+            'description': 'Replace local home/workspace paths with a public-safe placeholder.',
+            'applies_to': ['string_values'],
+            'action': 'replace_local_path',
+            'replacement': PATH_REDACTION_PLACEHOLDER,
+        },
+        {
+            'rule_id': 'header_like_secrets',
+            'description': 'Redact header-like strings containing authorization, cookie, token, secret, or api-key markers.',
+            'applies_to': ['string_values'],
+            'action': 'replace_header_value',
+            'replacement': PUBLIC_REDACTION_PLACEHOLDER,
+        },
+    ]
+    return {
+        'artifact_type': REDACTION_POLICY_ARTIFACT_TYPE,
+        'schema_version': REDACTION_POLICY_SCHEMA_VERSION,
+        'policy_id': policy_id,
+        'mode': 'public_safe_fixture_redaction',
+        'rules': rules,
+        'public_safety': {
+            'live_target_execution': False,
+            'raw_live_evidence_included': False,
+            'raw_stdout_stderr_included': False,
+            'credentials_included': False,
+            'private_paths_included': False,
+        },
+        'non_claims': [
+            'does_not_claim_complete_secret_detection',
+            'does_not_prove_upstream_data_never_contained_secrets',
+            'does_not_authorize_publication',
+        ],
+    }
+
+
+def _count_changed_paths(before: Any, after: Any) -> int:
+    if type(before) is not type(after):
+        return 1
+    if isinstance(before, dict):
+        keys = set(before) | set(after)
+        return sum(_count_changed_paths(before.get(key), after.get(key)) for key in keys)
+    if isinstance(before, list):
+        total = abs(len(before) - len(after))
+        for left, right in zip(before, after):
+            total += _count_changed_paths(left, right)
+        return total
+    return 0 if before == after else 1
+
+
+def build_redaction_receipt(
+    source_artifact: Mapping[str, Any],
+    redacted_artifact: Mapping[str, Any],
+    *,
+    policy: Mapping[str, Any] | None = None,
+    source_label: str = 'source_artifact',
+    redacted_label: str = 'redacted_artifact',
+    generated_at: str | None = None,
+) -> Dict[str, Any]:
+    """Build a public-safe receipt summarizing a redaction operation.
+
+    The receipt records hashes and counts. It does not include raw private
+    source material and does not prove a complete secret scan.
+    """
+    from .artifacts import artifact_sha256
+
+    policy_doc = dict(policy or build_default_redaction_policy())
+    source_hash = artifact_sha256(source_artifact)
+    redacted_hash = artifact_sha256(redacted_artifact)
+    changed_paths = _count_changed_paths(source_artifact, redacted_artifact)
+    status = 'redacted' if source_hash != redacted_hash else 'unchanged'
+    rules = policy_doc.get('rules') if isinstance(policy_doc.get('rules'), list) else []
+    return {
+        'artifact_type': REDACTION_RECEIPT_ARTIFACT_TYPE,
+        'schema_version': REDACTION_RECEIPT_SCHEMA_VERSION,
+        'generated_at': generated_at or _utc_now(),
+        'policy': {
+            'policy_id': str(policy_doc.get('policy_id') or ''),
+            'policy_hash': artifact_sha256(policy_doc),
+        },
+        'source': {
+            'label': source_label,
+            'hash': source_hash,
+        },
+        'redacted': {
+            'label': redacted_label,
+            'hash': redacted_hash,
+        },
+        'status': status,
+        'summary': {
+            'rules_considered': len(rules),
+            'changed_paths_estimate': changed_paths,
+            'source_and_redacted_hash_match': source_hash == redacted_hash,
+        },
+        'public_safety': {
+            'raw_source_included': False,
+            'raw_live_evidence_included': False,
+            'raw_stdout_stderr_included': False,
+            'credentials_included': False,
+            'private_paths_included': False,
+        },
+        'non_claims': [
+            'does_not_claim_complete_secret_detection',
+            'does_not_prove_upstream_data_never_contained_secrets',
+            'does_not_authorize_publication',
+        ],
+    }

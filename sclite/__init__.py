@@ -41,7 +41,16 @@ from .artifacts import (
     validate_schema_ref,
     validate_trace,
 )
-from .redaction import redact_prepared_spec, sanitize_public_artifact
+from .redaction import (
+    REDACTION_POLICY_ARTIFACT_TYPE,
+    REDACTION_POLICY_SCHEMA_VERSION,
+    REDACTION_RECEIPT_ARTIFACT_TYPE,
+    REDACTION_RECEIPT_SCHEMA_VERSION,
+    build_default_redaction_policy,
+    build_redaction_receipt,
+    redact_prepared_spec,
+    sanitize_public_artifact,
+)
 from .scope_fidelity import (
     SCOPE_FIDELITY_ARTIFACT_TYPE,
     SCOPE_FIDELITY_SCHEMA_REF,
@@ -50,6 +59,14 @@ from .scope_fidelity import (
     build_scope_fidelity_report_from_approved_spec,
     summarize_scope_fidelity,
     validate_scope_fidelity_report,
+)
+from .surfaces import (
+    PUBLIC_SNAPSHOT_MANIFEST_ARTIFACT_TYPE,
+    PUBLIC_SNAPSHOT_MANIFEST_SCHEMA_VERSION,
+    PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE,
+    PUBLIC_VALIDATION_SURFACE_INDEX_SCHEMA_VERSION,
+    build_public_snapshot_manifest,
+    build_public_validation_surface_index,
 )
 from .validation import build_validation_receipt, validate_fixture_dir
 

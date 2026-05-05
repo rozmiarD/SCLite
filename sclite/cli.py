@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any, Dict, Sequence
 
 from .artifacts import build_artifact_hash, validate_artifact
+from .redaction import build_default_redaction_policy, build_redaction_receipt
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
+from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
 from .validation import package_root, validate_fixture_dir, validation_receipt_main
 
 
@@ -43,6 +45,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     hash_cmd.add_argument('artifact', help='path to a JSON artifact')
     hash_cmd.add_argument('--schema', help='optional schema name/path to validate before hashing')
     hash_cmd.add_argument('--format', choices=['json', 'digest'], default='json')
+
+    policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
+    policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
+
+    redaction_receipt_cmd = sub.add_parser('redaction-receipt', help='emit a RedactionReceipt for a source/redacted JSON pair')
+    redaction_receipt_cmd.add_argument('--source-json', required=True)
+    redaction_receipt_cmd.add_argument('--redacted-json', required=True)
+    redaction_receipt_cmd.add_argument('--policy-json')
+    redaction_receipt_cmd.add_argument('--source-label', default='source_artifact')
+    redaction_receipt_cmd.add_argument('--redacted-label', default='redacted_artifact')
+
+    surface_cmd = sub.add_parser('validation-surface-index', help='emit the default PublicValidationSurfaceIndex')
+    surface_cmd.add_argument('--generated-at')
+
+    snapshot_cmd = sub.add_parser('snapshot-manifest', help='emit a PublicSnapshotManifest over JSON artifact files')
+    snapshot_cmd.add_argument('--file', action='append', default=[], help='JSON artifact path; repeatable')
+    snapshot_cmd.add_argument('--snapshot-name', default='sclite-public-snapshot')
+    snapshot_cmd.add_argument('--snapshot-version', default='v0.1')
 
     scope_cmd = sub.add_parser('scope-fidelity', help='build a static ScopeFidelityReport from an approved spec or explicit fields')
     scope_cmd.add_argument('--approved-spec', help='path to an approved_execution_spec JSON artifact')
@@ -88,6 +108,41 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(descriptor['digest'])
         else:
             print(json.dumps(descriptor, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == 'redaction-policy':
+        policy = build_default_redaction_policy(policy_id=str(args.policy_id))
+        print(json.dumps(policy, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == 'redaction-receipt':
+        source = _load_json_object(Path(str(args.source_json)))
+        redacted = _load_json_object(Path(str(args.redacted_json)))
+        policy = _load_json_object(Path(str(args.policy_json))) if args.policy_json else None
+        receipt = build_redaction_receipt(
+            source,
+            redacted,
+            policy=policy,
+            source_label=str(args.source_label),
+            redacted_label=str(args.redacted_label),
+        )
+        print(json.dumps(receipt, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == 'validation-surface-index':
+        index = build_public_validation_surface_index(generated_at=args.generated_at)
+        print(json.dumps(index, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == 'snapshot-manifest':
+        files = []
+        for item in args.file:
+            path = Path(str(item))
+            value = json.loads(path.read_text(encoding='utf-8'))
+            artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
+            files.append({'path': str(path), 'artifact_type': str(artifact_type or ''), 'schema': '', 'public_safe': True, 'value': value})
+        manifest = build_public_snapshot_manifest(files, snapshot_name=str(args.snapshot_name), snapshot_version=str(args.snapshot_version))
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == 'scope-fidelity':

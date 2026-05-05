@@ -1,0 +1,85 @@
+{
+  "artifact_type": "public_snapshot_manifest",
+  "files": [
+    {
+      "artifact_type": "policy_decision",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 520,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "4e208a84f8ad0a8fcafef4a2809a6715a6a5b5a33048462ecafad003c7030297"
+      },
+      "path": "examples/security-contract-proof/policy_decision.json",
+      "public_safe": true,
+      "schema": "policy_decision.v0.1"
+    },
+    {
+      "artifact_type": "redacted_prepared_execution_spec",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 1864,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "0c18801b11917346ef50899e79e5de5cdbd444a3c4f0f889bd080f0efccbf41e"
+      },
+      "path": "examples/security-contract-proof/prepared_execution_spec.redacted.json",
+      "public_safe": true,
+      "schema": "redacted_prepared_execution_spec.v0.1"
+    },
+    {
+      "artifact_type": "approved_execution_spec",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 2057,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "8074fd415c46e9747c6a95e5fb6928d2bdd505e9d48af6115385d0ff754b139b"
+      },
+      "path": "examples/security-contract-proof/approved_execution_spec.json",
+      "public_safe": true,
+      "schema": "approved_execution_spec.v0.1"
+    },
+    {
+      "artifact_type": "execution_receipt",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 457,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "4fdd1c6a89727c30104dc2c79f054a4e10cfaea70bbb4e3af0e8c0005d315da6"
+      },
+      "path": "examples/security-contract-proof/execution_receipt.json",
+      "public_safe": true,
+      "schema": "execution_receipt.v0.1"
+    },
+    {
+      "artifact_type": "evidence_bundle",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 1783,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "1265ca1066e6d8d85db62e45c1fd9a664601d5cfe9736196d1c9927693ccfe87"
+      },
+      "path": "examples/security-contract-proof/evidence_bundle.json",
+      "public_safe": true,
+      "schema": "evidence_bundle.v0.1"
+    }
+  ],
+  "generated_at": "2026-05-05T21:30:00+00:00",
+  "non_claims": [
+    "does_not_claim_live_vulnerability_evidence",
+    "does_not_prove_artifact_provenance",
+    "does_not_authorize_publication"
+  ],
+  "public_safety": {
+    "live_target_execution": false,
+    "protocol_adapter_work": false,
+    "raw_live_evidence_included": false,
+    "raw_stdout_stderr_included": false
+  },
+  "schema_version": "v0.1",
+  "snapshot_name": "sclite-v0.1-public-fixture-snapshot",
+  "snapshot_version": "v0.1",
+  "summary": {
+    "file_count": 5,
+    "hashed_file_count": 5,
+    "public_safe_file_count": 5
+  }
+}

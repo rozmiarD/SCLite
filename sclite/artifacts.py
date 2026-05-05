@@ -52,6 +52,10 @@ SCHEMA_FILES = {
     'evidence_bundle.v0.1': 'evidence_bundle.v0.1.schema.json',
     'scope_fidelity_report.v0.1': 'scope_fidelity_report.v0.1.schema.json',
     'security_contract_validation_receipt.v0.1': 'security_contract_validation_receipt.v0.1.schema.json',
+    'redaction_policy.v0.1': 'redaction_policy.v0.1.schema.json',
+    'redaction_receipt.v0.1': 'redaction_receipt.v0.1.schema.json',
+    'public_validation_surface_index.v0.1': 'public_validation_surface_index.v0.1.schema.json',
+    'public_snapshot_manifest.v0.1': 'public_snapshot_manifest.v0.1.schema.json',
 }
 
 

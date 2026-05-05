@@ -58,6 +58,14 @@ sclite = [
   "examples/scope-fidelity-report/*.md",
   "examples/prepared-execution-spec/*.json",
   "examples/prepared-execution-spec/*.md",
+  "examples/redaction-policy/*.json",
+  "examples/redaction-policy/*.md",
+  "examples/redaction-receipt/*.json",
+  "examples/redaction-receipt/*.md",
+  "examples/public-validation-surface-index/*.json",
+  "examples/public-validation-surface-index/*.md",
+  "examples/public-snapshot-manifest/*.json",
+  "examples/public-snapshot-manifest/*.md",
 ]
 
 [tool.pytest.ini_options]
