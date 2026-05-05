@@ -266,6 +266,20 @@ Likely future work, not present v0.1 guarantees:
 - adapters/reference integrations in separate packages;
 - replacement of the lightweight JSON Schema subset validator with a full JSON Schema implementation if needed.
 
+## PyPI publishing status
+
+The package metadata is prepared for the `sclite` distribution name. Until a release is uploaded to PyPI, install from GitHub with:
+
+```bash
+pip install git+https://github.com/rozmiarD/SCLite.git
+```
+
+After PyPI publication, the intended install command is:
+
+```bash
+pip install sclite
+```
+
 ## License
 
 MIT.
