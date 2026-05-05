@@ -90,6 +90,10 @@ Current schema-backed v0.1 artifacts:
 | `ExecutionReceipt` | Compact, public-safe summary of dry-run/execution outcome. | Schema + fixture validation. |
 | `EvidenceBundle` | Public-safe evidence/non-claim summary for the proof trace. | Schema + fixture validation. |
 | Artifact hash descriptor | Deterministic SHA-256 over SCLite canonical JSON for content addressing. | Helper + CLI + tests. |
+| `RedactionPolicy` | Public-safe redaction rules and non-claims. | Schema + helper + CLI + fixture. |
+| `RedactionReceipt` | Public-safe summary of a redaction operation with hashes/counts, not raw source. | Schema + helper + CLI + fixture. |
+| `PublicValidationSurfaceIndex` | Index of public-safe validation surfaces and commands. | Schema + helper + CLI + fixture. |
+| `PublicSnapshotManifest` | Manifest of selected public-safe artifacts with canonical hash descriptors. | Schema + helper + CLI + fixture. |
 | `ScopeFidelityReport` | Static review of target host vs hosts detected in normalized args/execution plan. | Schema + builder + CLI + fixture. |
 | `SecurityContractValidationReceipt` | Receipt showing which local/public-safe SCL validation checks ran. | Schema + builder + CLI. |
 
@@ -151,6 +155,15 @@ sclite hash-artifact \
   examples/security-contract-proof/approved_execution_spec.json
 ```
 
+Validate the new public governance/support artifacts:
+
+```bash
+sclite validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
+sclite validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
+sclite validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
+sclite validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+```
+
 Generate a Scope Fidelity report from the approved spec fixture:
 
 ```bash
@@ -204,6 +217,22 @@ print(build_artifact_hash(artifact))
 
 The hash helper is deterministic content addressing, not a signature, identity proof, authorization proof, or tamper-proof audit chain.
 
+Build redaction and public-surface helper artifacts:
+
+```python
+from sclite.redaction import build_default_redaction_policy, build_redaction_receipt, redact_prepared_spec
+from sclite.surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
+
+source = {"artifact_type": "example", "token": "synthetic-demo-token"}
+redacted = redact_prepared_spec(source)
+policy = build_default_redaction_policy()
+receipt = build_redaction_receipt(source, redacted, policy=policy)
+index = build_public_validation_surface_index()
+manifest = build_public_snapshot_manifest([{"path": "example.json", "artifact_type": "example", "schema": "", "value": redacted}])
+```
+
+These helpers document redaction/publication review surfaces. They do not prove complete secret detection, provenance, authorization, or publication readiness by themselves.
+
 ## Scope Fidelity in plain language
 
 `ScopeFidelityReport` is a static host-binding check. It compares:
@@ -227,6 +256,10 @@ It does **not** resolve DNS, follow redirects, inspect files loaded at runtime, 
 ├── schemas/                         # top-level schemas for reviewers/tools
 ├── examples/                        # clean synthetic public-safe examples
 │   ├── prepared-execution-spec/      # standalone prepared spec fixture
+│   ├── redaction-policy/             # RedactionPolicy fixture
+│   ├── redaction-receipt/            # RedactionReceipt fixture
+│   ├── public-validation-surface-index/
+│   ├── public-snapshot-manifest/
 ├── sclite/                          # Python package
 │   ├── schemas/                     # packaged schema copies
 │   ├── examples/                    # packaged example copies
@@ -279,7 +312,7 @@ Likely future work, not present v0.1 guarantees:
 
 - optional receipt signing or hash-chain support;
 - optional receipt signing or hash-chain support;
-- stronger redaction policy/receipt artifacts;
+- stronger redaction policy/receipt semantics and external secret scanner integration;
 - adapters/reference integrations in separate packages;
 - replacement of the lightweight JSON Schema subset validator with a full JSON Schema implementation if needed.
 

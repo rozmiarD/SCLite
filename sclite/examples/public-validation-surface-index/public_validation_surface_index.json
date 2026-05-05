@@ -1,0 +1,65 @@
+{
+  "artifact_type": "public_validation_surface_index",
+  "generated_at": "2026-05-05T21:30:00+00:00",
+  "non_claims": [
+    "does_not_claim_live_vulnerability_evidence",
+    "does_not_authorize_publication",
+    "does_not_cover_protocol_adapter_execution"
+  ],
+  "public_safety": {
+    "live_target_execution": false,
+    "protocol_adapter_work": false,
+    "public_push_authorized": false,
+    "raw_live_evidence_included": false
+  },
+  "schema_version": "v0.1",
+  "summary": {
+    "public_safe_surface_count": 3,
+    "surface_count": 3
+  },
+  "surfaces": [
+    {
+      "commands": [
+        "sclite validate examples/security-contract-proof"
+      ],
+      "kind": "fixture_directory",
+      "path": "examples/security-contract-proof",
+      "public_safe": true,
+      "purpose": "Validate the public-safe proof trace artifact chain.",
+      "schemas": [
+        "policy_decision.v0.1",
+        "redacted_prepared_execution_spec.v0.1",
+        "approved_execution_spec.v0.1",
+        "execution_receipt.v0.1",
+        "evidence_bundle.v0.1"
+      ],
+      "surface_id": "security_contract_proof_fixture"
+    },
+    {
+      "commands": [
+        "sclite validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json"
+      ],
+      "kind": "json_artifact",
+      "path": "examples/prepared-execution-spec/prepared_execution_spec.json",
+      "public_safe": true,
+      "purpose": "Validate the draft prepared execution shape before approval.",
+      "schemas": [
+        "prepared_execution_spec.v0.1"
+      ],
+      "surface_id": "prepared_execution_spec_fixture"
+    },
+    {
+      "commands": [
+        "sclite validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json"
+      ],
+      "kind": "json_artifact",
+      "path": "examples/scope-fidelity-report/scope_fidelity_report.json",
+      "public_safe": true,
+      "purpose": "Validate static target-host binding review output.",
+      "schemas": [
+        "scope_fidelity_report.v0.1"
+      ],
+      "surface_id": "scope_fidelity_fixture"
+    }
+  ]
+}

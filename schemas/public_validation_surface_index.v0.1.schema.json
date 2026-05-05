@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sclite.local/schemas/public_validation_surface_index.v0.1.schema.json",
+  "title": "SCLite PublicValidationSurfaceIndex v0.1",
+  "description": "Draft index of public-safe validation surfaces available in a repository or bundle. It documents local validation paths and commands; it does not authorize publication or live execution.",
+  "type": "object",
+  "required": [
+    "artifact_type",
+    "schema_version",
+    "generated_at",
+    "surfaces",
+    "summary",
+    "public_safety",
+    "non_claims"
+  ],
+  "properties": {
+    "artifact_type": {
+      "const": "public_validation_surface_index"
+    },
+    "schema_version": {
+      "const": "v0.1"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "surface_id",
+          "path",
+          "kind",
+          "purpose",
+          "schemas",
+          "commands",
+          "public_safe"
+        ],
+        "properties": {
+          "surface_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "schemas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "public_safe": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "surface_count",
+        "public_safe_surface_count"
+      ],
+      "properties": {
+        "surface_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "public_safe_surface_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "public_safety": {
+      "type": "object",
+      "required": [
+        "live_target_execution",
+        "protocol_adapter_work",
+        "public_push_authorized",
+        "raw_live_evidence_included"
+      ],
+      "properties": {
+        "live_target_execution": {
+          "const": false
+        },
+        "protocol_adapter_work": {
+          "const": false
+        },
+        "public_push_authorized": {
+          "const": false
+        },
+        "raw_live_evidence_included": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "non_claims": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

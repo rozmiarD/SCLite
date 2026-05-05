@@ -57,6 +57,7 @@ A governed runtime can use SCL like this:
    - CI/reviewer runs SCL CLI validation.
    - Runtime may emit `SecurityContractValidationReceipt` for its validation bundle.
    - Runtime or CI may emit SCLite artifact hash descriptors for stable content references.
+   - Runtime/reporting layer may emit `RedactionPolicy`, `RedactionReceipt`, `PublicValidationSurfaceIndex`, and `PublicSnapshotManifest` artifacts for public review boundaries.
 
 ## Minimal Python integration
 
@@ -106,6 +107,10 @@ A carrier-agnostic engine that consumes SCL could expose endpoints such as:
 - `POST /evidence/bundle` -> `EvidenceBundle`
 - `POST /validation/receipt` -> `SecurityContractValidationReceipt`
 - `POST /artifacts/hash` -> canonical SHA-256 descriptor
+- `POST /redaction/policy` -> `RedactionPolicy`
+- `POST /redaction/receipt` -> `RedactionReceipt`
+- `POST /public/validation-surface-index` -> `PublicValidationSurfaceIndex`
+- `POST /public/snapshot-manifest` -> `PublicSnapshotManifest`
 
 Those endpoints are not implemented in this repository. They are an integration direction for a separate engine package or runtime.
 

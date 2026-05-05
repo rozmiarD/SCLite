@@ -14,6 +14,10 @@ This guide explains the v0.1 artifacts in practical reviewer language. It mirror
 | `EvidenceBundle` | `examples/security-contract-proof/evidence_bundle.json` | Yes | Built/validated |
 | Evidence summary | `examples/security-contract-proof/evidence_summary.md` | Markdown, no schema | Loaded as fixture |
 | Artifact hash descriptor | Any JSON artifact | No schema in v0.1 | Built by helper/CLI |
+| `RedactionPolicy` | `examples/redaction-policy/redaction_policy.json` | Yes | Built/validated |
+| `RedactionReceipt` | `examples/redaction-receipt/redaction_receipt.json` | Yes | Built/validated |
+| `PublicValidationSurfaceIndex` | `examples/public-validation-surface-index/public_validation_surface_index.json` | Yes | Built/validated |
+| `PublicSnapshotManifest` | `examples/public-snapshot-manifest/public_snapshot_manifest.json` | Yes | Built/validated |
 | `ScopeFidelityReport` | `examples/scope-fidelity-report/scope_fidelity_report.json` | Yes | Built/validated |
 | `SecurityContractValidationReceipt` | CLI output | Yes | Built/validated |
 
@@ -123,6 +127,19 @@ The helper canonicalizes JSON with sorted keys, compact separators, preserved Un
 
 It is not a signature, identity proof, authorization proof, or tamper-proof audit chain. A runtime that needs provenance must add signing/identity controls outside this helper.
 
+
+## RedactionPolicy and RedactionReceipt
+
+`RedactionPolicy` documents public-safe redaction rules. `RedactionReceipt` records a redaction operation using policy/source/redacted hashes and summary counts while excluding raw source material.
+
+They are useful for reviewer traceability, but they are not a complete secret scanner, not proof that upstream data never contained secrets, and not publication authorization.
+
+## PublicValidationSurfaceIndex and PublicSnapshotManifest
+
+`PublicValidationSurfaceIndex` lists public-safe validation surfaces and commands. `PublicSnapshotManifest` describes selected public-safe files and can include SCLite canonical hash descriptors.
+
+These artifacts help reviewers understand what can be validated locally. They do not claim live execution, protocol adapter coverage, signed provenance, or push/package publication authorization.
+
 ## ScopeFidelityReport
 
 A `ScopeFidelityReport` is a static host-binding review artifact.
@@ -157,6 +174,10 @@ python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 exa
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.cli hash-artifact --schema approved_execution_spec.v0.1 examples/security-contract-proof/approved_execution_spec.json
+python -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
+python -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m sclite.cli scope-fidelity --approved-spec examples/security-contract-proof/approved_execution_spec.json --fail-on review
 python -m sclite.cli validation-receipt examples/security-contract-proof
 ```

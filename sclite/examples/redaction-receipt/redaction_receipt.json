@@ -1,0 +1,35 @@
+{
+  "artifact_type": "redaction_receipt",
+  "generated_at": "2026-05-05T21:30:00+00:00",
+  "non_claims": [
+    "does_not_claim_complete_secret_detection",
+    "does_not_prove_upstream_data_never_contained_secrets",
+    "does_not_authorize_publication"
+  ],
+  "policy": {
+    "policy_hash": "08528c426fbaa6b95f942ec4e16e878f6735348639676807eb0e73c3679ae445",
+    "policy_id": "sclite-public-safe-v0.1"
+  },
+  "public_safety": {
+    "credentials_included": false,
+    "private_paths_included": false,
+    "raw_live_evidence_included": false,
+    "raw_source_included": false,
+    "raw_stdout_stderr_included": false
+  },
+  "redacted": {
+    "hash": "e1ec9edaa5dab8330f0eda5286065972996f2e4dc0e77906af953861e05ae779",
+    "label": "synthetic_redacted_artifact"
+  },
+  "schema_version": "v0.1",
+  "source": {
+    "hash": "2a4914dc22da46ca304e8b808aae0cfd59109e5a983f68b145c4bb52c66f8eda",
+    "label": "synthetic_source_not_published"
+  },
+  "status": "redacted",
+  "summary": {
+    "changed_paths_estimate": 3,
+    "rules_considered": 4,
+    "source_and_redacted_hash_match": false
+  }
+}

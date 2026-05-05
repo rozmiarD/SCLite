@@ -152,6 +152,63 @@ Current limitations:
 - does not include forensic evidence storage;
 - does not include artifact hashes or private evidence references.
 
+
+### RedactionPolicy
+
+Schema: `schemas/redaction_policy.v0.1.schema.json`
+
+Example: `examples/redaction-policy/redaction_policy.json`
+
+Purpose: document public-safe redaction rules and non-claims. The default helper describes common sensitive-key, raw-output, local-path, and header-like redaction behavior.
+
+Current limitations:
+
+- not a complete secret scanner;
+- not proof that upstream data never contained secrets;
+- not publication authorization.
+
+### RedactionReceipt
+
+Schema: `schemas/redaction_receipt.v0.1.schema.json`
+
+Example: `examples/redaction-receipt/redaction_receipt.json`
+
+Purpose: summarize a redaction operation with policy/source/redacted hashes and counts while excluding raw source material.
+
+Current limitations:
+
+- does not include raw private source;
+- changed-path count is a simple estimate;
+- does not prove complete redaction or provenance.
+
+### PublicValidationSurfaceIndex
+
+Schema: `schemas/public_validation_surface_index.v0.1.schema.json`
+
+Example: `examples/public-validation-surface-index/public_validation_surface_index.json`
+
+Purpose: list public-safe validation surfaces, schemas, and commands a reviewer can run locally.
+
+Current limitations:
+
+- does not authorize public push/package publication;
+- does not claim live execution or protocol adapter coverage;
+- only indexes surfaces intentionally exposed by the producer.
+
+### PublicSnapshotManifest
+
+Schema: `schemas/public_snapshot_manifest.v0.1.schema.json`
+
+Example: `examples/public-snapshot-manifest/public_snapshot_manifest.json`
+
+Purpose: describe a selected public-safe artifact snapshot, optionally with SCLite canonical hash descriptors for files.
+
+Current limitations:
+
+- not a signed provenance statement;
+- not a tamper-proof transparency log;
+- not publication authorization.
+
 ### ScopeFidelityReport
 
 Schema: `schemas/scope_fidelity_report.v0.1.schema.json`
