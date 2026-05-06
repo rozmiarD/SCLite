@@ -3,11 +3,11 @@
 [![CI](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Lightweight Security Contract Layer for auditable AI/security execution contracts.
+Lightweight Security Contract Layer for auditable AI/security execution contract lifecycles.
 
-SCLite (Security Contract Layer) is a small, JSON-first contract layer for making security/agentic execution reviewable before and after a tool run.
+SCLite is a contract lifecycle for governed AI-assisted security actions: it separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
-It is currently a **draft v0.1** Python package, CLI, schema set, and fixture bundle. It does **not** execute tools, prove authorization, prove live vulnerabilities, or replace a runtime. It gives runtimes and carriers a common artifact shape for answering questions like:
+It is currently a **draft v0.2** Python package, CLI, schema set, and fixture bundle. It does **not** execute tools, prove legal authorization, prove live vulnerabilities, or replace a runtime. It gives runtimes and carriers a common artifact shape for answering questions like:
 
 - What did the agent or caller intend to do?
 - What did policy decide before execution was prepared?
@@ -15,17 +15,18 @@ It is currently a **draft v0.1** Python package, CLI, schema set, and fixture bu
 - What compact receipt summarizes what happened or would have happened?
 - What evidence/non-claims can a reviewer validate without seeing private runtime logs?
 - Did the requested target host drift from the hosts detected in the execution shape?
+- Does the local artifact bundle still match its cryptographic hash-linked lifecycle chain?
 
 The practical goal is simple: **model intent should not become execution authority by itself**. SCL is the contract/evidence layer that a governed runtime can consume.
 
 ## Status
 
-- Version: `0.1.0`
-- Status: draft / candidate standalone repository
+- Version: `0.2.0`
+- Status: draft lifecycle / candidate standalone repository
 - License: MIT
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
-- Cryptographic integrity: not included in v0.1
+- Cryptographic integrity: lightweight hash-linked artifact-chain verification included; signer identity / PKI is not included in core
 
 This repository is intended to be the reusable SCL core. A runtime such as Ravenclaw can use it as a dependency and keep policy engines, approval flows, executors, and carrier adapters outside this package.
 
@@ -42,7 +43,7 @@ AI-assisted security workflows often compress several very different steps into 
 
 Without structured artifacts, these steps are easy to blur together. A chat transcript or log line may say “approved” or “safe”, but a reviewer still has to reconstruct what was approved, what target was bound, what command shape existed, and what the output is claiming.
 
-SCL separates those concerns into schema-backed JSON artifacts. The current v0.1 artifacts are intentionally small and public-safe so they can be checked in fixtures, CI, docs, or review bundles without publishing raw private evidence.
+SCL separates those concerns into schema-backed JSON artifacts. The current v0.2 artifacts are intentionally small and public-safe so they can be checked in fixtures, CI, docs, or review bundles without publishing raw private evidence. v0.2 adds a lightweight cryptographic integrity core: canonical SHA-256 artifact descriptors plus an ordered hash-linked `ArtifactChainManifest`.
 
 ## What SCL is
 
@@ -67,17 +68,36 @@ SCL is not:
 - an MCP/OpenClaw/A2A replacement;
 - a proof of legal authorization;
 - a proof of live vulnerability evidence;
-- a tamper-proof audit chain.
+- a proof of signer identity / PKI trust by itself;
+- a tamper-proof transparency log.
 
 Those may be implemented by systems that consume SCL, but they are not part of this v0.1 core.
 
 ## Current artifact model
 
-The public-safe proof trace is:
+The v0.2 lifecycle trace is:
+
+```text
+intent -> policy decision -> execution contract -> execution ticket -> execution receipt -> evidence contract -> artifact chain manifest
+```
+
+The older v0.1 public-safe proof trace remains supported:
 
 ```text
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
+
+Current schema-backed v0.2 lifecycle artifacts:
+
+| Artifact | Purpose | Current status |
+| --- | --- | --- |
+| `IntentContract` | Captures what an agent/caller wants before authority exists. | Schema + lifecycle fixture validation. |
+| `PolicyDecision` v0.2 | Captures allow/deny/review policy outcome bound to the intent digest. | Schema + lifecycle fixture validation. |
+| `ExecutionContract` | Captures the exact bounded execution shape that may be reviewed and ticketed. | Schema + lifecycle fixture validation. |
+| `ExecutionTicket` | Captures approval for one exact execution contract under explicit bounds. | Schema + lifecycle fixture validation; integrity-bound, identity signature optional. |
+| `ExecutionReceipt` v0.2 | Captures what the external runtime actually did or dry-ran. | Schema + lifecycle fixture validation. |
+| `EvidenceContract` | Captures claims, non-claims, replay/verification path, and evidence bindings. | Schema + lifecycle fixture validation. |
+| `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. | Schema + `validate-chain` verification. |
 
 Current schema-backed v0.1 artifacts:
 
@@ -153,6 +173,12 @@ Hash one artifact with deterministic SCLite canonical JSON + SHA-256:
 sclite hash-artifact \
   --schema approved_execution_spec.v0.1 \
   examples/security-contract-proof/approved_execution_spec.json
+```
+
+Verify the v0.2 contract lifecycle chain:
+
+```bash
+sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
 Validate the new public governance/support artifacts:

@@ -1,8 +1,22 @@
 # SCL Artifact Guide
 
-This guide explains the v0.1 artifacts in practical reviewer language. It mirrors the current schemas and helpers in this repository; it does not describe features that are not implemented here.
+This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.1 proof-trace artifacts remain supported.
 
-## Quick map
+## v0.2 lifecycle map
+
+| Artifact | File in example | Schema-backed? | Built/validated by this package? |
+| --- | --- | --- | --- |
+| `IntentContract` | `examples/contract-lifecycle-v0.2/intent_contract.json` | Yes | Validated |
+| `PolicyDecision` v0.2 | `examples/contract-lifecycle-v0.2/policy_decision.json` | Yes | Validated |
+| `ExecutionContract` | `examples/contract-lifecycle-v0.2/execution_contract.json` | Yes | Validated |
+| `ExecutionTicket` | `examples/contract-lifecycle-v0.2/execution_ticket.json` | Yes | Validated; integrity-bound |
+| `ExecutionReceipt` v0.2 | `examples/contract-lifecycle-v0.2/execution_receipt.json` | Yes | Validated |
+| `EvidenceContract` | `examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
+| `ArtifactChainManifest` | `examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` |
+
+The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. It detects local bundle tampering, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
+
+## v0.1 quick map
 
 | Artifact | File in example | Schema-backed? | Built/validated by this package? |
 | --- | --- | --- | --- |

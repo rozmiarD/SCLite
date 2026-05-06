@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Sequence
 
 from .artifacts import build_artifact_hash, validate_artifact
+from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .redaction import build_default_redaction_policy, build_redaction_receipt
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
@@ -45,6 +46,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     hash_cmd.add_argument('artifact', help='path to a JSON artifact')
     hash_cmd.add_argument('--schema', help='optional schema name/path to validate before hashing')
     hash_cmd.add_argument('--format', choices=['json', 'digest'], default='json')
+
+    chain_cmd = sub.add_parser('validate-chain', help='verify a v0.2 hash-linked artifact-chain manifest')
+    chain_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
+    chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
+    chain_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
     policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
@@ -108,6 +115,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(descriptor['digest'])
         else:
             print(json.dumps(descriptor, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == 'validate-chain':
+        manifest_path = Path(str(args.manifest)).resolve()
+        manifest = _load_json_object(manifest_path)
+        root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
+        try:
+            result = verify_artifact_chain_manifest(manifest, root=root, validate_schemas=not args.no_schema)
+        except ChainVerificationError as exc:
+            print(f'artifact_chain_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'json':
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"artifact_chain_ok:{result['entry_count']}:{result['root_chain_digest']}")
         return 0
 
     if args.command == 'redaction-policy':
