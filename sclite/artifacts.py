@@ -56,6 +56,13 @@ SCHEMA_FILES = {
     'redaction_receipt.v0.1': 'redaction_receipt.v0.1.schema.json',
     'public_validation_surface_index.v0.1': 'public_validation_surface_index.v0.1.schema.json',
     'public_snapshot_manifest.v0.1': 'public_snapshot_manifest.v0.1.schema.json',
+    'intent_contract.v0.2': 'intent_contract.v0.2.schema.json',
+    'policy_decision.v0.2': 'policy_decision.v0.2.schema.json',
+    'execution_contract.v0.2': 'execution_contract.v0.2.schema.json',
+    'execution_ticket.v0.2': 'execution_ticket.v0.2.schema.json',
+    'execution_receipt.v0.2': 'execution_receipt.v0.2.schema.json',
+    'evidence_contract.v0.2': 'evidence_contract.v0.2.schema.json',
+    'artifact_chain_manifest.v0.2': 'artifact_chain_manifest.v0.2.schema.json',
 }
 
 

@@ -1,8 +1,8 @@
-# SCLite / Security Contract Layer v0.1 Draft Spec
+# SCLite / Security Contract Layer v0.2 Draft Spec
 
-Status: **draft v0.1**. This document describes the current package and schema bundle. It is not a standard, protocol, or compliance framework.
+Status: **draft v0.2**. This document describes the current package and schema bundle. It is not a standard, protocol, or compliance framework.
 
-SCL defines schema-backed artifacts for governed security/agentic execution. The intended use is to keep proposal, policy, approval, execution shape, receipts, and evidence separate enough to review and validate.
+SCLite is a contract lifecycle for governed AI-assisted security actions. It separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven. v0.2 adds lightweight cryptographic integrity for this lifecycle using canonical SHA-256 artifact descriptors and an ordered hash-linked chain manifest.
 
 ## Design principles
 
@@ -11,8 +11,31 @@ SCL defines schema-backed artifacts for governed security/agentic execution. The
 3. **Receipts should be compact and public-safe by default.** Raw evidence can live elsewhere; public proof artifacts should state what they do and do not claim.
 4. **Validation should be local and reproducible.** Fixtures should be checkable without live target execution.
 5. **Carriers are separate.** Chat systems, MCP servers, OpenClaw plugins, CI jobs, or custom runtimes can carry SCL artifacts, but SCL does not replace those systems.
+6. **Integrity is lightweight and explicit.** Core v0.2 verifies tamper-evident artifact binding, not signer identity, PKI trust, legal authorization, or runtime enforcement.
 
-## Canonical proof trace
+## Canonical v0.2 lifecycle
+
+```text
+intent -> policy decision -> execution contract -> execution ticket -> execution receipt -> evidence contract -> artifact chain manifest
+```
+
+The fixture directory `sclite/examples/contract-lifecycle-v0.2/` contains this public-safe chain:
+
+- `intent_contract.json`
+- `policy_decision.json`
+- `execution_contract.json`
+- `execution_ticket.json`
+- `execution_receipt.json`
+- `evidence_contract.json`
+- `artifact_chain_manifest.json`
+
+The chain can be verified locally with:
+
+```bash
+sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+```
+
+## Legacy v0.1 proof trace
 
 ```text
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary

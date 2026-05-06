@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - draft lifecycle candidate
+
+- Introduces SCLite v0.2 as a contract lifecycle model from intent to evidence.
+- Adds v0.2 schemas for `IntentContract`, `PolicyDecision`, `ExecutionContract`, `ExecutionTicket`, `ExecutionReceipt`, `EvidenceContract`, and `ArtifactChainManifest`.
+- Adds lightweight cryptographic integrity primitives: canonical artifact descriptors and ordered SHA-256 hash-linked chain manifests.
+- Adds `sclite validate-chain` for local verification of v0.2 lifecycle bundles.
+- Adds a public-safe `contract-lifecycle-v0.2` fixture showing intent, policy, execution contract, integrity-bound ticket, receipt, evidence contract, and manifest verification.
+- Keeps signer identity / PKI out of the core dependency path; v0.2 core verifies tamper-evident artifact binding only.
+
 ## 0.1.0 - draft candidate
 
 - Initial SCLite package candidate.

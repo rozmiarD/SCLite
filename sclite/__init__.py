@@ -41,6 +41,14 @@ from .artifacts import (
     validate_schema_ref,
     validate_trace,
 )
+from .integrity import (
+    CHAIN_CANONICALIZATION_VERSION,
+    CHAIN_HASH_ALGORITHM,
+    ChainVerificationError,
+    artifact_descriptor,
+    build_artifact_chain_manifest,
+    verify_artifact_chain_manifest,
+)
 from .redaction import (
     REDACTION_POLICY_ARTIFACT_TYPE,
     REDACTION_POLICY_SCHEMA_VERSION,

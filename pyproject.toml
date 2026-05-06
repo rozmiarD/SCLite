@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sclite"
-version = "0.1.0"
-description = "Lightweight Security Contract Layer artifacts, validation, and public-safe proof fixtures"
+version = "0.2.0"
+description = "Lightweight Security Contract Layer lifecycle artifacts, validation, and cryptographic integrity chain fixtures"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -66,6 +66,8 @@ sclite = [
   "examples/public-validation-surface-index/*.md",
   "examples/public-snapshot-manifest/*.json",
   "examples/public-snapshot-manifest/*.md",
+  "examples/contract-lifecycle-v0.2/*.json",
+  "examples/contract-lifecycle-v0.2/*.md",
 ]
 
 [tool.pytest.ini_options]
