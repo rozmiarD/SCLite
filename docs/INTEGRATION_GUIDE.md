@@ -2,7 +2,13 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, fixtures, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, or carrier adapter.
+SCLite v0.2 is centered on the contract lifecycle:
+
+```text
+intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
+```
+
+SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, fixtures, lifecycle integrity verification, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, or carrier adapter.
 
 ## Recommended boundary
 
@@ -22,55 +28,52 @@ Use SCL for the artifact boundary between those responsibilities.
 
 ## Reference flow
 
-A governed runtime can use SCL like this:
+A governed runtime can use SCLite v0.2 like this:
 
-1. **Receive scope/input**
+1. **Receive intent**
    - Runtime receives a target/objective/task.
-   - Runtime normalizes it in its own task model.
+   - Runtime emits or maps that request into `IntentContract`.
+   - Intent is not authority.
 
 2. **Evaluate policy**
    - Runtime policy code decides whether preparing execution is allowed.
-   - Runtime emits or maps that result into `PolicyDecision`.
+   - Runtime emits `PolicyDecision` v0.2 bound to the intent descriptor.
 
-3. **Prepare execution shape**
-   - Runtime compiles a concrete tool/action shape.
-   - Runtime may produce a `PreparedExecutionSpec` and a `RedactedPreparedExecutionSpec` public/auditor view.
+3. **Prepare execution contract**
+   - Runtime compiles a concrete bounded execution shape.
+   - Runtime emits `ExecutionContract` with target binding, tool, normalized args, and execution bounds.
 
-4. **Approve**
-   - Reviewer/auditor/owner policy approves or rejects the concrete execution shape.
-   - Runtime emits `ApprovedExecutionSpec` if approved.
+4. **Approve execution ticket**
+   - Reviewer/auditor/owner policy approves or rejects the execution contract.
+   - Runtime emits `ExecutionTicket` bound to the exact execution contract digest, with approval status, validity, and execution limits.
 
-5. **Preflight static host binding**
-   - Runtime or CI can build a `ScopeFidelityReport` from the approved spec.
-   - `fail` should generally block or require strong review.
-   - `review` should generally require inspection.
+5. **Execute or dry-run**
+   - Runtime executor consumes its own approved/ticketed shape.
+   - SCLite does not execute it.
+   - Runtime emits `ExecutionReceipt` v0.2 bound to the ticket.
 
-6. **Execute or dry-run**
-   - Runtime executor consumes the approved spec.
-   - SCL does not execute it.
-
-7. **Emit receipt/evidence**
-   - Runtime emits `ExecutionReceipt` and, where useful, `EvidenceBundle`.
+6. **Emit evidence contract**
+   - Runtime emits `EvidenceContract` with claims, non-claims, replay mode, verification commands, and a link to the receipt.
    - Public outputs should keep raw private evidence elsewhere.
 
-8. **Validate**
-   - CI/reviewer runs SCL CLI validation.
-   - Runtime may emit `SecurityContractValidationReceipt` for its validation bundle.
-   - Runtime or CI may emit SCLite artifact hash descriptors for stable content references.
-   - Runtime/reporting layer may emit `RedactionPolicy`, `RedactionReceipt`, `PublicValidationSurfaceIndex`, and `PublicSnapshotManifest` artifacts for public review boundaries.
+7. **Build and verify lifecycle chain**
+   - Runtime builds `ArtifactChainManifest`.
+   - CI/reviewer runs `sclite validate-chain` or `sclite verify-lifecycle`.
+   - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings.
+
+Legacy v0.1 artifacts (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, `ExecutionReceipt`, `EvidenceBundle`, and related public-safety artifacts) remain supported for compatibility and public proof traces.
 
 ## Minimal Python integration
 
 ```python
-from sclite.artifacts import validate_artifact
-from sclite.scope_fidelity import build_scope_fidelity_report_from_approved_spec
+from pathlib import Path
 
-# approved_spec is a dict produced by your runtime.
-validate_artifact(approved_spec, "approved_execution_spec.v0.1")
+from sclite.integrity import verify_artifact_chain_manifest
 
-scope_report = build_scope_fidelity_report_from_approved_spec(approved_spec)
-if scope_report["verdict"] == "fail":
-    raise RuntimeError("approved spec target host drift detected")
+# manifest is artifact_chain_manifest.json loaded as a dict.
+result = verify_artifact_chain_manifest(manifest, root=Path("bundle-root"))
+assert result["status"] == "passed"
+assert "ticket_binds_execution_contract" in result["semantic_checks"]
 ```
 
 ## Carrier guidance
@@ -97,15 +100,15 @@ Bad carrier behavior:
 
 ## Endpoint shape for a future engine
 
-A carrier-agnostic engine that consumes SCL could expose endpoints such as:
+A carrier-agnostic engine that consumes SCLite could expose endpoints such as:
 
-- `POST /policy/decide` -> `PolicyDecision`
-- `POST /execution/prepare` -> `PreparedExecutionSpec` + `RedactedPreparedExecutionSpec`
-- `POST /execution/approve` -> `ApprovedExecutionSpec`
-- `POST /scope-fidelity` -> `ScopeFidelityReport`
-- `POST /execution/receipt` -> `ExecutionReceipt`
-- `POST /evidence/bundle` -> `EvidenceBundle`
-- `POST /validation/receipt` -> `SecurityContractValidationReceipt`
+- `POST /intent` -> `IntentContract`
+- `POST /policy/decide` -> `PolicyDecision` v0.2
+- `POST /execution/contract` -> `ExecutionContract`
+- `POST /execution/ticket` -> `ExecutionTicket`
+- `POST /execution/receipt` -> `ExecutionReceipt` v0.2
+- `POST /evidence/contract` -> `EvidenceContract`
+- `POST /artifacts/chain` -> `ArtifactChainManifest`
 - `POST /artifacts/hash` -> canonical SHA-256 descriptor
 - `POST /redaction/policy` -> `RedactionPolicy`
 - `POST /redaction/receipt` -> `RedactionReceipt`

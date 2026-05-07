@@ -12,9 +12,9 @@ This guide explains the implemented SCLite artifacts in practical reviewer langu
 | `ExecutionTicket` | `examples/contract-lifecycle-v0.2/execution_ticket.json` | Yes | Validated; integrity-bound |
 | `ExecutionReceipt` v0.2 | `examples/contract-lifecycle-v0.2/execution_receipt.json` | Yes | Validated |
 | `EvidenceContract` | `examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
-| `ArtifactChainManifest` | `examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` |
+| `ArtifactChainManifest` | `examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
 
-The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. It detects local bundle tampering, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
+The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket binding, evidence->receipt binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
 
 ## v0.1 quick map
 
@@ -183,6 +183,8 @@ In this package, the CLI emits it for fixture validation. A larger runtime may p
 Run:
 
 ```bash
+python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
