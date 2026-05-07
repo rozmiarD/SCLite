@@ -5,6 +5,7 @@ from .chain import (
     artifact_descriptor,
     build_artifact_chain_manifest,
     verify_artifact_chain_manifest,
+    verify_lifecycle_semantics,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     'artifact_descriptor',
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
+    'verify_lifecycle_semantics',
 ]

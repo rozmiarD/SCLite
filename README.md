@@ -3,121 +3,123 @@
 [![CI](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Lightweight Security Contract Layer for auditable AI/security execution contract lifecycles.
+Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
 
-SCLite is a contract lifecycle for governed AI-assisted security actions: it separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
-
-It is currently a **draft v0.2** Python package, CLI, schema set, and fixture bundle. It does **not** execute tools, prove legal authorization, prove live vulnerabilities, or replace a runtime. It gives runtimes and carriers a common artifact shape for answering questions like:
-
-- What did the agent or caller intend to do?
-- What did policy decide before execution was prepared?
-- What execution shape was approved?
-- What compact receipt summarizes what happened or would have happened?
-- What evidence/non-claims can a reviewer validate without seeing private runtime logs?
-- Did the requested target host drift from the hosts detected in the execution shape?
-- Does the local artifact bundle still match its cryptographic hash-linked lifecycle chain?
-
-The practical goal is simple: **model intent should not become execution authority by itself**. SCL is the contract/evidence layer that a governed runtime can consume.
+SCLite v0.2 separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
 ## Status
 
 - Version: `0.2.0`
-- Status: draft lifecycle / candidate standalone repository
-- License: MIT
+- Status: **draft lifecycle candidate**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
-- Cryptographic integrity: lightweight hash-linked artifact-chain verification included; signer identity / PKI is not included in core
+- Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
+- Identity/PKI: not included in core
 
-This repository is intended to be the reusable SCL core. A runtime such as Ravenclaw can use it as a dependency and keep policy engines, approval flows, executors, and carrier adapters outside this package.
+SCLite v0.2 is a **contract lifecycle**, not an execution engine. Runtimes such as Ravenclaw can consume SCLite artifacts and enforce tickets, but executors, sandboxes, policy engines, raw evidence storage, agent loops, and carrier adapters stay outside this package.
 
-## What problem does SCL solve?
+## Project sentence
 
-AI-assisted security workflows often compress several very different steps into one ambiguous action:
+> SCLite separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
+
+## What problem does SCLite solve?
+
+AI-assisted security workflows often blur separate authority boundaries:
 
 1. a model proposes intent;
-2. policy/scope decides whether that intent is allowed;
+2. policy/scope decides whether the request may proceed;
 3. code prepares a concrete execution shape;
-4. a reviewer/auditor approves or rejects it;
-5. an executor runs or dry-runs tools;
-6. evidence is summarized for another human/system.
+4. an auditor/reviewer approves or rejects that shape;
+5. a runtime executes or dry-runs under bounds;
+6. evidence is summarized for review.
 
-Without structured artifacts, these steps are easy to blur together. A chat transcript or log line may say “approved” or “safe”, but a reviewer still has to reconstruct what was approved, what target was bound, what command shape existed, and what the output is claiming.
+SCLite turns those steps into small schema-backed JSON artifacts and verifies their integrity locally. A reviewer can check the public-safe bundle without running live targets or reading private logs.
 
-SCL separates those concerns into schema-backed JSON artifacts. The current v0.2 artifacts are intentionally small and public-safe so they can be checked in fixtures, CI, docs, or review bundles without publishing raw private evidence. v0.2 adds a lightweight cryptographic integrity core: canonical SHA-256 artifact descriptors plus an ordered hash-linked `ArtifactChainManifest`.
+## v0.2 canonical lifecycle
 
-## What SCL is
+```text
+intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
+```
 
-SCL is:
+Current v0.2 artifacts:
 
-- a set of JSON schemas for governed execution artifacts;
-- a Python package for building and validating current v0.1 artifacts;
-- a CLI for validating fixtures and generating static review artifacts;
-- a public-safe proof fixture showing the expected artifact chain;
-- a neutral `ScopeFidelityReport` helper for static host-binding review.
+| Artifact | Purpose |
+| --- | --- |
+| `IntentContract` | Captures what an agent/caller wants before authority exists. |
+| `PolicyDecision` v0.2 | Captures allow/deny/review policy outcome bound to intent. |
+| `ExecutionContract` | Captures the exact bounded execution shape prepared for review. |
+| `ExecutionTicket` | Captures approval for one exact execution contract under explicit bounds and validity. |
+| `ExecutionReceipt` v0.2 | Captures what an external runtime reports as executed or dry-run. |
+| `EvidenceContract` | Captures public-safe claims, non-claims, replay, verification, and evidence links. |
+| `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. |
 
-## What SCL is not
+Verify the lifecycle fixture:
 
-SCL is not:
+```bash
+sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+```
+
+`verify-lifecycle` currently uses the same verifier as `validate-chain`; the name exists because it describes the v0.2 review action more clearly.
+
+## What the verifier checks
+
+The v0.2 verifier checks more than raw hashes:
+
+- manifest paths cannot escape the artifact root;
+- artifact descriptors match canonical SHA-256 digests;
+- hash-chain links and root digest recompute correctly;
+- lifecycle artifacts appear in the canonical order;
+- policy binds the correct intent digest;
+- ticket binds the correct execution contract digest;
+- receipt binds the correct execution ticket digest;
+- evidence contract binds the correct receipt digest.
+
+## What SCLite is
+
+SCLite core is limited to:
+
+```text
+define / validate / hash / bind / redact / verify
+```
+
+It provides:
+
+- JSON schemas for lifecycle and compatibility artifacts;
+- deterministic artifact hashing helpers;
+- v0.2 lifecycle/chain verification;
+- redaction/public-snapshot helper artifacts;
+- a CLI for local validation and review fixtures;
+- legacy v0.1 compatibility fixtures and schemas.
+
+## What SCLite is not
+
+SCLite is not:
 
 - a security scanner;
 - an executor;
-- an approval authority by itself;
+- a sandbox;
 - a full policy engine;
-- a runtime sandbox;
-- a new protocol;
-- an MCP/OpenClaw/A2A replacement;
+- an approval authority by itself;
+- an agent loop;
+- a tool wrapper package for `nmap`, `ffuf`, etc.;
+- an MCP/OpenClaw/A2A protocol replacement;
 - a proof of legal authorization;
 - a proof of live vulnerability evidence;
-- a proof of signer identity / PKI trust by itself;
+- a proof of signer identity or PKI trust;
 - a tamper-proof transparency log.
 
-Those may be implemented by systems that consume SCL, but they are not part of this v0.1 core.
+## Legacy v0.1 compatibility
 
-## Current artifact model
-
-The v0.2 lifecycle trace is:
-
-```text
-intent -> policy decision -> execution contract -> execution ticket -> execution receipt -> evidence contract -> artifact chain manifest
-```
-
-The older v0.1 public-safe proof trace remains supported:
+The older public-safe v0.1 proof trace remains supported:
 
 ```text
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-Current schema-backed v0.2 lifecycle artifacts:
+v0.1 compatibility artifacts remain available for existing integrations, including Ravenclaw public proof fixtures. New lifecycle work should use the v0.2 model.
 
-| Artifact | Purpose | Current status |
-| --- | --- | --- |
-| `IntentContract` | Captures what an agent/caller wants before authority exists. | Schema + lifecycle fixture validation. |
-| `PolicyDecision` v0.2 | Captures allow/deny/review policy outcome bound to the intent digest. | Schema + lifecycle fixture validation. |
-| `ExecutionContract` | Captures the exact bounded execution shape that may be reviewed and ticketed. | Schema + lifecycle fixture validation. |
-| `ExecutionTicket` | Captures approval for one exact execution contract under explicit bounds. | Schema + lifecycle fixture validation; integrity-bound, identity signature optional. |
-| `ExecutionReceipt` v0.2 | Captures what the external runtime actually did or dry-ran. | Schema + lifecycle fixture validation. |
-| `EvidenceContract` | Captures claims, non-claims, replay/verification path, and evidence bindings. | Schema + lifecycle fixture validation. |
-| `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. | Schema + `validate-chain` verification. |
-
-Current schema-backed v0.1 artifacts:
-
-| Artifact | Purpose | Current status |
-| --- | --- | --- |
-| `PolicyDecision` | Captures policy outcome such as allow/deny/review-before-prepare with scope/tool facts. | Schema + fixture validation. |
-| `PreparedExecutionSpec` | Captures the concrete execution shape prepared before approval. | Schema + synthetic fixture validation. |
-| `RedactedPreparedExecutionSpec` | Public/auditor-safe prepared execution view with explicit public-safety/redaction flags. | Schema + proof fixture validation. |
-| `ApprovedExecutionSpec` | Captures the approved execution shape and execution truth expected by a runtime executor. | Schema + fixture validation. |
-| `ExecutionReceipt` | Compact, public-safe summary of dry-run/execution outcome. | Schema + fixture validation. |
-| `EvidenceBundle` | Public-safe evidence/non-claim summary for the proof trace. | Schema + fixture validation. |
-| Artifact hash descriptor | Deterministic SHA-256 over SCLite canonical JSON for content addressing. | Helper + CLI + tests. |
-| `RedactionPolicy` | Public-safe redaction rules and non-claims. | Schema + helper + CLI + fixture. |
-| `RedactionReceipt` | Public-safe summary of a redaction operation with hashes/counts, not raw source. | Schema + helper + CLI + fixture. |
-| `PublicValidationSurfaceIndex` | Index of public-safe validation surfaces and commands. | Schema + helper + CLI + fixture. |
-| `PublicSnapshotManifest` | Manifest of selected public-safe artifacts with canonical hash descriptors. | Schema + helper + CLI + fixture. |
-| `ScopeFidelityReport` | Static review of target host vs hosts detected in normalized args/execution plan. | Schema + builder + CLI + fixture. |
-| `SecurityContractValidationReceipt` | Receipt showing which local/public-safe SCL validation checks ran. | Schema + builder + CLI. |
-
-See [`SPEC.md`](SPEC.md) and [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md) for more detail.
+See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrity chain, compatibility notes, and explicit security boundaries.
 
 ## Installation
 
@@ -127,7 +129,7 @@ Once published to PyPI, the intended install path is:
 pip install sclite
 ```
 
-Install directly from GitHub after the repo is public:
+Install directly from GitHub:
 
 ```bash
 pip install git+https://github.com/rozmiarD/SCLite.git
@@ -141,11 +143,18 @@ python -m venv .venv
 python -m pip install -e '.[dev]'
 ```
 
-Runtime dependencies are intentionally empty for v0.1. The `dev` extra installs `pytest` for local tests.
+Runtime dependencies are intentionally empty. The `dev` extra installs `pytest` for local tests.
 
 ## CLI quickstart
 
-Validate the public-safe proof fixture:
+Validate the v0.2 lifecycle chain:
+
+```bash
+sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+```
+
+Validate the legacy public-safe proof fixture:
 
 ```bash
 sclite validate examples/security-contract-proof
@@ -157,14 +166,6 @@ Validate one artifact against a schema:
 sclite validate-artifact \
   --schema prepared_execution_spec.v0.1 \
   examples/prepared-execution-spec/prepared_execution_spec.json
-
-sclite validate-artifact \
-  --schema redacted_prepared_execution_spec.v0.1 \
-  examples/security-contract-proof/prepared_execution_spec.redacted.json
-
-sclite validate-artifact \
-  --schema approved_execution_spec.v0.1 \
-  examples/security-contract-proof/approved_execution_spec.json
 ```
 
 Hash one artifact with deterministic SCLite canonical JSON + SHA-256:
@@ -173,21 +174,6 @@ Hash one artifact with deterministic SCLite canonical JSON + SHA-256:
 sclite hash-artifact \
   --schema approved_execution_spec.v0.1 \
   examples/security-contract-proof/approved_execution_spec.json
-```
-
-Verify the v0.2 contract lifecycle chain:
-
-```bash
-sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-```
-
-Validate the new public governance/support artifacts:
-
-```bash
-sclite validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-sclite validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-sclite validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-sclite validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
 ```
 
 Generate a Scope Fidelity report from the approved spec fixture:
@@ -212,150 +198,26 @@ python -m pytest -q
 
 ## Python usage
 
-Build a static Scope Fidelity report:
-
 ```python
-from sclite.scope_fidelity import build_scope_fidelity_report, validate_scope_fidelity_report
+from sclite.integrity import verify_artifact_chain_manifest
 
-report = build_scope_fidelity_report(
-    target="https://example.com",
-    normalized_args=["https://example.com/login"],
-    execution_plan=[{"tool": "http_probe", "args": ["https://example.com/login"]}],
-    target_in_scope=True,
-    source_artifact="example",
-)
-validate_scope_fidelity_report(report)
-print(report["verdict"])  # "pass"
+# Load artifact_chain_manifest.json as a dict and verify it against a local root.
+result = verify_artifact_chain_manifest(manifest, root=fixture_dir)
+assert result["status"] == "passed"
 ```
-
-Validate and hash an artifact:
-
-```python
-import json
-from pathlib import Path
-from sclite.artifacts import artifact_sha256, build_artifact_hash, validate_artifact
-
-artifact = json.loads(Path("examples/security-contract-proof/approved_execution_spec.json").read_text())
-validate_artifact(artifact, "approved_execution_spec.v0.1")
-print(artifact_sha256(artifact))
-print(build_artifact_hash(artifact))
-```
-
-The hash helper is deterministic content addressing, not a signature, identity proof, authorization proof, or tamper-proof audit chain.
-
-Build redaction and public-surface helper artifacts:
-
-```python
-from sclite.redaction import build_default_redaction_policy, build_redaction_receipt, redact_prepared_spec
-from sclite.surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
-
-source = {"artifact_type": "example", "token": "synthetic-demo-token"}
-redacted = redact_prepared_spec(source)
-policy = build_default_redaction_policy()
-receipt = build_redaction_receipt(source, redacted, policy=policy)
-index = build_public_validation_surface_index()
-manifest = build_public_snapshot_manifest([{"path": "example.json", "artifact_type": "example", "schema": "", "value": redacted}])
-```
-
-These helpers document redaction/publication review surfaces. They do not prove complete secret detection, provenance, authorization, or publication readiness by themselves.
-
-## Scope Fidelity in plain language
-
-`ScopeFidelityReport` is a static host-binding check. It compares:
-
-- the declared target host; with
-- hosts detected in normalized arguments; and
-- hosts detected in execution-plan steps, including simple line-based stdin values.
-
-It returns:
-
-- `pass` when detected hosts exactly match the target host;
-- `review` when no host is detectable from the execution shape;
-- `fail` when a different host appears.
-
-It does **not** resolve DNS, follow redirects, inspect files loaded at runtime, parse every possible payload encoding, prove ownership, or prove legal authorization. Treat it as a preflight/reviewer artifact, not as a scope engine.
 
 ## Repository layout
 
 ```text
-.
-├── schemas/                         # top-level schemas for reviewers/tools
-├── examples/                        # clean synthetic public-safe examples
-│   ├── prepared-execution-spec/      # standalone prepared spec fixture
-│   ├── redaction-policy/             # RedactionPolicy fixture
-│   ├── redaction-receipt/            # RedactionReceipt fixture
-│   ├── public-validation-surface-index/
-│   ├── public-snapshot-manifest/
-├── sclite/                          # Python package
-│   ├── schemas/                     # packaged schema copies
-│   ├── examples/                    # packaged example copies
-│   ├── artifacts.py                 # schema loading, validation, proof-trace helpers
-│   ├── hosts.py                     # small dependency-free host extraction helpers
-│   ├── redaction.py                 # generic public-safe sanitization
-│   ├── scope_fidelity.py            # ScopeFidelityReport builder/validator
-│   ├── validation.py                # fixture + validation receipt helpers
-│   └── cli.py                       # CLI entrypoint
-├── tests/                           # package tests
-├── SPEC.md                          # draft v0.1 spec narrative
-├── .github/workflows/ci.yml         # GitHub Actions validation
-├── CHANGELOG.md                     # release notes
-└── PUBLICATION_CHECKLIST.md         # pre-publish safety checklist
-```
-
-Top-level `schemas/` and `examples/` are duplicated into `sclite/` package data so both humans and installed Python code can access them.
-
-## Integration model
-
-A governed runtime should treat SCL as a dependency, not as its executor. One possible integration sequence is:
-
-1. runtime receives scope/input;
-2. policy engine emits or maps a `PolicyDecision`;
-3. runtime prepares an execution shape;
-4. reviewer/auditor approves an `ApprovedExecutionSpec`;
-5. runtime executor consumes the approved spec;
-6. runtime emits an `ExecutionReceipt`;
-7. reporting layer emits an `EvidenceBundle` and/or validation receipt.
-
-SCL core helps with schema-backed artifact shape, fixture validation, generic redaction, and static host-binding review. The runtime remains responsible for real scope policy, tool allowlists, approval authority, execution isolation, logging, and private evidence storage.
-
-See [`docs/INTEGRATION_GUIDE.md`](docs/INTEGRATION_GUIDE.md).
-
-## Public-safe examples
-
-The fixtures use `example.com`, dry-run semantics, and synthetic metadata. They are designed to show shape and validation behavior, not live operational value.
-
-Important non-claims:
-
-- no live target execution;
-- no live vulnerability evidence;
-- no raw private stdout/stderr;
-- no credentials or private local paths;
-- no protocol adapter implementation.
-
-## Roadmap candidates
-
-Likely future work, not present v0.1 guarantees:
-
-- optional receipt signing or hash-chain support;
-- optional receipt signing or hash-chain support;
-- stronger redaction policy/receipt semantics and external secret scanner integration;
-- adapters/reference integrations in separate packages;
-- replacement of the lightweight JSON Schema subset validator with a full JSON Schema implementation if needed.
-
-## PyPI publishing status
-
-The package metadata is prepared for the `sclite` distribution name. Until a release is uploaded to PyPI, install from GitHub with:
-
-```bash
-pip install git+https://github.com/rozmiarD/SCLite.git
-```
-
-After PyPI publication, the intended install command is:
-
-```bash
-pip install sclite
+sclite/                         Python package
+sclite/schemas/                 Packaged schemas
+sclite/examples/contract-lifecycle-v0.2/
+examples/security-contract-proof/ Legacy v0.1 public-safe proof fixture
+schemas/                        Source schema copies
+SPEC.md                         v0.2 draft specification
+CHANGELOG.md                    Release notes
 ```
 
 ## License
 
-MIT.
+MIT. See [`LICENSE`](LICENSE).

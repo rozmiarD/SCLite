@@ -1,323 +1,165 @@
-# SCLite / Security Contract Layer v0.2 Draft Spec
+# SCLite v0.2 Draft Specification
 
-Status: **draft v0.2**. This document describes the current package and schema bundle. It is not a standard, protocol, or compliance framework.
+Status: **v0.2.0 draft lifecycle candidate**. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
 
-SCLite is a contract lifecycle for governed AI-assisted security actions. It separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven. v0.2 adds lightweight cryptographic integrity for this lifecycle using canonical SHA-256 artifact descriptors and an ordered hash-linked chain manifest.
+Core sentence:
 
-## Design principles
+> SCLite separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
-1. **Intent is not authority.** A model/tool caller proposing an action is not the same as an approved executable contract.
-2. **Approval should bind to execution shape.** Reviewers should see what target/tool/arguments/plan are being approved.
-3. **Receipts should be compact and public-safe by default.** Raw evidence can live elsewhere; public proof artifacts should state what they do and do not claim.
-4. **Validation should be local and reproducible.** Fixtures should be checkable without live target execution.
-5. **Carriers are separate.** Chat systems, MCP servers, OpenClaw plugins, CI jobs, or custom runtimes can carry SCL artifacts, but SCL does not replace those systems.
-6. **Integrity is lightweight and explicit.** Core v0.2 verifies tamper-evident artifact binding, not signer identity, PKI trust, legal authorization, or runtime enforcement.
+## v0.2 Canonical Model
 
-## Canonical v0.2 lifecycle
+SCLite v0.2 models a governed action as an ordered artifact lifecycle:
 
 ```text
-intent -> policy decision -> execution contract -> execution ticket -> execution receipt -> evidence contract -> artifact chain manifest
+intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The fixture directory `sclite/examples/contract-lifecycle-v0.2/` contains this public-safe chain:
+The lifecycle answers distinct questions:
 
-- `intent_contract.json`
-- `policy_decision.json`
-- `execution_contract.json`
-- `execution_ticket.json`
-- `execution_receipt.json`
-- `evidence_contract.json`
-- `artifact_chain_manifest.json`
+- `intent_contract`: what did the agent/caller want?
+- `policy_decision`: what did policy allow, deny, or require for review?
+- `execution_contract`: what exact bounded execution shape was prepared?
+- `execution_ticket`: what execution contract was approved, under what limits and validity window?
+- `execution_receipt`: what did an external runtime report as executed or dry-run?
+- `evidence_contract`: what public-safe claims/non-claims and replay checks can be reviewed?
+- `artifact_chain_manifest`: does this local artifact bundle still match the ordered canonical digest chain?
 
-The chain can be verified locally with:
+The canonical fixture lives at `sclite/examples/contract-lifecycle-v0.2/` and is verified with:
 
 ```bash
 sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-## Legacy v0.1 proof trace
+`verify-lifecycle` is intentionally an alias-level command for the same verifier today; it names the v0.2 reviewer intent more clearly.
+
+## v0.2 Artifact Definitions
+
+### IntentContract
+
+Schema: `schemas/intent_contract.v0.2.schema.json`
+
+Captures requested capability, target, actor/carrier context, constraints, and explicit authority boundaries. Intent is never execution authority.
+
+### PolicyDecision v0.2
+
+Schema: `schemas/policy_decision.v0.2.schema.json`
+
+Captures the policy result and binds back to the intent descriptor. Typical decisions include allowing preparation, requiring owner approval, or denying the request. It does not implement policy itself.
+
+### ExecutionContract
+
+Schema: `schemas/execution_contract.v0.2.schema.json`
+
+Captures the bounded execution shape to be reviewed/ticketed. Key required structures include:
+
+- `target_binding`
+- `execution_bounds`
+- `execution_shape.tool`
+- `execution_shape.normalized_args`
+
+This is still only a contract; it does not execute anything.
+
+### ExecutionTicket
+
+Schema: `schemas/execution_ticket.v0.2.schema.json`
+
+Captures approval for one exact execution contract. Key required structures include:
+
+- `approval.status`
+- `execution_limits.mode`
+- `execution_limits.max_runs`
+- `validity.not_before`
+- `validity.not_after`
+- `integrity.ticket_binds_execution_contract_digest`
+
+The digest binding is mandatory. Signer identity / PKI remains out of core v0.2.
+
+### ExecutionReceipt v0.2
+
+Schema: `schemas/execution_receipt.v0.2.schema.json`
+
+Captures a compact public-safe runtime receipt, including runtime mode, outcome summary, execution counts, and links back to the execution ticket/contract descriptors. Receipts summarize; they do not contain raw private logs.
+
+### EvidenceContract
+
+Schema: `schemas/evidence_contract.v0.2.schema.json`
+
+Captures reviewer-facing claims, non-claims, replay mode, verification commands, and a required link to `links.execution_receipt`. Key required structures include:
+
+- `claims`
+- `non_claims`
+- `replay`
+- `verification`
+- `links.execution_receipt`
+
+### ArtifactChainManifest
+
+Schema: `schemas/artifact_chain_manifest.v0.2.schema.json`
+
+Captures the ordered tamper-evident digest chain over lifecycle artifacts. The manifest uses deterministic SCLite canonical JSON descriptors and hash-linked chain digests.
+
+## v0.2 Integrity Chain
+
+SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
+
+1. every manifest entry path stays within the selected artifact root;
+2. every artifact descriptor matches the canonical SHA-256 digest of the local JSON artifact;
+3. every `previous_chain_digest` and `chain_digest` is recomputed in order;
+4. the `root_chain_digest` matches the final recomputed chain digest;
+5. the canonical lifecycle role order is enforced for v0.2 lifecycle manifests;
+6. `policy_decision` binds the correct `intent_contract` digest;
+7. `execution_contract` binds the correct intent and policy decision digests;
+8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;
+9. `execution_receipt` binds the correct `execution_ticket` digest;
+10. `evidence_contract` binds the correct `execution_receipt` digest.
+
+This is lightweight cryptographic integrity, not identity trust. It proves the verifier saw the same canonical artifact bytes and lifecycle links; it does not prove who created them, whether a human was legally authorized, or whether a runtime enforced them.
+
+## Legacy v0.1 Compatibility
+
+SCLite keeps the v0.1 public-safe proof trace for compatibility:
 
 ```text
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-The current fixture directory `examples/security-contract-proof/` contains this public-safe chain:
-
-- `policy_decision.json`
-- `prepared_execution_spec.redacted.json`
-- `approved_execution_spec.json`
-- `execution_receipt.json`
-- `evidence_bundle.json`
-- `evidence_summary.md`
-
-## Artifact definitions
-
-### PolicyDecision
-
-Schema: `schemas/policy_decision.v0.1.schema.json`
-
-Purpose: capture the result of a policy/scope/tooling decision before a concrete execution contract is approved.
-
-Current decisions:
-
-- `allow_prepare`
-- `owner_approval_required`
-- `deny`
-
-Current limitations:
-
-- does not prove legal authorization;
-- does not define a full policy engine;
-- does not cryptographically bind to later artifacts.
-
-### PreparedExecutionSpec
-
-Schema: `schemas/prepared_execution_spec.v0.1.schema.json`
-
-Example: `examples/prepared-execution-spec/prepared_execution_spec.json`
-
-Purpose: capture the concrete execution shape prepared before approval. This is where target, target host, tool, normalized arguments, execution plan, scope facts, and static host-binding summaries become reviewable.
-
-Current limitations:
-
-- validates shape, not execution authority;
-- does not define every runtime-specific preparation field;
-- does not prove legal authorization or live target ownership;
-- has no signature/hash-chain binding to policy or approval artifacts.
-
-### RedactedPreparedExecutionSpec
-
-Schema: `schemas/redacted_prepared_execution_spec.v0.1.schema.json`
-
-Proof fixture: `examples/security-contract-proof/prepared_execution_spec.redacted.json`
-
-Purpose: provide a public/auditor-safe view of a prepared execution shape before approval. It keeps the reviewable target/tool/argument/plan shape while requiring explicit redaction and public-safety flags.
-
-Current limitations:
-
-- redaction is conservative but not a complete secret scanner;
-- this package validates redaction claims but cannot prove private data never existed upstream;
-- runtime-specific redaction can be stronger than SCLite's generic helper.
-
-### ApprovedExecutionSpec
-
-Schema: `schemas/approved_execution_spec.v0.1.schema.json`
-
-Purpose: describe the approved execution shape a governed runtime may consume.
-
-Important fields include:
-
-- `spec_version`
-- `target`
-- `target_host`
-- `target_in_scope`
-- `resolved_tool`
-- `normalized_args`
-- `execution_plan`
-- `scope_facts`
-- `approval`
-- `execution_truth`
-
-Current limitations:
-
-- SCLite validates shape; it does not execute the spec;
-- SCLite does not enforce runtime-wide mandatory execution through this path;
-- v0.1 has no signature/hash-chain binding to previous artifacts.
-
-
-### Artifact canonicalization and hash descriptor
-
-Helper functions: `canonicalize_artifact`, `canonical_artifact_bytes`, `artifact_sha256`, and `build_artifact_hash` in `sclite.artifacts`.
-
-CLI: `sclite hash-artifact`.
-
-Purpose: provide deterministic content addressing for JSON-compatible SCLite artifacts. The v0.1 canonicalization uses compact UTF-8 JSON with sorted object keys, preserved Unicode, and no NaN/Infinity values. The hash descriptor records:
-
-- `canonicalization`: `sclite-json-v0.1`;
-- `algorithm`: `sha256`;
-- `digest`: lowercase SHA-256 hex digest;
-- `canonical_bytes`: byte length of the canonical representation.
-
-Current limitations:
-
-- this is not an RFC 8785/JCS implementation;
-- this is not a signature or identity proof;
-- this does not prove authorization or artifact provenance;
-- this does not create a tamper-proof hash-chain by itself.
-
-### ExecutionReceipt
-
-Schema: `schemas/execution_receipt.v0.1.schema.json`
-
-Purpose: compact public-safe summary of dry-run or execution outcome.
-
-The receipt is a summary, not a raw log. It records fields such as runtime mode, status, return code, reason, execution source, dry-run flag, command input summary, planned/executed command counts, and whether stdout/stderr existed.
-
-Current limitations:
-
-- does not include raw output;
-- does not prove the raw private evidence;
-- has no identity/signature model.
-
-### EvidenceBundle
-
-Schema: `schemas/evidence_bundle.v0.1.schema.json`
-
-Purpose: summarize public-safe evidence criteria and non-claims for a proof trace.
-
-Current proof mode:
-
-- `dry_run_contract_proof`
-
-Current limitations:
-
-- does not claim live vulnerability evidence;
-- does not include forensic evidence storage;
-- does not include artifact hashes or private evidence references.
-
-
-### RedactionPolicy
-
-Schema: `schemas/redaction_policy.v0.1.schema.json`
-
-Example: `examples/redaction-policy/redaction_policy.json`
-
-Purpose: document public-safe redaction rules and non-claims. The default helper describes common sensitive-key, raw-output, local-path, and header-like redaction behavior.
-
-Current limitations:
-
-- not a complete secret scanner;
-- not proof that upstream data never contained secrets;
-- not publication authorization.
-
-### RedactionReceipt
-
-Schema: `schemas/redaction_receipt.v0.1.schema.json`
-
-Example: `examples/redaction-receipt/redaction_receipt.json`
-
-Purpose: summarize a redaction operation with policy/source/redacted hashes and counts while excluding raw source material.
-
-Current limitations:
-
-- does not include raw private source;
-- changed-path count is a simple estimate;
-- does not prove complete redaction or provenance.
-
-### PublicValidationSurfaceIndex
-
-Schema: `schemas/public_validation_surface_index.v0.1.schema.json`
-
-Example: `examples/public-validation-surface-index/public_validation_surface_index.json`
-
-Purpose: list public-safe validation surfaces, schemas, and commands a reviewer can run locally.
-
-Current limitations:
-
-- does not authorize public push/package publication;
-- does not claim live execution or protocol adapter coverage;
-- only indexes surfaces intentionally exposed by the producer.
-
-### PublicSnapshotManifest
-
-Schema: `schemas/public_snapshot_manifest.v0.1.schema.json`
-
-Example: `examples/public-snapshot-manifest/public_snapshot_manifest.json`
-
-Purpose: describe a selected public-safe artifact snapshot, optionally with SCLite canonical hash descriptors for files.
-
-Current limitations:
-
-- not a signed provenance statement;
-- not a tamper-proof transparency log;
-- not publication authorization.
-
-### ScopeFidelityReport
-
-Schema: `schemas/scope_fidelity_report.v0.1.schema.json`
-
-Purpose: static host-binding review for a target and execution shape.
-
-Inputs:
-
-- target URL/host;
-- normalized argument scalars;
-- execution-plan step objects with `args` and optional `stdin`.
-
-Verdicts:
-
-- `pass`: detected hosts match the target host;
-- `review`: no host is detectable from the execution shape;
-- `fail`: at least one detected host differs from the target host.
-
-Current limitations:
-
-- static only;
-- no DNS resolution;
-- no redirect following;
-- no file loading;
-- no encoded payload decoding beyond simple scalar parsing;
-- no ownership/authorization proof.
-
-### SecurityContractValidationReceipt
-
-Schema: `schemas/security_contract_validation_receipt.v0.1.schema.json`
-
-Purpose: record which local/public-safe SCL validation checks ran and whether they passed.
-
-Current package CLI can emit this receipt for fixture validation. The receipt explicitly states:
-
-- `live_target_execution: false`
-- `protocol_adapter_work: false`
-- `public_push: false`
-
-Current limitations:
-
-- records local validation, not external CI truth;
-- does not authorize publication;
-- does not sign validation output.
-
-## JSON Schema validation status
-
-The package includes a small dependency-free JSON Schema subset validator in `scl.artifacts`. It supports the subset used by current schemas, including:
-
-- `const`
-- `enum`
-- `type`
-- `minLength`
-- `minimum`
-- `required`
-- `properties`
-- `additionalProperties: false`
-- array item validation
-
-The schemas declare JSON Schema draft 2020-12, but the built-in validator is not a full draft 2020-12 implementation. If this project grows toward broader third-party schema compatibility, replacing or supplementing the validator with a full JSON Schema implementation is a reasonable next step.
-
-## Versioning notes
-
-v0.1 currently preserves some artifact versions inherited from the reference runtime, for example `2026-03-18.approved.v1` for `ApprovedExecutionSpec` and date-stamped schema versions for policy/evidence artifacts.
-
-This is acceptable for a draft candidate. A future v1 should simplify version naming and define compatibility/version negotiation more explicitly.
-
-## Security and safety model
-
-SCL v0.1 improves reviewability; it does not by itself create safety. A safe system using SCL still needs:
-
-- real scope policy;
-- tool allowlists;
-- approval authority;
-- executor isolation;
-- private evidence storage;
-- secret scanning/redaction beyond generic helpers;
-- audit logging;
-- publication review.
-
-## Non-claims
-
-- SCL does not execute tools.
-- SCL does not prove legal authorization.
-- SCL does not prove live vulnerabilities.
-- SCL is not tamper-proof; v0.1 has no signatures or hash-chain.
-- SCL is not a runtime sandbox.
-- SCL is not a policy engine by itself.
-- SCL is carrier-neutral payload/schema/validation infrastructure, not an OpenClaw/MCP/A2A replacement.
+Legacy v0.1 artifacts remain schema-backed and useful for existing Ravenclaw/public-proof integrations:
+
+- `PolicyDecision` v0.1
+- `PreparedExecutionSpec`
+- `RedactedPreparedExecutionSpec`
+- `ApprovedExecutionSpec`
+- `ExecutionReceipt` v0.1
+- `EvidenceBundle`
+- `RedactionPolicy`
+- `RedactionReceipt`
+- `PublicValidationSurfaceIndex`
+- `PublicSnapshotManifest`
+- `ScopeFidelityReport`
+- `SecurityContractValidationReceipt`
+
+v0.1 compatibility does not change the v0.2 canonical lifecycle. New v0.2 work should use the lifecycle model above.
+
+## Non-Claims / Security Boundaries
+
+SCLite v0.2 does **not** include:
+
+- executors;
+- scanners;
+- sandboxing;
+- `nmap`/`ffuf`/tool wrappers;
+- agent loops;
+- MCP/OpenClaw/A2A servers or adapters;
+- authorization or ownership proof;
+- live vulnerability proof;
+- signer identity / PKI trust;
+- a tamper-proof transparency log.
+
+SCLite core capabilities are intentionally limited to:
+
+```text
+define / validate / hash / bind / redact / verify
+```
+
+Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execute or dry-run tools, store raw evidence, and expose carrier adapters. Those responsibilities stay outside SCLite.
