@@ -47,11 +47,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     hash_cmd.add_argument('--schema', help='optional schema name/path to validate before hashing')
     hash_cmd.add_argument('--format', choices=['json', 'digest'], default='json')
 
-    chain_cmd = sub.add_parser('validate-chain', help='verify a v0.2 hash-linked artifact-chain manifest')
+    chain_cmd = sub.add_parser('validate-chain', help='verify a v0.2 lifecycle artifact-chain manifest')
     chain_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     chain_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
     chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
+    lifecycle_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
+    lifecycle_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
+    lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    lifecycle_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
     policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
@@ -117,7 +123,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps(descriptor, indent=2, sort_keys=True))
         return 0
 
-    if args.command == 'validate-chain':
+    if args.command in {'validate-chain', 'verify-lifecycle'}:
         manifest_path = Path(str(args.manifest)).resolve()
         manifest = _load_json_object(manifest_path)
         root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
@@ -129,7 +135,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.format == 'json':
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
-            print(f"artifact_chain_ok:{result['entry_count']}:{result['root_chain_digest']}")
+            label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
+            print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}")
         return 0
 
     if args.command == 'redaction-policy':

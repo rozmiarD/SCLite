@@ -29,6 +29,8 @@ jobs:
           sclite validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
           sclite validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
           sclite hash-artifact --schema approved_execution_spec.v0.1 examples/security-contract-proof/approved_execution_spec.json
+          sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+          sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
           sclite redaction-policy | python -m json.tool >/dev/null
           sclite validation-surface-index | python -m json.tool >/dev/null
           sclite snapshot-manifest --file examples/security-contract-proof/approved_execution_spec.json | python -m json.tool >/dev/null

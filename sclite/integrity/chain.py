@@ -10,6 +10,14 @@ from sclite.artifacts import ARTIFACT_CANONICALIZATION_VERSION, ARTIFACT_HASH_AL
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
 CHAIN_HASH_ALGORITHM = 'sha256'
+V02_LIFECYCLE_ROLES = (
+    'intent_contract',
+    'policy_decision',
+    'execution_contract',
+    'execution_ticket',
+    'execution_receipt',
+    'evidence_contract',
+)
 
 
 class ChainVerificationError(ValueError):
@@ -134,6 +142,72 @@ def _load_json_object(path: Path) -> Dict[str, Any]:
     return value
 
 
+def _link_descriptor(value: Mapping[str, Any], link_name: str) -> Mapping[str, Any]:
+    links = value.get('links')
+    if not isinstance(links, Mapping):
+        raise ChainVerificationError(f'{value.get("artifact_type") or "artifact"} has no links object')
+    link = links.get(link_name)
+    if not isinstance(link, Mapping):
+        raise ChainVerificationError(f'{value.get("artifact_type") or "artifact"} missing links.{link_name}')
+    descriptor = link.get('descriptor')
+    if not isinstance(descriptor, Mapping):
+        raise ChainVerificationError(f'{value.get("artifact_type") or "artifact"} missing links.{link_name}.descriptor')
+    return descriptor
+
+
+def _assert_link_binds(source: Mapping[str, Any], link_name: str, target: Mapping[str, Any], reason: str) -> None:
+    expected = artifact_descriptor(target)
+    actual = dict(_link_descriptor(source, link_name))
+    if actual != expected:
+        raise ChainVerificationError(reason)
+
+
+def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]]) -> List[str]:
+    """Verify v0.2 lifecycle semantics beyond hash-chain integrity.
+
+    This checks the contract lifecycle bindings that matter operationally:
+    the ticket must bind the execution contract digest, the receipt must bind
+    the ticket digest, the evidence contract must bind the receipt digest, and
+    the canonical roles must appear in order. It remains local/static; it does
+    not execute tools, prove legal authorization, or prove signer identity.
+    """
+    roles = tuple(artifacts_by_role.keys())
+    if roles != V02_LIFECYCLE_ROLES:
+        raise ChainVerificationError(f'lifecycle role order mismatch: expected {list(V02_LIFECYCLE_ROLES)}, got {list(roles)}')
+
+    intent = artifacts_by_role['intent_contract']
+    policy = artifacts_by_role['policy_decision']
+    contract = artifacts_by_role['execution_contract']
+    ticket = artifacts_by_role['execution_ticket']
+    receipt = artifacts_by_role['execution_receipt']
+    evidence = artifacts_by_role['evidence_contract']
+
+    _assert_link_binds(policy, 'intent', intent, 'policy-intent digest mismatch')
+    _assert_link_binds(contract, 'intent', intent, 'execution_contract-intent digest mismatch')
+    _assert_link_binds(contract, 'policy_decision', policy, 'execution_contract-policy digest mismatch')
+    _assert_link_binds(ticket, 'execution_contract', contract, 'ticket-execution_contract digest mismatch')
+
+    integrity = ticket.get('integrity')
+    if not isinstance(integrity, Mapping):
+        raise ChainVerificationError('execution_ticket missing integrity object')
+    bound_digest = str(integrity.get('ticket_binds_execution_contract_digest') or '')
+    contract_digest = artifact_descriptor(contract)['digest']
+    if bound_digest != contract_digest:
+        raise ChainVerificationError('ticket integrity execution_contract digest mismatch')
+
+    _assert_link_binds(receipt, 'execution_ticket', ticket, 'receipt-ticket digest mismatch')
+    _assert_link_binds(evidence, 'execution_receipt', receipt, 'evidence-receipt digest mismatch')
+
+    return [
+        'role_order',
+        'policy_binds_intent',
+        'contract_binds_intent_and_policy',
+        'ticket_binds_execution_contract',
+        'receipt_binds_execution_ticket',
+        'evidence_binds_execution_receipt',
+    ]
+
+
 def verify_artifact_chain_manifest(manifest: Mapping[str, Any], *, root: Path | None = None, validate_schemas: bool = True) -> Dict[str, Any]:
     """Verify manifest descriptors and hash links against local artifact files."""
     entries = manifest.get('entries')
@@ -142,6 +216,7 @@ def verify_artifact_chain_manifest(manifest: Mapping[str, Any], *, root: Path | 
     base = (root or Path.cwd()).resolve()
     previous = ''
     checked: List[str] = []
+    artifacts_by_role: Dict[str, Mapping[str, Any]] = {}
     for index, entry in enumerate(entries):
         if not isinstance(entry, Mapping):
             raise ChainVerificationError(f'entry[{index}] is not an object')
@@ -171,13 +246,18 @@ def verify_artifact_chain_manifest(manifest: Mapping[str, Any], *, root: Path | 
             raise ChainVerificationError(f'entry[{index}] chain_digest mismatch')
         previous = actual_chain_digest
         checked.append(role)
+        artifacts_by_role[role] = value
     if str(manifest.get('root_chain_digest') or '') != previous:
         raise ChainVerificationError('root_chain_digest mismatch')
+    semantic_checks: List[str] = []
+    if set(checked) == set(V02_LIFECYCLE_ROLES):
+        semantic_checks = verify_lifecycle_semantics(artifacts_by_role)
     return {
         'status': 'passed',
         'checked_entries': checked,
         'entry_count': len(checked),
         'root_chain_digest': previous,
+        'semantic_checks': semantic_checks,
         'canonicalization': manifest.get('canonicalization') or CHAIN_CANONICALIZATION_VERSION,
         'hash_algorithm': manifest.get('hash_algorithm') or CHAIN_HASH_ALGORITHM,
     }
