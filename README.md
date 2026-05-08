@@ -137,7 +137,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 
 ## Installation
 
-Once published to PyPI, the intended install path is:
+Install from PyPI:
 
 ```bash
 pip install sclite-core

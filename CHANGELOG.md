@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Nothing yet.
+- Calibrated public docs after PyPI publication to reflect `sclite-core==0.2.1` as the install path and current release state.
 
 ## 0.2.1 - PyPI distribution rename
 
@@ -32,4 +32,4 @@
 - Adds deterministic canonical JSON SHA-256 artifact hash helper and CLI.
 - Adds `RedactionPolicy`, `RedactionReceipt`, `PublicValidationSurfaceIndex`, and `PublicSnapshotManifest` schemas, helpers, CLI surfaces, and fixtures.
 - Adds synthetic public-safe examples and tests.
-- Adds MIT license and package metadata for a future `pip install sclite` publication path.
+- Adds MIT license and package metadata for a future PyPI publication path.
