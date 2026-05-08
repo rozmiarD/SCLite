@@ -99,7 +99,8 @@ Before any public push:
 - confirm branch to push;
 - confirm local git status is clean;
 - run the checks above on the exact tree to be pushed;
-- decide whether the release remains `0.2.0` or becomes a patch release such as `0.2.1`;
+- confirm the PyPI distribution name is `sclite-core` and the Python import package remains `sclite`;
+- decide whether the release remains on the current version or becomes a patch release;
 - get explicit operator approval for any tag, TestPyPI upload, or PyPI upload.
 
 Validation receipts do not authorize publication. They only record checks.

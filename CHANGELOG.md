@@ -4,6 +4,11 @@
 
 - Nothing yet.
 
+## 0.2.1 - PyPI distribution rename
+
+- Renames the PyPI distribution to `sclite-core` because PyPI does not allow the distribution name `sclite`.
+- Keeps the Python import package as `sclite`.
+
 ## 0.2.0 - draft lifecycle candidate
 
 - Introduces SCLite v0.2 as a contract lifecycle model from intent to evidence.
