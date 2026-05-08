@@ -1,6 +1,6 @@
 # SCLite v0.2 Draft Specification
 
-Status: **v0.2.0 draft lifecycle candidate**. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
+Status: **v0.2 draft lifecycle candidate**. Current package release is `sclite-core==0.2.1`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
 
 Core sentence:
 

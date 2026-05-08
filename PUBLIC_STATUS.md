@@ -9,7 +9,7 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: not completed yet.
+- PyPI publication: completed as `sclite-core==0.2.1`.
 
 ## What is public-safe today
 
@@ -41,6 +41,6 @@ SCLite does not claim:
 
 SCLite is published under the PyPI distribution name `sclite-core` while preserving the Python import package name `sclite`.
 
-SCLite is the first package in the Ravenclaw/GovEngine/SCLite family that should be prepared for PyPI because it is small, dependency-free, CLI-backed, and already versioned.
+SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published to PyPI because it is small, dependency-free, CLI-backed, and already versioned.
 
-Before publication, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
+Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
