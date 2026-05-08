@@ -9,7 +9,7 @@ description = "Lightweight Security Contract Layer lifecycle artifacts, validati
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{ name = "SCLite maintainers" }]
+authors = [{ name = "Krzysztof Probola" }]
 keywords = ["security", "contracts", "validation", "evidence", "governance"]
 classifiers = [
   "Development Status :: 3 - Alpha",

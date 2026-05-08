@@ -8,6 +8,8 @@
 
 Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
 
+Project owner: **Krzysztof Probola**.
+
 SCLite v0.2 separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
 ## Status
