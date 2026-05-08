@@ -1,8 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Nothing yet.
+
 ## 0.2.0 - draft lifecycle candidate
 
 - Introduces SCLite v0.2 as a contract lifecycle model from intent to evidence.
+- Adds publication-readiness docs: `CONTRIBUTING.md`, `SECURITY.md`, `PUBLIC_STATUS.md`, and `VALIDATION.md`.
+- Expands the publication checklist with Git identity, build/twine, clean-tree, version-decision, and explicit approval gates.
+- Exposes `sclite.__version__` for package/version checks.
 - Adds v0.2 schemas for `IntentContract`, `PolicyDecision`, `ExecutionContract`, `ExecutionTicket`, `ExecutionReceipt`, `EvidenceContract`, and `ArtifactChainManifest`.
 - Adds lightweight cryptographic integrity primitives: canonical artifact descriptors and ordered SHA-256 hash-linked chain manifests.
 - Adds `sclite validate-chain` and `sclite verify-lifecycle` for local verification of v0.2 lifecycle bundles.

@@ -2,6 +2,21 @@
 
 This repository is intended to be public-safe, but publication still requires an explicit human decision.
 
+## Identity guard
+
+Before any tag, release, or publish action, verify the effective repo-local Git identity:
+
+```bash
+git config --get user.name
+git config --get user.email
+```
+
+Required value:
+
+```text
+0x505badc0de <0x505badc0de@proton.me>
+```
+
 ## Required local checks
 
 Run from the repository root:
@@ -49,7 +64,7 @@ This repository should contain only synthetic examples and public-safe docs/code
 
 ## Claim review
 
-Confirm docs do not claim that SCL v0.1:
+Confirm docs do not claim that SCLite/SCL v0.2:
 
 - is a standard;
 - is a protocol;
@@ -61,6 +76,20 @@ Confirm docs do not claim that SCL v0.1:
 - includes OpenClaw/MCP/A2A adapters;
 - replaces a runtime policy engine or executor.
 
+## Package build checks
+
+Before any TestPyPI or PyPI upload, run from a clean tree:
+
+```bash
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
+```
+
+Then test-install the generated wheel in a clean environment.
+
+Do not commit `build/`, `dist/`, `*.egg-info`, caches, or virtual environments.
+
 ## Publication decision
 
 Before any public push:
@@ -70,6 +99,7 @@ Before any public push:
 - confirm branch to push;
 - confirm local git status is clean;
 - run the checks above on the exact tree to be pushed;
-- get explicit operator approval.
+- decide whether the release remains `0.2.0` or becomes a patch release such as `0.2.1`;
+- get explicit operator approval for any tag, TestPyPI upload, or PyPI upload.
 
 Validation receipts do not authorize publication. They only record checks.

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__version__ = '0.2.0'
+
 from .artifacts import (
     APPROVED_EXECUTION_SPEC_FILE,
     APPROVED_EXECUTION_SPEC_VERSION,
