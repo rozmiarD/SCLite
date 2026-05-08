@@ -3,7 +3,7 @@
 [![CI](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
-[![Package: sclite 0.2.0](https://img.shields.io/badge/package-sclite%200.2.0-blueviolet.svg)](pyproject.toml)
+[![Package: sclite-core 0.2.1](https://img.shields.io/badge/package-sclite--core%200.2.1-blueviolet.svg)](pyproject.toml)
 [![JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 
 Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
@@ -14,7 +14,7 @@ SCLite v0.2 separates what an agent wants, what policy allows, what was approved
 
 ## Status
 
-- Version: `0.2.0`
+- Version: `0.2.1`
 - Status: **draft lifecycle candidate**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
@@ -140,7 +140,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 Once published to PyPI, the intended install path is:
 
 ```bash
-pip install sclite
+pip install sclite-core
 ```
 
 Install directly from GitHub:
