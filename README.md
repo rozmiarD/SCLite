@@ -126,6 +126,15 @@ v0.1 compatibility artifacts remain available for existing integrations, includi
 
 See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrity chain, compatibility notes, and explicit security boundaries.
 
+## Project docs
+
+- [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
+- [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
+- [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.
+- [`CHANGELOG.md`](CHANGELOG.md) — notable package changes.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution and boundary rules.
+- [`SECURITY.md`](SECURITY.md) — security reporting and fixture-safety policy.
+
 ## Installation
 
 Once published to PyPI, the intended install path is:
