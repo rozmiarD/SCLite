@@ -17,6 +17,8 @@ Required value:
 0x505badc0de <32790662+rozmiarD@users.noreply.github.com>
 ```
 
+History transparency guardrail: never rewrite already-published history to fix authorship, contribution graphs, cleanup, or cosmetics. No force-push, date rewrite, or tag rewrite for published public history; use corrective commits instead.
+
 ## Required local checks
 
 Run from the repository root:
