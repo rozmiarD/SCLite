@@ -14,7 +14,7 @@ git config --get user.email
 Required value:
 
 ```text
-0x505badc0de <0x505badc0de@proton.me>
+0x505badc0de <32790662+rozmiarD@users.noreply.github.com>
 ```
 
 ## Required local checks
