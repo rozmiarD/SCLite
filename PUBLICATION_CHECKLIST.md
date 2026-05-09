@@ -4,18 +4,20 @@ This repository is intended to be public-safe, but publication still requires an
 
 ## Identity guard
 
-Before any tag, release, or publish action, verify the effective repo-local Git identity:
+For maintainer releases from the operator-controlled publish tree, verify the effective repo-local Git identity:
 
 ```bash
 git config --get user.name
 git config --get user.email
 ```
 
-Required value:
+Required maintainer value for this publish tree:
 
 ```text
 0x505badc0de <32790662+rozmiarD@users.noreply.github.com>
 ```
+
+External contributors should use their own GitHub-associated identity; this guardrail is not a contributor identity requirement.
 
 History transparency guardrail: never rewrite already-published history to fix authorship, contribution graphs, cleanup, or cosmetics. No force-push, date rewrite, or tag rewrite for published public history; use corrective commits instead.
 
