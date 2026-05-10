@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Cleaned README badge order, removed personal ownership copy from public-facing docs, and aligned `SPEC.md` status wording with the published `0.2.1` lifecycle line.
 - Calibrated public docs after PyPI publication to reflect `sclite-core==0.2.1` as the install path and current release state.
 - Clarified that `0.2.1` is a published draft lifecycle line, not an execution engine or adapter package.
 

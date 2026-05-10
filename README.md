@@ -1,14 +1,13 @@
 # SCLite
 
-[![CI](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
-[![Package: sclite-core 0.2.1](https://img.shields.io/badge/package-sclite--core%200.2.1-blueviolet.svg)](pyproject.toml)
-[![JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
+[![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
+[![Package: sclite-core 0.2.1](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
+[![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+[![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
 
-Project owner: **Krzysztof Probola**.
 
 SCLite v0.2 separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
