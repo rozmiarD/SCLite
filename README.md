@@ -15,7 +15,7 @@ SCLite v0.2 separates what an agent wants, what policy allows, what was approved
 ## Status
 
 - Version: `0.2.1`
-- Status: **draft lifecycle candidate**
+- Status: **published 0.2.x draft lifecycle line**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest

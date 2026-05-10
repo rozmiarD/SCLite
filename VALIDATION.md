@@ -38,7 +38,7 @@ Expected result:
 
 ## Package build gate
 
-Before any PyPI/TestPyPI release candidate:
+Before any future PyPI/TestPyPI release candidate:
 
 ```bash
 python -m pip install build twine
@@ -46,7 +46,7 @@ python -m build
 python -m twine check dist/*
 ```
 
-Then test install from the generated wheel in a clean environment.
+Then test install from the generated wheel in a clean environment and confirm the distribution name `sclite-core` still imports as `sclite`.
 
 ## Non-claims
 
