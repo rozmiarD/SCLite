@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Calibrated public docs after PyPI publication to reflect `sclite-core==0.2.1` as the install path and current release state.
+- Clarified that `0.2.1` is a published draft lifecycle line, not an execution engine or adapter package.
 
 ## 0.2.1 - PyPI distribution rename
 

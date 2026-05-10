@@ -5,7 +5,7 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 ## Current maturity
 
 - Current package version: `0.2.1`.
-- Status: draft lifecycle candidate.
+- Status: published `0.2.x` draft lifecycle line.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
