@@ -64,7 +64,7 @@ sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_man
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-`verify-lifecycle` currently uses the same verifier as `validate-chain`; the name exists because it describes the v0.2 review action more clearly.
+`verify-lifecycle` uses the same underlying verifier as `validate-chain`; the command name exists because it describes the v0.2 review action more clearly.
 
 ## What the verifier checks
 

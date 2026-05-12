@@ -31,7 +31,7 @@ sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_man
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-`verify-lifecycle` is intentionally an alias-level command for the same verifier today; it names the v0.2 reviewer intent more clearly.
+`verify-lifecycle` intentionally uses the same underlying verifier as `validate-chain`; it names the v0.2 reviewer intent more clearly.
 
 ## v0.2 Artifact Definitions
 
