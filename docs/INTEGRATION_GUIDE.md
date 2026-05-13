@@ -52,11 +52,17 @@ A governed runtime can use SCLite v0.2 like this:
    - SCLite does not execute it.
    - Runtime emits `ExecutionReceipt` v0.2 bound to the ticket.
 
-6. **Emit evidence contract**
+6. **Verify ticket use / evidence bounds**
+   - For unreleased scoped-ticket fixtures, reviewers can run `sclite verify-ticket-use`.
+   - The check verifies local bindings only: ticket/contract/receipt/evidence descriptors, runtime identity, mode, network flag, use count, explicit `source_receipt_id`, completed-execution claim bounds, and network/live claim bounds.
+   - The check does not prove runtime enforcement, legal authorization, signer identity, or live vulnerability evidence.
+
+7. **Emit evidence contract**
    - Runtime emits `EvidenceContract` with claims, non-claims, replay mode, verification commands, and a link to the receipt.
+   - Claims that depend on a receipt should declare `bounded_by_receipt: true` and `source_receipt_id`.
    - Public outputs should keep raw private evidence elsewhere.
 
-7. **Build and verify lifecycle chain**
+8. **Build and verify lifecycle chain**
    - Runtime builds `ArtifactChainManifest`.
    - CI/reviewer runs `sclite validate-chain` or `sclite verify-lifecycle`.
    - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings.
@@ -64,6 +70,8 @@ A governed runtime can use SCLite v0.2 like this:
 Legacy v0.1 artifacts (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, `ExecutionReceipt`, `EvidenceBundle`, and related public-safety artifacts) remain supported for compatibility and public proof traces.
 
 ## Minimal Python integration
+
+Verify a v0.2 lifecycle bundle:
 
 ```python
 from pathlib import Path
@@ -74,6 +82,17 @@ from sclite.integrity import verify_artifact_chain_manifest
 result = verify_artifact_chain_manifest(manifest, root=Path("bundle-root"))
 assert result["status"] == "passed"
 assert "ticket_binds_execution_contract" in result["semantic_checks"]
+```
+
+Verify unreleased scoped-ticket use against receipt/evidence artifacts:
+
+```python
+from sclite.tickets import validate_ticket_semantics, verify_ticket_use
+
+validate_ticket_semantics(ticket, execution_contract)
+result = verify_ticket_use(ticket, execution_contract, execution_receipt, evidence_contract)
+assert result["status"] == "passed"
+assert "evidence_claims_bounded_by_receipt" in result["checks"]
 ```
 
 ## Carrier guidance

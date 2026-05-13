@@ -8,6 +8,7 @@
 - Started the `0.3.0` Scoped Tickets line with `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, semantic ticket-to-contract checks, and `sclite validate-ticket` / `sclite explain-ticket`.
 - Started the `0.3.5` Receipt-Bounded Evidence line with `sclite verify-ticket-use`, scoped-ticket receipt/evidence fixtures, and static checks that receipt and evidence claims stay inside the ticket.
 - Tightened `verify-ticket-use` so evidence claims must declare `source_receipt_id` and cannot claim completed execution, executed commands, or network execution beyond the linked receipt.
+- Expanded README, integration guidance, and publication checklist coverage for scoped-ticket and receipt-bounded-evidence review commands.
 - Added the v0.2 lifecycle chain validation and semantic `verify-lifecycle` commands to the documented publication validation gate, aligning SCLite docs with Ravenclaw reviewer demo usage.
 - Cleaned README badge order, removed personal ownership copy from public-facing docs, and aligned `SPEC.md` status wording with the published `0.2.1` lifecycle line.
 - Calibrated public docs after PyPI publication to reflect `sclite-core==0.2.1` as the install path and current release state.
