@@ -176,13 +176,40 @@ def load_json_schema(schema_ref: str, *, root: Path | None = None) -> Dict[str, 
     return value
 
 
-def validate_schema_ref(schema_ref: str, value: Any, *, root: Path | None = None, path: str = '$') -> None:
-    validate_json_schema_value(load_json_schema(schema_ref, root=root), value, path=path)
+def validate_schema_ref(
+    schema_ref: str,
+    value: Any,
+    *,
+    root: Path | None = None,
+    path: str = '$',
+    strict_jsonschema: bool = False,
+) -> None:
+    schema = load_json_schema(schema_ref, root=root)
+    if strict_jsonschema:
+        try:
+            import jsonschema
+        except ImportError as exc:  # pragma: no cover - depends on optional extra
+            raise JsonSchemaValidationError(
+                "strict JSON Schema validation requires the optional 'jsonschema' dependency; "
+                "install with: pip install 'sclite-core[jsonschema]'"
+            ) from exc
+        try:
+            jsonschema.Draft202012Validator(schema).validate(value)
+        except jsonschema.ValidationError as exc:
+            location = '.'.join(str(part) for part in exc.absolute_path) or path
+            raise JsonSchemaValidationError(f'{location}: {exc.message}') from exc
+        return
+    validate_json_schema_value(schema, value, path=path)
 
 
-def validate_artifact(value: Any, schema_name: str, *, root: Path | None = None) -> None:
-    """Validate one artifact against a named SCL schema."""
-    validate_schema_ref(schema_name, value, root=root)
+def validate_artifact(value: Any, schema_name: str, *, root: Path | None = None, strict_jsonschema: bool = False) -> None:
+    """Validate one artifact against a named SCL schema.
+
+    By default this uses SCLite's dependency-free schema subset validator.
+    Pass strict_jsonschema=True to use Draft 2020-12 validation via the
+    optional jsonschema extra.
+    """
+    validate_schema_ref(schema_name, value, root=root, strict_jsonschema=strict_jsonschema)
 
 
 def canonicalize_artifact(value: Any) -> str:

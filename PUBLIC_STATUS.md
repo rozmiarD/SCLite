@@ -37,6 +37,8 @@ SCLite does not claim:
 - tamper-proof transparency log guarantees;
 - protocol adapter readiness.
 
+The roadmap keeps those boundaries explicit: SCLite defines and verifies accountability artifacts, while policy, trust, runtime enforcement, adapter implementation, and raw evidence storage remain outside core.
+
 ## Release posture
 
 SCLite is published under the PyPI distribution name `sclite-core` while preserving the Python import package name `sclite`.
@@ -44,3 +46,5 @@ SCLite is published under the PyPI distribution name `sclite-core` while preserv
 SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published to PyPI because it is small, dependency-free, CLI-backed, and already versioned.
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
+
+See `ROADMAP.md` for the planned progression from the current `0.2.1` lifecycle line toward scoped tickets, receipt-bounded evidence, trust/carrier profiles, and review bundles. Roadmap milestones use PEP 440-compatible labels such as `0.2.5`, `0.3.0`, and `0.3.5`.

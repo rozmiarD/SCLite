@@ -87,6 +87,8 @@ SCLite core is limited to:
 define / validate / hash / bind / redact / verify
 ```
 
+Roadmap direction: scoped tickets should bound what a runtime may consume, and receipts should bound what public-safe evidence may claim. See [`ROADMAP.md`](ROADMAP.md).
+
 It provides:
 
 - JSON schemas for lifecycle and compatibility artifacts;
@@ -127,6 +129,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 
 ## Project docs
 
+- [`ROADMAP.md`](ROADMAP.md) — planned accountability-layer evolution using PEP 440-compatible milestone labels.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
 - [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
 - [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.
@@ -177,6 +180,16 @@ Validate one artifact against a schema:
 
 ```bash
 sclite validate-artifact \
+  --schema prepared_execution_spec.v0.1 \
+  examples/prepared-execution-spec/prepared_execution_spec.json
+```
+
+Use strict Draft 2020-12 validation with the optional `jsonschema` extra:
+
+```bash
+pip install 'sclite-core[jsonschema]'
+sclite validate-artifact \
+  --strict-jsonschema \
   --schema prepared_execution_spec.v0.1 \
   examples/prepared-execution-spec/prepared_execution_spec.json
 ```

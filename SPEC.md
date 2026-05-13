@@ -163,3 +163,7 @@ define / validate / hash / bind / redact / verify
 ```
 
 Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execute or dry-run tools, store raw evidence, and expose carrier adapters. Those responsibilities stay outside SCLite.
+
+## Roadmap Boundary
+
+Future SCLite work is expected to keep this split intact. The planned direction is to make scoped execution tickets and receipt-bounded evidence more explicit while keeping policy decisions, trust decisions, live execution, revocation, raw evidence storage, and carrier adapter implementation outside SCLite core. See [`ROADMAP.md`](ROADMAP.md) for the versioned roadmap.

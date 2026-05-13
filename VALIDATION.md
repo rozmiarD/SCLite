@@ -2,6 +2,8 @@
 
 SCLite validation is local and public-safe. It does not run live targets.
 
+The roadmap in `ROADMAP.md` preserves this boundary: future scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
+
 ## Fast local gate
 
 ```bash
@@ -18,6 +20,7 @@ python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
+python -m sclite.cli validate-artifact --strict-jsonschema --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.cli hash-artifact --schema approved_execution_spec.v0.1 examples/security-contract-proof/approved_execution_spec.json
@@ -34,7 +37,7 @@ Expected result:
 
 - fixture validation passes;
 - v0.2 lifecycle chain validation and semantic lifecycle verification pass;
-- artifact schema validation passes;
+- artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - validation receipt reports `status: passed`;
 - pytest passes.
