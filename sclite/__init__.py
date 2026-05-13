@@ -74,11 +74,13 @@ from .tickets import (
     SCOPED_TICKET_SCHEMA_REF,
     TICKET_PROFILES,
     TicketSemanticError,
+    TicketUseVerificationError,
     explain_ticket,
     normalized_args_digest,
     ticket_summary,
     validate_ticket_schema,
     validate_ticket_semantics,
+    verify_ticket_use,
 )
 from .surfaces import (
     PUBLIC_SNAPSHOT_MANIFEST_ARTIFACT_TYPE,
