@@ -30,6 +30,31 @@ def test_internal_scl_package_validates_copied_schema_artifact() -> None:
     artifacts.validate_artifact(approved, 'approved_execution_spec.v0.1')
 
 
+def test_strict_jsonschema_validation_accepts_public_safe_fixture() -> None:
+    approved = json.loads((PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json').read_text(encoding='utf-8'))
+    artifacts.validate_artifact(approved, 'approved_execution_spec.v0.1', strict_jsonschema=True)
+
+
+def test_strict_jsonschema_cli_accepts_public_safe_fixture() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'validate-artifact',
+            '--strict-jsonschema',
+            '--schema',
+            'approved_execution_spec.v0.1',
+            str(PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json'),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert 'security_contract_artifact_ok' in result.stdout
+
+
 def test_prepared_execution_spec_schema_validates_public_safe_fixture() -> None:
     prepared = json.loads(PACKAGE_PREPARED_FIXTURE.read_text(encoding='utf-8'))
     artifacts.validate_artifact(prepared, 'prepared_execution_spec.v0.1')

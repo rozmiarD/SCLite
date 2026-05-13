@@ -40,6 +40,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     artifact_cmd = sub.add_parser('validate-artifact', help='validate one JSON artifact against an SCL schema')
     artifact_cmd.add_argument('--schema', required=True, help='schema name or schema path, for example approved_execution_spec.v0.1')
+    artifact_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     artifact_cmd.add_argument('artifact', help='path to a JSON artifact')
 
     hash_cmd = sub.add_parser('hash-artifact', help='emit a deterministic canonical JSON SHA-256 descriptor for one artifact')
@@ -51,12 +52,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     chain_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     chain_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    chain_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
     lifecycle_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     lifecycle_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    lifecycle_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     lifecycle_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
@@ -107,7 +110,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == 'validate-artifact':
         artifact_path = Path(str(args.artifact))
         value = json.loads(artifact_path.read_text(encoding='utf-8'))
-        validate_artifact(value, str(args.schema))
+        validate_artifact(value, str(args.schema), strict_jsonschema=bool(args.strict_jsonschema))
         print(f'security_contract_artifact_ok:{artifact_path}')
         return 0
 
@@ -128,7 +131,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         manifest = _load_json_object(manifest_path)
         root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
         try:
-            result = verify_artifact_chain_manifest(manifest, root=root, validate_schemas=not args.no_schema)
+            result = verify_artifact_chain_manifest(
+                manifest,
+                root=root,
+                validate_schemas=not args.no_schema,
+                strict_jsonschema=bool(args.strict_jsonschema),
+            )
         except ChainVerificationError as exc:
             print(f'artifact_chain_failed:{exc}', file=sys.stderr)
             return 1

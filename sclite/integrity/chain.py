@@ -208,7 +208,13 @@ def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]
     ]
 
 
-def verify_artifact_chain_manifest(manifest: Mapping[str, Any], *, root: Path | None = None, validate_schemas: bool = True) -> Dict[str, Any]:
+def verify_artifact_chain_manifest(
+    manifest: Mapping[str, Any],
+    *,
+    root: Path | None = None,
+    validate_schemas: bool = True,
+    strict_jsonschema: bool = False,
+) -> Dict[str, Any]:
     """Verify manifest descriptors and hash links against local artifact files."""
     entries = manifest.get('entries')
     if not isinstance(entries, list):
@@ -233,7 +239,7 @@ def verify_artifact_chain_manifest(manifest: Mapping[str, Any], *, root: Path | 
         if validate_schemas:
             schema_ref = _schema_ref(value)
             if schema_ref:
-                validate_artifact(value, schema_ref, root=base)
+                validate_artifact(value, schema_ref, root=base, strict_jsonschema=strict_jsonschema)
         expected_descriptor = entry.get('descriptor')
         actual_descriptor = artifact_descriptor(value)
         if expected_descriptor != actual_descriptor:
