@@ -11,6 +11,7 @@ from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .redaction import build_default_redaction_policy, build_redaction_receipt
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
+from .tickets import TicketSemanticError, explain_ticket, ticket_summary, validate_ticket_schema, validate_ticket_semantics
 from .validation import package_root, validate_fixture_dir, validation_receipt_main
 
 
@@ -61,6 +62,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
     lifecycle_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     lifecycle_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    ticket_cmd = sub.add_parser('validate-ticket', help='validate an ExecutionTicket and optional execution-contract binding')
+    ticket_cmd.add_argument('ticket', help='path to execution_ticket.json')
+    ticket_cmd.add_argument('--contract', help='path to execution_contract.json for semantic binding checks')
+    ticket_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    ticket_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    explain_ticket_cmd = sub.add_parser('explain-ticket', help='explain an ExecutionTicket in reviewer-friendly text')
+    explain_ticket_cmd.add_argument('ticket', help='path to execution_ticket.json')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
     policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
@@ -145,6 +155,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
             print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}")
+        return 0
+
+    if args.command == 'validate-ticket':
+        ticket_path = Path(str(args.ticket)).resolve()
+        ticket = _load_json_object(ticket_path)
+        try:
+            if args.contract:
+                contract = _load_json_object(Path(str(args.contract)).resolve())
+                checks = validate_ticket_semantics(ticket, contract, strict_jsonschema=bool(args.strict_jsonschema))
+            else:
+                validate_ticket_schema(ticket, strict_jsonschema=bool(args.strict_jsonschema))
+                checks = ['ticket_schema']
+        except (TicketSemanticError, AssertionError) as exc:
+            print(f'execution_ticket_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'json':
+            print(json.dumps({'status': 'passed', 'checks': checks, 'summary': ticket_summary(ticket)}, indent=2, sort_keys=True))
+        else:
+            print(f"execution_ticket_ok:{ticket.get('schema_version') or 'unknown'}:{ticket.get('ticket_profile') or 'unknown'}:{len(checks)}")
+        return 0
+
+    if args.command == 'explain-ticket':
+        ticket = _load_json_object(Path(str(args.ticket)).resolve())
+        print(explain_ticket(ticket))
         return 0
 
     if args.command == 'redaction-policy':

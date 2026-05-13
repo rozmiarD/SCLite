@@ -19,6 +19,8 @@ Run the full public-safe checklist from the repository root:
 python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.cli explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --strict-jsonschema --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
@@ -37,6 +39,7 @@ Expected result:
 
 - fixture validation passes;
 - v0.2 lifecycle chain validation and semantic lifecycle verification pass;
+- v0.3 scoped-ticket schema, binding, and explanation checks pass;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - validation receipt reports `status: passed`;

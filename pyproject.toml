@@ -72,6 +72,8 @@ sclite = [
   "examples/public-snapshot-manifest/*.md",
   "examples/contract-lifecycle-v0.2/*.json",
   "examples/contract-lifecycle-v0.2/*.md",
+  "examples/scoped-ticket-v0.3/*.json",
+  "examples/scoped-ticket-v0.3/*.md",
 ]
 
 [tool.pytest.ini_options]

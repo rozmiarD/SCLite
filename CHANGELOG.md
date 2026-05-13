@@ -5,6 +5,7 @@
 - Added `ROADMAP.md` with PEP 440-compatible milestone labels for scoped tickets, receipt-bounded evidence, trust/carrier profiles, lifecycle review semantics, and review bundles.
 - Linked the roadmap from public docs and clarified that future accountability-layer work remains artifact validation/review, not execution, policy authority, signer trust, or adapter implementation.
 - Added optional strict Draft 2020-12 JSON Schema validation via `sclite-core[jsonschema]` and CLI `--strict-jsonschema`, while keeping the default validation path dependency-light.
+- Started the `0.3.0` Scoped Tickets line with `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, semantic ticket-to-contract checks, and `sclite validate-ticket` / `sclite explain-ticket`.
 - Added the v0.2 lifecycle chain validation and semantic `verify-lifecycle` commands to the documented publication validation gate, aligning SCLite docs with Ravenclaw reviewer demo usage.
 - Cleaned README badge order, removed personal ownership copy from public-facing docs, and aligned `SPEC.md` status wording with the published `0.2.1` lifecycle line.
 - Calibrated public docs after PyPI publication to reflect `sclite-core==0.2.1` as the install path and current release state.

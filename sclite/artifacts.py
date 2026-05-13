@@ -60,6 +60,7 @@ SCHEMA_FILES = {
     'policy_decision.v0.2': 'policy_decision.v0.2.schema.json',
     'execution_contract.v0.2': 'execution_contract.v0.2.schema.json',
     'execution_ticket.v0.2': 'execution_ticket.v0.2.schema.json',
+    'execution_ticket.v0.3': 'execution_ticket.v0.3.schema.json',
     'execution_receipt.v0.2': 'execution_receipt.v0.2.schema.json',
     'evidence_contract.v0.2': 'evidence_contract.v0.2.schema.json',
     'artifact_chain_manifest.v0.2': 'artifact_chain_manifest.v0.2.schema.json',
