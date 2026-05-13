@@ -122,7 +122,7 @@ Local unreleased main includes the first scoped-ticket and receipt-bounded-evide
 
 - `execution_ticket.v0.3` for runtime-consumable scoped-ticket artifacts;
 - `sclite validate-ticket` and `sclite explain-ticket` for ticket review;
-- `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket.
+- `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket, including explicit receipt-source binding and conservative completed-execution/network claim bounds.
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
 

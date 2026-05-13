@@ -127,7 +127,7 @@ Key negative tests:
 
 ## 0.3.5 — Ticket-use semantics and receipt-bounded evidence
 
-Status: started. The first implementation slice adds `sclite verify-ticket-use` and a scoped-ticket receipt/evidence fixture with static checks for receipt-to-ticket binding, runtime/mode/network/use limits, receipt-bounded evidence claims, and replay limits.
+Status: started. The first implementation slice adds `sclite verify-ticket-use` and a scoped-ticket receipt/evidence fixture with static checks for receipt-to-ticket binding, runtime/mode/network/use limits, explicit `source_receipt_id`, receipt-bounded evidence claims, completed-execution/network claim bounds, and replay limits.
 
 Goal: add the strongest downstream invariant:
 

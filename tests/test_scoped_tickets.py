@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from sclite.artifacts import validate_artifact
+from sclite.integrity import artifact_descriptor
 from sclite.tickets import TicketSemanticError, TicketUseVerificationError, explain_ticket, normalized_args_digest, validate_ticket_semantics, verify_ticket_use
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -233,6 +234,37 @@ def test_verify_ticket_use_rejects_evidence_receipt_drift() -> None:
     evidence = _evidence()
     evidence['links']['execution_receipt']['descriptor']['digest'] = '0' * 64
     with pytest.raises(TicketUseVerificationError, match='evidence-receipt descriptor mismatch'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_requires_explicit_claim_source_receipt_id() -> None:
+    evidence = _evidence()
+    del evidence['claims'][0]['source_receipt_id']
+    with pytest.raises(TicketUseVerificationError, match='must declare source_receipt_id'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_rejects_completed_claims_for_blocked_receipt() -> None:
+    receipt = _receipt()
+    receipt['outcome']['status'] = 'blocked'
+    evidence = _evidence()
+    evidence['links']['execution_receipt']['descriptor'] = artifact_descriptor(receipt)
+    evidence['claims'][0]['requires_completed_execution'] = True
+    with pytest.raises(TicketUseVerificationError, match='completed execution beyond receipt status'):
+        verify_ticket_use(_ticket(), _contract(), receipt, evidence)
+
+
+def test_verify_ticket_use_rejects_execution_claims_when_no_commands_executed() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['requires_completed_execution'] = True
+    with pytest.raises(TicketUseVerificationError, match='executed commands beyond receipt'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_rejects_network_claims_when_no_network_performed() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['requires_network_execution'] = True
+    with pytest.raises(TicketUseVerificationError, match='network execution beyond receipt'):
         verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
 
 

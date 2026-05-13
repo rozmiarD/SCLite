@@ -10,6 +10,16 @@ from .integrity import artifact_descriptor
 SCOPED_TICKET_SCHEMA_REF = 'schemas/execution_ticket.v0.3.schema.json'
 TICKET_PROFILES = {'review_record', 'scoped_execution_ticket', 'external_capability_ref'}
 CONSUMABLE_APPROVAL_STATUSES = {'approved_for_dry_run', 'approved'}
+BLOCKED_RECEIPT_STATUSES = {'blocked', 'rejected', 'denied', 'failed', 'skipped', 'not_executed'}
+EXECUTION_CLAIM_MARKERS = {
+    'actual_execution',
+    'command_executed',
+    'completed_execution',
+    'execution_performed',
+    'executed_command',
+    'tool_executed',
+}
+NETWORK_CLAIM_MARKERS = {'live_network', 'network_execution', 'network_observed'}
 
 
 class TicketSemanticError(ValueError):
@@ -245,6 +255,19 @@ def _claim_text(claim: Mapping[str, Any]) -> str:
     return ' '.join(str(part or '').lower() for part in parts)
 
 
+def _claim_has_marker(claim: Mapping[str, Any], markers: set[str]) -> bool:
+    text = _claim_text(claim)
+    return any(marker in text for marker in markers)
+
+
+def _claim_requires_completed_execution(claim: Mapping[str, Any]) -> bool:
+    return bool(claim.get('requires_completed_execution')) or _claim_has_marker(claim, EXECUTION_CLAIM_MARKERS)
+
+
+def _claim_requires_network_execution(claim: Mapping[str, Any]) -> bool:
+    return bool(claim.get('requires_network_execution')) or bool(claim.get('requires_live_execution')) or _claim_has_marker(claim, NETWORK_CLAIM_MARKERS)
+
+
 def verify_ticket_use(
     ticket: Mapping[str, Any],
     execution_contract: Mapping[str, Any],
@@ -282,7 +305,8 @@ def verify_ticket_use(
     receipt_mode = str(receipt_runtime.get('mode') or '')
     if _mode_level(receipt_mode) > _mode_level(ticket_mode):
         raise TicketUseVerificationError('receipt runtime mode exceeds ticket mode')
-    if ticket_mode == 'dry_run' and str(outcome.get('status') or '') not in {'dry_run', 'skipped', 'not_executed'}:
+    dry_run_receipt_statuses = {'dry_run', 'skipped', 'not_executed'} | BLOCKED_RECEIPT_STATUSES
+    if ticket_mode == 'dry_run' and str(outcome.get('status') or '') not in dry_run_receipt_statuses:
         raise TicketUseVerificationError('dry-run ticket receipt must report a dry-run/non-executed outcome')
 
     if bool(receipt_execution.get('network_execution_performed')) and not bool(spend.get('network_execution_allowed')):
@@ -320,6 +344,9 @@ def verify_ticket_use(
         'receipt_use_within_ticket',
     ]
 
+    receipt_status = str(outcome.get('status') or '').lower()
+    network_performed = bool(receipt_execution.get('network_execution_performed'))
+
     evidence_checks: List[str] = []
     if bool(spend.get('requires_evidence_contract')) and evidence_contract is None:
         raise TicketUseVerificationError('ticket requires an evidence contract but none was provided')
@@ -338,10 +365,17 @@ def verify_ticket_use(
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] must be an object')
             if claim.get('bounded_by_receipt') is not True:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] is not receipt-bounded')
-            if str(claim.get('source_receipt_id') or receipt.get('receipt_id') or '') != str(receipt.get('receipt_id') or ''):
+            source_receipt_id = str(claim.get('source_receipt_id') or '')
+            if not source_receipt_id:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] must declare source_receipt_id')
+            if source_receipt_id != str(receipt.get('receipt_id') or ''):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] source_receipt_id mismatch')
-            if bool(claim.get('requires_live_execution')) and not bool(receipt_execution.get('network_execution_performed')):
-                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires live execution beyond receipt')
+            if _claim_requires_completed_execution(claim) and receipt_status in BLOCKED_RECEIPT_STATUSES:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires completed execution beyond receipt status')
+            if _claim_requires_completed_execution(claim) and executed_count == 0:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires executed commands beyond receipt')
+            if _claim_requires_network_execution(claim) and not network_performed:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires network execution beyond receipt')
             text = _claim_text(claim)
             if ticket_mode == 'dry_run' and ('live_vulnerability' in text or 'confirmed_vulnerability' in text):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] exceeds dry-run ticket evidence bounds')
