@@ -70,6 +70,16 @@ from .scope_fidelity import (
     summarize_scope_fidelity,
     validate_scope_fidelity_report,
 )
+from .tickets import (
+    SCOPED_TICKET_SCHEMA_REF,
+    TICKET_PROFILES,
+    TicketSemanticError,
+    explain_ticket,
+    normalized_args_digest,
+    ticket_summary,
+    validate_ticket_schema,
+    validate_ticket_semantics,
+)
 from .surfaces import (
     PUBLIC_SNAPSHOT_MANIFEST_ARTIFACT_TYPE,
     PUBLIC_SNAPSHOT_MANIFEST_SCHEMA_VERSION,

@@ -88,6 +88,8 @@ Validation gate:
 
 ## 0.3.0 — Scoped Tickets
 
+Status: started. The first implementation slice adds `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, static ticket-to-contract semantic validation, and reviewer-facing ticket CLI commands.
+
 Goal: make `ExecutionTicket` explicitly runtime-consumable while preserving SCLite's non-authority boundary.
 
 An ExecutionTicket should become a **Scoped Ticket**: a bounded ticket a runtime can consume before side effects. It is not legal authorization, signer trust, or proof of runtime enforcement by itself.

@@ -170,6 +170,15 @@ sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_man
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
+Validate and explain the v0.3 scoped-ticket fixture:
+
+```bash
+sclite validate-ticket \
+  sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
+  --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+sclite explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+```
+
 Validate the legacy public-safe proof fixture:
 
 ```bash
