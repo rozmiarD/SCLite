@@ -21,7 +21,7 @@ The first v0.3.5 Receipt-Bounded Evidence slice adds `verify-ticket-use` for the
 python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 ```
 
-That verifier checks only local accountability bindings: receipt-to-ticket, receipt-to-contract, runtime/mode/network/use limits, evidence-to-receipt, evidence-to-ticket, receipt-bounded claim flags, and replay limits.
+That verifier checks only local accountability bindings: receipt-to-ticket, receipt-to-contract, runtime/mode/network/use limits, evidence-to-receipt, evidence-to-ticket, explicit `source_receipt_id`, receipt-bounded claim flags, completed-execution/network claim bounds, and replay limits.
 
 ## v0.2 lifecycle map
 
