@@ -23,6 +23,8 @@ SCLite can be reviewed as a package for:
 - redaction helpers;
 - Scope Fidelity reports;
 - validation-surface and snapshot-manifest helpers;
+- scoped-ticket validation and explanation helpers;
+- first static ticket-use / receipt-bounded-evidence verification helper;
 - CLI-based local validation.
 
 ## What is not claimed
@@ -47,4 +49,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-See `ROADMAP.md` for the planned progression from the current `0.2.1` lifecycle line toward scoped tickets, receipt-bounded evidence, trust/carrier profiles, and review bundles. Roadmap milestones use PEP 440-compatible labels such as `0.2.5`, `0.3.0`, and `0.3.5`.
+See `ROADMAP.md` for the planned progression from the current `0.2.1` lifecycle line toward scoped tickets, receipt-bounded evidence, trust/carrier profiles, and review bundles. Roadmap milestones use PEP 440-compatible labels such as `0.2.5`, `0.3.0`, and `0.3.5`; local unreleased main has started the `0.3.0`/`0.3.5` implementation slices while preserving the no-runtime boundary.

@@ -127,6 +127,8 @@ Key negative tests:
 
 ## 0.3.5 — Ticket-use semantics and receipt-bounded evidence
 
+Status: started. The first implementation slice adds `sclite verify-ticket-use` and a scoped-ticket receipt/evidence fixture with static checks for receipt-to-ticket binding, runtime/mode/network/use limits, receipt-bounded evidence claims, and replay limits.
+
 Goal: add the strongest downstream invariant:
 
 > Evidence claims must be receipt-bounded.
@@ -139,14 +141,10 @@ Planned work:
 2. Add ticket-use verification:
 
    ```bash
-   sclite verify-ticket-use --ticket execution_ticket.json --receipt execution_receipt.json
+   sclite verify-ticket-use execution_ticket.json --contract execution_contract.json --receipt execution_receipt.json --evidence-contract evidence_contract.json
    ```
 
-3. Add receipt-bounded evidence verification:
-
-   ```bash
-   sclite verify-evidence-bounds --receipt execution_receipt.json --evidence evidence_contract.json
-   ```
+3. Add receipt-bounded evidence verification as either a standalone command or a stricter profile layered on `verify-ticket-use`.
 
 4. Enforce rules such as:
    - dry-run receipts cannot support live vulnerability claims;

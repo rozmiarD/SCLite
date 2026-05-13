@@ -177,6 +177,11 @@ sclite validate-ticket \
   sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
   --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
 sclite explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+sclite verify-ticket-use \
+  sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
+  --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json \
+  --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json \
+  --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 ```
 
 Validate the legacy public-safe proof fixture:

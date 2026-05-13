@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from sclite.artifacts import validate_artifact
-from sclite.tickets import TicketSemanticError, explain_ticket, normalized_args_digest, validate_ticket_semantics
+from sclite.tickets import TicketSemanticError, TicketUseVerificationError, explain_ticket, normalized_args_digest, validate_ticket_semantics, verify_ticket_use
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'scoped-ticket-v0.3'
@@ -27,6 +27,14 @@ def _ticket() -> dict:
 
 def _contract() -> dict:
     return copy.deepcopy(_load('execution_contract.json'))
+
+
+def _receipt() -> dict:
+    return copy.deepcopy(_load('execution_receipt.json'))
+
+
+def _evidence() -> dict:
+    return copy.deepcopy(_load('evidence_contract.json'))
 
 
 def test_execution_ticket_v03_schema_validates_fixture() -> None:
@@ -156,3 +164,97 @@ def test_explain_ticket_cli() -> None:
     assert result.returncode == 0, result.stderr
     assert 'SCLite ExecutionTicket v0.3' in result.stdout
     assert 'Binds execution_contract: sha256:' in result.stdout
+
+
+def test_verify_ticket_use_accepts_receipt_bounded_evidence_fixture() -> None:
+    result = verify_ticket_use(_ticket(), _contract(), _receipt(), _evidence())
+    assert result['status'] == 'passed'
+    assert 'receipt_binds_ticket' in result['checks']
+    assert 'evidence_claims_bounded_by_receipt' in result['checks']
+
+
+def test_verify_ticket_use_rejects_receipt_ticket_drift() -> None:
+    receipt = _receipt()
+    receipt['links']['execution_ticket']['descriptor']['digest'] = '0' * 64
+    with pytest.raises(TicketUseVerificationError, match='receipt-ticket descriptor mismatch'):
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+
+
+def test_verify_ticket_use_rejects_runtime_drift() -> None:
+    receipt = _receipt()
+    receipt['runtime']['runtime_ref'] = 'runtime:other'
+    receipt['runtime']['name'] = 'other'
+    with pytest.raises(TicketUseVerificationError, match='runtime does not match'):
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+
+
+def test_verify_ticket_use_rejects_live_receipt_for_dry_run_ticket() -> None:
+    receipt = _receipt()
+    receipt['runtime']['mode'] = 'live'
+    receipt['outcome']['status'] = 'completed'
+    with pytest.raises(TicketUseVerificationError, match='mode exceeds'):
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+
+
+def test_verify_ticket_use_rejects_forbidden_network_execution() -> None:
+    receipt = _receipt()
+    receipt['execution']['network_execution_performed'] = True
+    with pytest.raises(TicketUseVerificationError, match='network execution forbidden'):
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+
+
+def test_verify_ticket_use_rejects_ticket_use_count_over_limit() -> None:
+    receipt = _receipt()
+    receipt['ticket_use']['use_count'] = 2
+    with pytest.raises(TicketUseVerificationError, match='use_count exceeds'):
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+
+
+def test_verify_ticket_use_requires_evidence_when_ticket_requires_it() -> None:
+    with pytest.raises(TicketUseVerificationError, match='requires an evidence contract'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), None)
+
+
+def test_verify_ticket_use_rejects_unbounded_claims() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['bounded_by_receipt'] = False
+    with pytest.raises(TicketUseVerificationError, match='not receipt-bounded'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_rejects_live_vulnerability_claims_for_dry_run() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['claim_type'] = 'confirmed_vulnerability'
+    with pytest.raises(TicketUseVerificationError, match='exceeds dry-run'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_rejects_evidence_receipt_drift() -> None:
+    evidence = _evidence()
+    evidence['links']['execution_receipt']['descriptor']['digest'] = '0' * 64
+    with pytest.raises(TicketUseVerificationError, match='evidence-receipt descriptor mismatch'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_verify_ticket_use_cli() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'verify-ticket-use',
+            str(FIXTURE / 'execution_ticket.json'),
+            '--contract',
+            str(FIXTURE / 'execution_contract.json'),
+            '--receipt',
+            str(FIXTURE / 'execution_receipt.json'),
+            '--evidence-contract',
+            str(FIXTURE / 'evidence_contract.json'),
+        ],
+        cwd=str(ROOT),
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.startswith('ticket_use_ok:scoped-ticket-demo-001:scoped-ticket-receipt-demo-001:')

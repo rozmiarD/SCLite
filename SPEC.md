@@ -116,6 +116,16 @@ SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
 
 This is lightweight cryptographic integrity, not identity trust. It proves the verifier saw the same canonical artifact bytes and lifecycle links; it does not prove who created them, whether a human was legally authorized, or whether a runtime enforced them.
 
+## Unreleased v0.3 Preview: Scoped Ticket Use
+
+Local unreleased main includes the first scoped-ticket and receipt-bounded-evidence preview surfaces:
+
+- `execution_ticket.v0.3` for runtime-consumable scoped-ticket artifacts;
+- `sclite validate-ticket` and `sclite explain-ticket` for ticket review;
+- `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket.
+
+These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
+
 ## Legacy v0.1 Compatibility
 
 SCLite keeps the v0.1 public-safe proof trace for compatibility:

@@ -11,7 +11,15 @@ from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .redaction import build_default_redaction_policy, build_redaction_receipt
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
-from .tickets import TicketSemanticError, explain_ticket, ticket_summary, validate_ticket_schema, validate_ticket_semantics
+from .tickets import (
+    TicketSemanticError,
+    TicketUseVerificationError,
+    explain_ticket,
+    ticket_summary,
+    validate_ticket_schema,
+    validate_ticket_semantics,
+    verify_ticket_use,
+)
 from .validation import package_root, validate_fixture_dir, validation_receipt_main
 
 
@@ -71,6 +79,14 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     explain_ticket_cmd = sub.add_parser('explain-ticket', help='explain an ExecutionTicket in reviewer-friendly text')
     explain_ticket_cmd.add_argument('ticket', help='path to execution_ticket.json')
+
+    ticket_use_cmd = sub.add_parser('verify-ticket-use', help='verify receipt/evidence use stays inside a scoped ExecutionTicket')
+    ticket_use_cmd.add_argument('ticket', help='path to execution_ticket.json')
+    ticket_use_cmd.add_argument('--contract', required=True, help='path to execution_contract.json')
+    ticket_use_cmd.add_argument('--receipt', required=True, help='path to execution_receipt.json')
+    ticket_use_cmd.add_argument('--evidence-contract', help='path to evidence_contract.json')
+    ticket_use_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    ticket_use_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
     policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
@@ -179,6 +195,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == 'explain-ticket':
         ticket = _load_json_object(Path(str(args.ticket)).resolve())
         print(explain_ticket(ticket))
+        return 0
+
+    if args.command == 'verify-ticket-use':
+        ticket = _load_json_object(Path(str(args.ticket)).resolve())
+        contract = _load_json_object(Path(str(args.contract)).resolve())
+        receipt = _load_json_object(Path(str(args.receipt)).resolve())
+        evidence = _load_json_object(Path(str(args.evidence_contract)).resolve()) if args.evidence_contract else None
+        try:
+            result = verify_ticket_use(
+                ticket,
+                contract,
+                receipt,
+                evidence,
+                strict_jsonschema=bool(args.strict_jsonschema),
+            )
+        except (TicketSemanticError, TicketUseVerificationError, AssertionError) as exc:
+            print(f'ticket_use_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'json':
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"ticket_use_ok:{result['ticket_id']}:{result['receipt_id']}:{len(result['checks'])}")
         return 0
 
     if args.command == 'redaction-policy':

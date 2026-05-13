@@ -16,6 +16,10 @@ class TicketSemanticError(ValueError):
     """Raised when an ExecutionTicket is well-shaped but semantically unsafe."""
 
 
+class TicketUseVerificationError(ValueError):
+    """Raised when a receipt/evidence bundle exceeds a scoped ticket."""
+
+
 def normalized_args_digest(normalized_args: Sequence[Any]) -> str:
     """Return the scoped-ticket digest for normalized execution arguments."""
     encoded = json.dumps(list(normalized_args), sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8')
@@ -199,4 +203,173 @@ def ticket_summary(ticket: Mapping[str, Any]) -> Dict[str, Any]:
         'max_uses': spend.get('max_uses'),
         'requires_receipt': spend.get('requires_receipt'),
         'requires_evidence_contract': spend.get('requires_evidence_contract'),
+    }
+
+
+def _artifact_link_descriptor(value: Mapping[str, Any], link_name: str, label: str) -> Mapping[str, Any]:
+    links = _require_mapping(value.get('links'), f'{label}.links')
+    link = _require_mapping(links.get(link_name), f'{label}.links.{link_name}')
+    return _require_mapping(link.get('descriptor'), f'{label}.links.{link_name}.descriptor')
+
+
+def _assert_artifact_link(source: Mapping[str, Any], link_name: str, target: Mapping[str, Any], label: str, reason: str) -> None:
+    if dict(_artifact_link_descriptor(source, link_name, label)) != artifact_descriptor(target):
+        raise TicketUseVerificationError(reason)
+
+
+def _runtime_matches_ticket(ticket: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
+    subject = _require_mapping(ticket.get('subject_binding'), 'ticket.subject_binding')
+    runtime = _require_mapping(receipt.get('runtime'), 'receipt.runtime')
+    expected = str(subject.get('usable_by_runtime') or '')
+    if not expected:
+        return False
+    candidates = {
+        str(runtime.get('runtime_ref') or ''),
+        str(runtime.get('id') or ''),
+        str(runtime.get('name') or ''),
+    }
+    if expected.startswith('runtime:'):
+        candidates.add('runtime:' + str(runtime.get('name') or ''))
+    return expected in candidates
+
+
+def _as_int(value: Any, label: str) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError) as exc:
+        raise TicketUseVerificationError(f'{label} must be an integer') from exc
+
+
+def _claim_text(claim: Mapping[str, Any]) -> str:
+    parts = [claim.get('claim_type'), claim.get('id'), claim.get('statement')]
+    return ' '.join(str(part or '').lower() for part in parts)
+
+
+def verify_ticket_use(
+    ticket: Mapping[str, Any],
+    execution_contract: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+    evidence_contract: Mapping[str, Any] | None = None,
+    *,
+    strict_jsonschema: bool = False,
+) -> Dict[str, Any]:
+    """Verify that receipt/evidence claims stay inside a scoped ticket.
+
+    This is the first static Receipt-Bounded Evidence gate for v0.3.5. It
+    verifies local artifact bindings and conservative receipt/evidence limits;
+    it does not execute tools, decide trust, prove legal authorization, or
+    attest that a runtime enforced the ticket.
+    """
+    validate_ticket_semantics(ticket, execution_contract, strict_jsonschema=strict_jsonschema)
+    schema_ref = str(receipt.get('schema_ref') or '')
+    if schema_ref:
+        validate_artifact(dict(receipt), schema_ref, strict_jsonschema=strict_jsonschema)
+
+    _assert_artifact_link(receipt, 'execution_ticket', ticket, 'receipt', 'receipt-ticket descriptor mismatch')
+    _assert_artifact_link(receipt, 'execution_contract', execution_contract, 'receipt', 'receipt-execution_contract descriptor mismatch')
+
+    if not _runtime_matches_ticket(ticket, receipt):
+        raise TicketUseVerificationError('receipt runtime does not match ticket subject_binding.usable_by_runtime')
+
+    scope = _require_mapping(ticket.get('scope_binding'), 'ticket.scope_binding')
+    limits = _require_mapping(ticket.get('execution_limits'), 'ticket.execution_limits')
+    spend = _require_mapping(ticket.get('spend_limits'), 'ticket.spend_limits')
+    receipt_runtime = _require_mapping(receipt.get('runtime'), 'receipt.runtime')
+    receipt_execution = _require_mapping(receipt.get('execution'), 'receipt.execution')
+    outcome = _require_mapping(receipt.get('outcome'), 'receipt.outcome')
+
+    ticket_mode = str(scope.get('mode') or limits.get('mode') or '')
+    receipt_mode = str(receipt_runtime.get('mode') or '')
+    if _mode_level(receipt_mode) > _mode_level(ticket_mode):
+        raise TicketUseVerificationError('receipt runtime mode exceeds ticket mode')
+    if ticket_mode == 'dry_run' and str(outcome.get('status') or '') not in {'dry_run', 'skipped', 'not_executed'}:
+        raise TicketUseVerificationError('dry-run ticket receipt must report a dry-run/non-executed outcome')
+
+    if bool(receipt_execution.get('network_execution_performed')) and not bool(spend.get('network_execution_allowed')):
+        raise TicketUseVerificationError('receipt reports network execution forbidden by ticket')
+
+    max_uses = _as_int(spend.get('max_uses'), 'ticket.spend_limits.max_uses')
+    ticket_use = receipt.get('ticket_use') if isinstance(receipt.get('ticket_use'), Mapping) else {}
+    if ticket_use:
+        if str(ticket_use.get('ticket_id') or '') != str(ticket.get('ticket_id') or ''):
+            raise TicketUseVerificationError('receipt ticket_use.ticket_id mismatch')
+        consumed_by_runtime = str(ticket_use.get('consumed_by_runtime') or '')
+        expected_runtime = str(_require_mapping(ticket.get('subject_binding'), 'ticket.subject_binding').get('usable_by_runtime') or '')
+        if consumed_by_runtime and consumed_by_runtime != expected_runtime:
+            raise TicketUseVerificationError('receipt ticket_use.consumed_by_runtime mismatch')
+        use_count = _as_int(ticket_use.get('use_count'), 'receipt.ticket_use.use_count')
+        if use_count < 1 or use_count > max_uses:
+            raise TicketUseVerificationError('receipt ticket use_count exceeds ticket max_uses')
+    elif max_uses < 1:
+        raise TicketUseVerificationError('ticket max_uses must permit at least one receipt')
+
+    executed_count = _as_int(
+        receipt_execution.get('executed_command_count', 0),
+        'receipt.execution.executed_command_count',
+    )
+    if bool(spend.get('one_shot')) and executed_count > _as_int(limits.get('max_runs'), 'ticket.execution_limits.max_runs'):
+        raise TicketUseVerificationError('receipt executed command count exceeds ticket execution limit')
+
+    checks = [
+        'ticket_semantics_valid',
+        'receipt_binds_ticket',
+        'receipt_binds_execution_contract',
+        'receipt_runtime_matches_ticket',
+        'receipt_mode_within_ticket',
+        'receipt_network_within_ticket',
+        'receipt_use_within_ticket',
+    ]
+
+    evidence_checks: List[str] = []
+    if bool(spend.get('requires_evidence_contract')) and evidence_contract is None:
+        raise TicketUseVerificationError('ticket requires an evidence contract but none was provided')
+    if evidence_contract is not None:
+        evidence_schema_ref = str(evidence_contract.get('schema_ref') or '')
+        if evidence_schema_ref:
+            validate_artifact(dict(evidence_contract), evidence_schema_ref, strict_jsonschema=strict_jsonschema)
+        _assert_artifact_link(evidence_contract, 'execution_receipt', receipt, 'evidence_contract', 'evidence-receipt descriptor mismatch')
+        _assert_artifact_link(evidence_contract, 'execution_ticket', ticket, 'evidence_contract', 'evidence-ticket descriptor mismatch')
+
+        claims = evidence_contract.get('claims')
+        if not isinstance(claims, list) or not claims:
+            raise TicketUseVerificationError('evidence_contract.claims must be a non-empty array')
+        for index, claim in enumerate(claims):
+            if not isinstance(claim, Mapping):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] must be an object')
+            if claim.get('bounded_by_receipt') is not True:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] is not receipt-bounded')
+            if str(claim.get('source_receipt_id') or receipt.get('receipt_id') or '') != str(receipt.get('receipt_id') or ''):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] source_receipt_id mismatch')
+            if bool(claim.get('requires_live_execution')) and not bool(receipt_execution.get('network_execution_performed')):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires live execution beyond receipt')
+            text = _claim_text(claim)
+            if ticket_mode == 'dry_run' and ('live_vulnerability' in text or 'confirmed_vulnerability' in text):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] exceeds dry-run ticket evidence bounds')
+        if ticket_mode == 'dry_run':
+            non_claims = evidence_contract.get('non_claims') if isinstance(evidence_contract.get('non_claims'), list) else []
+            if 'does_not_claim_live_vulnerability_evidence' not in {str(item) for item in non_claims}:
+                raise TicketUseVerificationError('dry-run evidence contract must disclaim live vulnerability evidence')
+        replay = _require_mapping(evidence_contract.get('replay'), 'evidence_contract.replay')
+        if bool(replay.get('live_execution_required')) and not bool(spend.get('network_execution_allowed')):
+            raise TicketUseVerificationError('evidence replay requires live execution forbidden by ticket')
+        evidence_checks = [
+            'evidence_binds_receipt',
+            'evidence_binds_ticket',
+            'evidence_claims_bounded_by_receipt',
+            'evidence_replay_within_ticket',
+        ]
+        checks.extend(evidence_checks)
+
+    return {
+        'status': 'passed',
+        'checks': checks,
+        'ticket_id': ticket.get('ticket_id'),
+        'receipt_id': receipt.get('receipt_id'),
+        'evidence_contract_id': evidence_contract.get('evidence_contract_id') if evidence_contract else None,
+        'summary': {
+            'ticket': ticket_summary(ticket),
+            'receipt_status': outcome.get('status'),
+            'receipt_runtime': receipt_runtime.get('runtime_ref') or receipt_runtime.get('name'),
+            'evidence_checks': evidence_checks,
+        },
     }
