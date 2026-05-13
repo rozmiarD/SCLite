@@ -27,6 +27,10 @@ Run from the repository root:
 
 ```bash
 python -m sclite.cli validate examples/security-contract-proof
+python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
@@ -43,6 +47,8 @@ python -m pytest -q
 Expected state:
 
 - proof fixture validates;
+- lifecycle chain and semantic lifecycle verification pass;
+- scoped-ticket validation and ticket-use/evidence-bound checks pass;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - validation receipt has `status: passed`;
@@ -76,7 +82,7 @@ Confirm docs do not claim that SCLite/SCL v0.2:
 - proves legal authorization;
 - proves live vulnerabilities;
 - is tamper-proof;
-- includes signatures/hash-chain;
+- includes identity signatures or PKI trust;
 - includes OpenClaw/MCP/A2A adapters;
 - replaces a runtime policy engine or executor.
 

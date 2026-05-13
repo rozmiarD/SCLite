@@ -94,6 +94,8 @@ It provides:
 - JSON schemas for lifecycle and compatibility artifacts;
 - deterministic artifact hashing helpers;
 - v0.2 lifecycle/chain verification;
+- unreleased scoped-ticket review helpers (`validate-ticket`, `explain-ticket`);
+- unreleased ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
 - redaction/public-snapshot helper artifacts;
 - a CLI for local validation and review fixtures;
 - legacy v0.1 compatibility fixtures and schemas.
@@ -238,12 +240,26 @@ python -m pytest -q
 
 ## Python usage
 
+Verify a v0.2 lifecycle manifest:
+
 ```python
 from sclite.integrity import verify_artifact_chain_manifest
 
 # Load artifact_chain_manifest.json as a dict and verify it against a local root.
 result = verify_artifact_chain_manifest(manifest, root=fixture_dir)
 assert result["status"] == "passed"
+```
+
+Review unreleased scoped-ticket / receipt-bounded-evidence fixtures:
+
+```python
+from sclite.tickets import validate_ticket_semantics, verify_ticket_use
+
+checks = validate_ticket_semantics(ticket, execution_contract)
+assert "ticket_scope_matches_execution_contract" in checks
+
+result = verify_ticket_use(ticket, execution_contract, execution_receipt, evidence_contract)
+assert "evidence_claims_bounded_by_receipt" in result["checks"]
 ```
 
 ## Repository layout
