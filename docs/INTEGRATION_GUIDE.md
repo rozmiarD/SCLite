@@ -2,7 +2,7 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite v0.2 is centered on the contract lifecycle:
+SCLite is centered on the v0.2 contract lifecycle, with the 0.3.5 line adding scoped-ticket and receipt-bounded-evidence checks:
 
 ```text
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
@@ -28,7 +28,7 @@ Use SCL for the artifact boundary between those responsibilities.
 
 ## Reference flow
 
-A governed runtime can use SCLite v0.2 like this:
+A governed runtime can use SCLite like this:
 
 1. **Receive intent**
    - Runtime receives a target/objective/task.
@@ -53,7 +53,7 @@ A governed runtime can use SCLite v0.2 like this:
    - Runtime emits `ExecutionReceipt` v0.2 bound to the ticket.
 
 6. **Verify ticket use / evidence bounds**
-   - For unreleased scoped-ticket fixtures, reviewers can run `sclite verify-ticket-use`.
+   - For the published v0.3 scoped-ticket fixture, reviewers can run `sclite verify-ticket-use`.
    - The check verifies local bindings only: ticket/contract/receipt/evidence descriptors, runtime identity, mode, network flag, use count, explicit `source_receipt_id`, completed-execution claim bounds, and network/live claim bounds.
    - The check does not prove runtime enforcement, legal authorization, signer identity, or live vulnerability evidence.
 
@@ -84,7 +84,7 @@ assert result["status"] == "passed"
 assert "ticket_binds_execution_contract" in result["semantic_checks"]
 ```
 
-Verify unreleased scoped-ticket use against receipt/evidence artifacts:
+Verify published scoped-ticket use against receipt/evidence artifacts:
 
 ```python
 from sclite.tickets import validate_ticket_semantics, verify_ticket_use

@@ -2,9 +2,9 @@
 
 This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.1 proof-trace artifacts remain supported.
 
-## v0.3 scoped ticket preview
+## v0.3 scoped ticket surface
 
-SCLite v0.3 starts making `ExecutionTicket` runtime-consumable as a scoped ticket while preserving SCLite's non-authority boundary. A scoped ticket can describe the runtime, target, tool, mode, normalized-argument digest, spend limits, and receipt/evidence obligations that an external runtime should enforce.
+SCLite 0.3.5 publishes the first `ExecutionTicket` scoped-ticket surface while preserving SCLite's non-authority boundary. A scoped ticket can describe the runtime, target, tool, mode, normalized-argument digest, spend limits, and receipt/evidence obligations that an external runtime should enforce.
 
 The fixture at `sclite/examples/scoped-ticket-v0.3/` demonstrates the shape and can be reviewed with:
 
@@ -15,7 +15,7 @@ python -m sclite.cli explain-ticket sclite/examples/scoped-ticket-v0.3/execution
 
 This remains local/static validation. It does not prove legal authorization, signer identity, runtime enforcement, or live vulnerability evidence.
 
-The first v0.3.5 Receipt-Bounded Evidence slice adds `verify-ticket-use` for the same fixture:
+The 0.3.5 Receipt-Bounded Evidence slice adds `verify-ticket-use` for the same fixture:
 
 ```bash
 python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
