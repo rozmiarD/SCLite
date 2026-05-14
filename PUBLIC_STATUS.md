@@ -4,12 +4,12 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current package version: `0.2.1`.
-- Status: published `0.2.x` draft lifecycle line.
+- Current package version: `0.3.5`.
+- Status: published `0.3.x` scoped-ticket and receipt-bounded-evidence line.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: completed as `sclite-core==0.2.1`.
+- PyPI publication: completed as `sclite-core==0.3.5`.
 
 ## What is public-safe today
 
@@ -49,4 +49,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-See `ROADMAP.md` for the planned progression from the current `0.2.1` lifecycle line toward scoped tickets, receipt-bounded evidence, trust/carrier profiles, and review bundles. Roadmap milestones use PEP 440-compatible labels such as `0.2.5`, `0.3.0`, and `0.3.5`; local unreleased main has started the `0.3.0`/`0.3.5` implementation slices while preserving the no-runtime boundary.
+See `ROADMAP.md` for the planned progression beyond the current `0.3.5` scoped-ticket / receipt-bounded-evidence line toward trust/carrier profiles and review bundles. Roadmap milestones use PEP 440-compatible labels; the `0.3.5` line preserves the no-runtime boundary.

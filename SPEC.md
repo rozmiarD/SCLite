@@ -1,6 +1,6 @@
-# SCLite v0.2 Draft Specification
+# SCLite Draft Specification
 
-Status: **published v0.2 draft lifecycle line**. Current package release is `sclite-core==0.2.1`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
+Status: **published v0.3.5 scoped-ticket and receipt-bounded-evidence line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification. Current package release is `sclite-core==0.3.5`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
 
 Core sentence:
 
@@ -116,9 +116,9 @@ SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
 
 This is lightweight cryptographic integrity, not identity trust. It proves the verifier saw the same canonical artifact bytes and lifecycle links; it does not prove who created them, whether a human was legally authorized, or whether a runtime enforced them.
 
-## Unreleased v0.3 Preview: Scoped Ticket Use
+## v0.3 Scoped Ticket Use
 
-Local unreleased main includes the first scoped-ticket and receipt-bounded-evidence preview surfaces:
+The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence surfaces:
 
 - `execution_ticket.v0.3` for runtime-consumable scoped-ticket artifacts;
 - `sclite validate-ticket` and `sclite explain-ticket` for ticket review;

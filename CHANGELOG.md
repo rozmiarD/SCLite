@@ -1,20 +1,21 @@
 # Changelog
 
-## Unreleased — post-0.2.1 main toward 0.3.x roadmap milestones
+## 0.3.5 - Scoped tickets and receipt-bounded evidence
 
-These entries are on `main` but are not published as a PyPI release yet. The current published package remains `sclite-core==0.2.1` until a deliberate version bump, tag, and PyPI upload.
+- Publishes the post-`0.2.1` scoped-ticket and receipt-bounded-evidence line as `sclite-core==0.3.5`.
+- Preserves the Python import package as `sclite` and keeps runtime dependencies empty.
 
-### Toward 0.3.5 — Receipt-Bounded Evidence
+### Receipt-Bounded Evidence
 
 - Started the `0.3.5` Receipt-Bounded Evidence line with `sclite verify-ticket-use`, scoped-ticket receipt/evidence fixtures, and static checks that receipt and evidence claims stay inside the ticket.
 - Tightened `verify-ticket-use` so evidence claims must declare `source_receipt_id` and cannot claim completed execution, executed commands, or network execution beyond the linked receipt.
 - Expanded README, integration guidance, and publication checklist coverage for scoped-ticket and receipt-bounded-evidence review commands.
 
-### Toward 0.3.0 — Scoped Tickets
+### Scoped Tickets
 
 - Started the `0.3.0` Scoped Tickets line with `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, semantic ticket-to-contract checks, and `sclite validate-ticket` / `sclite explain-ticket`.
 
-### Toward 0.2.5 — validation and roadmap hardening
+### Validation and roadmap hardening
 
 - Added `ROADMAP.md` with PEP 440-compatible milestone labels for scoped tickets, receipt-bounded evidence, trust/carrier profiles, lifecycle review semantics, and review bundles.
 - Linked the roadmap from public docs and clarified that future accountability-layer work remains artifact validation/review, not execution, policy authority, signer trust, or adapter implementation.
