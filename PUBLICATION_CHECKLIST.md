@@ -74,7 +74,7 @@ This repository should contain only synthetic examples and public-safe docs/code
 
 ## Claim review
 
-Confirm docs do not claim that SCLite/SCL v0.2:
+Confirm docs do not claim that SCLite/SCL v0.2/v0.3:
 
 - is a standard;
 - is a protocol;

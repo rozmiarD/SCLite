@@ -9,7 +9,10 @@
 Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
 
 
-SCLite v0.2 separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
+SCLite's canonical v0.2 lifecycle separates what an agent wants, what policy allows,
+what was approved, what was executed, and what can be proven. The published 0.3.5
+line adds scoped-ticket review and receipt-bounded-evidence checks on top of that
+lifecycle.
 
 ## Status
 
@@ -87,7 +90,7 @@ SCLite core is limited to:
 define / validate / hash / bind / redact / verify
 ```
 
-Roadmap direction: scoped tickets should bound what a runtime may consume, and receipts should bound what public-safe evidence may claim. See [`ROADMAP.md`](ROADMAP.md).
+The published 0.3.5 scoped-ticket surface bounds what a runtime may consume, and `verify-ticket-use` checks that public-safe evidence stays inside the linked receipt. See [`ROADMAP.md`](ROADMAP.md).
 
 It provides:
 
