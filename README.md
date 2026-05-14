@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 0.2.1](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
+[![Package: sclite-core 0.3.5](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -13,8 +13,8 @@ SCLite v0.2 separates what an agent wants, what policy allows, what was approved
 
 ## Status
 
-- Version: `0.2.1`
-- Status: **published 0.2.x draft lifecycle line**
+- Version: `0.3.5`
+- Status: **published 0.3.x scoped-ticket and receipt-bounded-evidence line**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -94,8 +94,8 @@ It provides:
 - JSON schemas for lifecycle and compatibility artifacts;
 - deterministic artifact hashing helpers;
 - v0.2 lifecycle/chain verification;
-- unreleased scoped-ticket review helpers (`validate-ticket`, `explain-ticket`);
-- unreleased ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
+- scoped-ticket review helpers (`validate-ticket`, `explain-ticket`);
+- ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
 - redaction/public-snapshot helper artifacts;
 - a CLI for local validation and review fixtures;
 - legacy v0.1 compatibility fixtures and schemas.
@@ -250,7 +250,7 @@ result = verify_artifact_chain_manifest(manifest, root=fixture_dir)
 assert result["status"] == "passed"
 ```
 
-Review unreleased scoped-ticket / receipt-bounded-evidence fixtures:
+Review scoped-ticket / receipt-bounded-evidence fixtures:
 
 ```python
 from sclite.tickets import validate_ticket_semantics, verify_ticket_use

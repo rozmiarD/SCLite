@@ -12,9 +12,9 @@ Scoped tickets bound what a runtime may consume.
 Receipts bound what evidence may claim.
 ```
 
-## Current baseline: 0.2.1
+## Current baseline: 0.3.5
 
-Current public package: `sclite-core==0.2.1`.
+Current public package: `sclite-core==0.3.5`.
 
 Current lifecycle:
 
@@ -88,7 +88,7 @@ Validation gate:
 
 ## 0.3.0 — Scoped Tickets
 
-Status: started. The first implementation slice adds `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, static ticket-to-contract semantic validation, and reviewer-facing ticket CLI commands.
+Status: published in `0.3.5`. The implementation adds `execution_ticket.v0.3`, a public-safe scoped-ticket fixture, static ticket-to-contract semantic validation, and reviewer-facing ticket CLI commands.
 
 Goal: make `ExecutionTicket` explicitly runtime-consumable while preserving SCLite's non-authority boundary.
 
@@ -127,7 +127,7 @@ Key negative tests:
 
 ## 0.3.5 — Ticket-use semantics and receipt-bounded evidence
 
-Status: started. The first implementation slice adds `sclite verify-ticket-use` and a scoped-ticket receipt/evidence fixture with static checks for receipt-to-ticket binding, runtime/mode/network/use limits, explicit `source_receipt_id`, receipt-bounded evidence claims, completed-execution/network claim bounds, and replay limits.
+Status: published in `0.3.5`. The implementation adds `sclite verify-ticket-use` and a scoped-ticket receipt/evidence fixture with static checks for receipt-to-ticket binding, runtime/mode/network/use limits, explicit `source_receipt_id`, receipt-bounded evidence claims, completed-execution/network claim bounds, and replay limits.
 
 Goal: add the strongest downstream invariant:
 
