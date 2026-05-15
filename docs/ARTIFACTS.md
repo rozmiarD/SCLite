@@ -1,6 +1,20 @@
 # SCL Artifact Guide
 
-This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.1 proof-trace artifacts remain supported.
+This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.3 adds scoped-ticket and receipt-bounded-evidence review; v0.5 packages the lifecycle into review bundles; v0.1 proof-trace artifacts remain supported.
+
+## v0.5 review bundle surface
+
+SCLite 0.5.0 publishes the canonical review-bundle surface. A review bundle packages the six lifecycle artifacts, an artifact-chain manifest, reviewer Markdown, and a verification receipt into one local/public-safe directory.
+
+The fixture at `examples/review-bundle/` demonstrates the shape and can be reviewed with:
+
+```bash
+python -m sclite.cli review examples/review-bundle --format json
+python -m sclite.cli review examples/review-bundle --format summary
+python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
+```
+
+The bundled fixture returns `review`, not `pass`, because it intentionally demonstrates the v0.2 lifecycle ticket rather than newer scoped `execution_ticket.v0.3` ticket-use semantics. That conservative verdict is part of the point: SCLite should make reviewer attention visible instead of overstating what a bundle proves.
 
 ## v0.3 scoped ticket surface
 
@@ -23,17 +37,42 @@ python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execut
 
 That verifier checks only local accountability bindings: receipt-to-ticket, receipt-to-contract, runtime/mode/network/use limits, evidence-to-receipt, evidence-to-ticket, explicit `source_receipt_id`, receipt-bounded claim flags, completed-execution/network claim bounds, and replay limits.
 
+## v0.4 trust/carrier references and review records
+
+SCLite includes digest-bound trust and carrier reference sidecars:
+
+```bash
+python -m sclite.cli validate-trust-profile \
+  sclite/examples/trust-carrier-profiles/trust_profile_ref.json \
+  --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.cli validate-carrier-profile \
+  sclite/examples/trust-carrier-profiles/carrier_profile_ref.json \
+  --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+```
+
+These checks validate sidecar shape and subject digest binding only. They do not prove signer identity, revocation state, delivery, adapter correctness, or authorization.
+
+Lifecycle review records aggregate static lifecycle checks:
+
+```bash
+python -m sclite.cli review-lifecycle \
+  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
+  --format json
+```
+
+The output is a `review_record.v0.1` with conservative `pass` / `review` / `fail` verdicts. Review records are also used as review-bundle verification receipts.
+
 ## v0.2 lifecycle map
 
 | Artifact | File in example | Schema-backed? | Built/validated by this package? |
 | --- | --- | --- | --- |
-| `IntentContract` | `examples/contract-lifecycle-v0.2/intent_contract.json` | Yes | Validated |
-| `PolicyDecision` v0.2 | `examples/contract-lifecycle-v0.2/policy_decision.json` | Yes | Validated |
-| `ExecutionContract` | `examples/contract-lifecycle-v0.2/execution_contract.json` | Yes | Validated |
-| `ExecutionTicket` | `examples/contract-lifecycle-v0.2/execution_ticket.json` | Yes | Validated; integrity-bound |
-| `ExecutionReceipt` v0.2 | `examples/contract-lifecycle-v0.2/execution_receipt.json` | Yes | Validated |
-| `EvidenceContract` | `examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
-| `ArtifactChainManifest` | `examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
+| `IntentContract` | `sclite/examples/contract-lifecycle-v0.2/intent_contract.json` | Yes | Validated |
+| `PolicyDecision` v0.2 | `sclite/examples/contract-lifecycle-v0.2/policy_decision.json` | Yes | Validated |
+| `ExecutionContract` | `sclite/examples/contract-lifecycle-v0.2/execution_contract.json` | Yes | Validated |
+| `ExecutionTicket` | `sclite/examples/contract-lifecycle-v0.2/execution_ticket.json` | Yes | Validated; integrity-bound |
+| `ExecutionReceipt` v0.2 | `sclite/examples/contract-lifecycle-v0.2/execution_receipt.json` | Yes | Validated |
+| `EvidenceContract` | `sclite/examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
+| `ArtifactChainManifest` | `sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
 
 The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket binding, evidence->receipt binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
 
@@ -206,6 +245,11 @@ Run:
 ```bash
 python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.cli review examples/review-bundle --format json
+python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
+python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
+python -m sclite.cli validate-trust-profile sclite/examples/trust-carrier-profiles/trust_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.cli validate-carrier-profile sclite/examples/trust-carrier-profiles/carrier_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json

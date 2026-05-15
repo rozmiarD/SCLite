@@ -1,6 +1,6 @@
 # Review Records
 
-SCLite review records are static, public-safe lifecycle review aggregates. They are the bridge from individual proof artifacts toward future review bundles.
+SCLite review records are static, public-safe lifecycle review aggregates. They are the review result format used by lifecycle reviews and v0.5 review bundles.
 
 A `review_record.v0.1` summarizes:
 

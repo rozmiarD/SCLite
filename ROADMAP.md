@@ -34,7 +34,7 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.3.5 line is an audit-proof lifecycle, scoped-ticket, and receipt-bounded-evidence layer. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, and digest bindings between intent, policy, execution contract, ticket, receipt, and evidence.
+The v0.5.0 line is the current review-bundle surface over SCLite's audit-proof lifecycle, scoped-ticket, receipt-bounded-evidence, trust/carrier reference, and lifecycle-review layers. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output.
 
 ## Versioning discipline
 
@@ -256,14 +256,20 @@ review_bundle/
   verification_receipt.json
 ```
 
-Planned CLI:
+Implemented CLI:
 
 ```bash
-sclite review review_bundle/
-sclite export-review-bundle review_bundle/ --format markdown
+sclite review examples/review-bundle --format json
+sclite export-review-bundle examples/review-bundle --format markdown
 ```
 
-Planned examples:
+Implemented example:
+
+```text
+examples/review-bundle/
+```
+
+Candidate post-0.5 examples:
 
 ```text
 examples/integrity-drills/

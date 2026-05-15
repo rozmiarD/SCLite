@@ -2,13 +2,13 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite is centered on the v0.2 contract lifecycle, with the 0.3.5 line adding scoped-ticket and receipt-bounded-evidence checks:
+SCLite is centered on the v0.2 contract lifecycle. The current 0.5.0 line layers scoped-ticket checks, receipt-bounded-evidence checks, trust/carrier references, lifecycle review records, and review bundles on top of that lifecycle:
 
 ```text
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, fixtures, lifecycle integrity verification, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, or carrier adapter.
+SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, lifecycle integrity verification, review-bundle packaging, public-safe fixtures, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, trust authority, or carrier adapter.
 
 ## Recommended boundary
 
@@ -67,6 +67,11 @@ A governed runtime can use SCLite like this:
    - CI/reviewer runs `sclite validate-chain` or `sclite verify-lifecycle`.
    - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings.
 
+9. **Package a review bundle**
+   - Runtime or CI places the six lifecycle artifacts, manifest, reviewer Markdown, and verification receipt in the canonical review-bundle shape.
+   - Reviewer runs `sclite review examples/review-bundle --format json` or exports Markdown with `sclite export-review-bundle`.
+   - Bundle review remains local/static: it does not execute tools, authorize work, prove signer identity, or verify carrier delivery.
+
 Legacy v0.1 artifacts (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, `ExecutionReceipt`, `EvidenceBundle`, and related public-safety artifacts) remain supported for compatibility and public proof traces.
 
 ## Minimal Python integration
@@ -93,6 +98,15 @@ validate_ticket_semantics(ticket, execution_contract)
 result = verify_ticket_use(ticket, execution_contract, execution_receipt, evidence_contract)
 assert result["status"] == "passed"
 assert "evidence_claims_bounded_by_receipt" in result["checks"]
+```
+
+Review a canonical v0.5 bundle:
+
+```python
+from sclite.bundles import review_bundle
+
+record = review_bundle("examples/review-bundle")
+assert record["artifact_type"] == "review_record"
 ```
 
 ## Carrier guidance
@@ -128,6 +142,7 @@ A carrier-agnostic engine that consumes SCLite could expose endpoints such as:
 - `POST /execution/receipt` -> `ExecutionReceipt` v0.2
 - `POST /evidence/contract` -> `EvidenceContract`
 - `POST /artifacts/chain` -> `ArtifactChainManifest`
+- `POST /review/bundle` -> review-bundle package/review result
 - `POST /artifacts/hash` -> canonical SHA-256 descriptor
 - `POST /redaction/policy` -> `RedactionPolicy`
 - `POST /redaction/receipt` -> `RedactionReceipt`

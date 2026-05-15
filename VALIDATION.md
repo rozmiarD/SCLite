@@ -2,7 +2,7 @@
 
 SCLite validation is local and public-safe. It does not run live targets.
 
-The roadmap in `ROADMAP.md` preserves this boundary: future scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
+The roadmap in `ROADMAP.md` preserves this boundary: scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
 
 ## Fast local gate
 

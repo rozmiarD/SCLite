@@ -11,6 +11,16 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 - CI: GitHub Actions validation exists.
 - PyPI publication: completed as `sclite-core==0.5.0`.
 
+## Current review path
+
+For new public demos and integrations, the clearest path is:
+
+```text
+v0.2 lifecycle artifacts -> artifact_chain_manifest -> v0.5 review bundle -> review_record verification receipt
+```
+
+Older v0.1 proof fixtures and v0.3 scoped-ticket checks remain supported, but `examples/review-bundle/` is the current front-door fixture for understanding the package.
+
 ## What is public-safe today
 
 SCLite can be reviewed as a package for:
