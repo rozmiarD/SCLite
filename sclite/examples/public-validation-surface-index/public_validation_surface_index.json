@@ -14,8 +14,8 @@
   },
   "schema_version": "v0.1",
   "summary": {
-    "public_safe_surface_count": 4,
-    "surface_count": 4
+    "public_safe_surface_count": 5,
+    "surface_count": 5
   },
   "surfaces": [
     {
@@ -74,6 +74,21 @@
         "scope_fidelity_report.v0.2"
       ],
       "surface_id": "lifecycle_review_fixture"
+    },
+    {
+      "commands": [
+        "sclite review examples/review-bundle --format json",
+        "sclite export-review-bundle examples/review-bundle --format markdown"
+      ],
+      "kind": "review_bundle_directory",
+      "path": "examples/review-bundle",
+      "public_safe": true,
+      "purpose": "Validate and export a canonical SCLite v0.5 review bundle.",
+      "schemas": [
+        "review_record.v0.1",
+        "artifact_chain_manifest.v0.2"
+      ],
+      "surface_id": "review_bundle_fixture"
     }
   ]
 }

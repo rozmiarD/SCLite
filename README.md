@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 0.3.5](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
+[![Package: sclite-core](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -9,15 +9,15 @@
 Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
 
 
-SCLite's canonical v0.2 lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The published 0.3.5
-line adds scoped-ticket review and receipt-bounded-evidence checks on top of that
-lifecycle.
+SCLite's canonical lifecycle separates what an agent wants, what policy allows,
+what was approved, what was executed, and what can be proven. The published 0.5.0
+line adds review bundles, lifecycle review records, trust/carrier references,
+scoped-ticket review, and receipt-bounded-evidence checks on top of that lifecycle.
 
 ## Status
 
-- Version: `0.3.5`
-- Status: **published 0.3.x scoped-ticket and receipt-bounded-evidence line**
+- Version: `0.5.0`
+- Status: **published 0.5.x review-bundle line**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -90,7 +90,7 @@ SCLite core is limited to:
 define / validate / hash / bind / redact / verify
 ```
 
-The published 0.3.5 scoped-ticket surface bounds what a runtime may consume, and `verify-ticket-use` checks that public-safe evidence stays inside the linked receipt. See [`ROADMAP.md`](ROADMAP.md).
+The published 0.5.0 review-bundle surface packages lifecycle artifacts, review records, and verification receipts for local public-safe review. The scoped-ticket surface still bounds what a runtime may consume, and `verify-ticket-use` checks that public-safe evidence stays inside the linked receipt. See [`ROADMAP.md`](ROADMAP.md).
 
 It provides:
 
@@ -101,6 +101,7 @@ It provides:
 - ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
 - digest-bound trust/carrier profile reference checks (`validate-trust-profile`, `validate-carrier-profile`);
 - lifecycle review records and Scope Fidelity v0.2 checks (`review-lifecycle`);
+- canonical review-bundle validation and Markdown export (`review`, `export-review-bundle`);
 - redaction/public-snapshot helper artifacts;
 - a CLI for local validation and review fixtures;
 - legacy v0.1 compatibility fixtures and schemas.
@@ -140,6 +141,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 - [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
+- [`docs/REVIEW_BUNDLES.md`](docs/REVIEW_BUNDLES.md) — canonical v0.5 review-bundle shape and CLI.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
 - [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
 - [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.
@@ -234,6 +236,13 @@ sclite scope-fidelity \
   --fail-on review
 ```
 
+Review and export the v0.5 review-bundle fixture:
+
+```bash
+sclite review examples/review-bundle --format json
+sclite export-review-bundle examples/review-bundle --format markdown
+```
+
 Emit a validation receipt for the proof fixture:
 
 ```bash
@@ -270,12 +279,23 @@ result = verify_ticket_use(ticket, execution_contract, execution_receipt, eviden
 assert "evidence_claims_bounded_by_receipt" in result["checks"]
 ```
 
+Review a canonical v0.5 bundle:
+
+```python
+from sclite.bundles import review_bundle
+
+record = review_bundle("examples/review-bundle")
+assert record["artifact_type"] == "review_record"
+```
+
 ## Repository layout
 
 ```text
 sclite/                         Python package
 sclite/schemas/                 Packaged schemas
 sclite/examples/contract-lifecycle-v0.2/
+sclite/examples/review-bundle/  Packaged v0.5 review-bundle fixture
+examples/review-bundle/         Public v0.5 review-bundle fixture
 examples/security-contract-proof/ Legacy v0.1 public-safe proof fixture
 schemas/                        Source schema copies
 SPEC.md                         v0.2 draft specification

@@ -66,6 +66,15 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'commands': ['sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json'],
             'public_safe': True,
         },
+        {
+            'surface_id': 'review_bundle_fixture',
+            'path': 'examples/review-bundle',
+            'kind': 'review_bundle_directory',
+            'purpose': 'Validate and export a canonical SCLite v0.5 review bundle.',
+            'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2'],
+            'commands': ['sclite review examples/review-bundle --format json', 'sclite export-review-bundle examples/review-bundle --format markdown'],
+            'public_safe': True,
+        },
     ]
     return {
         'artifact_type': PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE,

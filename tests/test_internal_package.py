@@ -8,6 +8,7 @@ from pathlib import Path
 import sclite
 from sclite import artifacts
 from sclite.redaction import build_default_redaction_policy, build_redaction_receipt, redact_prepared_spec
+from sclite.bundles import review_bundle
 from sclite.surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
 from sclite.validation import validate_fixture_dir
 
@@ -20,6 +21,7 @@ PACKAGE_REDACTION_RECEIPT_FIXTURE = PACKAGE_ROOT / 'examples' / 'redaction-recei
 PACKAGE_SURFACE_INDEX_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-validation-surface-index' / 'public_validation_surface_index.json'
 PACKAGE_SNAPSHOT_MANIFEST_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-snapshot-manifest' / 'public_snapshot_manifest.json'
 PACKAGE_REVIEW_RECORD_FIXTURE = PACKAGE_ROOT / 'examples' / 'lifecycle-review' / 'review_record.json'
+PACKAGE_REVIEW_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'review-bundle'
 
 
 def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
@@ -133,6 +135,12 @@ def test_review_record_schema_validates_packaged_fixture() -> None:
     artifacts.validate_artifact(record, 'review_record.v0.1')
     assert record['artifact_type'] == 'review_record'
     assert record['summary']['scope_fidelity_verdict'] == 'pass'
+
+
+def test_packaged_review_bundle_can_be_reviewed() -> None:
+    record = review_bundle(PACKAGE_REVIEW_BUNDLE_DIR)
+    artifacts.validate_artifact(record, 'review_record.v0.1')
+    assert record['review_profile'] == 'sclite-review-bundle-v0.1'
 
 
 def test_surface_and_manifest_builders_return_schema_valid_artifacts() -> None:

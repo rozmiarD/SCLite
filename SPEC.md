@@ -1,6 +1,6 @@
 # SCLite Draft Specification
 
-Status: **published v0.3.5 scoped-ticket and receipt-bounded-evidence line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification. Current package release is `sclite-core==0.3.5`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
+Status: **published v0.5.0 review-bundle line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification; the v0.5 surface packages lifecycle artifacts into review bundles. Current package release is `sclite-core==0.5.0`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity/review layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
 
 Core sentence:
 
@@ -125,6 +125,32 @@ The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence s
 - `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket, including explicit receipt-source binding and conservative completed-execution/network claim bounds.
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
+
+## v0.5 Review Bundles
+
+The `0.5.0` line adds a canonical review-bundle shape:
+
+```text
+review_bundle/
+  01_intent_contract.json
+  02_policy_decision.json
+  03_execution_contract.json
+  04_execution_ticket.json
+  05_execution_receipt.json
+  06_evidence_contract.json
+  artifact_chain_manifest.json
+  REVIEW.md
+  verification_receipt.json
+```
+
+Review bundles are validated with:
+
+```bash
+sclite review examples/review-bundle --format json
+sclite export-review-bundle examples/review-bundle --format markdown
+```
+
+A bundle review emits a `review_record.v0.1` with conservative `pass` / `review` / `fail` verdicts. This is still static artifact review only: it does not execute tools, decide authorization, prove signer identity, or verify carrier delivery.
 
 ## Legacy v0.1 Compatibility
 

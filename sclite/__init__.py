@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '0.3.5'
+__version__ = '0.5.0'
 
 from .artifacts import (
     APPROVED_EXECUTION_SPEC_FILE,
@@ -43,6 +43,17 @@ from .artifacts import (
     validate_schema_ref,
     validate_trace,
 )
+from .bundles import (
+    REVIEW_BUNDLE_MANIFEST_FILE,
+    REVIEW_BUNDLE_MARKDOWN_FILE,
+    REVIEW_BUNDLE_RECEIPT_FILE,
+    REVIEW_BUNDLE_REQUIRED_FILES,
+    ReviewBundleError,
+    export_review_bundle_markdown,
+    review_bundle,
+    review_bundle_summary,
+    validate_review_bundle_shape,
+)
 from .integrity import (
     CHAIN_CANONICALIZATION_VERSION,
     CHAIN_HASH_ALGORITHM,
@@ -61,13 +72,24 @@ from .redaction import (
     redact_prepared_spec,
     sanitize_public_artifact,
 )
+from .review import (
+    REVIEW_RECORD_SCHEMA,
+    REVIEW_RECORD_SCHEMA_REF,
+    ReviewRecordError,
+    build_review_record_from_manifest,
+    review_record_markdown,
+)
 from .scope_fidelity import (
+    LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
+    LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
     SCOPE_FIDELITY_ARTIFACT_TYPE,
     SCOPE_FIDELITY_SCHEMA_REF,
     SCOPE_FIDELITY_SCHEMA_VERSION,
+    build_lifecycle_scope_fidelity_report,
     build_scope_fidelity_report,
     build_scope_fidelity_report_from_approved_spec,
     summarize_scope_fidelity,
+    validate_lifecycle_scope_fidelity_report,
     validate_scope_fidelity_report,
 )
 from .tickets import (

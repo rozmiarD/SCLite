@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Sequence
 
 from .artifacts import build_artifact_hash, validate_artifact
+from .bundles import ReviewBundleError, export_review_bundle_markdown, review_bundle, review_bundle_summary
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .profiles import (
     ProfileReferenceError,
@@ -141,6 +142,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     review_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     review_cmd.add_argument('--fail-on', choices=['none', 'fail', 'review'], default='fail')
     review_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
+
+    bundle_review_cmd = sub.add_parser('review', help='review a canonical SCLite review_bundle directory')
+    bundle_review_cmd.add_argument('bundle_dir', help='path to review_bundle directory')
+    bundle_review_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    bundle_review_cmd.add_argument('--fail-on', choices=['none', 'fail', 'review'], default='fail')
+    bundle_review_cmd.add_argument('--format', choices=['json', 'markdown', 'summary'], default='json')
+
+    export_review_cmd = sub.add_parser('export-review-bundle', help='export a canonical SCLite review_bundle as Markdown or JSON')
+    export_review_cmd.add_argument('bundle_dir', help='path to review_bundle directory')
+    export_review_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    export_review_cmd.add_argument('--format', choices=['markdown', 'json'], default='markdown')
+    export_review_cmd.add_argument('--output', help='write output to this path instead of stdout')
 
     receipt_cmd = sub.add_parser('validation-receipt', help='validate an SCL fixture directory and emit a validation receipt')
     receipt_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
@@ -355,6 +368,39 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(json.dumps(record, indent=2, sort_keys=True))
         return _scope_fidelity_exit_code(str(record['verdict']), str(args.fail_on))
+
+    if args.command == 'review':
+        try:
+            record = review_bundle(
+                Path(str(args.bundle_dir)),
+                strict_jsonschema=bool(args.strict_jsonschema),
+            )
+        except (ReviewBundleError, AssertionError, ValueError) as exc:
+            print(f'review_bundle_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'markdown':
+            print(export_review_bundle_markdown(record), end='')
+        elif args.format == 'summary':
+            print(review_bundle_summary(record))
+        else:
+            print(json.dumps(record, indent=2, sort_keys=True))
+        return _scope_fidelity_exit_code(str(record['verdict']), str(args.fail_on))
+
+    if args.command == 'export-review-bundle':
+        try:
+            record = review_bundle(
+                Path(str(args.bundle_dir)),
+                strict_jsonschema=bool(args.strict_jsonschema),
+            )
+        except (ReviewBundleError, AssertionError, ValueError) as exc:
+            print(f'export_review_bundle_failed:{exc}', file=sys.stderr)
+            return 1
+        payload = json.dumps(record, indent=2, sort_keys=True) + '\n' if args.format == 'json' else export_review_bundle_markdown(record)
+        if args.output:
+            Path(str(args.output)).write_text(payload, encoding='utf-8')
+        else:
+            print(payload, end='')
+        return 0
 
     if args.command == 'validation-receipt':
         forwarded = [str(args.fixture_dir), '--format', args.format]

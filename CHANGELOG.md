@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 - Review bundles
+
+### Review bundles
+
+- Publishes the SCLite review-bundle line as `sclite-core==0.5.0`.
+- Added canonical `review_bundle/` validation with numbered lifecycle artifacts, `artifact_chain_manifest.json`, `REVIEW.md`, and `verification_receipt.json`.
+- Added `sclite review` and `sclite export-review-bundle` for local review-bundle validation and Markdown export.
+- Added packaged and source review-bundle fixtures while preserving conservative `pass` / `review` / `fail` verdicts.
 
 ### Trust and carrier profiles
 
