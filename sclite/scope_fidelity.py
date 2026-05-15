@@ -166,3 +166,123 @@ def build_scope_fidelity_report_from_approved_spec(approved_spec: Mapping[str, A
 
 def validate_scope_fidelity_report(report: Mapping[str, Any]) -> None:
     validate_schema_ref(SCOPE_FIDELITY_SCHEMA_REF, report)
+
+LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION = 'v0.2'
+LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF = 'schemas/scope_fidelity_report.v0.2.schema.json'
+
+
+def _target_entry(role: str, artifact: Mapping[str, Any]) -> Dict[str, Any]:
+    target = ''
+    host = ''
+    source = 'none'
+    if role == 'intent_contract':
+        raw_target = artifact.get('target') if isinstance(artifact.get('target'), Mapping) else {}
+        target = _safe_str(raw_target.get('uri') or raw_target.get('host') or '')
+        host = extract_host(raw_target.get('host') or raw_target.get('uri') or '')
+        source = 'target'
+    elif role == 'policy_decision':
+        raw_scope = artifact.get('scope') if isinstance(artifact.get('scope'), Mapping) else {}
+        target = _safe_str(raw_scope.get('target') or raw_scope.get('target_host') or '')
+        host = extract_host(raw_scope.get('target_host') or raw_scope.get('target') or '')
+        source = 'scope'
+    elif role == 'execution_contract':
+        raw_binding = artifact.get('target_binding') if isinstance(artifact.get('target_binding'), Mapping) else {}
+        target = _safe_str(raw_binding.get('target') or raw_binding.get('target_host') or '')
+        host = extract_host(raw_binding.get('target_host') or raw_binding.get('target') or '')
+        source = 'target_binding'
+    elif role == 'execution_ticket':
+        raw_scope = artifact.get('scope_binding') if isinstance(artifact.get('scope_binding'), Mapping) else {}
+        target = _safe_str(raw_scope.get('target_ref') or raw_scope.get('target_host') or '')
+        host = extract_host(raw_scope.get('target_host') or raw_scope.get('target_ref') or '')
+        source = 'scope_binding'
+    status = 'explicit' if host else 'linked_no_explicit_target'
+    return {
+        'role': role,
+        'artifact_type': _safe_str(artifact.get('artifact_type')),
+        'target': target,
+        'target_host': host,
+        'source': source,
+        'status': status,
+    }
+
+
+def build_lifecycle_scope_fidelity_report(
+    artifacts_by_role: Mapping[str, Mapping[str, Any]],
+    *,
+    source_artifact: str = '',
+) -> Dict[str, Any]:
+    """Build lifecycle-aware Scope Fidelity v0.2 from local artifacts.
+
+    The v0.2 report compares explicit target hosts across intent, policy,
+    execution contract, and scoped ticket artifacts. Receipt and evidence
+    artifacts are treated as digest-linked lifecycle artifacts rather than
+    independent target authorities unless they expose an explicit target.
+    """
+    canonical_roles = [
+        'intent_contract',
+        'policy_decision',
+        'execution_contract',
+        'execution_ticket',
+        'execution_receipt',
+        'evidence_contract',
+    ]
+    entries: List[Dict[str, Any]] = []
+    missing_roles: List[str] = []
+    for role in canonical_roles:
+        artifact = artifacts_by_role.get(role)
+        if isinstance(artifact, Mapping):
+            entries.append(_target_entry(role, artifact))
+        else:
+            missing_roles.append(role)
+    explicit_hosts = [entry['target_host'] for entry in entries if entry.get('target_host')]
+    unique_hosts: List[str] = []
+    for host in explicit_hosts:
+        if host not in unique_hosts:
+            unique_hosts.append(host)
+    mismatched = sorted(unique_hosts) if len(unique_hosts) > 1 else []
+    if mismatched or missing_roles:
+        verdict = 'fail' if mismatched else 'review'
+        status = 'cross_role_target_mismatch' if mismatched else 'incomplete_lifecycle'
+        reason = f"mismatched lifecycle target hosts: {','.join(mismatched)}" if mismatched else f"missing lifecycle roles: {','.join(missing_roles)}"
+    elif unique_hosts:
+        verdict = 'pass'
+        status = 'consistent'
+        reason = 'all explicit lifecycle target hosts match'
+    else:
+        verdict = 'review'
+        status = 'no_explicit_targets'
+        reason = 'no explicit target hosts found in lifecycle artifacts'
+    report = {
+        'artifact_type': SCOPE_FIDELITY_ARTIFACT_TYPE,
+        'schema_version': LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
+        'schema_ref': LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
+        'generated_at': _utc_now(),
+        'source_artifact': _safe_str(source_artifact),
+        'verdict': verdict,
+        'lifecycle_targets': entries,
+        'summary': {
+            'target_hosts': unique_hosts,
+            'mismatched_hosts_detected': mismatched,
+            'missing_roles': missing_roles,
+            'lifecycle_target_status': status,
+            'reason': reason,
+        },
+        'public_safety': {
+            'live_target_execution': False,
+            'protocol_adapter_work': False,
+            'public_push': False,
+            'static_analysis_only': True,
+        },
+        'limitations': [
+            'static_lifecycle_target_review_only',
+            'does_not_resolve_dns_redirects_or_ownership',
+            'does_not_prove_legal_authorization',
+            'does_not_execute_tools',
+            'receipt_and_evidence_targets_are_inferred_from_digest_linked_lifecycle_context',
+        ],
+    }
+    return sanitize_public_artifact(report)
+
+
+def validate_lifecycle_scope_fidelity_report(report: Mapping[str, Any], *, strict_jsonschema: bool = False) -> None:
+    validate_schema_ref(LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF, report, strict_jsonschema=strict_jsonschema)

@@ -19,6 +19,7 @@ PACKAGE_REDACTION_POLICY_FIXTURE = PACKAGE_ROOT / 'examples' / 'redaction-policy
 PACKAGE_REDACTION_RECEIPT_FIXTURE = PACKAGE_ROOT / 'examples' / 'redaction-receipt' / 'redaction_receipt.json'
 PACKAGE_SURFACE_INDEX_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-validation-surface-index' / 'public_validation_surface_index.json'
 PACKAGE_SNAPSHOT_MANIFEST_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-snapshot-manifest' / 'public_snapshot_manifest.json'
+PACKAGE_REVIEW_RECORD_FIXTURE = PACKAGE_ROOT / 'examples' / 'lifecycle-review' / 'review_record.json'
 
 
 def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
@@ -125,6 +126,13 @@ def test_public_surface_index_and_snapshot_manifest_schemas_validate_fixtures() 
     artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.1')
     assert index['summary']['surface_count'] >= 3
     assert manifest['summary']['hashed_file_count'] == manifest['summary']['file_count']
+
+
+def test_review_record_schema_validates_packaged_fixture() -> None:
+    record = json.loads(PACKAGE_REVIEW_RECORD_FIXTURE.read_text(encoding='utf-8'))
+    artifacts.validate_artifact(record, 'review_record.v0.1')
+    assert record['artifact_type'] == 'review_record'
+    assert record['summary']['scope_fidelity_verdict'] == 'pass'
 
 
 def test_surface_and_manifest_builders_return_schema_valid_artifacts() -> None:

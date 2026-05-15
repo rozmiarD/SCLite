@@ -8,6 +8,13 @@
 - Added `sclite validate-trust-profile` and `sclite validate-carrier-profile` to validate profile shape and subject-artifact digest binding only.
 - Added public-safe fixtures and docs for trust/carrier references while preserving SCLite's no-PKI, no-trust-authority, no-adapter, and no-runtime boundary.
 
+### Lifecycle review records
+
+- Started the SCLite 0.4.5 lifecycle-review line with `scope_fidelity_report.v0.2` and `review_record.v0.1` schemas.
+- Added lifecycle-aware Scope Fidelity checks across intent, policy, execution contract, ticket, receipt, and evidence artifacts.
+- Added `sclite review-lifecycle` to emit static public-safe lifecycle review records over artifact-chain manifests.
+- Added public-safe lifecycle review fixtures and docs while preserving conservative `pass` / `review` / `fail` verdicts.
+
 ## 0.3.5 - Scoped tickets and receipt-bounded evidence
 
 - Publishes the post-`0.2.1` scoped-ticket and receipt-bounded-evidence line as `sclite-core==0.3.5`.
