@@ -74,6 +74,8 @@ sclite = [
   "examples/contract-lifecycle-v0.2/*.md",
   "examples/scoped-ticket-v0.3/*.json",
   "examples/scoped-ticket-v0.3/*.md",
+  "examples/trust-carrier-profiles/*.json",
+  "examples/trust-carrier-profiles/*.md",
 ]
 
 [tool.pytest.ini_options]

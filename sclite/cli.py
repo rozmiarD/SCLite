@@ -8,6 +8,12 @@ from typing import Any, Dict, Sequence
 
 from .artifacts import build_artifact_hash, validate_artifact
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .profiles import (
+    ProfileReferenceError,
+    profile_ref_summary,
+    validate_carrier_profile_ref,
+    validate_trust_profile_ref,
+)
 from .redaction import build_default_redaction_policy, build_redaction_receipt
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
@@ -87,6 +93,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     ticket_use_cmd.add_argument('--evidence-contract', help='path to evidence_contract.json')
     ticket_use_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     ticket_use_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    trust_profile_cmd = sub.add_parser('validate-trust-profile', help='validate a digest-bound TrustProfileRef sidecar')
+    trust_profile_cmd.add_argument('profile_ref', help='path to trust_profile_ref.json')
+    trust_profile_cmd.add_argument('--subject', required=True, help='path to the subject artifact the profile reference binds')
+    trust_profile_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    trust_profile_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    carrier_profile_cmd = sub.add_parser('validate-carrier-profile', help='validate a digest-bound CarrierProfileRef sidecar')
+    carrier_profile_cmd.add_argument('profile_ref', help='path to carrier_profile_ref.json')
+    carrier_profile_cmd.add_argument('--subject', required=True, help='path to the subject artifact the profile reference binds')
+    carrier_profile_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    carrier_profile_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     policy_cmd = sub.add_parser('redaction-policy', help='emit the default public-safe RedactionPolicy descriptor')
     policy_cmd.add_argument('--policy-id', default='sclite-public-safe-v0.1')
@@ -217,6 +235,28 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             print(f"ticket_use_ok:{result['ticket_id']}:{result['receipt_id']}:{len(result['checks'])}")
+        return 0
+
+    if args.command in {'validate-trust-profile', 'validate-carrier-profile'}:
+        profile_ref_path = Path(str(args.profile_ref)).resolve()
+        subject_path = Path(str(args.subject)).resolve()
+        profile_ref = _load_json_object(profile_ref_path)
+        subject = _load_json_object(subject_path)
+        try:
+            if args.command == 'validate-trust-profile':
+                checks = validate_trust_profile_ref(profile_ref, subject, strict_jsonschema=bool(args.strict_jsonschema))
+                label = 'trust_profile_ref_ok'
+            else:
+                checks = validate_carrier_profile_ref(profile_ref, subject, strict_jsonschema=bool(args.strict_jsonschema))
+                label = 'carrier_profile_ref_ok'
+        except (ProfileReferenceError, AssertionError) as exc:
+            print(f'profile_ref_failed:{exc}', file=sys.stderr)
+            return 1
+        summary = profile_ref_summary(profile_ref)
+        if args.format == 'json':
+            print(json.dumps({'status': 'passed', 'checks': checks, 'summary': summary}, indent=2, sort_keys=True))
+        else:
+            print(f"{label}:{summary['profile']}:{summary['subject_artifact_digest']}:{len(checks)}")
         return 0
 
     if args.command == 'redaction-policy':

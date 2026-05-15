@@ -99,6 +99,7 @@ It provides:
 - v0.2 lifecycle/chain verification;
 - scoped-ticket review helpers (`validate-ticket`, `explain-ticket`);
 - ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
+- digest-bound trust/carrier profile reference checks (`validate-trust-profile`, `validate-carrier-profile`);
 - redaction/public-snapshot helper artifacts;
 - a CLI for local validation and review fixtures;
 - legacy v0.1 compatibility fixtures and schemas.
@@ -135,6 +136,8 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 ## Project docs
 
 - [`ROADMAP.md`](ROADMAP.md) — planned accountability-layer evolution using PEP 440-compatible milestone labels.
+- [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
+- [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
 - [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
 - [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.

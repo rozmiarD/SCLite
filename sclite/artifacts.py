@@ -64,6 +64,8 @@ SCHEMA_FILES = {
     'execution_receipt.v0.2': 'execution_receipt.v0.2.schema.json',
     'evidence_contract.v0.2': 'evidence_contract.v0.2.schema.json',
     'artifact_chain_manifest.v0.2': 'artifact_chain_manifest.v0.2.schema.json',
+    'trust_profile_ref.v0.1': 'trust_profile_ref.v0.1.schema.json',
+    'carrier_profile_ref.v0.1': 'carrier_profile_ref.v0.1.schema.json',
 }
 
 
