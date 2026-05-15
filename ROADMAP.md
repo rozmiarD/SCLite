@@ -10,7 +10,19 @@ Core positioning:
 AI can propose.
 Scoped tickets bound what a runtime may consume.
 Receipts bound what evidence may claim.
+Review bundles make the lifecycle inspectable.
 ```
+
+Ecosystem positioning:
+
+```text
+SCLite     = contract / proof / review layer
+GovEngine  = deterministic governed-runtime kernel that consumes SCLite
+Ravenclaw  = security-research runtime/profile over GovEngine + SCLite
+Tecrax     = future infrastructure-operations runtime/profile over GovEngine + SCLite
+```
+
+SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
 ## Current baseline: 0.3.5
 
@@ -22,7 +34,7 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.2 line is an audit-proof lifecycle and integrity layer. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, and digest bindings between intent, policy, execution contract, ticket, receipt, and evidence.
+The v0.3.5 line is an audit-proof lifecycle, scoped-ticket, and receipt-bounded-evidence layer. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, and digest bindings between intent, policy, execution contract, ticket, receipt, and evidence.
 
 ## Versioning discipline
 
@@ -57,7 +69,14 @@ SCLite does not own:
 - raw evidence storage;
 - runtime orchestration.
 
-GovEngine or another runtime may consume SCLite artifacts and decide policy, trust, approval, execution, revocation, and runtime enforcement. Ravenclaw is the reference governed runtime/proof implementation in the current project family.
+GovEngine or another runtime may consume SCLite artifacts and decide policy, trust, approval, execution, revocation, and runtime enforcement. Ravenclaw is the reference security runtime/proof implementation in the current project family; Tecrax is the reserved name for a future governed infrastructure-operations runtime/profile.
+
+Boundary invariant:
+
+```text
+SCLite defines and verifies proof artifacts.
+SCLite does not decide whether the world may be changed.
+```
 
 ## 0.2.5 — Baseline discipline and strict validation bridge
 
@@ -158,6 +177,8 @@ This milestone is the main accountability upgrade: SCLite should prevent AI-assi
 
 Goal: define how SCLite artifacts can be signed, transported, and externally verified without making SCLite a PKI, adapter, or trust authority.
 
+This milestone should support GovEngine and future domain runtimes such as Ravenclaw and Tecrax by binding trust/carrier references to artifact digests. It should not add runtime adapters or trust decisions to SCLite.
+
 Principle:
 
 ```text
@@ -181,6 +202,8 @@ Planned work:
    - `ci_artifact_bundle`
    - `github_artifact`
    - `govengine_bundle`
+   - `ravenclaw_review_bundle`
+   - `tecrax_review_bundle`
    - `openclaw_carrier_payload`
    - `mcp_message_ref`
    - `a2a_message_ref`
@@ -206,7 +229,7 @@ Planned work:
    - `pass`
    - `review`
    - `fail`
-4. Draft a review result shape that aggregates schema validation, chain integrity, lifecycle binding, scoped ticket semantics, ticket use, receipt-bounded evidence, Scope Fidelity, trust/carrier profile checks, and non-claims.
+4. Draft a review result shape that aggregates schema validation, chain integrity, lifecycle binding, scoped ticket semantics, ticket use, receipt-bounded evidence, Scope Fidelity, trust/carrier profile checks, failure catalog entries, and non-claims.
 
 ## 0.5.0 — Review Bundles and adoption demos
 
@@ -242,6 +265,7 @@ examples/ci-dry-run/
 examples/local-admin-change/
 examples/security-review-without-runtime/
 examples/govengine-compatible-runtime-stub/
+examples/tecrax-local-admin-change/
 ```
 
 Integrity drill examples should demonstrate concrete failure modes:
