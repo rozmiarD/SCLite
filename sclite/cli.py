@@ -15,6 +15,7 @@ from .profiles import (
     validate_trust_profile_ref,
 )
 from .redaction import build_default_redaction_policy, build_redaction_receipt
+from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
 from .tickets import (
@@ -133,6 +134,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     scope_cmd.add_argument('--source-artifact', default='', help='source artifact label/path for the report')
     scope_cmd.add_argument('--fail-on', choices=['none', 'fail', 'review'], default='fail', help='return exit code 2 when verdict reaches this threshold')
     scope_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
+
+    review_cmd = sub.add_parser('review-lifecycle', help='emit a static lifecycle ReviewRecord for an artifact-chain manifest')
+    review_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
+    review_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
+    review_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    review_cmd.add_argument('--fail-on', choices=['none', 'fail', 'review'], default='fail')
+    review_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
 
     receipt_cmd = sub.add_parser('validation-receipt', help='validate an SCL fixture directory and emit a validation receipt')
     receipt_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
@@ -331,6 +339,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(json.dumps(report, indent=2, sort_keys=True))
         return _scope_fidelity_exit_code(str(report['verdict']), str(args.fail_on))
+
+    if args.command == 'review-lifecycle':
+        try:
+            record = build_review_record_from_manifest(
+                Path(str(args.manifest)),
+                root=Path(str(args.root)).resolve() if args.root else None,
+                strict_jsonschema=bool(args.strict_jsonschema),
+            )
+        except (ReviewRecordError, AssertionError, ValueError) as exc:
+            print(f'review_lifecycle_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'markdown':
+            print(review_record_markdown(record), end='')
+        else:
+            print(json.dumps(record, indent=2, sort_keys=True))
+        return _scope_fidelity_exit_code(str(record['verdict']), str(args.fail_on))
 
     if args.command == 'validation-receipt':
         forwarded = [str(args.fixture_dir), '--format', args.format]

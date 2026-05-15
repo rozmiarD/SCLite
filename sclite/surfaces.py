@@ -57,6 +57,15 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'commands': ['sclite validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json'],
             'public_safe': True,
         },
+        {
+            'surface_id': 'lifecycle_review_fixture',
+            'path': 'examples/lifecycle-review/review_record.json',
+            'kind': 'json_artifact',
+            'purpose': 'Validate a static lifecycle ReviewRecord aggregate with Scope Fidelity v0.2.',
+            'schemas': ['review_record.v0.1', 'scope_fidelity_report.v0.2'],
+            'commands': ['sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json'],
+            'public_safe': True,
+        },
     ]
     return {
         'artifact_type': PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE,

@@ -14,8 +14,8 @@
   },
   "schema_version": "v0.1",
   "summary": {
-    "public_safe_surface_count": 3,
-    "surface_count": 3
+    "public_safe_surface_count": 4,
+    "surface_count": 4
   },
   "surfaces": [
     {
@@ -60,6 +60,20 @@
         "scope_fidelity_report.v0.1"
       ],
       "surface_id": "scope_fidelity_fixture"
+    },
+    {
+      "commands": [
+        "sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json"
+      ],
+      "kind": "json_artifact",
+      "path": "examples/lifecycle-review/review_record.json",
+      "public_safe": true,
+      "purpose": "Validate a static lifecycle ReviewRecord aggregate with Scope Fidelity v0.2.",
+      "schemas": [
+        "review_record.v0.1",
+        "scope_fidelity_report.v0.2"
+      ],
+      "surface_id": "lifecycle_review_fixture"
     }
   ]
 }
