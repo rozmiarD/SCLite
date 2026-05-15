@@ -1,0 +1,39 @@
+{
+  "artifact_type": "trust_profile_ref",
+  "created_at": "2026-05-15T22:00:00+00:00",
+  "integrity": {
+    "binding_mode": "subject_descriptor_digest",
+    "subject_artifact_digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc"
+  },
+  "links": {
+    "subject": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2698,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "role": "execution_ticket"
+    }
+  },
+  "non_claims": [
+    "does_not_prove_signer_identity",
+    "does_not_decide_trust",
+    "does_not_verify_revocation"
+  ],
+  "profile_ref_id": "govengine-integration-trust-ref-001",
+  "reference": {
+    "digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc",
+    "kind": "local_digest_reference"
+  },
+  "schema_ref": "schemas/trust_profile_ref.v0.1.schema.json",
+  "schema_version": "v0.1",
+  "trust_profile": "digest_only",
+  "verification_boundary": {
+    "external_verifier_decides_trust": true,
+    "sclite_validates_digest_binding_only": true
+  }
+}

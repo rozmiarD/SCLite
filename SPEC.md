@@ -1,6 +1,6 @@
 # SCLite Draft Specification
 
-Status: **published v0.5.0 review-bundle line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification; the v0.5 surface packages lifecycle artifacts into review bundles. Current package release is `sclite-core==0.5.0`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity/review layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
+Status: **published v0.5.1 review-bundle / GovEngine integration-readiness line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification; the v0.5 surface packages lifecycle artifacts into review bundles. Current package release is `sclite-core==0.5.1`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity/review layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
 
 Core sentence:
 
@@ -111,8 +111,8 @@ SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
 6. `policy_decision` binds the correct `intent_contract` digest;
 7. `execution_contract` binds the correct intent and policy decision digests;
 8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;
-9. `execution_receipt` binds the correct `execution_ticket` digest;
-10. `evidence_contract` binds the correct `execution_receipt` digest.
+9. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
+10. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
 
 This is lightweight cryptographic integrity, not identity trust. It proves the verifier saw the same canonical artifact bytes and lifecycle links; it does not prove who created them, whether a human was legally authorized, or whether a runtime enforced them.
 
@@ -128,7 +128,7 @@ These checks remain local artifact verification. They do not execute tools, deci
 
 ## v0.4 Trust/Carrier References and Review Records
 
-The `0.5.0` package includes the v0.4-oriented trust/carrier and lifecycle-review surfaces:
+The `0.5.x` package line includes the v0.4-oriented trust/carrier and lifecycle-review surfaces:
 
 - `trust_profile_ref.v0.1` and `sclite validate-trust-profile` validate digest-bound trust sidecars without proving signer identity, revocation, or PKI trust.
 - `carrier_profile_ref.v0.1` and `sclite validate-carrier-profile` validate digest-bound carrier sidecars without proving delivery or adapter correctness.
@@ -138,7 +138,7 @@ These surfaces reserve stable vocabulary for external runtimes and verifiers. SC
 
 ## v0.5 Review Bundles
 
-The `0.5.0` line adds a canonical review-bundle shape:
+The `0.5.x` line adds a canonical review-bundle shape:
 
 ```text
 review_bundle/
@@ -159,6 +159,8 @@ Review bundles are validated with:
 sclite review examples/review-bundle --format json
 sclite export-review-bundle examples/review-bundle --format markdown
 ```
+
+`examples/govengine-integration/` is the 0.5.1 downstream fixture: it combines the canonical bundle shape with a v0.3 scoped ticket, receipt-bounded evidence, and trust/carrier sidecars for GovEngine consumption. `examples/bad-review-bundle-cross-host/` is an intentional negative fixture for cross-role target drift.
 
 A bundle review emits a `review_record.v0.1` with conservative `pass` / `review` / `fail` verdicts. This is still static artifact review only: it does not execute tools, decide authorization, prove signer identity, or verify carrier delivery.
 
@@ -205,7 +207,7 @@ SCLite core does **not** include:
 SCLite core capabilities are intentionally limited to:
 
 ```text
-define / validate / hash / bind / redact / verify
+define / validate / hash / bind / redact / verify / review
 ```
 
 Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execute or dry-run tools, store raw evidence, and expose carrier adapters. Those responsibilities stay outside SCLite.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sclite-core"
-version = "0.5.0"
+version = "0.5.1"
 description = "Lightweight Security Contract Layer lifecycle artifacts, validation, and cryptographic integrity chain fixtures"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -80,6 +80,10 @@ sclite = [
   "examples/lifecycle-review/*.md",
   "examples/review-bundle/*.json",
   "examples/review-bundle/*.md",
+  "examples/govengine-integration/*.json",
+  "examples/govengine-integration/*.md",
+  "examples/bad-review-bundle-cross-host/*.json",
+  "examples/bad-review-bundle-cross-host/*.md",
 ]
 
 [tool.pytest.ini_options]

@@ -1,0 +1,100 @@
+{
+  "approval": {
+    "approval_id": "approval-demo-001",
+    "approver_kind": "fixture_reviewer",
+    "status": "approved_for_dry_run"
+  },
+  "artifact_type": "execution_ticket",
+  "created_at": "2026-05-13T20:54:00+00:00",
+  "execution_limits": {
+    "max_runs": 1,
+    "mode": "dry_run",
+    "one_shot": true
+  },
+  "integrity": {
+    "profile": "sclite-v0.3-scoped-ticket-integrity",
+    "ticket_binds_execution_contract_digest": "fde47cd31a532e4dbf2ff0206c165e254e33700e5d97902ef0b2398f3b69cb1d"
+  },
+  "links": {
+    "execution_contract": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_contract",
+        "canonical_bytes": 1450,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "fde47cd31a532e4dbf2ff0206c165e254e33700e5d97902ef0b2398f3b69cb1d",
+        "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "execution_contract"
+    },
+    "intent": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "intent_contract",
+        "canonical_bytes": 803,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35a0f49b424851ef7a2864705bfb9e5411b049641f5734456bf45068293d492f",
+        "schema_ref": "schemas/intent_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "intent_contract"
+    },
+    "policy_decision": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "policy_decision",
+        "canonical_bytes": 1005,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "9a9ffd9a326f11bc0a8389f74d29c77e9e256ca1fbba0f299bfc366fde2569c1",
+        "schema_ref": "schemas/policy_decision.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "policy_decision"
+    }
+  },
+  "non_claims": [
+    "does_not_prove_legal_authorization",
+    "does_not_prove_signer_identity",
+    "does_not_prove_runtime_enforcement",
+    "does_not_prove_live_vulnerability_evidence"
+  ],
+  "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+  "schema_version": "v0.3",
+  "scope_binding": {
+    "mode": "dry_run",
+    "normalized_args_digest": "sha256:963c15e8272d1a19906c0c551119c382bebb24485835ce206fab6715e68a964f",
+    "target_host": "example.com",
+    "target_kind": "host",
+    "target_ref": "host:example.com",
+    "tool": "http_probe"
+  },
+  "signature": {
+    "identity_signature_required": false,
+    "mode": "not_signed_integrity_only_fixture",
+    "note": "SCLite validates scoped ticket shape and bindings; signer trust remains external."
+  },
+  "spend_limits": {
+    "max_uses": 1,
+    "network_execution_allowed": false,
+    "one_shot": true,
+    "requires_evidence_contract": true,
+    "requires_receipt": true
+  },
+  "subject_binding": {
+    "issued_for_actor": "agent:ravenclaw-planner",
+    "session_ref": "session:public-safe-fixture",
+    "usable_by_runtime": "runtime:govengine-demo-executor"
+  },
+  "ticket_id": "scoped-ticket-demo-001",
+  "ticket_profile": "scoped_execution_ticket",
+  "ticket_semantics": {
+    "consumable_by_runtime": true,
+    "default_transferable": false,
+    "kind": "runtime_consumable_scoped_ticket"
+  },
+  "validity": {
+    "not_after": "2026-05-14T20:54:00+00:00",
+    "not_before": "2026-05-13T20:54:00+00:00"
+  }
+}

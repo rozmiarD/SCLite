@@ -2,7 +2,7 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite is centered on the v0.2 contract lifecycle. The current 0.5.0 line layers scoped-ticket checks, receipt-bounded-evidence checks, trust/carrier references, lifecycle review records, and review bundles on top of that lifecycle:
+SCLite is centered on the v0.2 contract lifecycle. The current 0.5.1 line layers scoped-ticket checks, receipt-bounded-evidence checks, trust/carrier references, lifecycle review records, and review bundles on top of that lifecycle:
 
 ```text
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
@@ -65,7 +65,7 @@ A governed runtime can use SCLite like this:
 8. **Build and verify lifecycle chain**
    - Runtime builds `ArtifactChainManifest`.
    - CI/reviewer runs `sclite validate-chain` or `sclite verify-lifecycle`.
-   - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings.
+   - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings, including receipt-to-contract and evidence-to-ticket links.
 
 9. **Package a review bundle**
    - Runtime or CI places the six lifecycle artifacts, manifest, reviewer Markdown, and verification receipt in the canonical review-bundle shape.
@@ -105,9 +105,12 @@ Review a canonical v0.5 bundle:
 ```python
 from sclite.bundles import review_bundle
 
-record = review_bundle("examples/review-bundle")
+record = review_bundle("examples/govengine-integration")
 assert record["artifact_type"] == "review_record"
+assert record["verdict"] == "pass"
 ```
+
+For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=0.5.1,<0.6`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
 
 ## Carrier guidance
 

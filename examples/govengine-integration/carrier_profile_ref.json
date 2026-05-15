@@ -1,0 +1,40 @@
+{
+  "artifact_type": "carrier_profile_ref",
+  "carrier_profile": "govengine_bundle",
+  "created_at": "2026-05-15T22:00:00+00:00",
+  "integrity": {
+    "binding_mode": "subject_descriptor_digest",
+    "subject_artifact_digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc"
+  },
+  "links": {
+    "subject": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2698,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "role": "execution_ticket"
+    }
+  },
+  "non_claims": [
+    "does_not_prove_carrier_delivery",
+    "does_not_implement_transport_adapter",
+    "does_not_authorize_execution"
+  ],
+  "profile_ref_id": "govengine-integration-carrier-ref-001",
+  "reference": {
+    "kind": "local_review_bundle",
+    "media_type": "application/vnd.sclite.review-bundle+json",
+    "uri": "examples/govengine-integration"
+  },
+  "schema_ref": "schemas/carrier_profile_ref.v0.1.schema.json",
+  "schema_version": "v0.1",
+  "transport_boundary": {
+    "external_carrier_delivers_payload": true,
+    "sclite_validates_digest_binding_only": true
+  }
+}
