@@ -25,6 +25,7 @@ SCLite can be reviewed as a package for:
 - validation-surface and snapshot-manifest helpers;
 - scoped-ticket validation and explanation helpers;
 - first static ticket-use / receipt-bounded-evidence verification helper;
+- initial digest-bound trust/carrier profile reference checks, without PKI/trust/adapter ownership;
 - CLI-based local validation.
 
 ## What is not claimed
@@ -49,4 +50,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-See `ROADMAP.md` for the planned progression beyond the current `0.3.5` scoped-ticket / receipt-bounded-evidence line toward trust/carrier profiles and review bundles. Roadmap milestones use PEP 440-compatible labels; the `0.3.5` line preserves the no-runtime boundary.
+See `ROADMAP.md` for the planned progression beyond the current `0.3.5` scoped-ticket / receipt-bounded-evidence line toward trust/carrier profiles and review bundles. The first local trust/carrier profile reference checks have started as post-0.3.5 development work; they preserve the no-runtime/no-PKI/no-adapter boundary.

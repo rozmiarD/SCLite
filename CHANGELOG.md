@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Trust and carrier profiles
+
+- Started the SCLite 0.4.0 trust/carrier profile line with digest-bound sidecar schemas: `trust_profile_ref.v0.1` and `carrier_profile_ref.v0.1`.
+- Added `sclite validate-trust-profile` and `sclite validate-carrier-profile` to validate profile shape and subject-artifact digest binding only.
+- Added public-safe fixtures and docs for trust/carrier references while preserving SCLite's no-PKI, no-trust-authority, no-adapter, and no-runtime boundary.
+
 ## 0.3.5 - Scoped tickets and receipt-bounded evidence
 
 - Publishes the post-`0.2.1` scoped-ticket and receipt-bounded-evidence line as `sclite-core==0.3.5`.
