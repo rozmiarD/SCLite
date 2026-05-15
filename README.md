@@ -23,11 +23,21 @@ scoped-ticket review, and receipt-bounded-evidence checks on top of that lifecyc
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
 - Identity/PKI: not included in core
 
-SCLite v0.2 is a **contract lifecycle**, not an execution engine. Runtimes such as Ravenclaw can consume SCLite artifacts and enforce tickets, but executors, sandboxes, policy engines, raw evidence storage, agent loops, and carrier adapters stay outside this package.
+SCLite's core is a **contract/review lifecycle**, not an execution engine. Runtimes such as Ravenclaw can consume SCLite artifacts and enforce tickets, but executors, sandboxes, policy engines, raw evidence storage, agent loops, and carrier adapters stay outside this package.
 
 ## Project sentence
 
 > SCLite separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
+
+## Version surface map
+
+| Surface | Role | Current status |
+| --- | --- | --- |
+| v0.1 proof trace | Legacy public-safe proof fixtures and validation receipts | Supported for compatibility |
+| v0.2 lifecycle | Canonical intent → policy → contract → ticket → receipt → evidence chain | Canonical lifecycle model |
+| v0.3 scoped tickets | Runtime-consumable ticket semantics and receipt-bounded evidence checks | Available via `validate-ticket`, `explain-ticket`, `verify-ticket-use` |
+| v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
+| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current adoption/demo surface |
 
 ## What problem does SCLite solve?
 
@@ -137,7 +147,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 
 ## Project docs
 
-- [`ROADMAP.md`](ROADMAP.md) — planned accountability-layer evolution using PEP 440-compatible milestone labels.
+- [`ROADMAP.md`](ROADMAP.md) — versioned accountability-layer evolution and post-0.5 direction.
 - [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
@@ -298,7 +308,7 @@ sclite/examples/review-bundle/  Packaged v0.5 review-bundle fixture
 examples/review-bundle/         Public v0.5 review-bundle fixture
 examples/security-contract-proof/ Legacy v0.1 public-safe proof fixture
 schemas/                        Source schema copies
-SPEC.md                         v0.2 draft specification
+SPEC.md                         Current public specification
 CHANGELOG.md                    Release notes
 ```
 

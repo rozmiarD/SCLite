@@ -126,6 +126,16 @@ The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence s
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
 
+## v0.4 Trust/Carrier References and Review Records
+
+The `0.5.0` package includes the v0.4-oriented trust/carrier and lifecycle-review surfaces:
+
+- `trust_profile_ref.v0.1` and `sclite validate-trust-profile` validate digest-bound trust sidecars without proving signer identity, revocation, or PKI trust.
+- `carrier_profile_ref.v0.1` and `sclite validate-carrier-profile` validate digest-bound carrier sidecars without proving delivery or adapter correctness.
+- `scope_fidelity_report.v0.2`, `review_record.v0.1`, and `sclite review-lifecycle` summarize lifecycle review checks with conservative `pass` / `review` / `fail` verdicts.
+
+These surfaces reserve stable vocabulary for external runtimes and verifiers. SCLite validates reference shape and local digest binding only.
+
 ## v0.5 Review Bundles
 
 The `0.5.0` line adds a canonical review-bundle shape:
@@ -179,7 +189,7 @@ v0.1 compatibility does not change the v0.2 canonical lifecycle. New v0.2 work s
 
 ## Non-Claims / Security Boundaries
 
-SCLite v0.2 does **not** include:
+SCLite core does **not** include:
 
 - executors;
 - scanners;
@@ -202,4 +212,4 @@ Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execut
 
 ## Roadmap Boundary
 
-Future SCLite work is expected to keep this split intact. The planned direction is to make scoped execution tickets and receipt-bounded evidence more explicit while keeping policy decisions, trust decisions, live execution, revocation, raw evidence storage, and carrier adapter implementation outside SCLite core. See [`ROADMAP.md`](ROADMAP.md) for the versioned roadmap.
+Future SCLite work is expected to keep this split intact. Post-0.5 work should improve examples, failure drills, optional verifier integrations, and runtime handoff clarity while keeping policy decisions, trust decisions, live execution, revocation, raw evidence storage, and carrier adapter implementation outside SCLite core. See [`ROADMAP.md`](ROADMAP.md) for the versioned roadmap.
