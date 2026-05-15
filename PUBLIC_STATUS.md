@@ -4,12 +4,12 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current package version: `0.3.5`.
-- Status: published `0.3.x` scoped-ticket and receipt-bounded-evidence line.
+- Current package version: `0.5.0`.
+- Status: published `0.5.x` review-bundle line.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: completed as `sclite-core==0.3.5`.
+- PyPI publication: completed as `sclite-core==0.5.0`.
 
 ## What is public-safe today
 
@@ -27,6 +27,7 @@ SCLite can be reviewed as a package for:
 - first static ticket-use / receipt-bounded-evidence verification helper;
 - initial digest-bound trust/carrier profile reference checks, without PKI/trust/adapter ownership;
 - initial lifecycle review records and lifecycle-aware Scope Fidelity v0.2;
+- canonical review-bundle validation and Markdown export helpers;
 - CLI-based local validation.
 
 ## What is not claimed
@@ -51,4 +52,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-See `ROADMAP.md` for the planned progression beyond the current `0.3.5` scoped-ticket / receipt-bounded-evidence line toward trust/carrier profiles and review bundles. The first local trust/carrier profile reference checks and lifecycle review-record surfaces have started as post-0.3.5 development work; they preserve the no-runtime/no-PKI/no-adapter boundary.
+The `0.5.0` line adds review bundles as the current adoption/demo surface while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.

@@ -24,9 +24,9 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.3.5
+## Current baseline: 0.5.0
 
-Current public package: `sclite-core==0.3.5`.
+Current public package: `sclite-core==0.5.0`.
 
 Current lifecycle:
 
@@ -175,6 +175,8 @@ This milestone is the main accountability upgrade: SCLite should prevent AI-assi
 
 ## 0.4.0 — Trust and Carrier Profiles
 
+Status: published in `0.5.0`. The implementation adds digest-bound `trust_profile_ref.v0.1` and `carrier_profile_ref.v0.1` sidecars, fixtures, docs, and CLI checks.
+
 Goal: define how SCLite artifacts can be signed, transported, and externally verified without making SCLite a PKI, adapter, or trust authority.
 
 This milestone should support GovEngine and future domain runtimes such as Ravenclaw and Tecrax by binding trust/carrier references to artifact digests. It should not add runtime adapters or trust decisions to SCLite.
@@ -213,6 +215,8 @@ Planned work:
 
 ## 0.4.5 — Lifecycle review semantics and Scope Fidelity v0.2
 
+Status: published in `0.5.0`. The implementation adds `scope_fidelity_report.v0.2`, `review_record.v0.1`, lifecycle review records, fixtures, docs, and `sclite review-lifecycle`.
+
 Goal: prepare the review-bundle surface by making lifecycle-level review semantics precise.
 
 Planned work:
@@ -232,6 +236,8 @@ Planned work:
 4. Draft a review result shape that aggregates schema validation, chain integrity, lifecycle binding, scoped ticket semantics, ticket use, receipt-bounded evidence, Scope Fidelity, trust/carrier profile checks, failure catalog entries, and non-claims.
 
 ## 0.5.0 — Review Bundles and adoption demos
+
+Status: published in `0.5.0`. The implementation adds canonical review-bundle validation/export, packaged/source fixtures, docs, and CLI commands `sclite review` and `sclite export-review-bundle`.
 
 Goal: make SCLite understandable, demoable, and adoptable without Ravenclaw.
 

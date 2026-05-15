@@ -23,6 +23,8 @@ python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/executio
 python -m sclite.cli explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
+python -m sclite.cli review examples/review-bundle --format json
+python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --strict-jsonschema --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
@@ -43,6 +45,7 @@ Expected result:
 - v0.2 lifecycle chain validation and semantic lifecycle verification pass;
 - v0.3 scoped-ticket schema, binding, explanation, and static ticket-use checks pass;
 - lifecycle review records and lifecycle-aware Scope Fidelity checks are generated conservatively;
+- canonical review bundles validate and export to Markdown;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - validation receipt reports `status: passed`;
