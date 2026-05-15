@@ -2,7 +2,7 @@
 
 SCLite review bundles are the v0.5 packaging surface for lifecycle artifacts and their local verification result.
 
-They make SCLite understandable and demoable without Ravenclaw, GovEngine, OpenClaw, MCP, A2A, or any live runtime.
+They make SCLite understandable and demoable without Ravenclaw, GovEngine, OpenClaw, MCP, A2A, or any live runtime. The `examples/govengine-integration/` bundle is the current downstream integration-readiness fixture.
 
 ## Canonical shape
 
@@ -46,6 +46,18 @@ Write Markdown to a file:
 ```bash
 sclite export-review-bundle examples/review-bundle --format markdown --output REVIEW.generated.md
 ```
+
+## GovEngine integration fixture
+
+`examples/govengine-integration/` uses the same canonical shape but includes the v0.3 scoped ticket, dry-run receipt, receipt-bounded evidence, and digest-bound trust/carrier sidecars that GovEngine can consume without taking over SCLite validation.
+
+```bash
+sclite review examples/govengine-integration --format json --fail-on review
+sclite validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+```
+
+`examples/bad-review-bundle-cross-host/` is intentionally failing and exists for negative tests around target drift.
 
 ## Conservative verdicts
 

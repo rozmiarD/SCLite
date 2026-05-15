@@ -75,6 +75,19 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'commands': ['sclite review examples/review-bundle --format json', 'sclite export-review-bundle examples/review-bundle --format markdown'],
             'public_safe': True,
         },
+        {
+            'surface_id': 'govengine_integration_fixture',
+            'path': 'examples/govengine-integration',
+            'kind': 'review_bundle_directory',
+            'purpose': 'Validate the SCLite 0.5.x downstream integration fixture for GovEngine consumption.',
+            'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3', 'trust_profile_ref.v0.1', 'carrier_profile_ref.v0.1'],
+            'commands': [
+                'sclite review examples/govengine-integration --format json --fail-on review',
+                'sclite validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json',
+                'sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json',
+            ],
+            'public_safe': True,
+        },
     ]
     return {
         'artifact_type': PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE,

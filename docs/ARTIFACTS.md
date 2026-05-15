@@ -4,9 +4,9 @@ This guide explains the implemented SCLite artifacts in practical reviewer langu
 
 ## v0.5 review bundle surface
 
-SCLite 0.5.0 publishes the canonical review-bundle surface. A review bundle packages the six lifecycle artifacts, an artifact-chain manifest, reviewer Markdown, and a verification receipt into one local/public-safe directory.
+SCLite 0.5.x publishes the canonical review-bundle surface. A review bundle packages the six lifecycle artifacts, an artifact-chain manifest, reviewer Markdown, and a verification receipt into one local/public-safe directory. The 0.5.1 patch adds `examples/govengine-integration/` as the downstream integration-readiness fixture.
 
-The fixture at `examples/review-bundle/` demonstrates the shape and can be reviewed with:
+The fixture at `examples/review-bundle/` demonstrates the base shape and can be reviewed with:
 
 ```bash
 python -m sclite.cli review examples/review-bundle --format json
@@ -14,7 +14,17 @@ python -m sclite.cli review examples/review-bundle --format summary
 python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
 ```
 
-The bundled fixture returns `review`, not `pass`, because it intentionally demonstrates the v0.2 lifecycle ticket rather than newer scoped `execution_ticket.v0.3` ticket-use semantics. That conservative verdict is part of the point: SCLite should make reviewer attention visible instead of overstating what a bundle proves.
+The bundled base fixture returns `review`, not `pass`, because it intentionally demonstrates the v0.2 lifecycle ticket rather than newer scoped `execution_ticket.v0.3` ticket-use semantics. That conservative verdict is part of the point: SCLite should make reviewer attention visible instead of overstating what a bundle proves.
+
+The GovEngine integration fixture is expected to pass because it uses the v0.3 scoped-ticket / receipt-bounded-evidence surface and digest-bound profile sidecars:
+
+```bash
+python -m sclite.cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+```
+
+`examples/bad-review-bundle-cross-host/` intentionally fails review due to cross-role target drift and is used for negative integration tests.
 
 ## v0.3 scoped ticket surface
 
@@ -74,7 +84,7 @@ The output is a `review_record.v0.1` with conservative `pass` / `review` / `fail
 | `EvidenceContract` | `sclite/examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
 | `ArtifactChainManifest` | `sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
 
-The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket binding, evidence->receipt binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
+The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket/contract binding, evidence->receipt/ticket binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
 
 ## v0.1 quick map
 

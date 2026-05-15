@@ -89,7 +89,9 @@ def test_v02_chain_manifest_verifies_fixture() -> None:
         'contract_binds_intent_and_policy',
         'ticket_binds_execution_contract',
         'receipt_binds_execution_ticket',
+        'receipt_binds_execution_contract',
         'evidence_binds_execution_receipt',
+        'evidence_binds_execution_ticket',
     ]
 
 

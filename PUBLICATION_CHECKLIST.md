@@ -26,6 +26,14 @@ History transparency guardrail: never rewrite already-published history to fix a
 Run from the repository root:
 
 ```bash
+scripts/public_validation_gate.sh
+scripts/strict_schema_gate.sh
+python -m pytest -q
+```
+
+Expanded command coverage includes:
+
+```bash
 python -m sclite.cli validate examples/security-contract-proof
 python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
@@ -33,7 +41,11 @@ python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/executio
 python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
 python -m sclite.cli review examples/review-bundle --format json
-python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
+python -m sclite.cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.cli review examples/bad-review-bundle-cross-host --format json --fail-on none
+python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.cli export-review-bundle examples/govengine-integration --format markdown
 python -m sclite.cli validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json
 python -m sclite.cli validate-artifact --schema redacted_prepared_execution_spec.v0.1 examples/security-contract-proof/prepared_execution_spec.redacted.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
@@ -52,7 +64,7 @@ Expected state:
 - proof fixture validates;
 - lifecycle chain and semantic lifecycle verification pass;
 - scoped-ticket validation and ticket-use/evidence-bound checks pass;
-- lifecycle review records and review bundles validate;
+- lifecycle review records, review bundles, GovEngine integration fixture, and negative drift fixture validate as expected;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - validation receipt has `status: passed`;

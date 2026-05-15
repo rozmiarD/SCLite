@@ -10,13 +10,13 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The published 0.5.0
-line adds review bundles, lifecycle review records, trust/carrier references,
+what was approved, what was executed, and what can be proven. The published 0.5.1
+line adds GovEngine integration-readiness fixtures and gates plus review bundles, lifecycle review records, trust/carrier references,
 scoped-ticket review, and receipt-bounded-evidence checks on top of that lifecycle.
 
 ## Status
 
-- Version: `0.5.0`
+- Version: `0.5.1`
 - Status: **published 0.5.x review-bundle line**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
@@ -89,18 +89,18 @@ The v0.2 verifier checks more than raw hashes:
 - lifecycle artifacts appear in the canonical order;
 - policy binds the correct intent digest;
 - ticket binds the correct execution contract digest;
-- receipt binds the correct execution ticket digest;
-- evidence contract binds the correct receipt digest.
+- receipt binds the correct execution ticket and execution contract digests;
+- evidence contract binds the correct receipt and execution ticket digests.
 
 ## What SCLite is
 
 SCLite core is limited to:
 
 ```text
-define / validate / hash / bind / redact / verify
+define / validate / hash / bind / redact / verify / review
 ```
 
-The published 0.5.0 review-bundle surface packages lifecycle artifacts, review records, and verification receipts for local public-safe review. The scoped-ticket surface still bounds what a runtime may consume, and `verify-ticket-use` checks that public-safe evidence stays inside the linked receipt. See [`ROADMAP.md`](ROADMAP.md).
+The published 0.5.x review-bundle surface packages lifecycle artifacts, review records, and verification receipts for local public-safe review. The scoped-ticket surface still bounds what a runtime may consume, and `verify-ticket-use` checks that public-safe evidence stays inside the linked receipt. See [`ROADMAP.md`](ROADMAP.md).
 
 It provides:
 
@@ -152,6 +152,9 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
 - [`docs/REVIEW_BUNDLES.md`](docs/REVIEW_BUNDLES.md) — canonical v0.5 review-bundle shape and CLI.
+- [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — stable SCLite 0.5.x imports, CLI surfaces, and fixtures for GovEngine.
+- [`docs/SCLITE_0_5_FREEZE.md`](docs/SCLITE_0_5_FREEZE.md) — 0.5.x freeze notes and non-goals.
+- [`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md) — CLI exit-code contract for CI/downstream callers.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
 - [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
 - [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.
@@ -253,6 +256,14 @@ sclite review examples/review-bundle --format json
 sclite export-review-bundle examples/review-bundle --format markdown
 ```
 
+Review the GovEngine integration-readiness fixture and enforce conservative CI thresholds:
+
+```bash
+sclite review examples/govengine-integration --format json --fail-on review
+sclite validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+```
+
 Emit a validation receipt for the proof fixture:
 
 ```bash
@@ -294,8 +305,8 @@ Review a canonical v0.5 bundle:
 ```python
 from sclite.bundles import review_bundle
 
-record = review_bundle("examples/review-bundle")
-assert record["artifact_type"] == "review_record"
+record = review_bundle("examples/govengine-integration")
+assert record["verdict"] == "pass"
 ```
 
 ## Repository layout
@@ -305,7 +316,9 @@ sclite/                         Python package
 sclite/schemas/                 Packaged schemas
 sclite/examples/contract-lifecycle-v0.2/
 sclite/examples/review-bundle/  Packaged v0.5 review-bundle fixture
+sclite/examples/govengine-integration/ Packaged downstream integration fixture
 examples/review-bundle/         Public v0.5 review-bundle fixture
+examples/govengine-integration/ Public GovEngine integration-readiness fixture
 examples/security-contract-proof/ Legacy v0.1 public-safe proof fixture
 schemas/                        Source schema copies
 SPEC.md                         Current public specification

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1 - GovEngine integration readiness
+
+- Freezes the documented GovEngine import/CLI contract for `sclite-core>=0.5.1,<0.6`.
+- Adds `examples/govengine-integration/` as the downstream positive fixture with canonical review bundle, v0.3 scoped ticket, receipt-bounded evidence, and digest-bound trust/carrier sidecars.
+- Adds `examples/bad-review-bundle-cross-host/` as an intentional negative fixture for cross-role target drift.
+- Tightens lifecycle semantic verification so receipts bind both ticket and execution contract, and evidence binds both receipt and ticket.
+- Adds CLI exit-code documentation plus public/strict validation gate scripts used by CI.
+- Expands negative tests for review bundles, profile refs, scoped-ticket use, CLI failure modes, non-claims, and review-record contract shape.
+
 ## 0.5.0 - Review bundles
 
 ### Review bundles

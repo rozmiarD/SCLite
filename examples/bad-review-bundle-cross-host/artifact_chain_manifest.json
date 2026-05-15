@@ -1,0 +1,114 @@
+{
+  "artifact_type": "artifact_chain_manifest",
+  "canonicalization": "sclite-artifact-chain-v0.2",
+  "chain_id": "sclite-v0.5-bad-review-bundle-cross-host-demo",
+  "created_at": "2026-05-15T22:00:00+00:00",
+  "entries": [
+    {
+      "chain_digest": "467d221e4cecd7c133bc7661cca83671ca34cfd2945a71e0f5e20b4ceb887c4e",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "intent_contract",
+        "canonical_bytes": 803,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35a0f49b424851ef7a2864705bfb9e5411b049641f5734456bf45068293d492f",
+        "schema_ref": "schemas/intent_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "path": "01_intent_contract.json",
+      "previous_chain_digest": "",
+      "required": true,
+      "role": "intent_contract"
+    },
+    {
+      "chain_digest": "cfda5d108a08b95b4223c1f6ced44da78da754412e6d9aee200b2e111d1359df",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "policy_decision",
+        "canonical_bytes": 1005,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "9a9ffd9a326f11bc0a8389f74d29c77e9e256ca1fbba0f299bfc366fde2569c1",
+        "schema_ref": "schemas/policy_decision.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "path": "02_policy_decision.json",
+      "previous_chain_digest": "467d221e4cecd7c133bc7661cca83671ca34cfd2945a71e0f5e20b4ceb887c4e",
+      "required": true,
+      "role": "policy_decision"
+    },
+    {
+      "chain_digest": "6beb318c2e7ee24b1ebb21df455d32036ea9b11f72659572b86bd2fe48891a88",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_contract",
+        "canonical_bytes": 1450,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "fde47cd31a532e4dbf2ff0206c165e254e33700e5d97902ef0b2398f3b69cb1d",
+        "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "path": "03_execution_contract.json",
+      "previous_chain_digest": "cfda5d108a08b95b4223c1f6ced44da78da754412e6d9aee200b2e111d1359df",
+      "required": true,
+      "role": "execution_contract"
+    },
+    {
+      "chain_digest": "b9fad20dd231a6f730a2c2c1f6c9cc8462edadd96a6c496245a1e41d87b82e11",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2699,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "8a58c270b6c71380cd204814bd8e67a5ff93c6fd5af695d26d1be8b252193aa5",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "path": "04_execution_ticket.json",
+      "previous_chain_digest": "6beb318c2e7ee24b1ebb21df455d32036ea9b11f72659572b86bd2fe48891a88",
+      "required": true,
+      "role": "execution_ticket"
+    },
+    {
+      "chain_digest": "52faa8b36a2b490cfaf0480d6da2c8b1035976d5fd469fd3f746d0c7af9e37b4",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_receipt",
+        "canonical_bytes": 1743,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "30e012f3876543930373840bc15e238eb3a89216317aff4033df82a411afd3d9",
+        "schema_ref": "schemas/execution_receipt.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "path": "05_execution_receipt.json",
+      "previous_chain_digest": "b9fad20dd231a6f730a2c2c1f6c9cc8462edadd96a6c496245a1e41d87b82e11",
+      "required": true,
+      "role": "execution_receipt"
+    },
+    {
+      "chain_digest": "713966993dabb224cc2d4501129f650331cc33d8070dcba144e275f62b2d6b7f",
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "evidence_contract",
+        "canonical_bytes": 1802,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "57a3721150495df1cdd5e3de6cc2a2a4a3df4b92b1d7943d180e5fe95948cc48",
+        "schema_ref": "schemas/evidence_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "path": "06_evidence_contract.json",
+      "previous_chain_digest": "52faa8b36a2b490cfaf0480d6da2c8b1035976d5fd469fd3f746d0c7af9e37b4",
+      "required": true,
+      "role": "evidence_contract"
+    }
+  ],
+  "hash_algorithm": "sha256",
+  "profile": "sclite-v0.5-bad-cross-host-integrity",
+  "root_chain_digest": "713966993dabb224cc2d4501129f650331cc33d8070dcba144e275f62b2d6b7f",
+  "schema_ref": "schemas/artifact_chain_manifest.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "signature_policy": {
+    "identity_signature_required": false,
+    "mode": "integrity_only",
+    "note": "v0.2 core verifies tamper-evident artifact binding; signer identity is an optional runtime/profile concern."
+  }
+}

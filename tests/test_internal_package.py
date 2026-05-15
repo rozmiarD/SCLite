@@ -22,6 +22,8 @@ PACKAGE_SURFACE_INDEX_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-validation-s
 PACKAGE_SNAPSHOT_MANIFEST_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-snapshot-manifest' / 'public_snapshot_manifest.json'
 PACKAGE_REVIEW_RECORD_FIXTURE = PACKAGE_ROOT / 'examples' / 'lifecycle-review' / 'review_record.json'
 PACKAGE_REVIEW_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'review-bundle'
+PACKAGE_GOVENGINE_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'govengine-integration'
+PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'bad-review-bundle-cross-host'
 
 
 def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
@@ -141,6 +143,19 @@ def test_packaged_review_bundle_can_be_reviewed() -> None:
     record = review_bundle(PACKAGE_REVIEW_BUNDLE_DIR)
     artifacts.validate_artifact(record, 'review_record.v0.1')
     assert record['review_profile'] == 'sclite-review-bundle-v0.1'
+
+
+def test_packaged_govengine_bundle_can_be_reviewed() -> None:
+    record = review_bundle(PACKAGE_GOVENGINE_BUNDLE_DIR)
+    artifacts.validate_artifact(record, 'review_record.v0.1')
+    assert record['verdict'] == 'pass'
+
+
+def test_packaged_bad_cross_host_bundle_stays_negative() -> None:
+    record = review_bundle(PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR)
+    artifacts.validate_artifact(record, 'review_record.v0.1')
+    assert record['verdict'] == 'fail'
+    assert record['summary']['scope_fidelity_verdict'] == 'fail'
 
 
 def test_surface_and_manifest_builders_return_schema_valid_artifacts() -> None:

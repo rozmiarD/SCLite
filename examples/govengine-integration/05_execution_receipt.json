@@ -1,0 +1,70 @@
+{
+  "artifact_type": "execution_receipt",
+  "created_at": "2026-05-13T21:05:00+00:00",
+  "evidence_refs": [
+    {
+      "kind": "evidence_contract",
+      "path": "evidence_contract.json"
+    }
+  ],
+  "execution": {
+    "ended_at": "2026-05-13T21:05:00+00:00",
+    "executed_command_count": 0,
+    "network_execution_performed": false,
+    "planned_command_count": 1,
+    "started_at": "2026-05-13T21:05:00+00:00"
+  },
+  "links": {
+    "execution_contract": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_contract",
+        "canonical_bytes": 1449,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "573ea42c15c4cc82e422f0aef66f5303ad68bc9b77ba11df7d8a53f3edf3d6ca",
+        "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "execution_contract"
+    },
+    "execution_ticket": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2698,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35e9415ef8b6882b665117c38e096e626e73851d66ba1ae1e0b3ded9e29d75cc",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "role": "execution_ticket"
+    }
+  },
+  "non_claims": [
+    "receipt_does_not_include_raw_logs",
+    "receipt_does_not_claim_live_target_execution",
+    "receipt_does_not_prove_runtime_enforcement"
+  ],
+  "outcome": {
+    "returncode": 0,
+    "status": "dry_run",
+    "stderr_present": false,
+    "stdout_present": false,
+    "summary": "Dry-run scoped-ticket use receipt for a public-safe fixture."
+  },
+  "receipt_id": "scoped-ticket-receipt-demo-001",
+  "runtime": {
+    "mode": "dry_run",
+    "name": "govengine-demo-executor",
+    "runtime_ref": "runtime:govengine-demo-executor",
+    "version": "fixture"
+  },
+  "schema_ref": "schemas/execution_receipt.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "ticket_use": {
+    "consumed_by_runtime": "runtime:govengine-demo-executor",
+    "one_shot_consumed": true,
+    "ticket_id": "scoped-ticket-demo-001",
+    "use_count": 1
+  }
+}

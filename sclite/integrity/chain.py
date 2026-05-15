@@ -196,7 +196,9 @@ def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]
         raise ChainVerificationError('ticket integrity execution_contract digest mismatch')
 
     _assert_link_binds(receipt, 'execution_ticket', ticket, 'receipt-ticket digest mismatch')
+    _assert_link_binds(receipt, 'execution_contract', contract, 'receipt-execution_contract digest mismatch')
     _assert_link_binds(evidence, 'execution_receipt', receipt, 'evidence-receipt digest mismatch')
+    _assert_link_binds(evidence, 'execution_ticket', ticket, 'evidence-ticket digest mismatch')
 
     return [
         'role_order',
@@ -204,7 +206,9 @@ def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]
         'contract_binds_intent_and_policy',
         'ticket_binds_execution_contract',
         'receipt_binds_execution_ticket',
+        'receipt_binds_execution_contract',
         'evidence_binds_execution_receipt',
+        'evidence_binds_execution_ticket',
     ]
 
 

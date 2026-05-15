@@ -24,9 +24,9 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.5.0
+## Current baseline: 0.5.1
 
-Current public package: `sclite-core==0.5.0`.
+Current public package: `sclite-core==0.5.1`.
 
 Current lifecycle:
 
@@ -34,14 +34,14 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.0 line is the current review-bundle surface over SCLite's audit-proof lifecycle, scoped-ticket, receipt-bounded-evidence, trust/carrier reference, and lifecycle-review layers. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output.
+The v0.5.x line is the current review-bundle surface. The 0.5.1 patch freezes GovEngine integration imports/CLI semantics and adds downstream positive/negative review fixtures over SCLite's audit-proof lifecycle, scoped-ticket, receipt-bounded-evidence, trust/carrier reference, and lifecycle-review layers. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output.
 
 ## Versioning discipline
 
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -290,6 +290,24 @@ Integrity drill examples should demonstrate concrete failure modes:
 - expired ticket.
 
 A key non-scanner example should be an AI-proposed firewall rule change: SCLite can show intent, policy review, exact dry-run config validation, scoped ticket, receipt, evidence, and manifest without requiring Ravenclaw or a live security scan.
+
+## 0.5.1 — GovEngine integration readiness
+
+Status: current patch line.
+
+Goal: make the SCLite 0.5 surface safe and boring for GovEngine to consume before package-chain sync.
+
+Implemented scope:
+
+- documented stable import and CLI contract for `sclite-core>=0.5.1,<0.6`;
+- documented CLI exit-code semantics for CI and downstream gates;
+- added `examples/govengine-integration/` as the positive downstream fixture;
+- added `examples/bad-review-bundle-cross-host/` as an intentional negative fixture;
+- tightened lifecycle semantic verification for receipt-to-contract and evidence-to-ticket links;
+- added public/strict validation scripts and wired CI to them;
+- expanded negative tests for bundles, profile refs, ticket use, CLI behavior, and public non-claims.
+
+This patch does not add runtime execution, policy authority, trust decisions, or carrier adapters. It only clarifies and hardens the review/proof substrate that GovEngine may consume.
 
 ## Release posture
 

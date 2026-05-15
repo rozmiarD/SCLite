@@ -1,0 +1,59 @@
+{
+  "artifact_type": "evidence_contract",
+  "claims": [
+    {
+      "bounded_by_receipt": true,
+      "claim_type": "receipt_bounded_dry_run",
+      "id": "receipt_bound_dry_run",
+      "requires_live_execution": false,
+      "source_receipt_id": "scoped-ticket-receipt-demo-001",
+      "statement": "The scoped ticket was used once by the named demo runtime and produced only a dry-run receipt.",
+      "status": "met"
+    }
+  ],
+  "created_at": "2026-05-13T21:05:00+00:00",
+  "evidence_contract_id": "scoped-ticket-evidence-demo-001",
+  "links": {
+    "execution_receipt": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_receipt",
+        "canonical_bytes": 1743,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "30e012f3876543930373840bc15e238eb3a89216317aff4033df82a411afd3d9",
+        "schema_ref": "schemas/execution_receipt.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "execution_receipt"
+    },
+    "execution_ticket": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2699,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "8a58c270b6c71380cd204814bd8e67a5ff93c6fd5af695d26d1be8b252193aa5",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "role": "execution_ticket"
+    }
+  },
+  "non_claims": [
+    "does_not_claim_live_vulnerability_evidence",
+    "does_not_include_private_runtime_logs",
+    "does_not_prove_legal_authorization",
+    "does_not_prove_runtime_enforcement"
+  ],
+  "replay": {
+    "live_execution_required": false,
+    "mode": "static_bundle_verification"
+  },
+  "schema_ref": "schemas/evidence_contract.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "verification": {
+    "commands": [
+      "sclite verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json"
+    ]
+  }
+}
