@@ -9,7 +9,7 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: completed as `sclite-core==0.5.0`; `0.5.1` is the GovEngine integration-readiness patch line.
+- PyPI publication: completed as `sclite-core==0.5.1`.
 
 ## Current review path
 
