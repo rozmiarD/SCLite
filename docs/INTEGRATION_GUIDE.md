@@ -10,6 +10,26 @@ intent_contract -> policy_decision -> execution_contract -> execution_ticket -> 
 
 SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, lifecycle integrity verification, review-bundle packaging, public-safe fixtures, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, trust authority, or carrier adapter.
 
+## Runtime boundary
+
+```mermaid
+flowchart LR
+    Runtime[External runtime: GovEngine or Ravenclaw] --> Produce[produce lifecycle artifacts]
+    Produce --> SCLite[SCLite validate hash bind review]
+    SCLite --> Bundle[review bundle or review record]
+    Bundle --> Runtime
+
+    Runtime --> Policy[policy and authorization]
+    Runtime --> Runner[tool execution or dry run]
+    Runtime --> RawEvidence[raw evidence storage]
+    Runtime --> Trust[PKI or signer trust]
+
+    SCLite -. does not decide .-> Policy
+    SCLite -. does not execute .-> Runner
+    SCLite -. does not store .-> RawEvidence
+    SCLite -. does not verify .-> Trust
+```
+
 ## Recommended boundary
 
 Keep these responsibilities outside SCL core:

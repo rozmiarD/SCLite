@@ -2,6 +2,18 @@
 
 This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.3 adds scoped-ticket and receipt-bounded-evidence review; v0.5 packages the lifecycle into review bundles; v0.1 proof-trace artifacts remain supported.
 
+## Lifecycle map
+
+```mermaid
+flowchart LR
+    Intent[intent_contract] --> Policy[policy_decision]
+    Policy --> Contract[execution_contract]
+    Contract --> Ticket[execution_ticket]
+    Ticket --> Receipt[execution_receipt]
+    Receipt --> Evidence[evidence_contract]
+    Evidence --> Manifest[artifact_chain_manifest]
+```
+
 ## v0.5 review bundle surface
 
 SCLite 0.5.x publishes the canonical review-bundle surface. A review bundle packages the six lifecycle artifacts, an artifact-chain manifest, reviewer Markdown, and a verification receipt into one local/public-safe directory. The 0.5.1 patch adds `examples/govengine-integration/` as the downstream integration-readiness fixture.
@@ -217,6 +229,8 @@ It is not a signature, identity proof, authorization proof, or tamper-proof audi
 `RedactionPolicy` documents public-safe redaction rules. `RedactionReceipt` records a redaction operation using policy/source/redacted hashes and summary counts while excluding raw source material.
 
 They are useful for reviewer traceability, but they are not a complete secret scanner, not proof that upstream data never contained secrets, and not publication authorization.
+
+The redaction helpers are blacklist-oriented public-safe fixture helpers. Treat them as part of publication hygiene, not as DLP or a general-purpose secret scanner.
 
 ## PublicValidationSurfaceIndex and PublicSnapshotManifest
 

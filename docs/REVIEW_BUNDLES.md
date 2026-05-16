@@ -4,6 +4,17 @@ SCLite review bundles are the v0.5 packaging surface for lifecycle artifacts and
 
 They make SCLite understandable and demoable without Ravenclaw, GovEngine, OpenClaw, MCP, A2A, or any live runtime. The `examples/govengine-integration/` bundle is the current downstream integration-readiness fixture.
 
+## Review flow
+
+```mermaid
+flowchart LR
+    Directory[review bundle directory] --> Shape[validate canonical shape]
+    Shape --> Chain[verify artifact chain]
+    Chain --> Lifecycle[run lifecycle review]
+    Lifecycle --> Record[review_record]
+    Record --> Export[Markdown export]
+```
+
 ## Canonical shape
 
 ```text
@@ -20,6 +31,8 @@ review_bundle/
 ```
 
 The numbered artifacts are the lifecycle payloads. `artifact_chain_manifest.json` binds them by canonical SHA-256 descriptors and ordered chain digests. `verification_receipt.json` is a `review_record.v0.1` generated from the bundle. `REVIEW.md` is a reviewer-friendly export of that record.
+
+`REVIEW.md` and `verification_receipt.json` are required canonical sidecars for packaged examples, but callers should treat them as cached review outputs. The `sclite review` and `sclite export-review-bundle` commands regenerate review output from the current lifecycle artifacts and manifest; they do not trust a stale sidecar as authority.
 
 ## CLI
 

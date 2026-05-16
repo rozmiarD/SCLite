@@ -39,6 +39,68 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
 | v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current adoption/demo surface |
 
+## Architecture diagrams
+
+### Contract lifecycle
+
+```mermaid
+flowchart LR
+    A[intent_contract] --> B[policy_decision]
+    B --> C[execution_contract]
+    C --> D[execution_ticket]
+    D --> E[execution_receipt]
+    E --> F[evidence_contract]
+    F --> G[artifact_chain_manifest]
+```
+
+### Core package architecture
+
+```mermaid
+flowchart TB
+    CLI[CLI] --> Validation[validation]
+    CLI --> ReviewBundles[review bundles]
+    CLI --> Profiles[profiles]
+    Validation --> Schemas[schemas]
+    Validation --> Artifacts[artifacts]
+    Artifacts --> Integrity[integrity chain]
+    Artifacts --> Tickets[tickets]
+    ReviewBundles --> Integrity
+    ReviewBundles --> ScopeFidelity[scope fidelity]
+    ReviewBundles --> Profiles
+    Profiles --> Integrity
+```
+
+### Runtime boundary
+
+```mermaid
+flowchart LR
+    Runtime[GovEngine or Ravenclaw runtime] --> Artifacts[SCLite artifacts]
+    Artifacts --> SCLite[SCLite validate hash bind review]
+    SCLite --> Record[review record or receipt]
+    Record --> Runtime
+
+    Runtime --> Execute[execute tools]
+    Runtime --> Authorize[decide authorization]
+    Runtime --> Evidence[store raw evidence]
+    Runtime --> Trust[verify PKI or signer trust]
+
+    SCLite -. does not .-> Execute
+    SCLite -. does not .-> Authorize
+    SCLite -. does not .-> Evidence
+    SCLite -. does not .-> Trust
+```
+
+### Review bundle flow
+
+```mermaid
+flowchart LR
+    Bundle[review bundle directory] --> Shape[validate shape]
+    Shape --> Chain[verify chain]
+    Chain --> Lifecycle[lifecycle review]
+    Lifecycle --> Record[review_record]
+    Record --> Markdown[markdown export]
+```
+
 ## What problem does SCLite solve?
 
 AI-assisted security workflows often blur separate authority boundaries:
@@ -91,6 +153,17 @@ The v0.2 verifier checks more than raw hashes:
 - ticket binds the correct execution contract digest;
 - receipt binds the correct execution ticket and execution contract digests;
 - evidence contract binds the correct receipt and execution ticket digests.
+
+## JSON Schema validation modes
+
+SCLite has two validation modes:
+
+| Mode | Dependency | Intended use | Boundary |
+| --- | --- | --- | --- |
+| dependency-free subset validator | none | fast/offline local checks and minimal installs | only supports the keyword subset SCLite implements directly |
+| strict Draft 2020-12 validator | optional `jsonschema` extra | CI, release gates, and reviewer validation | uses `jsonschema.Draft202012Validator` |
+
+The default CLI path preserves the zero-runtime-dependency package. Release and CI validation must also run strict mode through `scripts/strict_schema_gate.sh`. See [SCLite Validation](VALIDATION.md) for the supported keyword table and strict-mode commands.
 
 ## What SCLite is
 
@@ -155,6 +228,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 - [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — stable SCLite 0.5.x imports, CLI surfaces, and fixtures for GovEngine.
 - [`docs/SCLITE_0_5_FREEZE.md`](docs/SCLITE_0_5_FREEZE.md) — 0.5.x freeze notes and non-goals.
 - [`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md) — CLI exit-code contract for CI/downstream callers.
+- [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) — concrete tampering, boundary, and non-goal model.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
 - [`VALIDATION.md`](VALIDATION.md) — local validation and build gates.
 - [`PUBLICATION_CHECKLIST.md`](PUBLICATION_CHECKLIST.md) — release/publication checklist.

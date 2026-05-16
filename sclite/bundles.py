@@ -17,6 +17,10 @@ REVIEW_BUNDLE_REQUIRED_FILES = {
 REVIEW_BUNDLE_MANIFEST_FILE = 'artifact_chain_manifest.json'
 REVIEW_BUNDLE_MARKDOWN_FILE = 'REVIEW.md'
 REVIEW_BUNDLE_RECEIPT_FILE = 'verification_receipt.json'
+REVIEW_BUNDLE_SIDECAR_FILES = {
+    'review_markdown': REVIEW_BUNDLE_MARKDOWN_FILE,
+    'verification_receipt': REVIEW_BUNDLE_RECEIPT_FILE,
+}
 
 
 class ReviewBundleError(ValueError):
@@ -59,6 +63,12 @@ def validate_review_bundle_shape(bundle_dir: Path | str) -> Dict[str, Any]:
     _assert_inside(base, manifest_path)
     if not manifest_path.is_file():
         missing.append(REVIEW_BUNDLE_MANIFEST_FILE)
+    for role, filename in REVIEW_BUNDLE_SIDECAR_FILES.items():
+        path = base / filename
+        _assert_inside(base, path)
+        files[role] = filename
+        if not path.is_file():
+            missing.append(filename)
     if missing:
         raise ReviewBundleError('missing review bundle files: ' + ', '.join(missing))
 

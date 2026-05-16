@@ -97,6 +97,8 @@ Planned work:
 5. Keep the default core lightweight and dependency-minimal.
 6. Add or tighten source-vs-packaged schema parity tests.
 
+Status as of the post-0.5.1 documentation hardening pass: strict validation, subset-vs-strict tests, source-vs-packaged schema/review-fixture drift tests, threat-model docs, and Mermaid architecture diagrams are implemented. Remaining candidates for a future release are CLI modularization, a manually curated public `__all__`, and broader property-based tests for host extraction, canonical JSON, descriptor mismatch, path traversal, and digest drift.
+
 Validation gate:
 
 - `python -m pytest -q`
