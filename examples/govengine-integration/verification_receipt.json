@@ -14,7 +14,7 @@
       "status": "pass"
     },
     {
-      "count": 6,
+      "count": 8,
       "detail": "semantic checks present",
       "name": "lifecycle_binding",
       "status": "pass"
@@ -31,7 +31,7 @@
       "status": "pass"
     }
   ],
-  "generated_at": "2026-05-15T22:00:00+00:00",
+  "generated_at": "2026-05-16T06:45:47+00:00",
   "non_claims": [
     "does_not_execute_tools",
     "does_not_prove_legal_authorization",
@@ -52,7 +52,7 @@
   "schema_version": "v0.1",
   "scope_fidelity_report": {
     "artifact_type": "scope_fidelity_report",
-    "generated_at": "2026-05-15T21:37:05+00:00",
+    "generated_at": "2026-05-16T06:45:47+00:00",
     "lifecycle_targets": [
       {
         "artifact_type": "intent_contract",
@@ -118,7 +118,7 @@
     },
     "schema_ref": "schemas/scope_fidelity_report.v0.2.schema.json",
     "schema_version": "v0.2",
-    "source_artifact": "<local_path_omitted>/examples/govengine-integration/artifact_chain_manifest.json",
+    "source_artifact": "artifact_chain_manifest.json",
     "summary": {
       "lifecycle_target_status": "consistent",
       "mismatched_hosts_detected": [],
@@ -139,7 +139,9 @@
       "execution_receipt": "05_execution_receipt.json",
       "execution_ticket": "04_execution_ticket.json",
       "intent_contract": "01_intent_contract.json",
-      "policy_decision": "02_policy_decision.json"
+      "policy_decision": "02_policy_decision.json",
+      "review_markdown": "REVIEW.md",
+      "verification_receipt": "verification_receipt.json"
     },
     "review_bundle_shape": "canonical-v0.1",
     "root_chain_digest": "7ea971b5b73862e411600e3442fdf7ca82cced404da232a05c6631a6bfd35c13",

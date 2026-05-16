@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Adds GitHub-compatible Mermaid diagrams to README and the lifecycle/runtime/review-bundle docs.
+- Clarifies dependency-free schema validation as a documented subset and positions strict Draft 2020-12 validation as the CI/release authority.
+- Adds a concrete threat model covering artifact tampering, runtime boundaries, Scope Fidelity limits, redaction limits, and PKI/non-authority boundaries.
+- Requires canonical review-bundle sidecars (`REVIEW.md`, `verification_receipt.json`) during bundle-shape validation while still regenerating review output from source artifacts.
+- Removes local absolute manifest paths from generated review records and adds tests for source-vs-packaged schema/review-fixture drift plus subset-vs-strict validator behavior.
+
 ## 0.5.1 - GovEngine integration readiness
 
 - Freezes the documented GovEngine import/CLI contract for `sclite-core>=0.5.1,<0.6`.

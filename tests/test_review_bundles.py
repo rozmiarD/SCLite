@@ -46,10 +46,26 @@ def test_review_bundle_rejects_missing_required_file(tmp_path: Path) -> None:
         validate_review_bundle_shape(target)
 
 
+@pytest.mark.parametrize('filename', ['REVIEW.md', 'verification_receipt.json'])
+def test_review_bundle_rejects_missing_canonical_sidecar(tmp_path: Path, filename: str) -> None:
+    target = tmp_path / 'review-bundle'
+    shutil.copytree(BUNDLE, target)
+    (target / filename).unlink()
+    with pytest.raises(ReviewBundleError, match='missing review bundle files'):
+        validate_review_bundle_shape(target)
+
+
 def test_verification_receipt_fixture_is_schema_valid() -> None:
     record = json.loads((BUNDLE / 'verification_receipt.json').read_text(encoding='utf-8'))
     validate_artifact(record, 'review_record.v0.1')
     assert record['source_manifest'] == 'artifact_chain_manifest.json'
+
+
+def test_generated_review_record_uses_relative_source_paths() -> None:
+    record = review_bundle(BUNDLE)
+    assert record['source_manifest'] == 'artifact_chain_manifest.json'
+    assert record['scope_fidelity_report']['source_artifact'] == 'artifact_chain_manifest.json'
+    assert str(ROOT) not in json.dumps(record)
 
 
 def test_review_cli_json_and_summary() -> None:

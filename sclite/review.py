@@ -119,7 +119,11 @@ def build_review_record_from_manifest(
         checks.append(_check('lifecycle_binding', 'fail', str(exc)))
         statuses.extend(['fail', 'fail'])
 
-    scope_report = build_lifecycle_scope_fidelity_report(artifacts_by_role, source_artifact=str(manifest_path))
+    try:
+        source_artifact = str(manifest_path.relative_to(base))
+    except ValueError:
+        source_artifact = manifest_path.name
+    scope_report = build_lifecycle_scope_fidelity_report(artifacts_by_role, source_artifact=source_artifact)
     validate_lifecycle_scope_fidelity_report(scope_report, strict_jsonschema=strict_jsonschema)
     checks.append(_check('scope_fidelity', str(scope_report['verdict']), str(scope_report['summary']['reason']), len(scope_report.get('lifecycle_targets') or [])))
     statuses.append(str(scope_report['verdict']))

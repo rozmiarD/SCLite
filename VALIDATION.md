@@ -21,6 +21,30 @@ scripts/strict_schema_gate.sh
 python -m pytest -q
 ```
 
+The dependency-free validator is intentionally a subset validator. It exists so SCLite can keep zero runtime dependencies and still validate the repository's simple schema shapes in offline/minimal environments. It is not a full JSON Schema Draft 2020-12 implementation.
+
+| JSON Schema keyword | Dependency-free subset | Strict `jsonschema` mode |
+| --- | --- | --- |
+| `const` | supported | supported |
+| `enum` | supported | supported |
+| `type` | supported, including simple type arrays | supported |
+| `required` | supported | supported |
+| `properties` | supported recursively | supported |
+| `additionalProperties: false` | supported | supported |
+| `items` with one schema | supported recursively | supported |
+| `minLength` | supported | supported |
+| `minimum` | supported | supported |
+| `pattern`, `format`, `maxLength`, `maximum`, `oneOf`, `anyOf`, `allOf`, `not`, `if/then/else`, `dependentRequired`, `uniqueItems` | not implemented by the subset validator | supported according to `jsonschema` behavior |
+
+For CI and release validation, run both:
+
+```bash
+scripts/public_validation_gate.sh
+scripts/strict_schema_gate.sh
+```
+
+If strict mode and subset mode disagree, treat strict mode as authoritative for release readiness and either simplify the schema or add explicit implementation/tests for the missing subset keyword.
+
 The scripts expand to the public-safe fixture, lifecycle, ticket, profile, review-bundle, negative-bundle, and strict-schema checks. The equivalent command set starts with:
 
 ```bash
