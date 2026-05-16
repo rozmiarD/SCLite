@@ -39,68 +39,6 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
 | v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current adoption/demo surface |
 
-## Architecture diagrams
-
-### Contract lifecycle
-
-```mermaid
-flowchart LR
-    A[intent_contract] --> B[policy_decision]
-    B --> C[execution_contract]
-    C --> D[execution_ticket]
-    D --> E[execution_receipt]
-    E --> F[evidence_contract]
-    F --> G[artifact_chain_manifest]
-```
-
-### Core package architecture
-
-```mermaid
-flowchart TB
-    CLI[CLI] --> Validation[validation]
-    CLI --> ReviewBundles[review bundles]
-    CLI --> Profiles[profiles]
-    Validation --> Schemas[schemas]
-    Validation --> Artifacts[artifacts]
-    Artifacts --> Integrity[integrity chain]
-    Artifacts --> Tickets[tickets]
-    ReviewBundles --> Integrity
-    ReviewBundles --> ScopeFidelity[scope fidelity]
-    ReviewBundles --> Profiles
-    Profiles --> Integrity
-```
-
-### Runtime boundary
-
-```mermaid
-flowchart LR
-    Runtime[GovEngine or Ravenclaw runtime] --> Artifacts[SCLite artifacts]
-    Artifacts --> SCLite[SCLite validate hash bind review]
-    SCLite --> Record[review record or receipt]
-    Record --> Runtime
-
-    Runtime --> Execute[execute tools]
-    Runtime --> Authorize[decide authorization]
-    Runtime --> Evidence[store raw evidence]
-    Runtime --> Trust[verify PKI or signer trust]
-
-    SCLite -. does not .-> Execute
-    SCLite -. does not .-> Authorize
-    SCLite -. does not .-> Evidence
-    SCLite -. does not .-> Trust
-```
-
-### Review bundle flow
-
-```mermaid
-flowchart LR
-    Bundle[review bundle directory] --> Shape[validate shape]
-    Shape --> Chain[verify chain]
-    Chain --> Lifecycle[lifecycle review]
-    Lifecycle --> Record[review_record]
-    Record --> Markdown[markdown export]
-```
-
 ## What problem does SCLite solve?
 
 AI-assisted security workflows often blur separate authority boundaries:
@@ -113,6 +51,18 @@ AI-assisted security workflows often blur separate authority boundaries:
 6. evidence is summarized for review.
 
 SCLite turns those steps into small schema-backed JSON artifacts and verifies their integrity locally. A reviewer can check the public-safe bundle without running live targets or reading private logs.
+
+The canonical lifecycle keeps each authority boundary visible:
+
+```mermaid
+flowchart LR
+    A[intent_contract] --> B[policy_decision]
+    B --> C[execution_contract]
+    C --> D[execution_ticket]
+    D --> E[execution_receipt]
+    E --> F[evidence_contract]
+    F --> G[artifact_chain_manifest]
+```
 
 ## v0.2 canonical lifecycle
 
@@ -189,6 +139,23 @@ It provides:
 - a CLI for local validation and review fixtures;
 - legacy v0.1 compatibility fixtures and schemas.
 
+The package stays centered on local validation, review, profile references, and integrity checks:
+
+```mermaid
+flowchart TB
+    CLI[CLI] --> Validation[validation]
+    CLI --> ReviewBundles[review bundles]
+    CLI --> Profiles[profiles]
+    Validation --> Schemas[schemas]
+    Validation --> Artifacts[artifacts]
+    Artifacts --> Integrity[integrity chain]
+    Artifacts --> Tickets[tickets]
+    ReviewBundles --> Integrity
+    ReviewBundles --> ScopeFidelity[scope fidelity]
+    ReviewBundles --> Profiles
+    Profiles --> Integrity
+```
+
 ## What SCLite is not
 
 SCLite is not:
@@ -205,6 +172,26 @@ SCLite is not:
 - a proof of live vulnerability evidence;
 - a proof of signer identity or PKI trust;
 - a tamper-proof transparency log.
+
+Execution, authorization, raw evidence storage, and trust decisions belong to the host runtime:
+
+```mermaid
+flowchart LR
+    Runtime[GovEngine or Ravenclaw runtime] --> Artifacts[SCLite artifacts]
+    Artifacts --> SCLite[SCLite validate hash bind review]
+    SCLite --> Record[review record or receipt]
+    Record --> Runtime
+
+    Runtime --> Execute[execute tools]
+    Runtime --> Authorize[decide authorization]
+    Runtime --> Evidence[store raw evidence]
+    Runtime --> Trust[verify PKI or signer trust]
+
+    SCLite -. does not .-> Execute
+    SCLite -. does not .-> Authorize
+    SCLite -. does not .-> Evidence
+    SCLite -. does not .-> Trust
+```
 
 ## Legacy v0.1 compatibility
 
@@ -328,6 +315,17 @@ Review and export the v0.5 review-bundle fixture:
 ```bash
 sclite review examples/review-bundle --format json
 sclite export-review-bundle examples/review-bundle --format markdown
+```
+
+Review bundles package the lifecycle chain into a reviewer-facing record and optional Markdown export:
+
+```mermaid
+flowchart LR
+    Bundle[review bundle directory] --> Shape[validate shape]
+    Shape --> Chain[verify chain]
+    Chain --> Lifecycle[lifecycle review]
+    Lifecycle --> Record[review_record]
+    Record --> Markdown[markdown export]
 ```
 
 Review the GovEngine integration-readiness fixture and enforce conservative CI thresholds:
