@@ -1,6 +1,6 @@
 {
   "artifact_type": "public_validation_surface_index",
-  "generated_at": "2026-05-05T21:30:00+00:00",
+  "generated_at": "2026-05-21T12:10:00+00:00",
   "non_claims": [
     "does_not_claim_live_vulnerability_evidence",
     "does_not_authorize_publication",
@@ -14,8 +14,8 @@
   },
   "schema_version": "v0.1",
   "summary": {
-    "public_safe_surface_count": 6,
-    "surface_count": 6
+    "public_safe_surface_count": 7,
+    "surface_count": 7
   },
   "surfaces": [
     {
@@ -108,6 +108,21 @@
         "carrier_profile_ref.v0.1"
       ],
       "surface_id": "govengine_integration_fixture"
+    },
+    {
+      "commands": [
+        "sclite review examples/local-admin-change --format json --fail-on review"
+      ],
+      "kind": "review_bundle_directory",
+      "path": "examples/local-admin-change",
+      "public_safe": true,
+      "purpose": "Validate the SCLite 0.6 alpha local-admin-change fixture as a non-security multi-runtime proof surface.",
+      "schemas": [
+        "review_record.v0.1",
+        "artifact_chain_manifest.v0.2",
+        "execution_ticket.v0.3"
+      ],
+      "surface_id": "local_admin_change_fixture"
     }
   ]
 }

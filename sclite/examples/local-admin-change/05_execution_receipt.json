@@ -1,0 +1,70 @@
+{
+  "artifact_type": "execution_receipt",
+  "created_at": "2026-05-21T12:00:00+00:00",
+  "evidence_refs": [
+    {
+      "kind": "evidence_contract",
+      "path": "06_evidence_contract.json"
+    }
+  ],
+  "execution": {
+    "ended_at": "2026-05-21T12:00:00+00:00",
+    "executed_command_count": 0,
+    "network_execution_performed": false,
+    "planned_command_count": 1,
+    "started_at": "2026-05-21T12:00:00+00:00"
+  },
+  "links": {
+    "execution_contract": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_contract",
+        "canonical_bytes": 1545,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "ed9175da059cb8eae934688691767931a196fb1def4a9adb85ea2693f8cadba7",
+        "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "execution_contract"
+    },
+    "execution_ticket": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_ticket",
+        "canonical_bytes": 2773,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "ac5c968e965abf84830246e9ccb51a604d30c35038c0fbfa171399cb69d24d44",
+        "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+        "schema_version": "v0.3"
+      },
+      "role": "execution_ticket"
+    }
+  },
+  "non_claims": [
+    "receipt_does_not_include_raw_logs",
+    "receipt_does_not_claim_live_infrastructure_change",
+    "receipt_does_not_prove_runtime_enforcement"
+  ],
+  "outcome": {
+    "returncode": 0,
+    "status": "dry_run",
+    "stderr_present": false,
+    "stdout_present": false,
+    "summary": "Rendered a fixture-only service configuration diff and rollback note."
+  },
+  "receipt_id": "receipt-local-admin-change-001",
+  "runtime": {
+    "mode": "dry_run",
+    "name": "tecrax-local-fixture-renderer",
+    "runtime_ref": "runtime:tecrax-local-fixture-renderer",
+    "version": "fixture"
+  },
+  "schema_ref": "schemas/execution_receipt.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "ticket_use": {
+    "consumed_by_runtime": "runtime:tecrax-local-fixture-renderer",
+    "one_shot_consumed": true,
+    "ticket_id": "scoped-ticket-local-admin-change-001",
+    "use_count": 1
+  }
+}

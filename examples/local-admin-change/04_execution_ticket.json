@@ -1,0 +1,100 @@
+{
+  "approval": {
+    "approval_id": "approval-local-admin-change-001",
+    "approver_kind": "fixture_reviewer",
+    "status": "approved_for_dry_run"
+  },
+  "artifact_type": "execution_ticket",
+  "created_at": "2026-05-21T12:00:00+00:00",
+  "execution_limits": {
+    "max_runs": 1,
+    "mode": "dry_run",
+    "one_shot": true
+  },
+  "integrity": {
+    "profile": "sclite-v0.3-scoped-ticket-integrity",
+    "ticket_binds_execution_contract_digest": "ed9175da059cb8eae934688691767931a196fb1def4a9adb85ea2693f8cadba7"
+  },
+  "links": {
+    "execution_contract": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "execution_contract",
+        "canonical_bytes": 1545,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "ed9175da059cb8eae934688691767931a196fb1def4a9adb85ea2693f8cadba7",
+        "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "execution_contract"
+    },
+    "intent": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "intent_contract",
+        "canonical_bytes": 900,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "b008f1e98bc71adf3ae23bb5fba851263107a941b2bfb7a7f4745347b9e1df26",
+        "schema_ref": "schemas/intent_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "intent_contract"
+    },
+    "policy_decision": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "policy_decision",
+        "canonical_bytes": 1003,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "53f60e4cd8ce9cb8ae373b0ba878b4a678e08d57103fde43eebe4537c0a14952",
+        "schema_ref": "schemas/policy_decision.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "policy_decision"
+    }
+  },
+  "non_claims": [
+    "does_not_prove_legal_authorization",
+    "does_not_prove_signer_identity",
+    "does_not_prove_runtime_enforcement",
+    "does_not_authorize_live_infrastructure_change"
+  ],
+  "schema_ref": "schemas/execution_ticket.v0.3.schema.json",
+  "schema_version": "v0.3",
+  "scope_binding": {
+    "mode": "dry_run",
+    "normalized_args_digest": "sha256:5471e838d2a3c694cbc94644928a372fddb5bf97e7737c2dfb0578414196d284",
+    "target_host": "local.fixture",
+    "target_kind": "fixture_service",
+    "target_ref": "host:local.fixture",
+    "tool": "local_fixture_renderer"
+  },
+  "signature": {
+    "identity_signature_required": false,
+    "mode": "not_signed_integrity_only_fixture",
+    "note": "SCLite validates scoped ticket shape and bindings; signer trust remains external."
+  },
+  "spend_limits": {
+    "max_uses": 1,
+    "network_execution_allowed": false,
+    "one_shot": true,
+    "requires_evidence_contract": true,
+    "requires_receipt": true
+  },
+  "subject_binding": {
+    "issued_for_actor": "agent:tecrax-local-fixture",
+    "session_ref": "session:local-admin-change-fixture",
+    "usable_by_runtime": "runtime:tecrax-local-fixture-renderer"
+  },
+  "ticket_id": "scoped-ticket-local-admin-change-001",
+  "ticket_profile": "scoped_execution_ticket",
+  "ticket_semantics": {
+    "consumable_by_runtime": true,
+    "default_transferable": false,
+    "kind": "runtime_consumable_scoped_ticket"
+  },
+  "validity": {
+    "not_after": "2026-05-22T12:00:00+00:00",
+    "not_before": "2026-05-21T12:00:00+00:00"
+  }
+}

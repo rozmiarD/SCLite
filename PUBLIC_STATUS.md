@@ -4,12 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current package version: `0.5.1`.
-- Status: published `0.5.x` review-bundle line.
+- Current package version: `0.6.0a0`.
+- Public release label: `0.6.0-alpha`.
+- Status: alpha multi-runtime proof/review substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: completed as `sclite-core==0.5.1`.
+- PyPI publication: `sclite-core==0.6.0a0` is the current alpha package line.
 
 ## Current review path
 
@@ -19,7 +20,7 @@ For new public demos and integrations, the clearest path is:
 v0.2 lifecycle artifacts -> artifact_chain_manifest -> v0.5 review bundle -> review_record verification receipt
 ```
 
-Older v0.1 proof fixtures and v0.3 scoped-ticket checks remain supported, but `examples/review-bundle/` is the general front-door fixture and `examples/govengine-integration/` is the downstream integration-readiness fixture for understanding the package.
+Older v0.1 proof fixtures and v0.3 scoped-ticket checks remain supported, but `examples/review-bundle/` is the general front-door fixture, `examples/govengine-integration/` is the downstream integration-readiness fixture, and `examples/local-admin-change/` is the second non-security local-fixture proof for understanding package portability.
 
 ## What is public-safe today
 
@@ -39,6 +40,8 @@ SCLite can be reviewed as a package for:
 - initial lifecycle review records and lifecycle-aware Scope Fidelity v0.2;
 - canonical review-bundle validation and Markdown export helpers;
 - GovEngine integration-readiness fixture, stable import/CLI contract, CLI exit-code docs, and negative drift fixtures;
+- local-admin-change review bundle proving the same lifecycle outside the security-domain fixture path;
+- public truth validation for version, maturity, package badge/install, dependency-free status, public imports, CLI/docs, and non-authority boundaries;
 - CLI-based local validation.
 
 ## What is not claimed
@@ -63,4 +66,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-The `0.5.x` line adds review bundles and the `0.5.1` patch tightens downstream integration readiness as the current adoption/demo surface while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
+The `0.6.0-alpha` line keeps review-bundle behavior stable and adds multi-runtime proof/readiness hardening while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.

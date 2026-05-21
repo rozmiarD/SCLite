@@ -18,6 +18,7 @@ Run the full public-safe checklist from the repository root:
 ```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
+python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
@@ -57,6 +58,7 @@ python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execut
 python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
 python -m sclite.cli review examples/review-bundle --format json
 python -m sclite.cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.cli review examples/local-admin-change --format json --fail-on review
 python -m sclite.cli review examples/bad-review-bundle-cross-host --format json --fail-on none
 python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
@@ -83,7 +85,9 @@ Expected result:
 - lifecycle review records and lifecycle-aware Scope Fidelity checks are generated conservatively;
 - canonical review bundles validate and export to Markdown;
 - GovEngine integration fixture passes with `--fail-on review`;
+- local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
+- public truth validation passes for the current alpha source/package line;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - validation receipt reports `status: passed`;

@@ -1,12 +1,12 @@
 # GovEngine Integration Contract
 
-This document defines the SCLite 0.5 public import surface that GovEngine may rely on.
+This document defines the SCLite 0.6 alpha public import surface that GovEngine may rely on.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following import paths in the `sclite-core>=0.5.1,<0.6` line:
+GovEngine may rely on the following import paths in the `sclite-core>=0.6.0a0,<0.7` line:
 
 ```python
 from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest

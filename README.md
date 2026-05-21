@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core](https://img.shields.io/pypi/v/sclite-core?label=package%3A%20sclite-core&color=blueviolet)](https://pypi.org/project/sclite-core/)
+[![Package: sclite-core 0.6.0a0](https://img.shields.io/badge/package-sclite--core%200.6.0a0-blueviolet.svg)](https://pypi.org/project/sclite-core/0.6.0a0/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -10,14 +10,15 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The published 0.5.1
-line adds GovEngine integration-readiness fixtures and gates plus review bundles, lifecycle review records, trust/carrier references,
-scoped-ticket review, and receipt-bounded-evidence checks on top of that lifecycle.
+what was approved, what was executed, and what can be proven. The 0.6 alpha line
+keeps the 0.5 review-bundle contract stable while adding mechanically checked
+public truth and a second public-safe local-admin fixture for multi-runtime
+proof without adding runtime, adapter, PKI, or policy authority.
 
 ## Status
 
-- Version: `0.5.1`
-- Status: **published 0.5.x review-bundle line**
+- Version: `0.6.0a0`
+- Status: **0.6 alpha multi-runtime proof/review substrate**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -37,7 +38,8 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.2 lifecycle | Canonical intent → policy → contract → ticket → receipt → evidence chain | Canonical lifecycle model |
 | v0.3 scoped tickets | Runtime-consumable ticket semantics and receipt-bounded evidence checks | Available via `validate-ticket`, `explain-ticket`, `verify-ticket-use` |
 | v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
-| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current adoption/demo surface |
+| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current stable review surface |
+| v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Current alpha portability surface |
 
 ## What problem does SCLite solve?
 
@@ -212,7 +214,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
 - [`docs/REVIEW_BUNDLES.md`](docs/REVIEW_BUNDLES.md) — canonical v0.5 review-bundle shape and CLI.
-- [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — stable SCLite 0.5.x imports, CLI surfaces, and fixtures for GovEngine.
+- [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — stable SCLite 0.6 alpha imports, CLI surfaces, and fixtures for GovEngine.
 - [`docs/SCLITE_0_5_FREEZE.md`](docs/SCLITE_0_5_FREEZE.md) — 0.5.x freeze notes and non-goals.
 - [`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md) — CLI exit-code contract for CI/downstream callers.
 - [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) — concrete tampering, boundary, and non-goal model.
@@ -225,10 +227,10 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 
 ## Installation
 
-Install from PyPI:
+Install the current public alpha package from PyPI with an exact version pin:
 
 ```bash
-pip install sclite-core
+python -m pip install sclite-core==0.6.0a0
 ```
 
 Install directly from GitHub:
@@ -246,6 +248,7 @@ python -m pip install -e '.[dev]'
 ```
 
 Runtime dependencies are intentionally empty. The `dev` extra installs `pytest` for local tests.
+Python import package remains `sclite`.
 
 ## CLI quickstart
 

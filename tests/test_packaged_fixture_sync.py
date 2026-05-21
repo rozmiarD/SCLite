@@ -23,7 +23,7 @@ def test_packaged_schemas_match_source_schemas() -> None:
 
 
 def test_packaged_public_review_fixtures_match_source_fixtures() -> None:
-    for fixture in ['review-bundle', 'govengine-integration', 'bad-review-bundle-cross-host']:
+    for fixture in ['review-bundle', 'govengine-integration', 'local-admin-change', 'bad-review-bundle-cross-host']:
         source = ROOT / 'examples' / fixture
         packaged = ROOT / 'sclite' / 'examples' / fixture
         assert _relative_files(source) == _relative_files(packaged), fixture
