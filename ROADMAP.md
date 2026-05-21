@@ -330,6 +330,70 @@ This alpha does not add runtime execution, policy decisions, trust decisions,
 PKI/KMS/key-store behavior, carrier adapters, live infrastructure operations,
 or legal authorization claims.
 
+## 0.6.x — Alpha substrate stabilization
+
+Goal: keep the new multi-runtime proof claim boring before adding another
+artifact or schema family.
+
+Next work should consolidate what already exists:
+
+1. keep `examples/govengine-integration/` and `examples/local-admin-change/`
+   equivalent at the review-bundle contract level while preserving their
+   different domain stories;
+2. add or tighten failure-catalog coverage for review bundles, lifecycle
+   binding drift, scoped-ticket misuse, receipt-bounded evidence overclaims,
+   and trust/carrier reference digest drift only where current fixtures leave a
+   real gap;
+3. make source fixture, packaged fixture, CLI summary, and review-record
+   outputs stay mechanically aligned;
+4. document compatibility expectations for the stable 0.5 review-bundle
+   surface consumed by GovEngine and Ravenclaw;
+5. keep the dependency-light validator and optional strict JSON Schema path
+   behaviorally aligned for supported fixtures.
+
+Success criteria:
+
+- public and strict validation gates pass for both public-safe review-bundle
+  families and the intentional negative fixture;
+- GovEngine still consumes the SCLite package through review-bundle and
+  scoped-ticket boundaries without private fixture knowledge;
+- the second non-security fixture proves portability without adding runtime,
+  policy, credential, trust-authority, or adapter claims;
+- public truth, package data, fixture sync, and CLI exit-code tests reject
+  documentation or packaged-fixture drift.
+
+## 0.7.x — Consumer conformance only after 0.6 settles
+
+Do not open a 0.7 schema wave merely because GovEngine or Ravenclaw is moving.
+The next minor line is justified only if consumers prove a narrow artifact or
+validation contract that the 0.6 alpha cannot express safely.
+
+Candidate direction, if proven:
+
+- a small consumer-conformance matrix for GovEngine, Ravenclaw, and a
+  non-security fixture path;
+- review-bundle compatibility metadata or diagnostics when they reduce review
+  ambiguity without turning SCLite into a runtime;
+- reviewer-facing failure explanations that remain static validation output,
+  not policy or trust decisions.
+
+Entry criteria:
+
+- at least one concrete downstream gap is reproduced from GovEngine or
+  Ravenclaw tests;
+- the gap cannot be solved by a fixture, documentation, or validator hardening
+  patch inside the 0.6 line;
+- any proposed schema/API addition has positive and negative public-safe
+  fixtures plus package-compatibility tests.
+
+Success criteria:
+
+- SCLite still owns proof/review artifacts only;
+- GovEngine and Ravenclaw can validate the new surface without live execution,
+  credentials, network targets, or protocol adapters;
+- existing 0.5 review-bundle consumers remain compatible or receive an
+  explicit migration contract before release.
+
 ## Release posture
 
 Do not rush a PyPI release for every roadmap milestone. A milestone should become a package release only when it adds real API, schema, CLI, or documentation value and passes the release checklist.
