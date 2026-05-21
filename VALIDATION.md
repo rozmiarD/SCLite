@@ -77,6 +77,20 @@ python -m sclite.cli validation-receipt examples/security-contract-proof
 python -m pytest -q
 ```
 
+## Review-bundle compatibility
+
+The stable `0.5` review-bundle surface remains the downstream compatibility
+boundary for GovEngine and Ravenclaw on the `0.6` alpha line. Consumers may
+rely on the canonical `review_bundle` directory shape, the
+`review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
+profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`
+summary output. They must not assume a security fixture story, private fixture
+paths, runtime execution, trust authority, or adapter behavior from the bundle.
+
+`tests/test_review_bundles.py` keeps the public-safe GovEngine integration and
+local-admin-change fixture families aligned at that contract level while their
+domain narratives remain different.
+
 Expected result:
 
 - fixture validation passes;

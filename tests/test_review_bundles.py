@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / 'examples' / 'review-bundle'
 PACKAGE_BUNDLE = ROOT / 'sclite' / 'examples' / 'review-bundle'
 LOCAL_ADMIN_CHANGE = ROOT / 'examples' / 'local-admin-change'
+GOVENGINE_INTEGRATION = ROOT / 'examples' / 'govengine-integration'
 
 
 def test_review_bundle_shape_validates_canonical_fixture() -> None:
@@ -50,6 +51,35 @@ def test_local_admin_change_fixture_is_second_public_safe_review_bundle() -> Non
     assert 'does_not_execute_tools' in serialized
     assert '"live_target_execution": false' in serialized
     assert '"network_execution_performed": true' not in serialized
+
+
+@pytest.mark.parametrize('bundle', [GOVENGINE_INTEGRATION, LOCAL_ADMIN_CHANGE])
+def test_alpha_review_bundle_families_keep_review_record_and_cli_summary_aligned(bundle: Path) -> None:
+    record = review_bundle(bundle, generated_at='2026-05-21T00:00:00+00:00')
+    validate_artifact(record, 'review_record.v0.1', strict_jsonschema=True)
+
+    summary = subprocess.run(
+        [sys.executable, '-m', 'sclite.cli', 'review', str(bundle), '--format', 'summary', '--fail-on', 'review'],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert summary.returncode == 0, summary.stderr
+    assert summary.stdout.strip() == review_bundle_summary(record)
+    assert record['review_profile'] == 'sclite-review-bundle-v0.1'
+    assert record['summary']['review_bundle_shape'] == 'canonical-v0.1'
+    assert tuple(record['summary']['review_bundle_files']) == (
+        'intent_contract',
+        'policy_decision',
+        'execution_contract',
+        'execution_ticket',
+        'execution_receipt',
+        'evidence_contract',
+        'review_markdown',
+        'verification_receipt',
+    )
 
 
 def test_review_bundle_rejects_missing_required_file(tmp_path: Path) -> None:
