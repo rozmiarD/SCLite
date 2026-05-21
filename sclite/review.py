@@ -52,6 +52,7 @@ def _artifact_paths_from_manifest(manifest: Mapping[str, Any], root: Path) -> Di
     entries = manifest.get('entries')
     if not isinstance(entries, list):
         raise ReviewRecordError('manifest.entries is not an array')
+    base = root.resolve()
     result: Dict[str, Path] = {}
     for entry in entries:
         if not isinstance(entry, Mapping):
@@ -59,7 +60,12 @@ def _artifact_paths_from_manifest(manifest: Mapping[str, Any], root: Path) -> Di
         role = str(entry.get('role') or '')
         rel_path = str(entry.get('path') or '')
         if role and rel_path:
-            result[role] = (root / rel_path).resolve()
+            artifact_path = (base / rel_path).resolve()
+            try:
+                artifact_path.relative_to(base)
+            except ValueError as exc:
+                raise ReviewRecordError(f'manifest entry path escapes root: {rel_path}') from exc
+            result[role] = artifact_path
     return result
 
 
@@ -82,6 +88,7 @@ def build_review_record_from_manifest(
     manifest = _load_json_object(manifest_path)
     checks: List[Dict[str, Any]] = []
     statuses: List[str] = []
+    record_generated_at = generated_at or _utc_now()
 
     artifact_paths = _artifact_paths_from_manifest(manifest, base)
     artifacts_by_role: Dict[str, Mapping[str, Any]] = {}
@@ -123,7 +130,11 @@ def build_review_record_from_manifest(
         source_artifact = str(manifest_path.relative_to(base))
     except ValueError:
         source_artifact = manifest_path.name
-    scope_report = build_lifecycle_scope_fidelity_report(artifacts_by_role, source_artifact=source_artifact)
+    scope_report = build_lifecycle_scope_fidelity_report(
+        artifacts_by_role,
+        source_artifact=source_artifact,
+        generated_at=record_generated_at,
+    )
     validate_lifecycle_scope_fidelity_report(scope_report, strict_jsonschema=strict_jsonschema)
     checks.append(_check('scope_fidelity', str(scope_report['verdict']), str(scope_report['summary']['reason']), len(scope_report.get('lifecycle_targets') or [])))
     statuses.append(str(scope_report['verdict']))
@@ -144,7 +155,7 @@ def build_review_record_from_manifest(
         'artifact_type': 'review_record',
         'schema_version': 'v0.1',
         'schema_ref': REVIEW_RECORD_SCHEMA_REF,
-        'generated_at': generated_at or _utc_now(),
+        'generated_at': record_generated_at,
         'review_id': 'review-record-' + (str(chain_result.get('root_chain_digest'))[:12] if chain_result else 'unverified'),
         'review_profile': 'sclite-lifecycle-review-v0.1',
         'source_manifest': str(manifest_path),

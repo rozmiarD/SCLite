@@ -210,6 +210,7 @@ def build_lifecycle_scope_fidelity_report(
     artifacts_by_role: Mapping[str, Mapping[str, Any]],
     *,
     source_artifact: str = '',
+    generated_at: str | None = None,
 ) -> Dict[str, Any]:
     """Build lifecycle-aware Scope Fidelity v0.2 from local artifacts.
 
@@ -256,7 +257,7 @@ def build_lifecycle_scope_fidelity_report(
         'artifact_type': SCOPE_FIDELITY_ARTIFACT_TYPE,
         'schema_version': LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
         'schema_ref': LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
-        'generated_at': _utc_now(),
+        'generated_at': generated_at or _utc_now(),
         'source_artifact': _safe_str(source_artifact),
         'verdict': verdict,
         'lifecycle_targets': entries,

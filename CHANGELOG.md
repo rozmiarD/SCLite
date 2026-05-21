@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Rejects lifecycle review manifest paths that escape the selected artifact root before artifact loading.
+- Aligns generated lifecycle Scope Fidelity timestamps with their parent review records and adds tests that 0.6 alpha verification receipts match regenerated review records.
 - Adds GitHub-compatible Mermaid diagrams to README and the lifecycle/runtime/review-bundle docs.
 - Clarifies dependency-free schema validation as a documented subset and positions strict Draft 2020-12 validation as the CI/release authority.
 - Adds a concrete threat model covering artifact tampering, runtime boundaries, Scope Fidelity limits, redaction limits, and PKI/non-authority boundaries.
