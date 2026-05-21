@@ -82,6 +82,14 @@ def test_alpha_review_bundle_families_keep_review_record_and_cli_summary_aligned
     )
 
 
+@pytest.mark.parametrize('bundle', [GOVENGINE_INTEGRATION, LOCAL_ADMIN_CHANGE])
+def test_alpha_verification_receipt_matches_generated_review_record(bundle: Path) -> None:
+    fixture = json.loads((bundle / 'verification_receipt.json').read_text(encoding='utf-8'))
+    record = review_bundle(bundle, generated_at=str(fixture['generated_at']))
+
+    assert record == fixture
+
+
 def test_review_bundle_rejects_missing_required_file(tmp_path: Path) -> None:
     target = tmp_path / 'review-bundle'
     shutil.copytree(BUNDLE, target)

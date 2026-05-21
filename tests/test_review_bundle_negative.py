@@ -8,6 +8,7 @@ import pytest
 
 from sclite.bundles import ReviewBundleError, review_bundle, validate_review_bundle_shape
 from sclite.integrity import build_artifact_chain_manifest
+from sclite.review import ReviewRecordError, build_review_record_from_manifest
 
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / 'examples' / 'govengine-integration'
@@ -70,6 +71,19 @@ def test_review_bundle_rejects_manifest_path_escape(tmp_path: Path) -> None:
     (bundle / 'artifact_chain_manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     with pytest.raises(ReviewBundleError, match='manifest paths do not match'):
         review_bundle(bundle)
+
+
+def test_review_lifecycle_rejects_manifest_path_escape_before_artifact_read(tmp_path: Path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    outside = tmp_path / 'outside_intent_contract.json'
+    outside.write_text((bundle / '01_intent_contract.json').read_text(encoding='utf-8'), encoding='utf-8')
+    manifest = _load(bundle / 'artifact_chain_manifest.json')
+    manifest['entries'][0]['path'] = '../outside_intent_contract.json'
+    manifest_path = bundle / 'artifact_chain_manifest.json'
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+    with pytest.raises(ReviewRecordError, match='path escapes root'):
+        build_review_record_from_manifest(manifest_path, root=bundle)
 
 
 def _assert_fail_detail(record: dict, expected: str) -> None:
