@@ -18,6 +18,7 @@ record = json.loads(Path('examples/govengine-integration/verification_receipt.js
 validate_lifecycle_scope_fidelity_report(record['scope_fidelity_report'], strict_jsonschema=True)
 PY
 python -m sclite.cli review examples/govengine-integration --strict-jsonschema --format json --fail-on review >/dev/null
+python -m sclite.cli review examples/local-admin-change --strict-jsonschema --format json --fail-on review >/dev/null
 python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --strict-jsonschema --format json >/dev/null
 python -m sclite.cli validate-artifact --strict-jsonschema --schema trust_profile_ref.v0.1 examples/govengine-integration/trust_profile_ref.json
 python -m sclite.cli validate-artifact --strict-jsonschema --schema carrier_profile_ref.v0.1 examples/govengine-integration/carrier_profile_ref.json

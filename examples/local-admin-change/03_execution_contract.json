@@ -1,0 +1,67 @@
+{
+  "artifact_type": "execution_contract",
+  "contract_id": "exec-contract-local-admin-change-001",
+  "created_at": "2026-05-21T12:00:00+00:00",
+  "execution_bounds": {
+    "max_commands": 1,
+    "mode": "dry_run",
+    "network_execution_allowed": false,
+    "timeout_seconds": 0
+  },
+  "execution_shape": {
+    "normalized_args": [
+      "fixture://local.fixture/service/demo-web"
+    ],
+    "plan": [
+      {
+        "args": [
+          "fixture://local.fixture/service/demo-web"
+        ],
+        "step": 1,
+        "tool": "local_fixture_renderer"
+      }
+    ],
+    "tool": "local_fixture_renderer"
+  },
+  "expected_receipt": {
+    "required": true,
+    "schema_ref": "schemas/execution_receipt.v0.2.schema.json"
+  },
+  "links": {
+    "intent": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "intent_contract",
+        "canonical_bytes": 900,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "b008f1e98bc71adf3ae23bb5fba851263107a941b2bfb7a7f4745347b9e1df26",
+        "schema_ref": "schemas/intent_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "intent_contract"
+    },
+    "policy_decision": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "policy_decision",
+        "canonical_bytes": 1003,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "53f60e4cd8ce9cb8ae373b0ba878b4a678e08d57103fde43eebe4537c0a14952",
+        "schema_ref": "schemas/policy_decision.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "policy_decision"
+    }
+  },
+  "non_claims": [
+    "execution_contract_is_not_runtime_execution",
+    "execution_contract_does_not_authorize_live_host_changes"
+  ],
+  "schema_ref": "schemas/execution_contract.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "target_binding": {
+    "target": "fixture://local.fixture/service/demo-web",
+    "target_host": "local.fixture",
+    "target_in_scope": true
+  }
+}

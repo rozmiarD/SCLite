@@ -8,6 +8,13 @@
 - Requires canonical review-bundle sidecars (`REVIEW.md`, `verification_receipt.json`) during bundle-shape validation while still regenerating review output from source artifacts.
 - Removes local absolute manifest paths from generated review records and adds tests for source-vs-packaged schema/review-fixture drift plus subset-vs-strict validator behavior.
 
+## 0.6.0-alpha - Multi-runtime proof substrate
+
+- Promotes the package line to `0.6.0a0` / `0.6.0-alpha`.
+- Adds public truth validation for version, maturity, package badge/install, stable imports, validation gates, public fixtures, and non-authority boundaries.
+- Adds `examples/local-admin-change/` as a second public-safe non-security review-bundle fixture plus packaged copy.
+- Keeps SCLite limited to proof/review artifacts and does not add runtime execution, policy authority, PKI/KMS/key-store behavior, carrier adapters, or live infrastructure claims.
+
 ## 0.5.1 - GovEngine integration readiness
 
 - Freezes the documented GovEngine import/CLI contract for `sclite-core>=0.5.1,<0.6`.

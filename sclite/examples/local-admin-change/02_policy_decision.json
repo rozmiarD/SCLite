@@ -1,0 +1,46 @@
+{
+  "artifact_type": "policy_decision",
+  "capability": {
+    "class": "local_fixture",
+    "name": "service_config_diff_review",
+    "network_effect": "none"
+  },
+  "constraints": [
+    "dry_run_only",
+    "no_credentials",
+    "no_private_inventory",
+    "rollback_plan_required"
+  ],
+  "created_at": "2026-05-21T12:00:00+00:00",
+  "decision": "allow_prepare",
+  "decision_id": "policy-local-admin-change-001",
+  "links": {
+    "intent": {
+      "descriptor": {
+        "algorithm": "sha256",
+        "artifact_type": "intent_contract",
+        "canonical_bytes": 900,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "b008f1e98bc71adf3ae23bb5fba851263107a941b2bfb7a7f4745347b9e1df26",
+        "schema_ref": "schemas/intent_contract.v0.2.schema.json",
+        "schema_version": "v0.2"
+      },
+      "role": "intent_contract"
+    }
+  },
+  "reason_codes": [
+    "local_fixture_allowed",
+    "dry_run_contract_path"
+  ],
+  "risk": {
+    "level": "low",
+    "reason": "synthetic local fixture with no host connection"
+  },
+  "schema_ref": "schemas/policy_decision.v0.2.schema.json",
+  "schema_version": "v0.2",
+  "scope": {
+    "scope_profile": "local-fixture-only",
+    "target_host": "local.fixture",
+    "target_in_scope": true
+  }
+}

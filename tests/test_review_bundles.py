@@ -14,6 +14,7 @@ from sclite.bundles import ReviewBundleError, review_bundle, review_bundle_summa
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / 'examples' / 'review-bundle'
 PACKAGE_BUNDLE = ROOT / 'sclite' / 'examples' / 'review-bundle'
+LOCAL_ADMIN_CHANGE = ROOT / 'examples' / 'local-admin-change'
 
 
 def test_review_bundle_shape_validates_canonical_fixture() -> None:
@@ -36,6 +37,19 @@ def test_packaged_review_bundle_fixture_matches_public_shape() -> None:
     record = review_bundle(PACKAGE_BUNDLE)
     assert record['summary']['artifact_count'] == 6
     assert record['summary']['scope_fidelity_verdict'] == 'pass'
+
+
+def test_local_admin_change_fixture_is_second_public_safe_review_bundle() -> None:
+    record = review_bundle(LOCAL_ADMIN_CHANGE)
+    validate_artifact(record, 'review_record.v0.1', strict_jsonschema=True)
+
+    assert record['verdict'] == 'pass'
+    assert record['summary']['scope_fidelity_verdict'] == 'pass'
+    assert record['summary']['target_hosts'] == ['local.fixture']
+    serialized = json.dumps(record)
+    assert 'does_not_execute_tools' in serialized
+    assert '"live_target_execution": false' in serialized
+    assert '"network_execution_performed": true' not in serialized
 
 
 def test_review_bundle_rejects_missing_required_file(tmp_path: Path) -> None:

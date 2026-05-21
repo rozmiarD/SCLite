@@ -1,0 +1,154 @@
+{
+  "artifact_type": "review_record",
+  "checks": [
+    {
+      "count": 6,
+      "detail": "all manifest artifacts validated against declared schemas",
+      "name": "schema_validation",
+      "status": "pass"
+    },
+    {
+      "count": 6,
+      "detail": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+      "name": "chain_integrity",
+      "status": "pass"
+    },
+    {
+      "count": 8,
+      "detail": "semantic checks present",
+      "name": "lifecycle_binding",
+      "status": "pass"
+    },
+    {
+      "count": 6,
+      "detail": "all explicit lifecycle target hosts match",
+      "name": "scope_fidelity",
+      "status": "pass"
+    },
+    {
+      "detail": "v0.3 ticket-use semantics available for downstream verification",
+      "name": "ticket_use_profile",
+      "status": "pass"
+    }
+  ],
+  "generated_at": "2026-05-21T12:05:00+00:00",
+  "non_claims": [
+    "does_not_execute_tools",
+    "does_not_prove_legal_authorization",
+    "does_not_prove_signer_identity",
+    "does_not_prove_carrier_delivery",
+    "does_not_replace_runtime_policy_decision"
+  ],
+  "public_safety": {
+    "live_target_execution": false,
+    "protocol_adapter_work": false,
+    "public_push": false,
+    "static_analysis_only": true,
+    "trust_authority_decision": false
+  },
+  "review_id": "review-record-ffcc2cee1249",
+  "review_profile": "sclite-review-bundle-v0.1",
+  "schema_ref": "schemas/review_record.v0.1.schema.json",
+  "schema_version": "v0.1",
+  "scope_fidelity_report": {
+    "artifact_type": "scope_fidelity_report",
+    "generated_at": "2026-05-21T13:52:05+00:00",
+    "lifecycle_targets": [
+      {
+        "artifact_type": "intent_contract",
+        "role": "intent_contract",
+        "source": "target",
+        "status": "explicit",
+        "target": "fixture://local.fixture/service/demo-web",
+        "target_host": "local.fixture"
+      },
+      {
+        "artifact_type": "policy_decision",
+        "role": "policy_decision",
+        "source": "scope",
+        "status": "explicit",
+        "target": "local.fixture",
+        "target_host": "local.fixture"
+      },
+      {
+        "artifact_type": "execution_contract",
+        "role": "execution_contract",
+        "source": "target_binding",
+        "status": "explicit",
+        "target": "fixture://local.fixture/service/demo-web",
+        "target_host": "local.fixture"
+      },
+      {
+        "artifact_type": "execution_ticket",
+        "role": "execution_ticket",
+        "source": "scope_binding",
+        "status": "explicit",
+        "target": "host:local.fixture",
+        "target_host": "local.fixture"
+      },
+      {
+        "artifact_type": "execution_receipt",
+        "role": "execution_receipt",
+        "source": "none",
+        "status": "linked_no_explicit_target",
+        "target": "",
+        "target_host": ""
+      },
+      {
+        "artifact_type": "evidence_contract",
+        "role": "evidence_contract",
+        "source": "none",
+        "status": "linked_no_explicit_target",
+        "target": "",
+        "target_host": ""
+      }
+    ],
+    "limitations": [
+      "static_lifecycle_target_review_only",
+      "does_not_resolve_dns_redirects_or_ownership",
+      "does_not_prove_legal_authorization",
+      "does_not_execute_tools",
+      "receipt_and_evidence_targets_are_inferred_from_digest_linked_lifecycle_context"
+    ],
+    "public_safety": {
+      "live_target_execution": false,
+      "protocol_adapter_work": false,
+      "public_push": false,
+      "static_analysis_only": true
+    },
+    "schema_ref": "schemas/scope_fidelity_report.v0.2.schema.json",
+    "schema_version": "v0.2",
+    "source_artifact": "artifact_chain_manifest.json",
+    "summary": {
+      "lifecycle_target_status": "consistent",
+      "mismatched_hosts_detected": [],
+      "missing_roles": [],
+      "reason": "all explicit lifecycle target hosts match",
+      "target_hosts": [
+        "local.fixture"
+      ]
+    },
+    "verdict": "pass"
+  },
+  "source_manifest": "artifact_chain_manifest.json",
+  "summary": {
+    "artifact_count": 6,
+    "review_bundle_files": {
+      "evidence_contract": "06_evidence_contract.json",
+      "execution_contract": "03_execution_contract.json",
+      "execution_receipt": "05_execution_receipt.json",
+      "execution_ticket": "04_execution_ticket.json",
+      "intent_contract": "01_intent_contract.json",
+      "policy_decision": "02_policy_decision.json",
+      "review_markdown": "REVIEW.md",
+      "verification_receipt": "verification_receipt.json"
+    },
+    "review_bundle_shape": "canonical-v0.1",
+    "root_chain_digest": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+    "scope_fidelity_verdict": "pass",
+    "target_hosts": [
+      "local.fixture"
+    ]
+  },
+  "verdict": "pass"
+}

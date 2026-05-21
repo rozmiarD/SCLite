@@ -88,6 +88,15 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             ],
             'public_safe': True,
         },
+        {
+            'surface_id': 'local_admin_change_fixture',
+            'path': 'examples/local-admin-change',
+            'kind': 'review_bundle_directory',
+            'purpose': 'Validate the SCLite 0.6 alpha local-admin-change fixture as a non-security multi-runtime proof surface.',
+            'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3'],
+            'commands': ['sclite review examples/local-admin-change --format json --fail-on review'],
+            'public_safe': True,
+        },
     ]
     return {
         'artifact_type': PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE,

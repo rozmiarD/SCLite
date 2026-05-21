@@ -28,6 +28,7 @@ Run from the repository root:
 ```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
+python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
@@ -42,6 +43,7 @@ python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execut
 python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
 python -m sclite.cli review examples/review-bundle --format json
 python -m sclite.cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.cli review examples/local-admin-change --format json --fail-on review
 python -m sclite.cli review examples/bad-review-bundle-cross-host --format json --fail-on none
 python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
@@ -65,6 +67,8 @@ Expected state:
 - lifecycle chain and semantic lifecycle verification pass;
 - scoped-ticket validation and ticket-use/evidence-bound checks pass;
 - lifecycle review records, review bundles, GovEngine integration fixture, and negative drift fixture validate as expected;
+- local-admin-change review bundle validates as a second public-safe non-security fixture;
+- public truth validator passes for the package/source line;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - validation receipt has `status: passed`;
