@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 0.6.0a0](https://img.shields.io/badge/package-sclite--core%200.6.0a0-blueviolet.svg)](https://pypi.org/project/sclite-core/0.6.0a0/)
+[![Package: sclite-core 0.7.0a0](https://img.shields.io/badge/package-sclite--core%200.7.0a0-blueviolet.svg)](https://pypi.org/project/sclite-core/0.7.0a0/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -10,15 +10,16 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The 0.6 alpha line
-keeps the 0.5 review-bundle contract stable while adding mechanically checked
-public truth and a second public-safe local-admin fixture for multi-runtime
-proof without adding runtime, adapter, PKI, or policy authority.
+what was approved, what was executed, and what can be proven. The 0.7 alpha line
+curates the review-lifecycle/review-bundle front door and lets active consumers
+materialize a canonical review bundle without adding runtime, adapter, PKI, or
+policy authority. Legacy v0.1 proof helpers remain explicit compatibility
+modules rather than current root exports.
 
 ## Status
 
-- Version: `0.6.0a0`
-- Status: **0.6 alpha multi-runtime proof/review substrate**
+- Version: `0.7.0a0`
+- Status: **0.7 alpha review-lifecycle surface collapse**
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -39,7 +40,8 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.3 scoped tickets | Runtime-consumable ticket semantics and receipt-bounded evidence checks | Available via `validate-ticket`, `explain-ticket`, `verify-ticket-use` |
 | v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
 | v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current stable review surface |
-| v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Current alpha portability surface |
+| v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Delivered predecessor fixture substrate |
+| v0.7 alpha surface collapse | Curated lifecycle/review-bundle root API plus materialization for active consumers | Current alpha integration front door |
 
 ## What problem does SCLite solve?
 
@@ -230,7 +232,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 Install the current public alpha package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==0.6.0a0
+python -m pip install sclite-core==0.7.0a0
 ```
 
 Install directly from GitHub:

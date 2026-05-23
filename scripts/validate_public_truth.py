@@ -17,11 +17,11 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '0.6.0a0'
-EXPECTED_RELEASE_LABEL = '0.6.0-alpha'
+EXPECTED_VERSION = '0.7.0a0'
+EXPECTED_RELEASE_LABEL = '0.7.0-alpha'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.6.0a0,<0.7'
+EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.7.0a0,<0.8'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -41,6 +41,7 @@ STABLE_IMPORTS = (
     'sclite.tickets:verify_ticket_use',
     'sclite.review:build_review_record_from_manifest',
     'sclite.bundles:review_bundle',
+    'sclite.bundles:materialize_review_bundle',
     'sclite.bundles:validate_review_bundle_shape',
     'sclite.profiles:validate_trust_profile_ref',
     'sclite.profiles:validate_carrier_profile_ref',
@@ -92,7 +93,16 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
     _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={version}')
 
 
-def _assert_current_claim_docs(errors: list[str], *, version: str, spec: str, artifact_docs: str) -> None:
+def _assert_current_claim_docs(
+    errors: list[str],
+    *,
+    version: str,
+    readme: str,
+    roadmap: str,
+    spec: str,
+    artifact_docs: str,
+    integration_guide: str,
+) -> None:
     stale_current_markers = (
         'Current package release is `sclite-core==0.5.1`',
         'Current package: `sclite-core==0.5.1`',
@@ -105,11 +115,18 @@ def _assert_current_claim_docs(errors: list[str], *, version: str, spec: str, ar
             errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
     _require(errors, 'SPEC.md', spec, f'Current package release is `sclite-core=={version}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
-    _require(errors, 'SPEC.md', spec, 'v0.1 proof-trace artifacts remain only')
-    _require(errors, 'SPEC.md', spec, 'Ravenclaw/public-proof migration')
+    _require(errors, 'SPEC.md', spec, 'v0.1 proof-trace artifacts remain compatibility/history material')
+    _require(errors, 'SPEC.md', spec, "Ravenclaw's")
+    _require(errors, 'SPEC.md', spec, 'active path now consumes the current lifecycle/review-bundle front door')
+    _require(errors, 'README.md', readme, 'v0.7 alpha surface collapse')
+    _require(errors, 'README.md', readme, 'Current alpha integration front door')
+    _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current public package line: `sclite-core=={version}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'Legacy v0.1 artifacts are compatibility/history material for Ravenclaw')
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 0.7 alpha line')
+    if 'The current 0.6 alpha line' in integration_guide:
+        errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 
 
 def _stable_import_errors() -> list[str]:
@@ -119,6 +136,24 @@ def _stable_import_errors() -> list[str]:
         module = importlib.import_module(module_name)
         if not callable(getattr(module, attr, None)):
             errors.append(f'stable_import_not_callable:{spec}')
+    return errors
+
+
+def _curated_root_export_errors() -> list[str]:
+    errors: list[str] = []
+    required = ('materialize_review_bundle', 'review_bundle', 'verify_ticket_use')
+    forbidden_legacy = (
+        'PROOF_TRACE_FILES',
+        'build_proof_trace_artifacts',
+        'validate_public_proof_trace_artifacts',
+        'build_evidence_bundle_artifact',
+    )
+    for name in required:
+        if name not in sclite.__all__:
+            errors.append(f'root_api_missing_current_export:{name}')
+    for name in forbidden_legacy:
+        if name in sclite.__all__:
+            errors.append(f'root_api_exports_legacy_surface:{name}')
     return errors
 
 
@@ -196,16 +231,24 @@ def collect_errors() -> list[str]:
         errors.append(f'runtime_dependencies_not_empty:{project.get("dependencies")}')
 
     _assert_readme_package_truth(errors, readme, version)
-    _assert_current_claim_docs(errors, version=version, spec=spec, artifact_docs=artifact_docs)
+    _assert_current_claim_docs(
+        errors,
+        version=version,
+        readme=readme,
+        roadmap=roadmap,
+        spec=spec,
+        artifact_docs=artifact_docs,
+        integration_guide=integration_guide,
+    )
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, '0.6 alpha')
+    _require(errors, 'README.md', readme, '0.7 alpha')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Public release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI publication: `{EXPECTED_DISTRIBUTION}=={version}` is the current alpha package line.')
     _require(errors, 'ROADMAP.md', roadmap, f'Current public package: `{EXPECTED_DISTRIBUTION}=={version}`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Multi-runtime proof substrate')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Ravenclaw-first surface collapse')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
@@ -221,6 +264,7 @@ def collect_errors() -> list[str]:
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m pip check')
 
     errors.extend(_stable_import_errors())
+    errors.extend(_curated_root_export_errors())
     errors.extend(_surface_fixture_errors())
     errors.extend(_forbidden_claim_errors(PUBLIC_DOCS))
 

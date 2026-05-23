@@ -3,17 +3,17 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current public package line: `sclite-core==0.6.0a0`
-(`0.6.0-alpha`). The current integration front door is the review lifecycle
+Current public package line: `sclite-core==0.7.0a0`
+(`0.7.0-alpha`). The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
 release labels and artifact schema versions are separate concepts.
 
 Legacy v0.1 artifacts are compatibility/history material for Ravenclaw
 public-proof migration, not the current front door for new integrations. The
-next `0.7.0-alpha` direction is Ravenclaw-first surface collapse and retirement
-of v0.1 from the active SCLite integration contract after downstream migration
-tests pass.
+The `0.7.0-alpha` line implements Ravenclaw-first surface collapse: v0.1 is not
+part of the active root API, while explicit compatibility modules remain for
+historical fixtures and migration validation.
 
 ## Lifecycle map
 

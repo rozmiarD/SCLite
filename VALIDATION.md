@@ -79,8 +79,8 @@ python -m pytest -q
 
 ## Review-bundle compatibility
 
-The stable `0.5` review-bundle surface remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the `0.6` alpha line. Consumers may
+The stable `0.5` review-bundle shape remains the downstream compatibility
+boundary for GovEngine and Ravenclaw on the `0.7` alpha line. Consumers may
 rely on the canonical `review_bundle` directory shape, the
 `review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
 profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`

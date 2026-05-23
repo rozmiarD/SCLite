@@ -24,9 +24,9 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.6.0-alpha
+## Current baseline: 0.7.0-alpha
 
-Current public package: `sclite-core==0.6.0a0` (`0.6.0-alpha`).
+Current public package: `sclite-core==0.7.0a0` (`0.7.0-alpha`).
 
 Current lifecycle:
 
@@ -34,14 +34,14 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.x line remains the stable review-bundle surface. The 0.6 alpha line freezes public truth around that surface and adds a second public-safe local-admin-change fixture over the same audit-proof lifecycle, scoped-ticket, receipt-bounded-evidence, trust/carrier reference, and lifecycle-review layers. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output without adding runtime, adapter, PKI, or policy authority.
+The v0.5.x line remains the stable review-bundle shape. The 0.7 alpha package line makes the lifecycle/review-bundle path the curated root front door, includes a deterministic review-bundle materializer for active consumers, and retains legacy v0.1 only through explicit compatibility modules. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output without adding runtime, adapter, PKI, or policy authority.
 
 ## Versioning discipline
 
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -295,7 +295,7 @@ A key non-scanner example should be an AI-proposed firewall rule change: SCLite 
 
 ## 0.5.1 — GovEngine integration readiness
 
-Status: current patch line.
+Status: published predecessor patch line.
 
 Goal: make the SCLite 0.5 surface safe and boring for GovEngine to consume before package-chain sync.
 
@@ -313,7 +313,7 @@ This patch does not add runtime execution, policy authority, trust decisions, or
 
 ## 0.6.0-alpha — Multi-runtime proof substrate
 
-Status: current alpha line.
+Status: delivered predecessor line.
 
 Goal: make SCLite credible as a dependency-light proof/review substrate for
 more than one governed runtime without widening its authority.
@@ -377,6 +377,8 @@ Success criteria:
 
 ## 0.7.0-alpha — Ravenclaw-first surface collapse and legacy retirement
 
+Status: current alpha line implemented for validation and downstream migration.
+
 Do not open a 0.7 schema wave merely because GovEngine or Ravenclaw is moving.
 The next minor line is justified only as a cleanup/boundary release: reduce the
 active SCLite public surface to what current consumers actually use, migrate
@@ -437,6 +439,19 @@ Required work:
    and Tecrax use.
 8. Keep all compatibility breakage explicit: no silent removal before the
    dependent repos are patched and validated.
+
+Delivered in the current candidate:
+
+- `sclite.__all__` is curated around current lifecycle/review, integrity,
+  scoped-ticket, and scope-fidelity surfaces instead of re-exporting legacy
+  proof helpers;
+- `sclite.bundles.materialize_review_bundle()` packages runtime-produced
+  lifecycle artifacts into the canonical locally reviewable bundle shape;
+- Ravenclaw's active demo/current lifecycle path produces a scoped-ticket
+  lifecycle and canonical review bundle; explicit v0.1 helpers remain only for
+  compatibility fixtures and migration tests;
+- public truth validation checks the curated root export boundary and the
+  GovEngine import contract.
 
 Success criteria:
 
