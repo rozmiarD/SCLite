@@ -184,6 +184,7 @@ def collect_errors() -> list[str]:
     changelog = _read('CHANGELOG.md')
     integration_contract = _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md')
     integration_guide = _read('docs/INTEGRATION_GUIDE.md')
+    workflow = _read('.github/workflows/ci.yml')
 
     if project['name'] != EXPECTED_DISTRIBUTION:
         errors.append(f'distribution_name_mismatch:{project["name"]}')
@@ -209,6 +210,15 @@ def collect_errors() -> list[str]:
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@v6')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@v6')
+    _require(errors, '.github/workflows/ci.yml', workflow, "python-version: ['3.11', '3.12', '3.13']")
+    _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/public_validation_gate.sh')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/strict_schema_gate.sh')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'package-dry-run:')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'rm -rf dist build *.egg-info')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'python -m twine check dist/*')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'python -m pip check')
 
     errors.extend(_stable_import_errors())
     errors.extend(_surface_fixture_errors())
