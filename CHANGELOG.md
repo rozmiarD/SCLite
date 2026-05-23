@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-alpha - Ravenclaw-first surface collapse
 
+- Promotes the candidate package line to `0.7.0a0` / `0.7.0-alpha` for Ravenclaw-first surface collapse.
+- Adds canonical review-bundle materialization for runtime-produced current lifecycle artifacts.
+- Curates the root API around current lifecycle/review, integrity, scoped-ticket, and scope-fidelity contracts; legacy v0.1 proof helpers remain explicit compatibility modules.
+- Migrates the active Ravenclaw proof path to scoped-ticket lifecycle artifacts and review bundles without adding runtime, trust-authority, credential, or carrier ownership.
 - Rejects lifecycle review manifest paths that escape the selected artifact root before artifact loading.
 - Aligns generated lifecycle Scope Fidelity timestamps with their parent review records and adds tests that 0.6 alpha verification receipts match regenerated review records.
 - Adds GitHub-compatible Mermaid diagrams to README and the lifecycle/runtime/review-bundle docs.

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .integrity import build_artifact_chain_manifest
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 
 REVIEW_BUNDLE_REQUIRED_FILES = {
@@ -91,6 +92,14 @@ def validate_review_bundle_shape(bundle_dir: Path | str) -> Dict[str, Any]:
     }
 
 
+def _as_bundle_review_record(record: Dict[str, Any], files: Mapping[str, str]) -> Dict[str, Any]:
+    record['review_profile'] = 'sclite-review-bundle-v0.1'
+    record['source_manifest'] = REVIEW_BUNDLE_MANIFEST_FILE
+    record['summary']['review_bundle_shape'] = 'canonical-v0.1'
+    record['summary']['review_bundle_files'] = dict(files)
+    return record
+
+
 def review_bundle(
     bundle_dir: Path | str,
     *,
@@ -109,10 +118,66 @@ def review_bundle(
         )
     except ReviewRecordError as exc:
         raise ReviewBundleError(str(exc)) from exc
-    record['review_profile'] = 'sclite-review-bundle-v0.1'
-    record['source_manifest'] = REVIEW_BUNDLE_MANIFEST_FILE
-    record['summary']['review_bundle_shape'] = 'canonical-v0.1'
-    record['summary']['review_bundle_files'] = shape['files']
+    return _as_bundle_review_record(record, shape['files'])
+
+
+def materialize_review_bundle(
+    bundle_dir: Path | str,
+    artifacts_by_role: Mapping[str, Mapping[str, Any]],
+    *,
+    chain_id: str = 'sclite-review-bundle',
+    created_at: str | None = None,
+    generated_at: str | None = None,
+    strict_jsonschema: bool = False,
+) -> Dict[str, Any]:
+    """Write and review a canonical local bundle from lifecycle artifacts.
+
+    This is artifact packaging only. It does not execute a runtime, authorize
+    side effects, decide signer trust, or publish the resulting directory.
+    """
+    missing = [role for role in REVIEW_BUNDLE_REQUIRED_FILES if role not in artifacts_by_role]
+    if missing:
+        raise ReviewBundleError('missing lifecycle artifacts for review bundle: ' + ', '.join(missing))
+
+    base = Path(bundle_dir).resolve()
+    base.mkdir(parents=True, exist_ok=True)
+    manifest_inputs: list[Dict[str, Any]] = []
+    for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items():
+        artifact = artifacts_by_role[role]
+        if not isinstance(artifact, Mapping):
+            raise ReviewBundleError(f'{role}: lifecycle artifact is not an object')
+        path = base / filename
+        _assert_inside(base, path)
+        value = dict(artifact)
+        path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+        manifest_inputs.append({'role': role, 'path': filename, 'value': value})
+
+    manifest = build_artifact_chain_manifest(
+        manifest_inputs,
+        chain_id=chain_id,
+        **({'created_at': created_at} if created_at else {}),
+    )
+    (base / REVIEW_BUNDLE_MANIFEST_FILE).write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + '\n',
+        encoding='utf-8',
+    )
+    try:
+        record = build_review_record_from_manifest(
+            base / REVIEW_BUNDLE_MANIFEST_FILE,
+            root=base,
+            strict_jsonschema=strict_jsonschema,
+            generated_at=generated_at,
+        )
+    except ReviewRecordError as exc:
+        raise ReviewBundleError(str(exc)) from exc
+    files = {**REVIEW_BUNDLE_REQUIRED_FILES, **REVIEW_BUNDLE_SIDECAR_FILES}
+    record = _as_bundle_review_record(record, files)
+    (base / REVIEW_BUNDLE_RECEIPT_FILE).write_text(
+        json.dumps(record, indent=2, sort_keys=True) + '\n',
+        encoding='utf-8',
+    )
+    (base / REVIEW_BUNDLE_MARKDOWN_FILE).write_text(review_record_markdown(record), encoding='utf-8')
+    validate_review_bundle_shape(base)
     return record
 
 

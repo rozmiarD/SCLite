@@ -9,7 +9,14 @@ from pathlib import Path
 import pytest
 
 from sclite.artifacts import validate_artifact
-from sclite.bundles import ReviewBundleError, review_bundle, review_bundle_summary, validate_review_bundle_shape
+from sclite.bundles import (
+    REVIEW_BUNDLE_REQUIRED_FILES,
+    ReviewBundleError,
+    materialize_review_bundle,
+    review_bundle,
+    review_bundle_summary,
+    validate_review_bundle_shape,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / 'examples' / 'review-bundle'
@@ -51,6 +58,28 @@ def test_local_admin_change_fixture_is_second_public_safe_review_bundle() -> Non
     assert 'does_not_execute_tools' in serialized
     assert '"live_target_execution": false' in serialized
     assert '"network_execution_performed": true' not in serialized
+
+
+def test_materialize_review_bundle_packages_current_lifecycle_artifacts(tmp_path: Path) -> None:
+    source = {
+        role: json.loads((GOVENGINE_INTEGRATION / filename).read_text(encoding='utf-8'))
+        for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items()
+    }
+    target = tmp_path / 'generated-review-bundle'
+
+    record = materialize_review_bundle(
+        target,
+        source,
+        chain_id='ravenclaw-current-lifecycle',
+        created_at='2026-05-21T00:00:00+00:00',
+        generated_at='2026-05-21T00:00:00+00:00',
+        strict_jsonschema=True,
+    )
+
+    assert record['verdict'] == 'pass'
+    assert (target / 'verification_receipt.json').is_file()
+    assert (target / 'REVIEW.md').is_file()
+    assert review_bundle(target, generated_at='2026-05-21T00:00:00+00:00')['verdict'] == 'pass'
 
 
 @pytest.mark.parametrize('bundle', [GOVENGINE_INTEGRATION, LOCAL_ADMIN_CHANGE])

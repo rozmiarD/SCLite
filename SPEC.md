@@ -1,17 +1,17 @@
 # SCLite Draft Specification
 
-Status: **published 0.6.0-alpha multi-runtime proof/review substrate**.
-Current package release is `sclite-core==0.6.0a0`; the Python import package
+Status: **0.7.0-alpha review-lifecycle surface collapse**.
+Current package release is `sclite-core==0.7.0a0`; the Python import package
 remains `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
-and v0.5 review-bundle packaging. The 0.6 alpha line adds public-truth and
-multi-fixture hardening around that substrate without adding runtime, adapter,
-PKI, or policy authority.
+and v0.5 review-bundle packaging. The 0.7 alpha line curates that substrate as
+the root API and supports canonical review-bundle materialization for active
+consumers without adding runtime, adapter, PKI, or policy authority.
 
 Artifact schema versions and package release lines are different concepts. New
 integrations should treat the lifecycle/review-bundle path as current. Legacy
-v0.1 proof-trace artifacts remain only for Ravenclaw/public-proof migration and
-history until Ravenclaw is fully on the current lifecycle/review-bundle path.
+v0.1 proof-trace artifacts remain compatibility/history material; Ravenclaw's
+active path now consumes the current lifecycle/review-bundle front door.
 SCLite is a schema-backed contract lifecycle and integrity/review layer. It is
 not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance
 framework.
