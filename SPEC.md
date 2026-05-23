@@ -1,6 +1,20 @@
 # SCLite Draft Specification
 
-Status: **published v0.5.1 review-bundle / GovEngine integration-readiness line**. The v0.2 lifecycle remains the canonical artifact chain; the v0.3 ticket surface adds scoped-ticket review and ticket-use verification; the v0.5 surface packages lifecycle artifacts into review bundles. Current package release is `sclite-core==0.5.1`; the Python import package remains `sclite`. SCLite is a schema-backed contract lifecycle and integrity/review layer. It is not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance framework.
+Status: **published 0.6.0-alpha multi-runtime proof/review substrate**.
+Current package release is `sclite-core==0.6.0a0`; the Python import package
+remains `sclite`. The current front door is the review lifecycle substrate:
+v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
+and v0.5 review-bundle packaging. The 0.6 alpha line adds public-truth and
+multi-fixture hardening around that substrate without adding runtime, adapter,
+PKI, or policy authority.
+
+Artifact schema versions and package release lines are different concepts. New
+integrations should treat the lifecycle/review-bundle path as current. Legacy
+v0.1 proof-trace artifacts remain only for Ravenclaw/public-proof migration and
+history until Ravenclaw is fully on the current lifecycle/review-bundle path.
+SCLite is a schema-backed contract lifecycle and integrity/review layer. It is
+not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance
+framework.
 
 Core sentence:
 
@@ -166,13 +180,16 @@ A bundle review emits a `review_record.v0.1` with conservative `pass` / `review`
 
 ## Legacy v0.1 Compatibility
 
-SCLite keeps the v0.1 public-safe proof trace for compatibility:
+SCLite keeps the v0.1 public-safe proof trace as compatibility/history material
+for existing Ravenclaw/public-proof migration. It is not the current front door
+for new integrations:
 
 ```text
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-Legacy v0.1 artifacts remain schema-backed and useful for existing Ravenclaw/public-proof integrations:
+Legacy v0.1 artifacts remain schema-backed and useful for existing
+Ravenclaw/public-proof migration:
 
 - `PolicyDecision` v0.1
 - `PreparedExecutionSpec`
@@ -187,7 +204,11 @@ Legacy v0.1 artifacts remain schema-backed and useful for existing Ravenclaw/pub
 - `ScopeFidelityReport`
 - `SecurityContractValidationReceipt`
 
-v0.1 compatibility does not change the v0.2 canonical lifecycle. New v0.2 work should use the lifecycle model above.
+v0.1 compatibility does not change the v0.2 canonical lifecycle. New work
+should use the lifecycle/review-bundle model above. The `0.7.0-alpha` direction
+is Ravenclaw-first surface collapse: migrate Ravenclaw off the legacy v0.1
+front door, then retire v0.1 from the active SCLite integration contract rather
+than preserving it as a permanent compatibility product.
 
 ## Non-Claims / Security Boundaries
 

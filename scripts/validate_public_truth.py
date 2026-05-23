@@ -28,6 +28,8 @@ PUBLIC_DOCS = (
     'ROADMAP.md',
     'VALIDATION.md',
     'PUBLICATION_CHECKLIST.md',
+    'SPEC.md',
+    'docs/ARTIFACTS.md',
     'docs/GOVENGINE_INTEGRATION_CONTRACT.md',
     'docs/INTEGRATION_GUIDE.md',
     'docs/SCLITE_0_5_FREEZE.md',
@@ -88,6 +90,26 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
     _require(errors, 'README.md', readme, f'package-sclite--core%20{version}-blueviolet.svg')
     _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{version}/')
     _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={version}')
+
+
+def _assert_current_claim_docs(errors: list[str], *, version: str, spec: str, artifact_docs: str) -> None:
+    stale_current_markers = (
+        'Current package release is `sclite-core==0.5.1`',
+        'Current package: `sclite-core==0.5.1`',
+        'current public package: `sclite-core==0.5.1`',
+    )
+    for marker in stale_current_markers:
+        if marker in spec:
+            errors.append(f'SPEC.md:stale_current_package_claim:{marker}')
+        if marker in artifact_docs:
+            errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
+    _require(errors, 'SPEC.md', spec, f'Current package release is `sclite-core=={version}`')
+    _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
+    _require(errors, 'SPEC.md', spec, 'v0.1 proof-trace artifacts remain only')
+    _require(errors, 'SPEC.md', spec, 'Ravenclaw/public-proof migration')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current public package line: `sclite-core=={version}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'Legacy v0.1 artifacts are compatibility/history material for Ravenclaw')
 
 
 def _stable_import_errors() -> list[str]:
@@ -157,6 +179,8 @@ def collect_errors() -> list[str]:
     roadmap = _read('ROADMAP.md')
     validation = _read('VALIDATION.md')
     publication = _read('PUBLICATION_CHECKLIST.md')
+    spec = _read('SPEC.md')
+    artifact_docs = _read('docs/ARTIFACTS.md')
     changelog = _read('CHANGELOG.md')
     integration_contract = _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md')
     integration_guide = _read('docs/INTEGRATION_GUIDE.md')
@@ -171,6 +195,7 @@ def collect_errors() -> list[str]:
         errors.append(f'runtime_dependencies_not_empty:{project.get("dependencies")}')
 
     _assert_readme_package_truth(errors, readme, version)
+    _assert_current_claim_docs(errors, version=version, spec=spec, artifact_docs=artifact_docs)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
     _require(errors, 'README.md', readme, '0.6 alpha')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
