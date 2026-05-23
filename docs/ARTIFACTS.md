@@ -1,6 +1,19 @@
 # SCL Artifact Guide
 
-This guide explains the implemented SCLite artifacts in practical reviewer language. v0.2 adds a contract lifecycle model and a lightweight cryptographic integrity chain; v0.3 adds scoped-ticket and receipt-bounded-evidence review; v0.5 packages the lifecycle into review bundles; v0.1 proof-trace artifacts remain supported.
+This guide explains the implemented SCLite artifacts in practical reviewer
+language.
+
+Current public package line: `sclite-core==0.6.0a0`
+(`0.6.0-alpha`). The current integration front door is the review lifecycle
+substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
+receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
+release labels and artifact schema versions are separate concepts.
+
+Legacy v0.1 artifacts are compatibility/history material for Ravenclaw
+public-proof migration, not the current front door for new integrations. The
+next `0.7.0-alpha` direction is Ravenclaw-first surface collapse and retirement
+of v0.1 from the active SCLite integration contract after downstream migration
+tests pass.
 
 ## Lifecycle map
 
@@ -14,9 +27,13 @@ flowchart LR
     Evidence --> Manifest[artifact_chain_manifest]
 ```
 
-## v0.5 review bundle surface
+## Current review-bundle surface
 
-SCLite 0.5.x publishes the canonical review-bundle surface. A review bundle packages the six lifecycle artifacts, an artifact-chain manifest, reviewer Markdown, and a verification receipt into one local/public-safe directory. The 0.5.1 patch adds `examples/govengine-integration/` as the downstream integration-readiness fixture.
+SCLite's current review-bundle surface packages the six lifecycle artifacts, an
+artifact-chain manifest, reviewer Markdown, and a verification receipt into one
+local/public-safe directory. The 0.6 alpha package line preserves the 0.5
+review-bundle contract and adds public-truth and multi-fixture hardening around
+it.
 
 The fixture at `examples/review-bundle/` demonstrates the base shape and can be reviewed with:
 
@@ -98,7 +115,11 @@ The output is a `review_record.v0.1` with conservative `pass` / `review` / `fail
 
 The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket/contract binding, evidence->receipt/ticket binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
 
-## v0.1 quick map
+## Legacy v0.1 quick map
+
+These artifacts remain available for Ravenclaw/public-proof migration and
+historical validation. They should not be used as the current SCLite
+integration front door for new work.
 
 | Artifact | File in example | Schema-backed? | Built/validated by this package? |
 | --- | --- | --- | --- |

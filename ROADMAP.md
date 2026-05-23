@@ -335,6 +335,12 @@ or legal authorization claims.
 Goal: keep the new multi-runtime proof claim boring before adding another
 artifact or schema family.
 
+The 2026-05-23 surface audit changes the next decision: SCLite should not keep
+expanding or preserving broad compatibility by default. Its only real consumers
+are GovEngine, Ravenclaw indirectly, and Tecrax's dry-run/local-fixture pressure
+surface. That makes uncontrolled compatibility preservation more expensive than
+useful during alpha development.
+
 Next work should consolidate what already exists:
 
 1. keep `examples/govengine-integration/` and `examples/local-admin-change/`
@@ -349,7 +355,12 @@ Next work should consolidate what already exists:
 4. document compatibility expectations for the stable 0.5 review-bundle
    surface consumed by GovEngine and Ravenclaw;
 5. keep the dependency-light validator and optional strict JSON Schema path
-   behaviorally aligned for supported fixtures.
+   behaviorally aligned for supported fixtures;
+6. identify which current imports are truly consumed by GovEngine, Ravenclaw,
+   and Tecrax, and treat everything else as internal or compatibility-only
+   unless a test proves otherwise;
+7. stop presenting legacy v0.1 proof-trace artifacts as a current front door for
+   new integrations.
 
 Success criteria:
 
@@ -360,39 +371,98 @@ Success criteria:
 - the second non-security fixture proves portability without adding runtime,
   policy, credential, trust-authority, or adapter claims;
 - public truth, package data, fixture sync, and CLI exit-code tests reject
-  documentation or packaged-fixture drift.
+  documentation or packaged-fixture drift;
+- SCLite has a concrete `0.7.0-alpha` cleanup plan before any new schema family
+  is added.
 
-## 0.7.x — Consumer conformance only after 0.6 settles
+## 0.7.0-alpha — Ravenclaw-first surface collapse and legacy retirement
 
 Do not open a 0.7 schema wave merely because GovEngine or Ravenclaw is moving.
-The next minor line is justified only if consumers prove a narrow artifact or
-validation contract that the 0.6 alpha cannot express safely.
+The next minor line is justified only as a cleanup/boundary release: reduce the
+active SCLite public surface to what current consumers actually use, migrate
+Ravenclaw off the legacy v0.1 proof front door, retire legacy from the active
+integration contract, and separate package release labels from artifact schema
+versions.
 
-Candidate direction, if proven:
+Problem statement:
 
-- a small consumer-conformance matrix for GovEngine, Ravenclaw, and a
-  non-security fixture path;
-- review-bundle compatibility metadata or diagnostics when they reduce review
-  ambiguity without turning SCLite into a runtime;
-- reviewer-facing failure explanations that remain static validation output,
-  not policy or trust decisions.
+- README and docs currently describe `v0.1`, `v0.2`, `v0.3`, `v0.4`, `v0.5`,
+  and `v0.6` in one product narrative. In code these are mixed concepts:
+  artifact schema versions, package milestones, compatibility fixtures, and
+  review-bundle packaging.
+- SCLite has no uncontrolled external consumer base that requires preserving all
+  active surfaces during alpha development.
+- Ravenclaw is an active controlled consumer, so preserving legacy v0.1 mainly
+  for Ravenclaw would manufacture long-term support cost. The better path is to
+  migrate Ravenclaw first, then simplify SCLite.
+- The broad `sclite.__all__` export makes accidental helpers look public.
+- `SPEC.md` and some docs can drift because public truth validation does not yet
+  cover every current-claim document.
 
-Entry criteria:
+Target current front door:
 
-- at least one concrete downstream gap is reproduced from GovEngine or
-  Ravenclaw tests;
-- the gap cannot be solved by a fixture, documentation, or validator hardening
-  patch inside the 0.6 line;
-- any proposed schema/API addition has positive and negative public-safe
-  fixtures plus package-compatibility tests.
+- canonical review lifecycle artifacts and artifact-chain verification;
+- canonical review-bundle validation/export;
+- scoped-ticket and receipt-bounded-evidence verification needed by GovEngine;
+- digest-bound trust/carrier reference validation only as static references;
+- deterministic artifact descriptors and dependency-free/strict validation
+  paths;
+- public truth and fixture/package parity validators.
+
+Ravenclaw migration target:
+
+- Ravenclaw's active proof/security-contract validation path should use the
+  current SCLite lifecycle/review-bundle path instead of the legacy v0.1 proof
+  trace.
+- Ravenclaw must be migrated away from wildcard `sclite.artifacts` consumption.
+- v0.1 public proof trace, prepared/approved spec helpers, legacy evidence
+  bundle helpers, and validation receipt helpers should become historical or
+  temporary migration-only support, not a permanent compatibility product.
+
+Required work:
+
+1. Replace broad `sclite.__all__` generation with a curated public export list.
+2. Add a public surface validator that fails when undocumented helpers are
+   exported as current API.
+3. Extend public truth validation to cover `SPEC.md`, `docs/ARTIFACTS.md`, and
+   any document that claims the current SCLite front door.
+4. Update README/PUBLIC_STATUS/SPEC/ROADMAP/VALIDATION wording so package lines
+   and artifact schema versions are not presented as competing product versions.
+5. Patch Ravenclaw first so its current path consumes lifecycle/review-bundle
+   outputs and no longer treats v0.1 proof helpers as active SCLite surface.
+6. Keep any v0.1 support only as temporary migration scaffolding until
+   Ravenclaw, GovEngine, and Tecrax tests are green against the narrowed
+   surface.
+7. Add downstream conformance tests for the exact imports GovEngine, Ravenclaw,
+   and Tecrax use.
+8. Keep all compatibility breakage explicit: no silent removal before the
+   dependent repos are patched and validated.
 
 Success criteria:
 
 - SCLite still owns proof/review artifacts only;
 - GovEngine and Ravenclaw can validate the new surface without live execution,
   credentials, network targets, or protocol adapters;
-- existing 0.5 review-bundle consumers remain compatible or receive an
-  explicit migration contract before release.
+- Tecrax still needs no more than the neutral descriptor/review fixture path;
+- Ravenclaw's active proof path no longer depends on legacy v0.1 as the current
+  SCLite integration contract;
+- docs name one current SCLite front door and classify legacy v0.1 as
+  historical or temporary migration support;
+- broad legacy surfaces are not advertised as current integration APIs;
+- validators mechanically reject reintroducing stale current claims;
+- existing review-bundle consumers remain compatible or receive an explicit
+  migration contract before release.
+
+Out of scope:
+
+- new runtime behavior;
+- new policy/trust authority;
+- OpenClaw/MCP/A2A adapters;
+- PKI/KMS/key-store behavior;
+- new schema families not required to complete the surface collapse.
+
+Future `0.7.x` patches after `0.7.0-alpha` should be limited to migration
+repair, docs/validator truth, and downstream fallout from this simplification.
 
 ## Release posture
 
