@@ -316,7 +316,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'README.md', readme, '0.8 alpha')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Public release label: `{EXPECTED_RELEASE_LABEL}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI publication target: `{EXPECTED_DISTRIBUTION}=={version}` is the current alpha source/package candidate.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI package: `{EXPECTED_DISTRIBUTION}=={version}` is the published current alpha package.')
     _require(errors, 'ROADMAP.md', roadmap, f'Current public package: `{EXPECTED_DISTRIBUTION}=={version}`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
