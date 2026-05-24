@@ -75,6 +75,26 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
     ) in errors
 
 
+def test_public_truth_validator_rejects_candidate_wording_for_published_roadmap_line() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_roadmap_release_truth(
+        errors,
+        (
+            'Status: current alpha line implemented for validation and downstream migration.\n'
+            'Delivered in the current candidate:\n'
+            'Status: current alpha candidate implemented after Ravenclaw consumer migration.\n'
+            'gates pass against the 0.8 candidate.\n'
+        ),
+    )
+
+    assert (
+        'ROADMAP.md:stale_published_candidate_claim:'
+        'Status: current alpha candidate implemented after Ravenclaw consumer migration.'
+    ) in errors
+
+
 def test_public_truth_validator_rejects_legacy_root_exports() -> None:
     validator = _load_validator()
     original = validator.sclite.__all__

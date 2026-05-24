@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Corrects roadmap status language for the already published `0.8.0-alpha`
+  line and adds public-truth coverage against reverting published current
+  roadmap sections to candidate wording.
+
 ## 0.8.0-alpha - Legacy proof-trace retirement
 
 - Published the alpha package as `sclite-core==0.8.0a0` on PyPI.
