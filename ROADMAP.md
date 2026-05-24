@@ -377,7 +377,7 @@ Success criteria:
 
 ## 0.7.0-alpha — Ravenclaw-first surface collapse and legacy retirement
 
-Status: current alpha line implemented for validation and downstream migration.
+Status: published predecessor migration line.
 
 Do not open a 0.7 schema wave merely because GovEngine or Ravenclaw is moving.
 The next minor line is justified only as a cleanup/boundary release: reduce the
@@ -440,7 +440,7 @@ Required work:
 8. Keep all compatibility breakage explicit: no silent removal before the
    dependent repos are patched and validated.
 
-Delivered in the current candidate:
+Delivered in `0.7.0-alpha`:
 
 - `sclite.__all__` is curated around current lifecycle/review, integrity,
   scoped-ticket, and scope-fidelity surfaces instead of re-exporting legacy
@@ -478,7 +478,7 @@ Out of scope:
 
 ## 0.8.0-alpha — Retire superseded proof-trace product path
 
-Status: current alpha candidate implemented after Ravenclaw consumer migration.
+Status: published current alpha line after Ravenclaw consumer migration.
 
 Delivered:
 
@@ -500,7 +500,7 @@ Success criteria:
 - source and packaged SCLite no longer contain the retired proof-trace product
   directories, validators, or owned-only schemas;
 - public, strict-schema, pytest, clean-wheel, and downstream compatibility
-  gates pass against the 0.8 candidate.
+  gates passed for the published `0.8.0-alpha` line.
 
 ## Release posture
 

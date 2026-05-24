@@ -136,6 +136,22 @@ def _assert_current_claim_docs(
         errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 
 
+def _assert_roadmap_release_truth(errors: list[str], roadmap: str) -> None:
+    stale_markers = (
+        'Status: current alpha line implemented for validation and downstream migration.',
+        'Delivered in the current candidate:',
+        'Status: current alpha candidate implemented after Ravenclaw consumer migration.',
+        'gates pass against the 0.8 candidate.',
+    )
+    for marker in stale_markers:
+        if marker in roadmap:
+            errors.append(f'ROADMAP.md:stale_published_candidate_claim:{marker}')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor migration line.')
+    _require(errors, 'ROADMAP.md', roadmap, 'Delivered in `0.7.0-alpha`:')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current alpha line after Ravenclaw consumer migration.')
+    _require(errors, 'ROADMAP.md', roadmap, 'gates passed for the published `0.8.0-alpha` line.')
+
+
 def _stable_import_errors() -> list[str]:
     errors: list[str] = []
     for spec in STABLE_IMPORTS:
@@ -312,6 +328,7 @@ def collect_errors() -> list[str]:
         artifact_docs=artifact_docs,
         integration_guide=integration_guide,
     )
+    _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
     _require(errors, 'README.md', readme, '0.8 alpha')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
