@@ -1,6 +1,6 @@
 # SCLite 0.5 Freeze Notes
 
-These notes define the 0.5 review-bundle behavior that remains stable while GovEngine consumes the `sclite-core>=0.7.0a0,<0.8` alpha line.
+These notes define the 0.5 review-bundle behavior that remains stable while GovEngine consumes the `sclite-core>=0.8.0a0,<0.9` alpha line.
 
 ## Stable for GovEngine consumption
 
@@ -34,7 +34,7 @@ The following are not part of the GovEngine freeze contract:
 - helper functions not listed in [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md);
 - Markdown formatting of `REVIEW.md` or exported review text;
 - example prose and fixture wording;
-- legacy v0.1 compatibility internals beyond public fixture validation;
+- retired proof-trace internals;
 - private/non-public helper functions;
 - exact exception classes/messages beyond non-zero failure behavior for CLI gates.
 

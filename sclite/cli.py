@@ -28,7 +28,6 @@ from .tickets import (
     validate_ticket_semantics,
     verify_ticket_use,
 )
-from .validation import package_root, validate_fixture_dir, validation_receipt_main
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
@@ -52,11 +51,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description='Security Contract Layer validation CLI.')
     sub = parser.add_subparsers(dest='command', required=True)
 
-    validate_cmd = sub.add_parser('validate', help='validate a public-safe SCL proof fixture directory')
-    validate_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
-
     artifact_cmd = sub.add_parser('validate-artifact', help='validate one JSON artifact against an SCL schema')
-    artifact_cmd.add_argument('--schema', required=True, help='schema name or schema path, for example approved_execution_spec.v0.1')
+    artifact_cmd.add_argument('--schema', required=True, help='schema name or schema path, for example execution_contract.v0.2')
     artifact_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     artifact_cmd.add_argument('artifact', help='path to a JSON artifact')
 
@@ -155,23 +151,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     export_review_cmd.add_argument('--format', choices=['markdown', 'json'], default='markdown')
     export_review_cmd.add_argument('--output', help='write output to this path instead of stdout')
 
-    receipt_cmd = sub.add_parser('validation-receipt', help='validate an SCL fixture directory and emit a validation receipt')
-    receipt_cmd.add_argument('fixture_dir', nargs='?', default=str(package_root() / 'examples' / 'security-contract-proof'))
-    receipt_cmd.add_argument('--format', choices=['json', 'markdown'], default='json')
-
     args = parser.parse_args(argv)
-    if args.command == 'validate':
-        fixture_dir = Path(str(args.fixture_dir))
-        if not fixture_dir.is_absolute():
-            fixture_dir = (Path.cwd() / fixture_dir).resolve()
-        errors = validate_fixture_dir(fixture_dir)
-        if errors:
-            for error in errors:
-                print(error, file=sys.stderr)
-            return 1
-        print(f'security_contract_fixtures_ok:{fixture_dir}')
-        return 0
-
     if args.command == 'validate-artifact':
         artifact_path = Path(str(args.artifact))
         value = json.loads(artifact_path.read_text(encoding='utf-8'))
@@ -401,10 +381,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(payload, end='')
         return 0
-
-    if args.command == 'validation-receipt':
-        forwarded = [str(args.fixture_dir), '--format', args.format]
-        return validation_receipt_main(forwarded)
 
     parser.error('unknown command')
     return 2

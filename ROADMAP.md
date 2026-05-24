@@ -24,9 +24,9 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.7.0-alpha
+## Current baseline: 0.8.0-alpha
 
-Current public package: `sclite-core==0.7.0a0` (`0.7.0-alpha`).
+Current public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
 
 Current lifecycle:
 
@@ -34,14 +34,14 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.x line remains the stable review-bundle shape. The 0.7 alpha package line makes the lifecycle/review-bundle path the curated root front door, includes a deterministic review-bundle materializer for active consumers, and retains legacy v0.1 only through explicit compatibility modules. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output without adding runtime, adapter, PKI, or policy authority.
+The v0.5.x line remains the stable review-bundle shape. The 0.8 alpha package line makes the lifecycle/review-bundle path the single curated front door, includes a deterministic review-bundle materializer for active consumers, and removes the superseded proof-trace product path after controlled consumer migration. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output without adding runtime, adapter, PKI, or policy authority.
 
 ## Versioning discipline
 
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -476,8 +476,31 @@ Out of scope:
 - PKI/KMS/key-store behavior;
 - new schema families not required to complete the surface collapse.
 
-Future `0.7.x` patches after `0.7.0-alpha` should be limited to migration
-repair, docs/validator truth, and downstream fallout from this simplification.
+## 0.8.0-alpha — Retire superseded proof-trace product path
+
+Status: current alpha candidate implemented after Ravenclaw consumer migration.
+
+Delivered:
+
+1. Remove `sclite.validation`, proof-trace builders/invariants, and the
+   `sclite validate` / `sclite validation-receipt` legacy CLI path.
+2. Remove legacy-only proof fixtures and schemas from source and packaged data.
+3. Keep current lifecycle/review schemas and independently used static
+   Scope Fidelity, redaction, snapshot, and review-record formats.
+4. Require public truth validation to fail if retired paths, CLI commands, or
+   schemas reappear as installed/current product surfaces.
+5. Preserve the boundary: no runtime execution, policy authority, adapter,
+   PKI/KMS, or key-store behavior is introduced.
+
+Success criteria:
+
+- Ravenclaw current proof projection validates only through the current
+  lifecycle/review-bundle path;
+- GovEngine uses only the documented neutral SCLite import surface;
+- source and packaged SCLite no longer contain the retired proof-trace product
+  directories, validators, or owned-only schemas;
+- public, strict-schema, pytest, clean-wheel, and downstream compatibility
+  gates pass against the 0.8 candidate.
 
 ## Release posture
 
@@ -488,7 +511,7 @@ Before any tag/upload:
 1. verify maintainer Git identity;
 2. run full tests;
 3. run lifecycle CLI validation;
-4. validate v0.1 compatibility fixtures;
+4. confirm retired proof-trace paths and CLI commands remain absent;
 5. build package;
 6. run `twine check`;
 7. clean wheel install;

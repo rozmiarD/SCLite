@@ -31,7 +31,7 @@
   },
   "schema_ref": "schemas/scope_fidelity_report.v0.1.schema.json",
   "schema_version": "v0.1",
-  "source_artifact": "examples/security-contract-proof/approved_execution_spec.json",
+  "source_artifact": "retained_static_scope_fidelity_fixture",
   "target": "https://example.com",
   "target_host": "example.com",
   "target_in_scope": true,

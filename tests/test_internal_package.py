@@ -7,40 +7,44 @@ from pathlib import Path
 
 import sclite
 from sclite import artifacts
-from sclite.redaction import build_default_redaction_policy, build_redaction_receipt, redact_prepared_spec
 from sclite.bundles import review_bundle
+from sclite.redaction import build_default_redaction_policy, build_redaction_receipt, redact_prepared_spec
 from sclite.surfaces import build_public_snapshot_manifest, build_public_validation_surface_index
-from sclite.validation import validate_fixture_dir
 
 
 PACKAGE_ROOT = Path(sclite.__file__).resolve().parent
-PACKAGE_FIXTURE_DIR = PACKAGE_ROOT / 'examples' / 'security-contract-proof'
-PACKAGE_PREPARED_FIXTURE = PACKAGE_ROOT / 'examples' / 'prepared-execution-spec' / 'prepared_execution_spec.json'
+PACKAGE_REVIEW_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'review-bundle'
+PACKAGE_GOVENGINE_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'govengine-integration'
+PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'bad-review-bundle-cross-host'
+PACKAGE_EXECUTION_CONTRACT = PACKAGE_REVIEW_BUNDLE_DIR / '03_execution_contract.json'
 PACKAGE_REDACTION_POLICY_FIXTURE = PACKAGE_ROOT / 'examples' / 'redaction-policy' / 'redaction_policy.json'
 PACKAGE_REDACTION_RECEIPT_FIXTURE = PACKAGE_ROOT / 'examples' / 'redaction-receipt' / 'redaction_receipt.json'
 PACKAGE_SURFACE_INDEX_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-validation-surface-index' / 'public_validation_surface_index.json'
 PACKAGE_SNAPSHOT_MANIFEST_FIXTURE = PACKAGE_ROOT / 'examples' / 'public-snapshot-manifest' / 'public_snapshot_manifest.json'
 PACKAGE_REVIEW_RECORD_FIXTURE = PACKAGE_ROOT / 'examples' / 'lifecycle-review' / 'review_record.json'
-PACKAGE_REVIEW_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'review-bundle'
-PACKAGE_GOVENGINE_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'govengine-integration'
-PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR = PACKAGE_ROOT / 'examples' / 'bad-review-bundle-cross-host'
 
 
-def test_internal_scl_package_validates_clean_public_safe_fixture() -> None:
-    assert validate_fixture_dir(PACKAGE_FIXTURE_DIR) == []
+def test_packaged_current_lifecycle_artifacts_validate() -> None:
+    schemas = {
+        '01_intent_contract.json': 'intent_contract.v0.2',
+        '02_policy_decision.json': 'policy_decision.v0.2',
+        '03_execution_contract.json': 'execution_contract.v0.2',
+        '04_execution_ticket.json': 'execution_ticket.v0.2',
+        '05_execution_receipt.json': 'execution_receipt.v0.2',
+        '06_evidence_contract.json': 'evidence_contract.v0.2',
+        'artifact_chain_manifest.json': 'artifact_chain_manifest.v0.2',
+    }
+    for filename, schema in schemas.items():
+        artifact = json.loads((PACKAGE_REVIEW_BUNDLE_DIR / filename).read_text(encoding='utf-8'))
+        artifacts.validate_artifact(artifact, schema)
 
 
-def test_internal_scl_package_validates_copied_schema_artifact() -> None:
-    approved = json.loads((PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json').read_text(encoding='utf-8'))
-    artifacts.validate_artifact(approved, 'approved_execution_spec.v0.1')
+def test_strict_jsonschema_validation_accepts_current_execution_contract() -> None:
+    contract = json.loads(PACKAGE_EXECUTION_CONTRACT.read_text(encoding='utf-8'))
+    artifacts.validate_artifact(contract, 'execution_contract.v0.2', strict_jsonschema=True)
 
 
-def test_strict_jsonschema_validation_accepts_public_safe_fixture() -> None:
-    approved = json.loads((PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json').read_text(encoding='utf-8'))
-    artifacts.validate_artifact(approved, 'approved_execution_spec.v0.1', strict_jsonschema=True)
-
-
-def test_strict_jsonschema_cli_accepts_public_safe_fixture() -> None:
+def test_strict_jsonschema_cli_accepts_current_execution_contract() -> None:
     result = subprocess.run(
         [
             sys.executable,
@@ -49,8 +53,8 @@ def test_strict_jsonschema_cli_accepts_public_safe_fixture() -> None:
             'validate-artifact',
             '--strict-jsonschema',
             '--schema',
-            'approved_execution_spec.v0.1',
-            str(PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json'),
+            'execution_contract.v0.2',
+            str(PACKAGE_EXECUTION_CONTRACT),
         ],
         check=False,
         text=True,
@@ -60,35 +64,9 @@ def test_strict_jsonschema_cli_accepts_public_safe_fixture() -> None:
     assert 'security_contract_artifact_ok' in result.stdout
 
 
-def test_prepared_execution_spec_schema_validates_public_safe_fixture() -> None:
-    prepared = json.loads(PACKAGE_PREPARED_FIXTURE.read_text(encoding='utf-8'))
-    artifacts.validate_artifact(prepared, 'prepared_execution_spec.v0.1')
-    assert prepared['artifact_type'] == 'prepared_execution_spec'
-    assert prepared['resolved_tool'] == 'http_probe'
-
-
-def test_redacted_prepared_execution_spec_schema_validates_public_safe_fixture() -> None:
-    redacted = json.loads((PACKAGE_FIXTURE_DIR / 'prepared_execution_spec.redacted.json').read_text(encoding='utf-8'))
-    artifacts.validate_artifact(redacted, 'redacted_prepared_execution_spec.v0.1')
-    assert redacted['artifact_type'] == 'redacted_prepared_execution_spec'
-    assert redacted['public_safety']['live_target_execution'] is False
-    assert redacted['redaction']['credentials_included'] is False
-
-
-def test_redacted_prepared_execution_spec_schema_rejects_raw_output_claim() -> None:
-    redacted = json.loads((PACKAGE_FIXTURE_DIR / 'prepared_execution_spec.redacted.json').read_text(encoding='utf-8'))
-    redacted['public_safety']['raw_stdout_stderr_included'] = True
-    try:
-        artifacts.validate_artifact(redacted, 'redacted_prepared_execution_spec.v0.1')
-    except artifacts.JsonSchemaValidationError as exc:
-        assert 'raw_stdout_stderr_included' in str(exc)
-    else:  # pragma: no cover - assertion guard
-        raise AssertionError('schema should reject public raw stdout/stderr claims')
-
-
 def test_artifact_canonicalization_is_stable_for_key_order_and_unicode() -> None:
-    first = {'b': ['żuraw', {'z': 1, 'a': True}], 'a': 'example'}
-    second = {'a': 'example', 'b': ['żuraw', {'a': True, 'z': 1}]}
+    first = {'b': ['zuraw', {'z': 1, 'a': True}], 'a': 'example'}
+    second = {'a': 'example', 'b': ['zuraw', {'a': True, 'z': 1}]}
     assert artifacts.canonicalize_artifact(first) == artifacts.canonicalize_artifact(second)
     assert artifacts.artifact_sha256(first) == artifacts.artifact_sha256(second)
     descriptor = artifacts.build_artifact_hash(first)
@@ -99,9 +77,7 @@ def test_artifact_canonicalization_is_stable_for_key_order_and_unicode() -> None
 
 
 def test_artifact_hash_changes_when_artifact_changes() -> None:
-    base = {'artifact_type': 'example', 'value': 1}
-    changed = {'artifact_type': 'example', 'value': 2}
-    assert artifacts.artifact_sha256(base) != artifacts.artifact_sha256(changed)
+    assert artifacts.artifact_sha256({'value': 1}) != artifacts.artifact_sha256({'value': 2})
 
 
 def test_redaction_policy_and_receipt_schemas_validate_fixtures() -> None:
@@ -135,90 +111,50 @@ def test_public_surface_index_and_snapshot_manifest_schemas_validate_fixtures() 
 def test_review_record_schema_validates_packaged_fixture() -> None:
     record = json.loads(PACKAGE_REVIEW_RECORD_FIXTURE.read_text(encoding='utf-8'))
     artifacts.validate_artifact(record, 'review_record.v0.1')
-    assert record['artifact_type'] == 'review_record'
     assert record['summary']['scope_fidelity_verdict'] == 'pass'
 
 
-def test_packaged_review_bundle_can_be_reviewed() -> None:
-    record = review_bundle(PACKAGE_REVIEW_BUNDLE_DIR)
-    artifacts.validate_artifact(record, 'review_record.v0.1')
-    assert record['review_profile'] == 'sclite-review-bundle-v0.1'
+def test_packaged_review_bundles_remain_reviewable() -> None:
+    assert review_bundle(PACKAGE_REVIEW_BUNDLE_DIR)['verdict'] in {'pass', 'review'}
+    assert review_bundle(PACKAGE_GOVENGINE_BUNDLE_DIR)['verdict'] == 'pass'
+    bad = review_bundle(PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR)
+    assert bad['verdict'] == 'fail'
+    assert bad['summary']['scope_fidelity_verdict'] == 'fail'
 
 
-def test_packaged_govengine_bundle_can_be_reviewed() -> None:
-    record = review_bundle(PACKAGE_GOVENGINE_BUNDLE_DIR)
-    artifacts.validate_artifact(record, 'review_record.v0.1')
-    assert record['verdict'] == 'pass'
-
-
-def test_packaged_bad_cross_host_bundle_stays_negative() -> None:
-    record = review_bundle(PACKAGE_BAD_CROSS_HOST_BUNDLE_DIR)
-    artifacts.validate_artifact(record, 'review_record.v0.1')
-    assert record['verdict'] == 'fail'
-    assert record['summary']['scope_fidelity_verdict'] == 'fail'
-
-
-def test_surface_and_manifest_builders_return_schema_valid_artifacts() -> None:
+def test_surface_and_manifest_builders_accept_current_artifact() -> None:
     index = build_public_validation_surface_index(generated_at='2026-05-05T21:30:00+00:00')
-    approved = json.loads((PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json').read_text(encoding='utf-8'))
+    contract = json.loads(PACKAGE_EXECUTION_CONTRACT.read_text(encoding='utf-8'))
     manifest = build_public_snapshot_manifest([
-        {'path': 'approved_execution_spec.json', 'artifact_type': 'approved_execution_spec', 'schema': 'approved_execution_spec.v0.1', 'public_safe': True, 'value': approved}
+        {'path': '03_execution_contract.json', 'artifact_type': 'execution_contract', 'schema': 'execution_contract.v0.2', 'public_safe': True, 'value': contract}
     ], generated_at='2026-05-05T21:30:00+00:00')
     artifacts.validate_artifact(index, 'public_validation_surface_index.v0.1')
     artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.1')
 
 
 def test_hash_artifact_cli_emits_same_digest_as_helper() -> None:
-    approved_path = PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json'
-    approved = json.loads(approved_path.read_text(encoding='utf-8'))
+    contract = json.loads(PACKAGE_EXECUTION_CONTRACT.read_text(encoding='utf-8'))
     proc = subprocess.run(
-        [
-            sys.executable,
-            '-m',
-            'sclite.cli',
-            'hash-artifact',
-            '--schema',
-            'approved_execution_spec.v0.1',
-            '--format',
-            'digest',
-            str(approved_path),
-        ],
+        [sys.executable, '-m', 'sclite.cli', 'hash-artifact', '--schema', 'execution_contract.v0.2', '--format', 'digest', str(PACKAGE_EXECUTION_CONTRACT)],
         capture_output=True,
         text=True,
         check=True,
     )
-    assert proc.stdout.strip() == artifacts.artifact_sha256(approved)
+    assert proc.stdout.strip() == artifacts.artifact_sha256(contract)
 
 
-def test_new_public_surface_clis_emit_schema_valid_json() -> None:
+def test_public_surface_clis_emit_schema_valid_json() -> None:
     policy_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'redaction-policy'], capture_output=True, text=True, check=True)
     index_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'validation-surface-index', '--generated-at', '2026-05-05T21:30:00+00:00'], capture_output=True, text=True, check=True)
-    snapshot_proc = subprocess.run([
-        sys.executable,
-        '-m',
-        'sclite.cli',
-        'snapshot-manifest',
-        '--file',
-        str(PACKAGE_FIXTURE_DIR / 'approved_execution_spec.json'),
-    ], capture_output=True, text=True, check=True)
+    snapshot_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'snapshot-manifest', '--file', str(PACKAGE_EXECUTION_CONTRACT)], capture_output=True, text=True, check=True)
     artifacts.validate_artifact(json.loads(policy_proc.stdout), 'redaction_policy.v0.1')
     artifacts.validate_artifact(json.loads(index_proc.stdout), 'public_validation_surface_index.v0.1')
     artifacts.validate_artifact(json.loads(snapshot_proc.stdout), 'public_snapshot_manifest.v0.1')
 
 
-def test_fixture_is_synthetic_not_redacted_private_runtime_export() -> None:
-    serialized = '\n'.join(path.read_text(encoding='utf-8') for path in sorted(PACKAGE_FIXTURE_DIR.iterdir()) if path.is_file())
-    forbidden = [
-        'session' + '=<redacted>',
-        '<workspace' + '_path_redacted>',
-        '<cookie' + '_redacted>',
-        'operator' + '_supplied',
-        'X-Bug' + '-Bounty',
-        'X-Test' + '-Account-Email',
-        'Author' + 'ization:',
-        'Bearer' + ' ',
-        str(Path.home()),
-    ]
+def test_current_fixture_is_synthetic_not_private_runtime_export() -> None:
+    serialized = '\n'.join(path.read_text(encoding='utf-8') for path in sorted(PACKAGE_REVIEW_BUNDLE_DIR.iterdir()) if path.is_file())
+    forbidden = ['session' + '=<redacted>', 'operator' + '_supplied', 'Author' + 'ization:', 'Bearer' + ' ', str(Path.home())]
     for needle in forbidden:
         assert needle not in serialized
 

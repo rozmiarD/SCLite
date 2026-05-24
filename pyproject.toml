@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sclite-core"
-version = "0.7.0a0"
+version = "0.8.0a0"
 description = "Lightweight Security Contract Layer lifecycle artifacts, validation, and cryptographic integrity chain fixtures"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -56,12 +56,8 @@ namespaces = false
 [tool.setuptools.package-data]
 sclite = [
   "schemas/*.json",
-  "examples/security-contract-proof/*.json",
-  "examples/security-contract-proof/*.md",
   "examples/scope-fidelity-report/*.json",
   "examples/scope-fidelity-report/*.md",
-  "examples/prepared-execution-spec/*.json",
-  "examples/prepared-execution-spec/*.md",
   "examples/redaction-policy/*.json",
   "examples/redaction-policy/*.md",
   "examples/redaction-receipt/*.json",

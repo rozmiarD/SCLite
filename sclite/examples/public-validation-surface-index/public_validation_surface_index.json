@@ -14,53 +14,10 @@
   },
   "schema_version": "v0.1",
   "summary": {
-    "public_safe_surface_count": 7,
-    "surface_count": 7
+    "public_safe_surface_count": 4,
+    "surface_count": 4
   },
   "surfaces": [
-    {
-      "commands": [
-        "sclite validate examples/security-contract-proof"
-      ],
-      "kind": "fixture_directory",
-      "path": "examples/security-contract-proof",
-      "public_safe": true,
-      "purpose": "Validate the public-safe proof trace artifact chain.",
-      "schemas": [
-        "policy_decision.v0.1",
-        "redacted_prepared_execution_spec.v0.1",
-        "approved_execution_spec.v0.1",
-        "execution_receipt.v0.1",
-        "evidence_bundle.v0.1"
-      ],
-      "surface_id": "security_contract_proof_fixture"
-    },
-    {
-      "commands": [
-        "sclite validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json"
-      ],
-      "kind": "json_artifact",
-      "path": "examples/prepared-execution-spec/prepared_execution_spec.json",
-      "public_safe": true,
-      "purpose": "Validate the draft prepared execution shape before approval.",
-      "schemas": [
-        "prepared_execution_spec.v0.1"
-      ],
-      "surface_id": "prepared_execution_spec_fixture"
-    },
-    {
-      "commands": [
-        "sclite validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json"
-      ],
-      "kind": "json_artifact",
-      "path": "examples/scope-fidelity-report/scope_fidelity_report.json",
-      "public_safe": true,
-      "purpose": "Validate static target-host binding review output.",
-      "schemas": [
-        "scope_fidelity_report.v0.1"
-      ],
-      "surface_id": "scope_fidelity_fixture"
-    },
     {
       "commands": [
         "sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json"
@@ -68,7 +25,7 @@
       "kind": "json_artifact",
       "path": "examples/lifecycle-review/review_record.json",
       "public_safe": true,
-      "purpose": "Validate a static lifecycle ReviewRecord aggregate with Scope Fidelity v0.2.",
+      "purpose": "Validate a static lifecycle review aggregate and its scope-fidelity result.",
       "schemas": [
         "review_record.v0.1",
         "scope_fidelity_report.v0.2"
@@ -83,7 +40,7 @@
       "kind": "review_bundle_directory",
       "path": "examples/review-bundle",
       "public_safe": true,
-      "purpose": "Validate and export a canonical SCLite v0.5 review bundle.",
+      "purpose": "Validate and export a canonical SCLite current lifecycle/review bundle.",
       "schemas": [
         "review_record.v0.1",
         "artifact_chain_manifest.v0.2"
@@ -99,7 +56,7 @@
       "kind": "review_bundle_directory",
       "path": "examples/govengine-integration",
       "public_safe": true,
-      "purpose": "Validate the SCLite 0.5.x downstream integration fixture for GovEngine consumption.",
+      "purpose": "Validate the current downstream integration fixture for GovEngine consumption.",
       "schemas": [
         "review_record.v0.1",
         "artifact_chain_manifest.v0.2",
@@ -116,7 +73,7 @@
       "kind": "review_bundle_directory",
       "path": "examples/local-admin-change",
       "public_safe": true,
-      "purpose": "Validate the SCLite 0.6 alpha local-admin-change fixture as a non-security multi-runtime proof surface.",
+      "purpose": "Validate the current local-admin-change fixture as a non-security multi-runtime proof surface.",
       "schemas": [
         "review_record.v0.1",
         "artifact_chain_manifest.v0.2",

@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import importlib
+import json
 import re
 import sys
 import tomllib
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -17,11 +18,11 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '0.7.0a0'
-EXPECTED_RELEASE_LABEL = '0.7.0-alpha'
+EXPECTED_VERSION = '0.8.0a0'
+EXPECTED_RELEASE_LABEL = '0.8.0-alpha'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.7.0a0,<0.8'
+EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0a0,<0.9'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -48,9 +49,15 @@ STABLE_IMPORTS = (
     'sclite.scope_fidelity:build_lifecycle_scope_fidelity_report',
 )
 REQUIRED_FIXTURES = (
+    'examples/lifecycle-review/review_record.json',
     'examples/review-bundle',
     'examples/govengine-integration',
     'examples/local-admin-change',
+)
+RETIRED_CURRENT_SURFACE_PATHS = (
+    'examples/security-contract-proof',
+    'examples/prepared-execution-spec/prepared_execution_spec.json',
+    'examples/scope-fidelity-report/scope_fidelity_report.json',
 )
 FORBIDDEN_OVERCLAIMS = (
     'production-ready',
@@ -115,16 +122,16 @@ def _assert_current_claim_docs(
             errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
     _require(errors, 'SPEC.md', spec, f'Current package release is `sclite-core=={version}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
-    _require(errors, 'SPEC.md', spec, 'v0.1 proof-trace artifacts remain compatibility/history material')
-    _require(errors, 'SPEC.md', spec, "Ravenclaw's")
-    _require(errors, 'SPEC.md', spec, 'active path now consumes the current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'v0.7 alpha surface collapse')
+    _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
+    _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
+    _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
+    _require(errors, 'README.md', readme, 'v0.8 alpha legacy retirement')
     _require(errors, 'README.md', readme, 'Current alpha integration front door')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current public package line: `sclite-core=={version}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'Legacy v0.1 artifacts are compatibility/history material for Ravenclaw')
-    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 0.7 alpha line')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 0.8 alpha line')
     if 'The current 0.6 alpha line' in integration_guide:
         errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 
@@ -164,6 +171,8 @@ def _surface_fixture_errors() -> list[str]:
     for fixture in REQUIRED_FIXTURES:
         if fixture not in surface_paths:
             errors.append(f'public_surface_index_missing_fixture:{fixture}')
+        if not (ROOT / fixture).is_dir():
+            continue
         try:
             record = review_bundle(ROOT / fixture, generated_at='2026-05-21T00:00:00+00:00')
         except Exception as exc:  # pragma: no cover - failure path reports details
@@ -171,6 +180,69 @@ def _surface_fixture_errors() -> list[str]:
             continue
         if str(record.get('verdict')) != 'pass' and fixture != 'examples/review-bundle':
             errors.append(f'{fixture}:unexpected_review_verdict:{record.get("verdict")}')
+    for path in RETIRED_CURRENT_SURFACE_PATHS:
+        if path in surface_paths:
+            errors.append(f'public_surface_index_advertises_legacy_fixture:{path}')
+    return errors
+
+
+def _snapshot_fixture_errors() -> list[str]:
+    errors: list[str] = []
+    path = 'examples/public-snapshot-manifest/public_snapshot_manifest.json'
+    manifest = json.loads(_read(path))
+    paths = {str(item.get('path') or '') for item in manifest.get('files') or []}
+    if not paths:
+        errors.append(f'{path}:missing_snapshot_files')
+    if any(item.startswith('examples/security-contract-proof/') for item in paths):
+        errors.append(f'{path}:advertises_legacy_proof_trace_as_current_snapshot')
+    if not any(item.startswith('examples/review-bundle/') for item in paths):
+        errors.append(f'{path}:missing_current_review_bundle_artifacts')
+    return errors
+
+
+def _retired_product_errors() -> list[str]:
+    errors: list[str] = []
+    removed_paths = (
+        'sclite/validation.py',
+        'examples/security-contract-proof',
+        'sclite/examples/security-contract-proof',
+        'examples/prepared-execution-spec',
+        'sclite/examples/prepared-execution-spec',
+    )
+    removed_schemas = (
+        'policy_decision.v0.1.schema.json',
+        'prepared_execution_spec.v0.1.schema.json',
+        'redacted_prepared_execution_spec.v0.1.schema.json',
+        'approved_execution_spec.v0.1.schema.json',
+        'execution_receipt.v0.1.schema.json',
+        'evidence_bundle.v0.1.schema.json',
+        'security_contract_validation_receipt.v0.1.schema.json',
+    )
+    for path in removed_paths:
+        candidate = ROOT / path
+        if candidate.is_file() or (candidate.is_dir() and any(item.is_file() for item in candidate.rglob('*'))):
+            errors.append(f'retired_product_path_present:{path}')
+    for schema in removed_schemas:
+        if (ROOT / 'schemas' / schema).exists() or (ROOT / 'sclite' / 'schemas' / schema).exists():
+            errors.append(f'retired_product_schema_present:{schema}')
+    cli_text = _read('sclite/cli.py')
+    for marker in ("add_parser('validate'", "add_parser('validation-receipt'"):
+        if marker in cli_text:
+            errors.append(f'retired_product_cli_present:{marker}')
+    errors.extend(_retired_reference_errors({
+        'examples/scope-fidelity-report/scope_fidelity_report.json':
+            _read('examples/scope-fidelity-report/scope_fidelity_report.json'),
+        'sclite/examples/scope-fidelity-report/scope_fidelity_report.json':
+            _read('sclite/examples/scope-fidelity-report/scope_fidelity_report.json'),
+    }))
+    return errors
+
+
+def _retired_reference_errors(text_by_path: Mapping[str, str]) -> list[str]:
+    errors: list[str] = []
+    for path, text in text_by_path.items():
+        if 'examples/security-contract-proof/' in text or 'examples/prepared-execution-spec/' in text:
+            errors.append(f'{path}:references_retired_product_path')
     return errors
 
 
@@ -241,14 +313,14 @@ def collect_errors() -> list[str]:
         integration_guide=integration_guide,
     )
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, '0.7 alpha')
+    _require(errors, 'README.md', readme, '0.8 alpha')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Public release label: `{EXPECTED_RELEASE_LABEL}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI publication: `{EXPECTED_DISTRIBUTION}=={version}` is the current alpha package line.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI publication target: `{EXPECTED_DISTRIBUTION}=={version}` is the current alpha source/package candidate.')
     _require(errors, 'ROADMAP.md', roadmap, f'Current public package: `{EXPECTED_DISTRIBUTION}=={version}`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Ravenclaw-first surface collapse')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Legacy proof-trace retirement')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
@@ -266,6 +338,8 @@ def collect_errors() -> list[str]:
     errors.extend(_stable_import_errors())
     errors.extend(_curated_root_export_errors())
     errors.extend(_surface_fixture_errors())
+    errors.extend(_snapshot_fixture_errors())
+    errors.extend(_retired_product_errors())
     errors.extend(_forbidden_claim_errors(PUBLIC_DOCS))
 
     return errors

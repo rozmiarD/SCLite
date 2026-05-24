@@ -4,23 +4,23 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current package version: `0.7.0a0`.
-- Public release label: `0.7.0-alpha`.
+- Current package version: `0.8.0a0`.
+- Public release label: `0.8.0-alpha`.
 - Status: alpha multi-runtime proof/review substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI publication: `sclite-core==0.7.0a0` is the current alpha package line.
+- PyPI publication target: `sclite-core==0.8.0a0` is the current alpha source/package candidate.
 
 ## Current review path
 
 For new public demos and integrations, the clearest path is:
 
 ```text
-v0.2 lifecycle artifacts -> artifact_chain_manifest -> v0.5 review bundle -> review_record verification receipt
+current lifecycle artifacts -> artifact_chain_manifest -> review bundle -> review_record verification receipt
 ```
 
-Legacy v0.1 proof fixtures remain explicit compatibility/history material. Scoped-ticket checks, `examples/review-bundle/`, `examples/govengine-integration/`, and `examples/local-admin-change/` form the current review-lifecycle front door.
+The superseded proof-trace fixtures/builders/CLI have been retired after the controlled Ravenclaw migration and are not part of the installed/current surface. Scoped-ticket checks, `examples/review-bundle/`, `examples/govengine-integration/`, and `examples/local-admin-change/` form the review-lifecycle front door. Schema identifiers such as `review_record.v0.1` describe retained formats, not an older supported product line.
 
 ## What is public-safe today
 
@@ -66,4 +66,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-The `0.7.0-alpha` line keeps review-bundle behavior stable, adds canonical review-bundle materialization for runtime-produced lifecycle artifacts, and removes legacy v0.1 proof helpers from the root public export list while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
+The `0.8.0-alpha` line keeps review-bundle behavior stable and removes the superseded proof-trace product path after consumer migration while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
