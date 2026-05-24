@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
-from pathlib import Path
 
 from sclite import artifacts
 from sclite.scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
-
-
-PACKAGE_ROOT = Path(__import__('sclite').__file__).resolve().parent
-APPROVED_FIXTURE = PACKAGE_ROOT / 'examples' / 'security-contract-proof' / 'approved_execution_spec.json'
 
 
 def test_scope_fidelity_exact_host_binding_passes_schema() -> None:
@@ -58,7 +52,12 @@ def test_scope_fidelity_missing_detected_hosts_requires_review() -> None:
 
 
 def test_scope_fidelity_from_approved_fixture() -> None:
-    approved = json.loads(APPROVED_FIXTURE.read_text(encoding='utf-8'))
+    approved = {
+        'target': 'https://example.com/login',
+        'target_in_scope': True,
+        'normalized_args': ['https://example.com/login'],
+        'execution_plan': [{'tool': 'http_probe', 'args': ['https://example.com/login']}],
+    }
     report = build_scope_fidelity_report_from_approved_spec(approved, source_artifact='approved_fixture')
     validate_scope_fidelity_report(report)
     assert report['verdict'] == 'pass'

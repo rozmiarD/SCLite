@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0-alpha - Legacy proof-trace retirement
+
+- Removes the superseded proof-trace builders, fixture validator/receipt CLI, legacy-only schemas, and packaged fixtures after Ravenclaw migrated its current public proof projection.
+- Keeps the lifecycle/review-bundle, scoped-ticket, receipt-bounded evidence, Scope Fidelity, redaction, and publication-hygiene contracts that remain in current use.
+- Strengthens public truth validation so retired product surfaces cannot silently return as current package claims.
+
 ## 0.7.0-alpha - Ravenclaw-first surface collapse
 
 - Promotes the candidate package line to `0.7.0a0` / `0.7.0-alpha` for Ravenclaw-first surface collapse.

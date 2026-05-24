@@ -2,67 +2,91 @@
   "artifact_type": "public_snapshot_manifest",
   "files": [
     {
+      "artifact_type": "intent_contract",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 803,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "35a0f49b424851ef7a2864705bfb9e5411b049641f5734456bf45068293d492f"
+      },
+      "path": "examples/review-bundle/01_intent_contract.json",
+      "public_safe": true,
+      "schema": ""
+    },
+    {
       "artifact_type": "policy_decision",
       "hash": {
         "algorithm": "sha256",
-        "canonical_bytes": 520,
+        "canonical_bytes": 958,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "4e208a84f8ad0a8fcafef4a2809a6715a6a5b5a33048462ecafad003c7030297"
+        "digest": "fe997b9400b3dbac7f562a2f946734ca189b48253b0142f137e7e13b7b669e0b"
       },
-      "path": "examples/security-contract-proof/policy_decision.json",
+      "path": "examples/review-bundle/02_policy_decision.json",
       "public_safe": true,
-      "schema": "policy_decision.v0.1"
+      "schema": ""
     },
     {
-      "artifact_type": "redacted_prepared_execution_spec",
+      "artifact_type": "execution_contract",
       "hash": {
         "algorithm": "sha256",
-        "canonical_bytes": 1864,
+        "canonical_bytes": 1449,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "0c18801b11917346ef50899e79e5de5cdbd444a3c4f0f889bd080f0efccbf41e"
+        "digest": "573ea42c15c4cc82e422f0aef66f5303ad68bc9b77ba11df7d8a53f3edf3d6ca"
       },
-      "path": "examples/security-contract-proof/prepared_execution_spec.redacted.json",
+      "path": "examples/review-bundle/03_execution_contract.json",
       "public_safe": true,
-      "schema": "redacted_prepared_execution_spec.v0.1"
+      "schema": ""
     },
     {
-      "artifact_type": "approved_execution_spec",
+      "artifact_type": "execution_ticket",
       "hash": {
         "algorithm": "sha256",
-        "canonical_bytes": 2057,
+        "canonical_bytes": 1917,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "8074fd415c46e9747c6a95e5fb6928d2bdd505e9d48af6115385d0ff754b139b"
+        "digest": "f003b4820d73ef4bc0c1ed5badef40f132e6b2d84ad10e07ef3f30da1802c063"
       },
-      "path": "examples/security-contract-proof/approved_execution_spec.json",
+      "path": "examples/review-bundle/04_execution_ticket.json",
       "public_safe": true,
-      "schema": "approved_execution_spec.v0.1"
+      "schema": ""
     },
     {
       "artifact_type": "execution_receipt",
       "hash": {
         "algorithm": "sha256",
-        "canonical_bytes": 457,
+        "canonical_bytes": 1468,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "4fdd1c6a89727c30104dc2c79f054a4e10cfaea70bbb4e3af0e8c0005d315da6"
+        "digest": "dbc8ccd856928c3386f296795ffaa98f744cf005a5211aadde635d2c0fc0768a"
       },
-      "path": "examples/security-contract-proof/execution_receipt.json",
+      "path": "examples/review-bundle/05_execution_receipt.json",
       "public_safe": true,
-      "schema": "execution_receipt.v0.1"
+      "schema": ""
     },
     {
-      "artifact_type": "evidence_bundle",
+      "artifact_type": "evidence_contract",
       "hash": {
         "algorithm": "sha256",
-        "canonical_bytes": 1783,
+        "canonical_bytes": 1446,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "1265ca1066e6d8d85db62e45c1fd9a664601d5cfe9736196d1c9927693ccfe87"
+        "digest": "8137721432dbbdae324f419aec74a27610dce5f5f38101a02273e1a32a507b40"
       },
-      "path": "examples/security-contract-proof/evidence_bundle.json",
+      "path": "examples/review-bundle/06_evidence_contract.json",
       "public_safe": true,
-      "schema": "evidence_bundle.v0.1"
+      "schema": ""
+    },
+    {
+      "artifact_type": "artifact_chain_manifest",
+      "hash": {
+        "algorithm": "sha256",
+        "canonical_bytes": 3822,
+        "canonicalization": "sclite-json-v0.1",
+        "digest": "1c3f7128534c34bb478b094380c78772d2ff209c4283d6f5342c7119147e4cea"
+      },
+      "path": "examples/review-bundle/artifact_chain_manifest.json",
+      "public_safe": true,
+      "schema": ""
     }
   ],
-  "generated_at": "2026-05-05T21:30:00+00:00",
+  "generated_at": "2026-05-24T00:00:00+00:00",
   "non_claims": [
     "does_not_claim_live_vulnerability_evidence",
     "does_not_prove_artifact_provenance",
@@ -75,11 +99,11 @@
     "raw_stdout_stderr_included": false
   },
   "schema_version": "v0.1",
-  "snapshot_name": "sclite-v0.1-public-fixture-snapshot",
-  "snapshot_version": "v0.1",
+  "snapshot_name": "sclite-current-review-bundle-snapshot",
+  "snapshot_version": "current-lifecycle-review",
   "summary": {
-    "file_count": 5,
-    "hashed_file_count": 5,
-    "public_safe_file_count": 5
+    "file_count": 7,
+    "hashed_file_count": 7,
+    "public_safe_file_count": 7
   }
 }

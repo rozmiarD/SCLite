@@ -28,14 +28,14 @@ def test_public_truth_validator_passes() -> None:
         check=True,
     )
 
-    assert result.stdout.strip() == 'public_truth_ok:sclite-core==0.7.0a0:import=sclite:runtime_deps=0'
+    assert result.stdout.strip() == 'public_truth_ok:sclite-core==0.8.0a0:import=sclite:runtime_deps=0'
 
 
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
     validator = _load_validator()
     errors: list[str] = []
 
-    validator._assert_readme_package_truth(errors, 'img.shields.io/pypi/v/sclite-core', '0.7.0a0')
+    validator._assert_readme_package_truth(errors, 'img.shields.io/pypi/v/sclite-core', '0.8.0a0')
 
     assert 'README.md:prerelease_unsafe_package_claim:img.shields.io/pypi/v/sclite-core' in errors
 
@@ -46,9 +46,9 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
 
     validator._assert_current_claim_docs(
         errors,
-        version='0.7.0a0',
+        version='0.8.0a0',
         readme=(
-            'v0.7 alpha surface collapse\n'
+            'v0.8 alpha legacy retirement\n'
             'Current alpha integration front door\n'
         ),
         roadmap=(
@@ -58,15 +58,15 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         spec=(
             'Current package release is `sclite-core==0.5.1`\n'
             'The current front door is the review lifecycle substrate\n'
-            'Legacy v0.1 proof-trace artifacts remain compatibility/history material; Ravenclaw\'s\n'
-            'active path now consumes the current lifecycle/review-bundle front door.\n'
+            'The superseded proof-trace product path is retired after Ravenclaw migrated to the\n'
+            'current lifecycle/review-bundle front door.\n'
         ),
         artifact_docs=(
-            'Current public package line: `sclite-core==0.7.0a0`\n'
+            'Current public package line: `sclite-core==0.8.0a0`\n'
             'The current integration front door is the review lifecycle substrate\n'
-            'Legacy v0.1 artifacts are compatibility/history material for Ravenclaw\n'
+            'The superseded proof-trace product path is retired after Ravenclaw\n'
         ),
-        integration_guide='The current 0.7 alpha line curates the review-bundle contract.\n',
+        integration_guide='The current 0.8 alpha line curates the review-bundle contract.\n',
     )
 
     assert (
@@ -86,3 +86,39 @@ def test_public_truth_validator_rejects_legacy_root_exports() -> None:
         )
     finally:
         validator.sclite.__all__ = original
+
+
+def test_current_public_surface_index_excludes_legacy_proof_trace_front_door() -> None:
+    validator = _load_validator()
+
+    assert validator._surface_fixture_errors() == []
+    surface_paths = {
+        surface['path']
+        for surface in validator.build_public_validation_surface_index(
+            generated_at='2026-05-24T00:00:00+00:00'
+        )['surfaces']
+    }
+    assert not surface_paths.intersection(validator.RETIRED_CURRENT_SURFACE_PATHS)
+
+
+def test_current_public_snapshot_manifest_excludes_legacy_proof_trace() -> None:
+    validator = _load_validator()
+
+    assert validator._snapshot_fixture_errors() == []
+
+
+def test_retired_proof_trace_product_paths_stay_absent() -> None:
+    validator = _load_validator()
+
+    assert validator._retired_product_errors() == []
+
+
+def test_retained_fixture_rejects_reference_to_retired_product_path() -> None:
+    validator = _load_validator()
+
+    assert validator._retired_reference_errors({
+        'examples/scope-fidelity-report/scope_fidelity_report.json':
+            '{"source_artifact": "examples/security-contract-proof/approved_execution_spec.json"}',
+    }) == [
+        'examples/scope-fidelity-report/scope_fidelity_report.json:references_retired_product_path',
+    ]

@@ -18,50 +18,17 @@ def _utc_now() -> str:
 
 
 def build_public_validation_surface_index(*, generated_at: str | None = None) -> Dict[str, Any]:
-    """Return the default public-safe validation surface index for SCLite v0.1.
+    """Return the current public-safe SCLite lifecycle/review surface index.
 
     The index describes what a reviewer can validate locally. It does not claim
     live execution, authorization, or protocol adapter coverage.
     """
     surfaces = [
         {
-            'surface_id': 'security_contract_proof_fixture',
-            'path': 'examples/security-contract-proof',
-            'kind': 'fixture_directory',
-            'purpose': 'Validate the public-safe proof trace artifact chain.',
-            'schemas': [
-                'policy_decision.v0.1',
-                'redacted_prepared_execution_spec.v0.1',
-                'approved_execution_spec.v0.1',
-                'execution_receipt.v0.1',
-                'evidence_bundle.v0.1',
-            ],
-            'commands': ['sclite validate examples/security-contract-proof'],
-            'public_safe': True,
-        },
-        {
-            'surface_id': 'prepared_execution_spec_fixture',
-            'path': 'examples/prepared-execution-spec/prepared_execution_spec.json',
-            'kind': 'json_artifact',
-            'purpose': 'Validate the draft prepared execution shape before approval.',
-            'schemas': ['prepared_execution_spec.v0.1'],
-            'commands': ['sclite validate-artifact --schema prepared_execution_spec.v0.1 examples/prepared-execution-spec/prepared_execution_spec.json'],
-            'public_safe': True,
-        },
-        {
-            'surface_id': 'scope_fidelity_fixture',
-            'path': 'examples/scope-fidelity-report/scope_fidelity_report.json',
-            'kind': 'json_artifact',
-            'purpose': 'Validate static target-host binding review output.',
-            'schemas': ['scope_fidelity_report.v0.1'],
-            'commands': ['sclite validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json'],
-            'public_safe': True,
-        },
-        {
             'surface_id': 'lifecycle_review_fixture',
             'path': 'examples/lifecycle-review/review_record.json',
             'kind': 'json_artifact',
-            'purpose': 'Validate a static lifecycle ReviewRecord aggregate with Scope Fidelity v0.2.',
+            'purpose': 'Validate a static lifecycle review aggregate and its scope-fidelity result.',
             'schemas': ['review_record.v0.1', 'scope_fidelity_report.v0.2'],
             'commands': ['sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json'],
             'public_safe': True,
@@ -70,7 +37,7 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'surface_id': 'review_bundle_fixture',
             'path': 'examples/review-bundle',
             'kind': 'review_bundle_directory',
-            'purpose': 'Validate and export a canonical SCLite v0.5 review bundle.',
+            'purpose': 'Validate and export a canonical SCLite current lifecycle/review bundle.',
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2'],
             'commands': ['sclite review examples/review-bundle --format json', 'sclite export-review-bundle examples/review-bundle --format markdown'],
             'public_safe': True,
@@ -79,7 +46,7 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'surface_id': 'govengine_integration_fixture',
             'path': 'examples/govengine-integration',
             'kind': 'review_bundle_directory',
-            'purpose': 'Validate the SCLite 0.5.x downstream integration fixture for GovEngine consumption.',
+            'purpose': 'Validate the current downstream integration fixture for GovEngine consumption.',
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3', 'trust_profile_ref.v0.1', 'carrier_profile_ref.v0.1'],
             'commands': [
                 'sclite review examples/govengine-integration --format json --fail-on review',
@@ -92,7 +59,7 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'surface_id': 'local_admin_change_fixture',
             'path': 'examples/local-admin-change',
             'kind': 'review_bundle_directory',
-            'purpose': 'Validate the SCLite 0.6 alpha local-admin-change fixture as a non-security multi-runtime proof surface.',
+            'purpose': 'Validate the current local-admin-change fixture as a non-security multi-runtime proof surface.',
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3'],
             'commands': ['sclite review examples/local-admin-change --format json --fail-on review'],
             'public_safe': True,

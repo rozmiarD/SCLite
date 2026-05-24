@@ -1,12 +1,12 @@
 # GovEngine Integration Contract
 
-This document defines the SCLite 0.7 alpha public import surface that GovEngine may rely on.
+This document defines the SCLite 0.8 alpha public import surface that GovEngine may rely on.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following import paths in the `sclite-core>=0.7.0a0,<0.8` line:
+GovEngine may rely on the following import paths in the `sclite-core>=0.8.0a0,<0.9` line:
 
 ```python
 from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest
@@ -17,11 +17,11 @@ from sclite.profiles import validate_trust_profile_ref, validate_carrier_profile
 from sclite.scope_fidelity import build_lifecycle_scope_fidelity_report
 ```
 
-Anything not listed here is internal, compatibility-only, legacy support, or not guaranteed as a stable GovEngine integration surface. `sclite.artifacts` remains importable for historical fixtures and migration validation, but legacy v0.1 proof helpers are not part of the current root API.
+Anything not listed here is internal or not guaranteed as a stable GovEngine integration surface. `sclite.artifacts` remains importable for schema validation and canonical hashes; the superseded proof-trace helpers and validators have been removed.
 
 ## Stable CLI surfaces for GovEngine/CI
 
-GovEngine and CI jobs may rely on these CLI commands in the `0.7.x` line:
+GovEngine and CI jobs may rely on these CLI commands in the `0.8.x` line:
 
 ```bash
 sclite validate-chain PATH/TO/artifact_chain_manifest.json
