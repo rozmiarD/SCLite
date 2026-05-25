@@ -1,10 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.8.0-beta - Lifecycle/review surface freeze (candidate)
 
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.
+- Prepares the unpublished `sclite-core==0.8.0b0` source candidate by freezing
+  the existing lifecycle/review front door and explicitly retaining current
+  schema and fixture identifiers.
+- Distinguishes candidate source truth from the latest published PyPI package,
+  which remains `sclite-core==0.8.0a0` until an approved release action.
+- Removes current-documentation drift that described an active lifecycle
+  negative fixture with retired prepared-execution wording or described a
+  retained schema-level scoped-ticket artifact as a published package line.
 
 ## 0.8.0-alpha - Legacy proof-trace retirement
 

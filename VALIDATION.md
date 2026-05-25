@@ -76,7 +76,7 @@ python -m pytest -q
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the `0.8` alpha line. Consumers may
+boundary for GovEngine and Ravenclaw on the `0.8` beta candidate. Consumers may
 rely on the canonical `review_bundle` directory shape, the
 `review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
 profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`
@@ -97,7 +97,8 @@ Expected result:
 - GovEngine integration fixture passes with `--fail-on review`;
 - local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation passes for the current alpha source/package line;
+- public truth validation distinguishes the `0.8.0b0` source candidate from
+  the latest published `0.8.0a0` package line;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - pytest passes.

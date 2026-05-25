@@ -2,7 +2,12 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite is centered on the v0.2 contract lifecycle. The current 0.8 alpha line curates the 0.5 review-bundle contract as the integration front door, adds deterministic review-bundle materialization for active consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks, trust/carrier references, lifecycle review records, public truth validation, and public-safe fixtures on top of that lifecycle:
+SCLite is centered on the v0.2 contract lifecycle. The current 0.8 beta
+candidate freezes the 0.5 review-bundle contract as the integration front
+door, retains deterministic review-bundle materialization for active
+consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks,
+trust/carrier references, lifecycle review records, public truth validation,
+and public-safe fixtures on top of that lifecycle:
 
 ```text
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest

@@ -3,7 +3,7 @@
 SCLite is a small Security Contract Layer package. Keep the core intentionally narrow:
 
 ```text
-define / validate / hash / bind / redact / verify
+define / validate / hash / bind / redact / review / verify
 ```
 
 ## Development setup

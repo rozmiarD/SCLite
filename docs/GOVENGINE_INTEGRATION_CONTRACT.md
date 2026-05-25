@@ -1,6 +1,8 @@
 # GovEngine Integration Contract
 
-This document defines the SCLite 0.8 alpha public import surface that GovEngine may rely on.
+This document defines the SCLite 0.8 lifecycle/review public import surface
+that GovEngine may rely on. It is frozen by the unpublished `0.8.0b0` beta
+candidate and remains compatible with the published `0.8.0a0` baseline.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
