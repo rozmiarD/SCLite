@@ -51,6 +51,13 @@ the lifecycle gate on top and fails closed unless the manifest contains exactly
 the canonical v0.2 role sequence with no extra roles, duplicate roles, or
 changed order.
 
+`verify-guarded-chain` verifies an optional `kernel_guard_hmac_v1` sidecar over
+an artifact-chain manifest. The guard is HMAC-SHA256 over canonical JSON
+transcripts for each manifest entry plus a root transcript that binds
+`root_chain_digest` and manifest metadata. It provides authenticity only inside
+the GovEngine/KERNEL domain that knows the secret; replay freshness remains a
+GovEngine replay-store responsibility.
+
 ## v0.2 Artifact Definitions
 
 ### IntentContract
@@ -132,6 +139,29 @@ SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
 8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;
 9. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
 10. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
+
+## Optional Kernel Guard HMAC
+
+`kernel_guard_hmac_v1` is an optional sidecar profile. It does not change the
+artifact body digest model and does not make SCLite a key store, PKI verifier,
+runtime, or replay authority.
+
+Per-entry transcripts bind:
+
+- profile, chain id, sequence, entry count;
+- entry role and path;
+- descriptor digest, artifact type, schema ref, schema version,
+  canonicalization, and hash algorithm;
+- previous HMAC tag, nonce, and key id.
+
+The root transcript binds:
+
+- profile and chain id;
+- entry count;
+- first and last entry tag;
+- `root_chain_digest`;
+- manifest metadata digest;
+- key id.
 
 This is lightweight cryptographic integrity, not identity trust. It proves the verifier saw the same canonical artifact bytes and lifecycle links; it does not prove who created them, whether a human was legally authorized, or whether a runtime enforced them.
 

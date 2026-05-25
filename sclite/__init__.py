@@ -22,6 +22,13 @@ from .integrity import (
     build_artifact_chain_manifest,
     verify_artifact_chain_manifest,
 )
+from .kernel_guard import (
+    KERNEL_GUARD_PROFILE,
+    KernelGuardError,
+    build_kernel_guard_manifest,
+    manifest_metadata_digest,
+    verify_kernel_guard_manifest,
+)
 from .review import (
     REVIEW_RECORD_SCHEMA,
     REVIEW_RECORD_SCHEMA_REF,
@@ -72,6 +79,11 @@ __all__ = (
     'artifact_descriptor',
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
+    'KERNEL_GUARD_PROFILE',
+    'KernelGuardError',
+    'build_kernel_guard_manifest',
+    'manifest_metadata_digest',
+    'verify_kernel_guard_manifest',
     'REVIEW_RECORD_SCHEMA',
     'REVIEW_RECORD_SCHEMA_REF',
     'ReviewRecordError',

@@ -66,9 +66,9 @@ manifests, but `verify-lifecycle` must not silently downgrade to hash-only
 validation when a lifecycle-shaped manifest carries extra roles, duplicate
 roles, or changed order.
 
-The planned kernel guard profile must stay optional and lightweight. It should
-bind existing manifest entries and descriptors through a sidecar or manifest
-guard, not by mutating each artifact body. It may provide authenticity inside a
+The `kernel_guard_hmac_v1` profile is optional and lightweight. It binds
+existing manifest entries and descriptors through a sidecar guard, not by
+mutating each artifact body. It may provide authenticity inside a
 GovEngine/KERNEL domain that knows the HMAC secret; it must not claim public
 PKI, global identity, non-repudiation, replay prevention without a GovEngine
 replay store, or protection from a malicious kernel.

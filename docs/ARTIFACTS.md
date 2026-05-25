@@ -112,6 +112,7 @@ The output is a `review_record.v0.1` with conservative `pass` / `review` / `fail
 | `ExecutionReceipt` v0.2 | `sclite/examples/contract-lifecycle-v0.2/execution_receipt.json` | Yes | Validated |
 | `EvidenceContract` | `sclite/examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
 | `ArtifactChainManifest` | `sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
+| `KernelGuardManifest` | optional sidecar, `kernel_guard_hmac_v1.schema.json` | Optional | Verified by `sclite verify-guarded-chain` when a local HMAC key is supplied |
 
 The v0.2 integrity model is deliberately lightweight: canonical SHA-256
 descriptors plus an ordered hash-linked chain. `validate-chain` verifies local
@@ -123,6 +124,11 @@ evidence->receipt/ticket binding, and manifest path containment. It detects
 local bundle tampering and lifecycle-link drift, but it does not prove signer
 identity, legal authorization, runtime enforcement, replay freshness, or
 transparency-log inclusion.
+
+The optional Kernel Guard sidecar adds HMAC-SHA256 authenticity inside a
+GovEngine/KERNEL secret domain. It binds existing manifest entries and manifest
+metadata without changing artifact bodies. It is not public PKI and does not
+handle replay without an external replay store.
 
 ## Artifact hash descriptor
 
