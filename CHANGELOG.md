@@ -2,6 +2,10 @@
 
 ## 0.8.0-beta - Lifecycle/review surface freeze (candidate)
 
+- Hardens lifecycle verification so `verify-lifecycle` requires the exact
+  canonical v0.2 lifecycle role sequence and rejects extra roles, duplicate
+  roles, and changed order instead of silently downgrading to hash-only chain
+  validation or overwriting duplicate role entries during semantic checks.
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.

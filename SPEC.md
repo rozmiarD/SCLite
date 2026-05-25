@@ -46,7 +46,10 @@ sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_man
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-`verify-lifecycle` intentionally uses the same underlying verifier as `validate-chain`; it names the v0.2 reviewer intent more clearly.
+`validate-chain` verifies the ordered hash-chain. `verify-lifecycle` applies
+the lifecycle gate on top and fails closed unless the manifest contains exactly
+the canonical v0.2 role sequence with no extra roles, duplicate roles, or
+changed order.
 
 ## v0.2 Artifact Definitions
 
@@ -122,7 +125,8 @@ SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
 2. every artifact descriptor matches the canonical SHA-256 digest of the local JSON artifact;
 3. every `previous_chain_digest` and `chain_digest` is recomputed in order;
 4. the `root_chain_digest` matches the final recomputed chain digest;
-5. the canonical lifecycle role order is enforced for v0.2 lifecycle manifests;
+5. `verify-lifecycle` enforces the exact canonical lifecycle role sequence for
+   v0.2 lifecycle manifests, with no extra or duplicate roles;
 6. `policy_decision` binds the correct `intent_contract` digest;
 7. `execution_contract` binds the correct intent and policy decision digests;
 8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;

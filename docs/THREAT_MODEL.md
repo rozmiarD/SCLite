@@ -18,6 +18,7 @@ SCLite is designed to help detect:
 
 - modified lifecycle artifacts after review;
 - digest mismatch inside an artifact-chain manifest;
+- extra, duplicate, or reordered roles in strict lifecycle verification;
 - lifecycle binding drift, such as a ticket bound to a different execution contract;
 - receipt/evidence overclaiming relative to linked ticket or receipt artifacts;
 - simple cross-role target drift visible in explicit host fields;
@@ -34,6 +35,11 @@ SCLite does not detect or enforce:
 - raw evidence storage safety;
 - complete secret scanning or DLP;
 - signer identity, revocation, transparency logs, PKI, or Sigstore verification;
+- authenticity claims from `signature_policy` metadata unless an external
+  verifier validates a real signature or guard;
+- replay of an old but otherwise valid integrity-only bundle;
+- forged complete chains when an attacker controls every artifact and manifest
+  before any external signature, guard, or anchor is applied;
 - carrier delivery or protocol correctness;
 - malicious external runtimes that ignore SCLite artifacts.
 

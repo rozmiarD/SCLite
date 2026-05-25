@@ -212,12 +212,19 @@ def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]
     ]
 
 
+def _raise_lifecycle_roles_mismatch(checked: Sequence[str]) -> None:
+    raise ChainVerificationError(
+        f'lifecycle roles mismatch: expected {list(V02_LIFECYCLE_ROLES)}, got {list(checked)}'
+    )
+
+
 def verify_artifact_chain_manifest(
     manifest: Mapping[str, Any],
     *,
     root: Path | None = None,
     validate_schemas: bool = True,
     strict_jsonschema: bool = False,
+    require_lifecycle: bool = False,
 ) -> Dict[str, Any]:
     """Verify manifest descriptors and hash links against local artifact files."""
     entries = manifest.get('entries')
@@ -227,6 +234,7 @@ def verify_artifact_chain_manifest(
     previous = ''
     checked: List[str] = []
     artifacts_by_role: Dict[str, Mapping[str, Any]] = {}
+    duplicate_roles: List[str] = []
     for index, entry in enumerate(entries):
         if not isinstance(entry, Mapping):
             raise ChainVerificationError(f'entry[{index}] is not an object')
@@ -256,11 +264,19 @@ def verify_artifact_chain_manifest(
             raise ChainVerificationError(f'entry[{index}] chain_digest mismatch')
         previous = actual_chain_digest
         checked.append(role)
-        artifacts_by_role[role] = value
+        if role in artifacts_by_role:
+            duplicate_roles.append(role)
+        else:
+            artifacts_by_role[role] = value
     if str(manifest.get('root_chain_digest') or '') != previous:
         raise ChainVerificationError('root_chain_digest mismatch')
     semantic_checks: List[str] = []
-    if set(checked) == set(V02_LIFECYCLE_ROLES):
+    checked_roles = tuple(checked)
+    if require_lifecycle and checked_roles != V02_LIFECYCLE_ROLES:
+        _raise_lifecycle_roles_mismatch(checked)
+    if checked_roles == V02_LIFECYCLE_ROLES:
+        semantic_checks = verify_lifecycle_semantics(artifacts_by_role)
+    elif not duplicate_roles and set(checked) == set(V02_LIFECYCLE_ROLES) and len(checked) == len(V02_LIFECYCLE_ROLES):
         semantic_checks = verify_lifecycle_semantics(artifacts_by_role)
     return {
         'status': 'passed',

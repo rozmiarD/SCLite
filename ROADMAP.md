@@ -45,6 +45,34 @@ order, digest bindings between intent, policy, execution contract, ticket,
 receipt, and evidence, and packaged reviewer-facing bundle output without
 adding runtime, adapter, PKI, or policy authority.
 
+## Active hardening direction: strict lifecycle, then optional kernel guard
+
+The next hardening step is intentionally ordered:
+
+1. make lifecycle verification fail closed for non-canonical lifecycle role
+   lists;
+2. document integrity-only limits and signature-policy non-claims;
+3. add an optional `kernel_guard_hmac_v1` manifest/sidecar guard only after the
+   lifecycle verifier is strict.
+
+Strict lifecycle means exactly this role sequence and no extras or duplicates:
+
+```text
+intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract
+```
+
+Generic chain validation may remain useful for non-lifecycle hash-chain
+manifests, but `verify-lifecycle` must not silently downgrade to hash-only
+validation when a lifecycle-shaped manifest carries extra roles, duplicate
+roles, or changed order.
+
+The planned kernel guard profile must stay optional and lightweight. It should
+bind existing manifest entries and descriptors through a sidecar or manifest
+guard, not by mutating each artifact body. It may provide authenticity inside a
+GovEngine/KERNEL domain that knows the HMAC secret; it must not claim public
+PKI, global identity, non-repudiation, replay prevention without a GovEngine
+replay store, or protection from a malicious kernel.
+
 ## Versioning discipline
 
 Roadmap milestones use PEP 440-compatible package-style labels:
