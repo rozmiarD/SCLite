@@ -10,15 +10,16 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The 0.8 alpha line
-exposes one review-lifecycle/review-bundle front door and lets active consumers
+what was approved, what was executed, and what can be proven. The 0.8 beta
+candidate freezes one review-lifecycle/review-bundle front door and lets active consumers
 materialize a canonical review bundle without adding runtime, adapter, PKI, or
 policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
-- Version: `0.8.0a0`
-- Status: **0.8 alpha lifecycle/review surface with legacy proof-trace retirement**
+- Version: `0.8.0b0`
+- Status: **unpublished 0.8 beta candidate: frozen lifecycle/review surface**
+- Latest published package: `sclite-core==0.8.0a0` (`0.8.0-alpha`)
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -34,14 +35,15 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 
 | Surface | Role | Current status |
 | --- | --- | --- |
-| legacy proof trace | Superseded public-safe proof fixtures and validation receipts | Retired from the installed/current surface in 0.8 alpha |
+| legacy proof trace | Superseded public-safe proof fixtures and validation receipts | Retired from the installed/current surface in published 0.8 alpha |
 | v0.2 lifecycle | Canonical intent → policy → contract → ticket → receipt → evidence chain | Canonical lifecycle model |
 | v0.3 scoped tickets | Runtime-consumable ticket semantics and receipt-bounded evidence checks | Available via `validate-ticket`, `explain-ticket`, `verify-ticket-use` |
 | v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
-| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current stable review surface |
+| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current frozen review surface |
 | v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Delivered predecessor fixture substrate |
 | v0.7 alpha surface collapse | Curated lifecycle/review-bundle root API plus materialization for active consumers | Delivered migration baseline |
-| v0.8 alpha legacy retirement | Removes the superseded proof-trace product path after consumer migration | Current alpha integration front door |
+| v0.8 alpha legacy retirement | Removes the superseded proof-trace product path after consumer migration | Published predecessor baseline |
+| v0.8 beta surface freeze | Freezes the lifecycle/review front door with retained contract identifiers | Unpublished source candidate |
 
 ## What problem does SCLite solve?
 
@@ -124,7 +126,7 @@ The default CLI path preserves the zero-runtime-dependency package. Release and 
 SCLite core is limited to:
 
 ```text
-define / validate / hash / bind / redact / verify / review
+define / validate / hash / bind / redact / review / verify
 ```
 
 The review-bundle shape first published on the 0.5.x line remains part of the
@@ -210,7 +212,7 @@ development:
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-It is not an installed/current SCLite surface in the 0.8 alpha line. Ravenclaw
+It is not an installed/current SCLite surface in the 0.8 beta candidate. Ravenclaw
 has moved its public proof projection to the current lifecycle/review-bundle
 model; retained schema identifiers such as `review_record.v0.1` identify
 current formats and are not compatibility product lines.
@@ -224,7 +226,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
 - [`docs/REVIEW_BUNDLES.md`](docs/REVIEW_BUNDLES.md) — canonical v0.5 review-bundle shape and CLI.
-- [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — current SCLite alpha imports, CLI surfaces, and fixtures for GovEngine.
+- [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — current SCLite imports, CLI surfaces, and fixtures for GovEngine.
 - [`docs/SCLITE_0_5_FREEZE.md`](docs/SCLITE_0_5_FREEZE.md) — 0.5.x freeze notes and non-goals.
 - [`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md) — CLI exit-code contract for CI/downstream callers.
 - [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) — concrete tampering, boundary, and non-goal model.
@@ -237,7 +239,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 
 ## Installation
 
-Install the current public alpha package from PyPI with an exact version pin:
+Install the latest published package from PyPI with an exact version pin:
 
 ```bash
 python -m pip install sclite-core==0.8.0a0

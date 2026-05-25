@@ -1,6 +1,8 @@
 # SCLite 0.5 Freeze Notes
 
-These notes define the 0.5 review-bundle behavior that remains stable while GovEngine consumes the `sclite-core>=0.8.0a0,<0.9` alpha line.
+These notes define the 0.5 review-bundle behavior that remains stable while
+GovEngine consumes the `sclite-core>=0.8.0a0,<0.9` line, including the
+unpublished SCLite `0.8.0b0` beta candidate.
 
 ## Stable for GovEngine consumption
 

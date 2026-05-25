@@ -6,7 +6,9 @@ It is not an executor, scanner, authorization authority, sandbox, or vulnerabili
 
 ## Supported versions
 
-SCLite is currently in a `0.y.z` lifecycle-candidate phase. Security fixes should target `main` until stable release branches exist.
+The source tree currently prepares the unpublished `sclite-core==0.8.0b0`
+beta candidate. The latest published package remains `sclite-core==0.8.0a0`.
+Security fixes should target `main` until stable release branches exist.
 
 ## Reporting security issues
 

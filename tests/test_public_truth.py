@@ -28,16 +28,48 @@ def test_public_truth_validator_passes() -> None:
         check=True,
     )
 
-    assert result.stdout.strip() == 'public_truth_ok:sclite-core==0.8.0a0:import=sclite:runtime_deps=0'
+    assert result.stdout.strip() == 'public_truth_ok:sclite-core==0.8.0b0:import=sclite:runtime_deps=0'
 
 
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
     validator = _load_validator()
     errors: list[str] = []
 
-    validator._assert_readme_package_truth(errors, 'img.shields.io/pypi/v/sclite-core', '0.8.0a0')
+    validator._assert_readme_package_truth(errors, 'img.shields.io/pypi/v/sclite-core', '0.8.0b0')
 
     assert 'README.md:prerelease_unsafe_package_claim:img.shields.io/pypi/v/sclite-core' in errors
+
+
+def test_public_truth_validator_rejects_unpublished_beta_install_claim() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_readme_package_truth(
+        errors,
+        'python -m pip install sclite-core==0.8.0b0',
+        '0.8.0b0',
+    )
+
+    assert (
+        'README.md:unpublished_candidate_install_claim:'
+        'python -m pip install sclite-core==0.8.0b0'
+    ) in errors
+
+
+def test_public_truth_validator_rejects_unpublished_beta_pypi_claim() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_unpublished_candidate_truth(
+        errors,
+        {'PUBLIC_STATUS.md': 'PyPI package: `sclite-core==0.8.0b0`'},
+        '0.8.0b0',
+    )
+
+    assert (
+        'PUBLIC_STATUS.md:unpublished_candidate_claimed_published:'
+        'PyPI package: `sclite-core==0.8.0b0`'
+    ) in errors
 
 
 def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
@@ -46,10 +78,10 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
 
     validator._assert_current_claim_docs(
         errors,
-        version='0.8.0a0',
+        version='0.8.0b0',
         readme=(
-            'v0.8 alpha legacy retirement\n'
-            'Current alpha integration front door\n'
+            'v0.8 beta surface freeze\n'
+            'Unpublished source candidate\n'
         ),
         roadmap=(
             '## 0.5.1 — GovEngine integration readiness\n\n'
@@ -57,16 +89,19 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         ),
         spec=(
             'Current package release is `sclite-core==0.5.1`\n'
+            'Current source candidate is `sclite-core==0.8.0b0`; the latest published\n'
+            'package remains `sclite-core==0.8.0a0`\n'
             'The current front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw migrated to the\n'
             'current lifecycle/review-bundle front door.\n'
         ),
         artifact_docs=(
-            'Current public package line: `sclite-core==0.8.0a0`\n'
+            'Current source candidate: `sclite-core==0.8.0b0`\n'
+            'latest published public package: `sclite-core==0.8.0a0`\n'
             'The current integration front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw\n'
         ),
-        integration_guide='The current 0.8 alpha line curates the review-bundle contract.\n',
+        integration_guide='The current 0.8 beta candidate freezes the review-bundle contract.\n',
     )
 
     assert (
@@ -141,4 +176,20 @@ def test_retained_fixture_rejects_reference_to_retired_product_path() -> None:
             '{"source_artifact": "examples/security-contract-proof/approved_execution_spec.json"}',
     }) == [
         'examples/scope-fidelity-report/scope_fidelity_report.json:references_retired_product_path',
+    ]
+
+
+def test_current_fixture_docs_reject_retired_or_maturity_ambiguous_wording() -> None:
+    validator = _load_validator()
+
+    assert validator._documentation_drift_errors({
+        'examples/bad-review-bundle-cross-host/README.md':
+            'the prepared execution/ticket target remains unchanged',
+        'examples/trust-carrier-profiles/README.md':
+            'bound to the published v0.3 scoped-ticket artifact',
+    }) == [
+        'examples/bad-review-bundle-cross-host/README.md:stale_current_wording:'
+        'prepared execution/ticket target',
+        'examples/trust-carrier-profiles/README.md:stale_current_wording:'
+        'published v0.3 scoped-ticket artifact',
     ]

@@ -3,14 +3,15 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current public package line: `sclite-core==0.8.0a0`
-(`0.8.0-alpha`). The current integration front door is the review lifecycle
+Current source candidate: `sclite-core==0.8.0b0` (`0.8.0-beta`);
+latest published public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
+The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
 release labels and artifact schema versions are separate concepts.
 
 The superseded proof-trace product path is retired after Ravenclaw public-proof
-migration, not a current front door for new integrations. The `0.8.0-alpha`
+migration, not a current front door for new integrations. The `0.8.0-beta`
 line removes its builders, validators, owned-only schemas, and fixture
 directories from the installed/current surface.
 
@@ -30,7 +31,7 @@ flowchart LR
 
 SCLite's current review-bundle surface packages the six lifecycle artifacts, an
 artifact-chain manifest, reviewer Markdown, and a verification receipt into one
-local/public-safe directory. The current alpha package line preserves the 0.5
+local/public-safe directory. The current beta candidate preserves the 0.5
 review-bundle contract and adds public-truth and multi-fixture hardening around
 it.
 

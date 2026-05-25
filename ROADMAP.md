@@ -24,9 +24,10 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.8.0-alpha
+## Current baseline: 0.8.0-beta candidate
 
-Current public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
+Current source candidate: `sclite-core==0.8.0b0` (`0.8.0-beta`).
+Latest published public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
 
 Current lifecycle:
 
@@ -34,14 +35,22 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.x line remains the stable review-bundle shape. The 0.8 alpha package line makes the lifecycle/review-bundle path the single curated front door, includes a deterministic review-bundle materializer for active consumers, and removes the superseded proof-trace product path after controlled consumer migration. It verifies schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role order, digest bindings between intent, policy, execution contract, ticket, receipt, and evidence, and packaged reviewer-facing bundle output without adding runtime, adapter, PKI, or policy authority.
+The v0.5.x line remains the stable review-bundle shape. The 0.8 beta candidate
+freezes the lifecycle/review-bundle path as the single curated front door,
+includes the deterministic review-bundle materializer used by active
+consumers, and retains the alpha removal of the superseded proof-trace product
+path after controlled consumer migration. It verifies schema-backed artifacts,
+canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role
+order, digest bindings between intent, policy, execution contract, ticket,
+receipt, and evidence, and packaged reviewer-facing bundle output without
+adding runtime, adapter, PKI, or policy authority.
 
 ## Versioning discipline
 
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b0 (candidate)
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -501,6 +510,24 @@ Success criteria:
   directories, validators, or owned-only schemas;
 - public, strict-schema, pytest, clean-wheel, and downstream compatibility
   gates passed for the published `0.8.0-alpha` line.
+
+## 0.8.0-beta — Freeze lifecycle/review public responsibility
+
+Status: unpublished source candidate; the latest published package remains
+`sclite-core==0.8.0a0`.
+
+Candidate scope:
+
+1. Freeze the existing lifecycle/review-bundle front door, stable GovEngine
+   imports and explicit non-claims for the beta line.
+2. Preserve retained schema and fixture identifiers that describe current
+   contracts; do not turn cosmetic renaming into artifact churn.
+3. Keep runtime execution, policy authority, adapter, PKI/KMS, storage and
+   production-readiness behavior outside SCLite.
+4. Require validation to distinguish candidate source truth from latest
+   published package truth until an approved release completes.
+5. Prove GovEngine, Ravenclaw and Tecrax consumption without adding SCLite
+   surface breadth.
 
 ## Release posture
 

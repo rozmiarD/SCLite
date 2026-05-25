@@ -1,6 +1,6 @@
 # Trust and carrier profile references
 
-This fixture demonstrates SCLite v0.4-style sidecar references bound to the published v0.3 scoped-ticket artifact.
+This fixture demonstrates SCLite v0.4-style sidecar references bound to the retained v0.3 scoped-ticket artifact.
 
 ```bash
 sclite validate-trust-profile sclite/examples/trust-carrier-profiles/trust_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json

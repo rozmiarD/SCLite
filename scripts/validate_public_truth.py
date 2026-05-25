@@ -18,14 +18,18 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '0.8.0a0'
-EXPECTED_RELEASE_LABEL = '0.8.0-alpha'
+EXPECTED_VERSION = '0.8.0b0'
+EXPECTED_RELEASE_LABEL = '0.8.0-beta'
+LATEST_PUBLISHED_VERSION = '0.8.0a0'
+LATEST_PUBLISHED_LABEL = '0.8.0-alpha'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
 EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0a0,<0.9'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
+    'SECURITY.md',
+    'CONTRIBUTING.md',
     'ROADMAP.md',
     'VALIDATION.md',
     'PUBLICATION_CHECKLIST.md',
@@ -95,9 +99,32 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
     for marker in forbidden:
         if marker in readme:
             errors.append(f'README.md:prerelease_unsafe_package_claim:{marker}')
-    _require(errors, 'README.md', readme, f'package-sclite--core%20{version}-blueviolet.svg')
-    _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{version}/')
-    _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={version}')
+    if version != LATEST_PUBLISHED_VERSION:
+        candidate_public_markers = (
+            f'https://pypi.org/project/sclite-core/{version}/',
+            f'python -m pip install sclite-core=={version}',
+        )
+        for marker in candidate_public_markers:
+            if marker in readme:
+                errors.append(f'README.md:unpublished_candidate_install_claim:{marker}')
+    _require(errors, 'README.md', readme, f'Version: `{version}`')
+    _require(errors, 'README.md', readme, f'package-sclite--core%20{LATEST_PUBLISHED_VERSION}-blueviolet.svg')
+    _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{LATEST_PUBLISHED_VERSION}/')
+    _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={LATEST_PUBLISHED_VERSION}')
+
+
+def _assert_unpublished_candidate_truth(errors: list[str], paths: Mapping[str, str], version: str) -> None:
+    if version == LATEST_PUBLISHED_VERSION:
+        return
+    forbidden_claims = (
+        f'PyPI package: `{EXPECTED_DISTRIBUTION}=={version}`',
+        f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={version}`',
+        f'Published the beta package as `{EXPECTED_DISTRIBUTION}=={version}`',
+    )
+    for path, text in paths.items():
+        for claim in forbidden_claims:
+            if claim in text:
+                errors.append(f'{path}:unpublished_candidate_claimed_published:{claim}')
 
 
 def _assert_current_claim_docs(
@@ -120,18 +147,20 @@ def _assert_current_claim_docs(
             errors.append(f'SPEC.md:stale_current_package_claim:{marker}')
         if marker in artifact_docs:
             errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
-    _require(errors, 'SPEC.md', spec, f'Current package release is `sclite-core=={version}`')
+    _require(errors, 'SPEC.md', spec, f'Current source candidate is `sclite-core=={version}`')
+    _require(errors, 'SPEC.md', spec, f'package remains `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'v0.8 alpha legacy retirement')
-    _require(errors, 'README.md', readme, 'Current alpha integration front door')
+    _require(errors, 'README.md', readme, 'v0.8 beta surface freeze')
+    _require(errors, 'README.md', readme, 'Unpublished source candidate')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current public package line: `sclite-core=={version}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current source candidate: `sclite-core=={version}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
-    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 0.8 alpha line')
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 0.8 beta')
     if 'The current 0.6 alpha line' in integration_guide:
         errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 
@@ -150,6 +179,8 @@ def _assert_roadmap_release_truth(errors: list[str], roadmap: str) -> None:
     _require(errors, 'ROADMAP.md', roadmap, 'Delivered in `0.7.0-alpha`:')
     _require(errors, 'ROADMAP.md', roadmap, 'Status: published current alpha line after Ravenclaw consumer migration.')
     _require(errors, 'ROADMAP.md', roadmap, 'gates passed for the published `0.8.0-alpha` line.')
+    _require(errors, 'ROADMAP.md', roadmap, '## 0.8.0-beta — Freeze lifecycle/review public responsibility')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: unpublished source candidate; the latest published package remains')
 
 
 def _stable_import_errors() -> list[str]:
@@ -262,6 +293,19 @@ def _retired_reference_errors(text_by_path: Mapping[str, str]) -> list[str]:
     return errors
 
 
+def _documentation_drift_errors(text_by_path: Mapping[str, str]) -> list[str]:
+    errors: list[str] = []
+    forbidden_current_wording = (
+        'prepared execution/ticket target',
+        'published v0.3 scoped-ticket artifact',
+    )
+    for path, text in text_by_path.items():
+        for wording in forbidden_current_wording:
+            if wording in text:
+                errors.append(f'{path}:stale_current_wording:{wording}')
+    return errors
+
+
 def _forbidden_claim_errors(paths: Iterable[str]) -> list[str]:
     errors: list[str] = []
     negation_markers = (
@@ -329,19 +373,30 @@ def collect_errors() -> list[str]:
         integration_guide=integration_guide,
     )
     _assert_roadmap_release_truth(errors, roadmap)
+    _assert_unpublished_candidate_truth(
+        errors,
+        {'PUBLIC_STATUS.md': public_status, 'CHANGELOG.md': changelog, 'ROADMAP.md': roadmap},
+        version,
+    )
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, '0.8 alpha')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current package version: `{version}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Public release label: `{EXPECTED_RELEASE_LABEL}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'PyPI package: `{EXPECTED_DISTRIBUTION}=={version}` is the published current alpha package.')
-    _require(errors, 'ROADMAP.md', roadmap, f'Current public package: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'README.md', readme, 'unpublished 0.8 beta candidate')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current source candidate version: `{version}`.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Candidate release label: `{EXPECTED_RELEASE_LABEL}`.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
+    _require(errors, 'ROADMAP.md', roadmap, f'Current source candidate: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'ROADMAP.md', roadmap, f'Latest published public package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Legacy proof-trace retirement')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Lifecycle/review surface freeze (candidate)')
+    _require(errors, 'CHANGELOG.md', changelog, f'`{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` until an approved release action')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')
+    _require(errors, 'CONTRIBUTING.md', _read('CONTRIBUTING.md'), 'define / validate / hash / bind / redact / review / verify')
+    _require(errors, 'SPEC.md', spec, 'define / validate / hash / bind / redact / review / verify')
+    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'unpublished `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
+    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'latest published package remains `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, "python-version: ['3.11', '3.12', '3.13']")
@@ -357,6 +412,16 @@ def collect_errors() -> list[str]:
     errors.extend(_surface_fixture_errors())
     errors.extend(_snapshot_fixture_errors())
     errors.extend(_retired_product_errors())
+    errors.extend(_documentation_drift_errors({
+        'examples/bad-review-bundle-cross-host/README.md':
+            _read('examples/bad-review-bundle-cross-host/README.md'),
+        'sclite/examples/bad-review-bundle-cross-host/README.md':
+            _read('sclite/examples/bad-review-bundle-cross-host/README.md'),
+        'examples/trust-carrier-profiles/README.md':
+            _read('examples/trust-carrier-profiles/README.md'),
+        'sclite/examples/trust-carrier-profiles/README.md':
+            _read('sclite/examples/trust-carrier-profiles/README.md'),
+    }))
     errors.extend(_forbidden_claim_errors(PUBLIC_DOCS))
 
     return errors

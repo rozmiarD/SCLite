@@ -4,13 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current package version: `0.8.0a0`.
-- Public release label: `0.8.0-alpha`.
-- Status: alpha multi-runtime proof/review substrate.
+- Current source candidate version: `0.8.0b0`.
+- Candidate release label: `0.8.0-beta`.
+- Status: unpublished beta candidate for the frozen multi-runtime proof/review substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- PyPI package: `sclite-core==0.8.0a0` is the published current alpha package.
+- Latest published PyPI package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
 
 ## Current review path
 
@@ -66,4 +66,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-The `0.8.0-alpha` line keeps review-bundle behavior stable and removes the superseded proof-trace product path after consumer migration while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
+The published `0.8.0-alpha` line removed the superseded proof-trace product path after consumer migration. The unpublished `0.8.0-beta` candidate freezes that same lifecycle/review surface while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.

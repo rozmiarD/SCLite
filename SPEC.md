@@ -1,10 +1,11 @@
 # SCLite Draft Specification
 
-Status: **0.8.0-alpha lifecycle/review surface with legacy proof-trace retirement**.
-Current package release is `sclite-core==0.8.0a0`; the Python import package
-remains `sclite`. The current front door is the review lifecycle substrate:
+Status: **unpublished 0.8.0-beta candidate: frozen lifecycle/review surface**.
+Current source candidate is `sclite-core==0.8.0b0`; the latest published
+package remains `sclite-core==0.8.0a0`, and the Python import package remains
+`sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
-and v0.5 review-bundle packaging. The 0.8 alpha line curates that substrate as
+and v0.5 review-bundle packaging. The 0.8 beta candidate freezes that substrate as
 the root API and supports canonical review-bundle materialization for active
 consumers without adding runtime, adapter, PKI, or policy authority.
 
@@ -188,7 +189,7 @@ scope/input -> policy decision -> prepared execution spec -> approved execution 
 ```
 
 The legacy builders, fixture validators, schemas owned only by this trace, and
-its fixture directories are not part of the `0.8.0-alpha` installed/current
+its fixture directories are not part of the `0.8.0-beta` installed/current
 surface. Current work uses the lifecycle/review-bundle model above. Generic
 redaction, snapshot-manifest, Scope Fidelity, and review-record schemas remain
 because the current lifecycle still uses them; their schema suffixes are
@@ -212,7 +213,7 @@ SCLite core does **not** include:
 SCLite core capabilities are intentionally limited to:
 
 ```text
-define / validate / hash / bind / redact / verify / review
+define / validate / hash / bind / redact / review / verify
 ```
 
 Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execute or dry-run tools, store raw evidence, and expose carrier adapters. Those responsibilities stay outside SCLite.
