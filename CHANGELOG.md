@@ -12,7 +12,7 @@
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.
-- Prepares the unpublished `sclite-core==0.8.0b0` source candidate by freezing
+- Prepares the unpublished `sclite-core==0.8.0b1` source candidate by freezing
   the existing lifecycle/review front door and explicitly retaining current
   schema and fixture identifiers.
 - Distinguishes candidate source truth from the latest published PyPI package,

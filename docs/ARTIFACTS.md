@@ -3,7 +3,7 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current source candidate: `sclite-core==0.8.0b0` (`0.8.0-beta`);
+Current source candidate: `sclite-core==0.8.0b1` (`0.8.0-beta`);
 latest published public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
