@@ -26,7 +26,7 @@ SCLite must stay deliberately small. The emergence of GovEngine as a broader gov
 
 ## Current baseline: 0.8.0-beta candidate
 
-Current source candidate: `sclite-core==0.8.0b0` (`0.8.0-beta`).
+Current source candidate: `sclite-core==0.8.0b1` (`0.8.0-beta`).
 Latest published public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
 
 Current lifecycle:
@@ -78,7 +78,7 @@ replay store, or protection from a malicious kernel.
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b0 (candidate)
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b1 (candidate)
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.

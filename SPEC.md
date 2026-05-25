@@ -1,7 +1,7 @@
 # SCLite Draft Specification
 
 Status: **unpublished 0.8.0-beta candidate: frozen lifecycle/review surface**.
-Current source candidate is `sclite-core==0.8.0b0`; the latest published
+Current source candidate is `sclite-core==0.8.0b1`; the latest published
 package remains `sclite-core==0.8.0a0`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,

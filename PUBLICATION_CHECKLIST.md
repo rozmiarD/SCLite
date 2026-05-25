@@ -32,7 +32,7 @@ python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
-For the `0.8.0b0` source candidate, current documentation and validation must
+For the `0.8.0b1` source candidate, current documentation and validation must
 state that the latest published PyPI release remains `sclite-core==0.8.0a0`
 until a separately approved tag/upload has completed and been verified.
 
@@ -134,7 +134,7 @@ Before any public push:
 - confirm local git status is clean;
 - run the checks above on the exact tree to be pushed;
 - confirm the PyPI distribution name is `sclite-core` and the Python import package remains `sclite`;
-- decide whether the validated `0.8.0b0` candidate is authorized for release;
+- decide whether the validated `0.8.0b1` candidate is authorized for release;
 - get explicit operator approval for any tag, TestPyPI upload, or PyPI upload.
 
 Validation receipts do not authorize publication. They only record checks.
