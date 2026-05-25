@@ -95,7 +95,9 @@ sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_man
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-`verify-lifecycle` uses the same underlying verifier as `validate-chain`; the command name exists because it describes the v0.2 review action more clearly.
+`validate-chain` verifies the ordered hash-chain. `verify-lifecycle` applies
+the lifecycle gate on top and requires the exact canonical v0.2 role sequence
+with no extra roles, duplicate roles, or changed order.
 
 ## What the verifier checks
 
@@ -270,6 +272,9 @@ Validate the v0.2 lifecycle chain:
 sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
+
+Use `sclite validate-chain --strict-lifecycle ...` when a generic chain check
+should also fail closed on the canonical lifecycle role sequence.
 
 Validate and explain the v0.3 scoped-ticket fixture:
 

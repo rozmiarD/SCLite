@@ -113,7 +113,16 @@ The output is a `review_record.v0.1` with conservative `pass` / `review` / `fail
 | `EvidenceContract` | `sclite/examples/contract-lifecycle-v0.2/evidence_contract.json` | Yes | Validated |
 | `ArtifactChainManifest` | `sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json` | Yes | Verified by `sclite validate-chain` / `sclite verify-lifecycle` |
 
-The v0.2 integrity model is deliberately lightweight: canonical SHA-256 descriptors plus an ordered hash-linked chain. The verifier also checks lifecycle semantics: canonical role order, policy->intent binding, execution contract->intent/policy binding, ticket->execution contract binding, receipt->ticket/contract binding, evidence->receipt/ticket binding, and manifest path containment. It detects local bundle tampering and lifecycle-link drift, but it does not prove signer identity, legal authorization, runtime enforcement, or transparency-log inclusion.
+The v0.2 integrity model is deliberately lightweight: canonical SHA-256
+descriptors plus an ordered hash-linked chain. `validate-chain` verifies local
+chain integrity; `verify-lifecycle` additionally requires the exact canonical
+lifecycle role sequence with no extra or duplicate roles. Lifecycle semantics
+then check policy->intent binding, execution contract->intent/policy binding,
+ticket->execution contract binding, receipt->ticket/contract binding,
+evidence->receipt/ticket binding, and manifest path containment. It detects
+local bundle tampering and lifecycle-link drift, but it does not prove signer
+identity, legal authorization, runtime enforcement, replay freshness, or
+transparency-log inclusion.
 
 ## Artifact hash descriptor
 

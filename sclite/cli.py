@@ -66,6 +66,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     chain_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
     chain_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    chain_cmd.add_argument('--strict-lifecycle', action='store_true', help='require the canonical v0.2 lifecycle role sequence with no extras or duplicates')
     chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
@@ -181,6 +182,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 root=root,
                 validate_schemas=not args.no_schema,
                 strict_jsonschema=bool(args.strict_jsonschema),
+                require_lifecycle=args.command == 'verify-lifecycle' or bool(getattr(args, 'strict_lifecycle', False)),
             )
         except ChainVerificationError as exc:
             print(f'artifact_chain_failed:{exc}', file=sys.stderr)

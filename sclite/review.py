@@ -116,6 +116,7 @@ def build_review_record_from_manifest(
             root=base,
             validate_schemas=True,
             strict_jsonschema=strict_jsonschema,
+            require_lifecycle=True,
         )
         semantic_checks = chain_result.get('semantic_checks') if isinstance(chain_result.get('semantic_checks'), list) else []
         checks.append(_check('chain_integrity', 'pass', str(chain_result.get('root_chain_digest') or ''), int(chain_result.get('entry_count') or 0)))

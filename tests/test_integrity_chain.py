@@ -53,6 +53,11 @@ def _artifacts() -> dict[str, dict]:
     return {role: copy.deepcopy(_load(path)) for role, path in LIFECYCLE_FILES}
 
 
+def _write_lifecycle_files(tmp_path: Path, artifacts: dict[str, dict]) -> None:
+    for role, path in LIFECYCLE_FILES:
+        (tmp_path / path).write_text(json.dumps(artifacts[role], indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+
 def test_v02_lifecycle_artifacts_validate_against_schemas() -> None:
     for name in [
         'intent_contract.json',
@@ -148,8 +153,63 @@ def test_v02_lifecycle_detects_role_order_mismatch(tmp_path: Path) -> None:
         created_at='2026-05-06T18:21:00+00:00',
     )
 
-    with pytest.raises(ChainVerificationError, match='lifecycle role order mismatch'):
-        verify_artifact_chain_manifest(manifest, root=tmp_path, validate_schemas=False)
+    with pytest.raises(ChainVerificationError, match='lifecycle roles mismatch'):
+        verify_artifact_chain_manifest(manifest, root=tmp_path, validate_schemas=False, require_lifecycle=True)
+
+
+def test_v02_lifecycle_strict_rejects_extra_role(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    _write_lifecycle_files(tmp_path, artifacts)
+    (tmp_path / 'injected_extra_role.json').write_text(
+        json.dumps(artifacts['execution_receipt'], indent=2, sort_keys=True) + '\n',
+        encoding='utf-8',
+    )
+    entries = [
+        ('intent_contract', 'intent_contract.json', artifacts['intent_contract']),
+        ('policy_decision', 'policy_decision.json', artifacts['policy_decision']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_ticket', 'execution_ticket.json', artifacts['execution_ticket']),
+        ('injected_extra_role', 'injected_extra_role.json', artifacts['execution_receipt']),
+        ('execution_receipt', 'execution_receipt.json', artifacts['execution_receipt']),
+        ('evidence_contract', 'evidence_contract.json', artifacts['evidence_contract']),
+    ]
+    manifest = build_artifact_chain_manifest(
+        [{'role': role, 'path': path, 'value': value} for role, path, value in entries],
+        chain_id='sclite-v0.2-demo-lifecycle',
+        created_at='2026-05-06T18:21:00+00:00',
+    )
+
+    loose = verify_artifact_chain_manifest(manifest, root=tmp_path)
+    assert loose['semantic_checks'] == []
+
+    with pytest.raises(ChainVerificationError, match='lifecycle roles mismatch'):
+        verify_artifact_chain_manifest(manifest, root=tmp_path, require_lifecycle=True)
+
+
+def test_v02_lifecycle_strict_rejects_duplicate_role_without_overwrite(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    _write_lifecycle_files(tmp_path, artifacts)
+    entries = [
+        ('intent_contract', 'intent_contract.json', artifacts['intent_contract']),
+        ('policy_decision', 'policy_decision.json', artifacts['policy_decision']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_ticket', 'execution_ticket.json', artifacts['execution_ticket']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_receipt', 'execution_receipt.json', artifacts['execution_receipt']),
+        ('evidence_contract', 'evidence_contract.json', artifacts['evidence_contract']),
+    ]
+    manifest = build_artifact_chain_manifest(
+        [{'role': role, 'path': path, 'value': value} for role, path, value in entries],
+        chain_id='sclite-v0.2-demo-lifecycle',
+        created_at='2026-05-06T18:21:00+00:00',
+    )
+
+    loose = verify_artifact_chain_manifest(manifest, root=tmp_path)
+    assert loose['checked_entries'].count('execution_contract') == 2
+    assert loose['semantic_checks'] == []
+
+    with pytest.raises(ChainVerificationError, match='lifecycle roles mismatch'):
+        verify_artifact_chain_manifest(manifest, root=tmp_path, require_lifecycle=True)
 
 
 def test_v02_lifecycle_detects_manifest_path_escape() -> None:

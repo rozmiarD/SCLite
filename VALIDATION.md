@@ -73,6 +73,12 @@ python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 ex
 python -m pytest -q
 ```
 
+`verify-lifecycle` is stricter than generic chain validation. It requires the
+canonical v0.2 lifecycle role sequence exactly, with no extra roles, duplicate
+roles, or changed order. `validate-chain` remains available for generic
+hash-chain verification; pass `--strict-lifecycle` when that command should
+also enforce lifecycle role strictness.
+
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
@@ -90,7 +96,8 @@ domain narratives remain different.
 Expected result:
 
 - current lifecycle/review fixture validation passes;
-- v0.2 lifecycle chain validation and semantic lifecycle verification pass;
+- v0.2 lifecycle chain validation and strict semantic lifecycle verification
+  pass;
 - v0.3 scoped-ticket schema, binding, explanation, and static ticket-use checks pass;
 - lifecycle review records and lifecycle-aware Scope Fidelity checks are generated conservatively;
 - canonical review bundles validate and export to Markdown;
