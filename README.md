@@ -276,6 +276,20 @@ sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_m
 Use `sclite validate-chain --strict-lifecycle ...` when a generic chain check
 should also fail closed on the canonical lifecycle role sequence.
 
+Optionally verify a GovEngine/KERNEL-domain guard sidecar:
+
+```bash
+SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+  sclite verify-guarded-chain \
+  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
+  --guard kernel_guard_manifest.json \
+  --strict-lifecycle
+```
+
+`kernel_guard_hmac_v1` authenticates a manifest and its entries only inside the
+domain that knows the HMAC secret. It is not PKI, non-repudiation, public
+identity, replay prevention, or proof that a runtime behaved correctly.
+
 Validate and explain the v0.3 scoped-ticket fixture:
 
 ```bash

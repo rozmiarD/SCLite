@@ -79,6 +79,12 @@ roles, or changed order. `validate-chain` remains available for generic
 hash-chain verification; pass `--strict-lifecycle` when that command should
 also enforce lifecycle role strictness.
 
+`verify-guarded-chain` is optional. It verifies a `kernel_guard_hmac_v1`
+sidecar when a GovEngine/KERNEL-domain HMAC secret is available through
+`--guard-key-env` (default: `SCLITE_KERNEL_GUARD_KEY`). This command does not
+check replay freshness; GovEngine or another runtime must keep the replay
+store for `root_tag`, `chain_id`, ticket/run id, and `key_id`.
+
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
@@ -106,6 +112,8 @@ Expected result:
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
 - public truth validation distinguishes the `0.8.0b0` source candidate from
   the latest published `0.8.0a0` package line;
+- optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
+  sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - pytest passes.

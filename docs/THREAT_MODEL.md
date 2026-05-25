@@ -10,6 +10,7 @@ SCLite is a local artifact validation and review package. It helps reviewers det
 - scoped execution tickets;
 - receipt-bounded evidence contracts;
 - review records and review bundles;
+- optional `kernel_guard_hmac_v1` sidecars;
 - public-safe fixtures and Markdown exports.
 
 ## Attacker Capabilities Considered
@@ -40,6 +41,9 @@ SCLite does not detect or enforce:
 - replay of an old but otherwise valid integrity-only bundle;
 - forged complete chains when an attacker controls every artifact and manifest
   before any external signature, guard, or anchor is applied;
+- HMAC key compromise for guarded bundles;
+- replay of an old guarded bundle unless an external GovEngine/runtime replay
+  store rejects the `root_tag` or chain/run identifier;
 - carrier delivery or protocol correctness;
 - malicious external runtimes that ignore SCLite artifacts.
 

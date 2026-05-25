@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Sequence
@@ -9,6 +10,7 @@ from typing import Any, Dict, Sequence
 from .artifacts import build_artifact_hash, validate_artifact
 from .bundles import ReviewBundleError, export_review_bundle_markdown, review_bundle, review_bundle_summary
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .kernel_guard import KernelGuardError, verify_kernel_guard_manifest
 from .profiles import (
     ProfileReferenceError,
     profile_ref_summary,
@@ -75,6 +77,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
     lifecycle_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     lifecycle_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+
+    guard_cmd = sub.add_parser('verify-guarded-chain', help='verify an optional kernel_guard_hmac_v1 sidecar for an artifact-chain manifest')
+    guard_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
+    guard_cmd.add_argument('--guard', required=True, help='path to kernel_guard_manifest.json')
+    guard_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
+    guard_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
+    guard_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
+    guard_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    guard_cmd.add_argument('--strict-lifecycle', action='store_true', help='require the canonical v0.2 lifecycle role sequence with no extras or duplicates')
+    guard_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     ticket_cmd = sub.add_parser('validate-ticket', help='validate an ExecutionTicket and optional execution-contract binding')
     ticket_cmd.add_argument('ticket', help='path to execution_ticket.json')
@@ -192,6 +204,35 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
             print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}")
+        return 0
+
+    if args.command == 'verify-guarded-chain':
+        manifest_path = Path(str(args.manifest)).resolve()
+        guard_path = Path(str(args.guard)).resolve()
+        manifest = _load_json_object(manifest_path)
+        guard = _load_json_object(guard_path)
+        root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
+        key = os.environ.get(str(args.guard_key_env) or '')
+        if not key:
+            print(f'kernel_guard_failed:missing guard key env {args.guard_key_env}', file=sys.stderr)
+            return 1
+        try:
+            result = verify_kernel_guard_manifest(
+                manifest,
+                guard,
+                key=key,
+                root=root,
+                validate_schemas=not args.no_schema,
+                strict_jsonschema=bool(args.strict_jsonschema),
+                require_lifecycle=bool(args.strict_lifecycle),
+            )
+        except KernelGuardError as exc:
+            print(f'kernel_guard_failed:{exc}', file=sys.stderr)
+            return 1
+        if args.format == 'json':
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"kernel_guard_ok:{result['entry_count']}:{result['root_chain_digest']}:{result['guard_root_tag']}")
         return 0
 
     if args.command == 'validate-ticket':

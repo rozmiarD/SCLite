@@ -6,6 +6,9 @@
   canonical v0.2 lifecycle role sequence and rejects extra roles, duplicate
   roles, and changed order instead of silently downgrading to hash-only chain
   validation or overwriting duplicate role entries during semantic checks.
+- Adds optional `kernel_guard_hmac_v1` sidecar verification for
+  GovEngine/KERNEL-domain authenticity over existing artifact-chain manifests,
+  without mutating artifact bodies or adding runtime dependencies.
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.
