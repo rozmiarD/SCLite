@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 0.8.0a0](https://img.shields.io/badge/package-sclite--core%200.8.0a0-blueviolet.svg)](https://pypi.org/project/sclite-core/0.8.0a0/)
+[![Package: sclite-core 0.8.0b2](https://img.shields.io/badge/package-sclite--core%200.8.0b2-blueviolet.svg)](https://pypi.org/project/sclite-core/0.8.0b2/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -10,16 +10,16 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The 0.8 beta
-candidate freezes one review-lifecycle/review-bundle front door and lets active consumers
+what was approved, what was executed, and what can be proven. The published
+0.8 beta release freezes one review-lifecycle/review-bundle front door and lets active consumers
 materialize a canonical review bundle without adding runtime, adapter, PKI, or
 policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
 - Version: `0.8.0b2`
-- Status: **unpublished 0.8 beta candidate: frozen lifecycle/review surface**
-- Latest published package: `sclite-core==0.8.0a0` (`0.8.0-alpha`)
+- Status: **published 0.8 beta: frozen lifecycle/review surface**
+- Latest published package: `sclite-core==0.8.0b2` (`0.8.0-beta`)
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -43,7 +43,7 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Delivered predecessor fixture substrate |
 | v0.7 alpha surface collapse | Curated lifecycle/review-bundle root API plus materialization for active consumers | Delivered migration baseline |
 | v0.8 alpha legacy retirement | Removes the superseded proof-trace product path after consumer migration | Published predecessor baseline |
-| v0.8 beta surface freeze | Freezes the lifecycle/review front door with retained contract identifiers | Unpublished source candidate |
+| v0.8 beta surface freeze | Freezes the lifecycle/review front door with retained contract identifiers | Published current beta line |
 
 ## What problem does SCLite solve?
 
@@ -214,7 +214,7 @@ development:
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-It is not an installed/current SCLite surface in the 0.8 beta candidate. Ravenclaw
+It is not an installed/current SCLite surface in the 0.8 beta release. Ravenclaw
 has moved its public proof projection to the current lifecycle/review-bundle
 model; retained schema identifiers such as `review_record.v0.1` identify
 current formats and are not compatibility product lines.
@@ -244,7 +244,7 @@ See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrit
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==0.8.0a0
+python -m pip install sclite-core==0.8.0b2
 ```
 
 Install directly from GitHub:
@@ -315,7 +315,7 @@ Security posture modes:
 - `guarded_domain_auth_fresh`: HMAC authenticity plus GovEngine replay-store
   freshness.
 - `public_signed_export`: future public signature/export mode, not implemented
-  in this candidate.
+  in this release.
 
 Validate and explain the v0.3 scoped-ticket fixture:
 

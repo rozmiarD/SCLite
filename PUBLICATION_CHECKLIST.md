@@ -32,9 +32,8 @@ python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
-For the `0.8.0b1` source candidate, current documentation and validation must
-state that the latest published PyPI release remains `sclite-core==0.8.0a0`
-until a separately approved tag/upload has completed and been verified.
+For the `0.8.0b2` beta release, current documentation and validation must state
+that the latest published PyPI release is `sclite-core==0.8.0b2`.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current
@@ -72,8 +71,7 @@ Expected state:
 - scoped-ticket validation and ticket-use/evidence-bound checks pass;
 - lifecycle review records, review bundles, GovEngine integration fixture, and negative drift fixture validate as expected;
 - local-admin-change review bundle validates as a second public-safe non-security fixture;
-- public truth validator passes for the source candidate versus latest
-  published package distinction;
+- public truth validator passes for the current published beta package truth;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - pytest passes.
@@ -134,7 +132,7 @@ Before any public push:
 - confirm local git status is clean;
 - run the checks above on the exact tree to be pushed;
 - confirm the PyPI distribution name is `sclite-core` and the Python import package remains `sclite`;
-- decide whether the validated `0.8.0b1` candidate is authorized for release;
+- decide whether the validated current tree is authorized for release;
 - get explicit operator approval for any tag, TestPyPI upload, or PyPI upload.
 
 Validation receipts do not authorize publication. They only record checks.

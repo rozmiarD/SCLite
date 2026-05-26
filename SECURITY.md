@@ -6,9 +6,8 @@ It is not an executor, scanner, authorization authority, sandbox, or vulnerabili
 
 ## Supported versions
 
-The source tree currently prepares the unpublished `sclite-core==0.8.0b2`
-beta candidate. The latest published package remains `sclite-core==0.8.0a0`.
-Security fixes should target `main` until stable release branches exist.
+The current published beta package is `sclite-core==0.8.0b2`. Security fixes
+should target `main` until stable release branches exist.
 
 ## Reporting security issues
 

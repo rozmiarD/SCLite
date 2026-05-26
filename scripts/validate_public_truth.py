@@ -20,11 +20,11 @@ from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 EXPECTED_VERSION = '0.8.0b2'
 EXPECTED_RELEASE_LABEL = '0.8.0-beta'
-LATEST_PUBLISHED_VERSION = '0.8.0a0'
-LATEST_PUBLISHED_LABEL = '0.8.0-alpha'
+LATEST_PUBLISHED_VERSION = EXPECTED_VERSION
+LATEST_PUBLISHED_LABEL = EXPECTED_RELEASE_LABEL
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0a0,<0.9'
+EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0b2,<0.9'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -148,16 +148,15 @@ def _assert_current_claim_docs(
             errors.append(f'SPEC.md:stale_current_package_claim:{marker}')
         if marker in artifact_docs:
             errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
-    _require(errors, 'SPEC.md', spec, f'Current source candidate is `sclite-core=={version}`')
-    _require(errors, 'SPEC.md', spec, f'package remains `sclite-core=={LATEST_PUBLISHED_VERSION}`')
+    _require(errors, 'SPEC.md', spec, f'Current package is `sclite-core=={version}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
     _require(errors, 'README.md', readme, 'v0.8 beta surface freeze')
-    _require(errors, 'README.md', readme, 'Unpublished source candidate')
+    _require(errors, 'README.md', readme, 'Published current beta line')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current source candidate: `sclite-core=={version}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current package: `sclite-core=={version}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
@@ -181,7 +180,7 @@ def _assert_roadmap_release_truth(errors: list[str], roadmap: str) -> None:
     _require(errors, 'ROADMAP.md', roadmap, 'Status: published current alpha line after Ravenclaw consumer migration.')
     _require(errors, 'ROADMAP.md', roadmap, 'gates passed for the published `0.8.0-alpha` line.')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.8.0-beta — Freeze lifecycle/review public responsibility')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: unpublished source candidate; the latest published package remains')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current beta line.')
 
 
 def _stable_import_errors() -> list[str]:
@@ -374,30 +373,24 @@ def collect_errors() -> list[str]:
         integration_guide=integration_guide,
     )
     _assert_roadmap_release_truth(errors, roadmap)
-    _assert_unpublished_candidate_truth(
-        errors,
-        {'PUBLIC_STATUS.md': public_status, 'CHANGELOG.md': changelog, 'ROADMAP.md': roadmap},
-        version,
-    )
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'unpublished 0.8 beta candidate')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current source candidate version: `{version}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Candidate release label: `{EXPECTED_RELEASE_LABEL}`.')
+    _require(errors, 'README.md', readme, 'published 0.8 beta')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
-    _require(errors, 'ROADMAP.md', roadmap, f'Current source candidate: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'ROADMAP.md', roadmap, f'Current package: `{EXPECTED_DISTRIBUTION}=={version}`')
     _require(errors, 'ROADMAP.md', roadmap, f'Latest published public package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Lifecycle/review surface freeze (candidate)')
-    _require(errors, 'CHANGELOG.md', changelog, f'`{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` until an approved release action')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Lifecycle/review surface freeze')
+    _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')
     _require(errors, 'CONTRIBUTING.md', _read('CONTRIBUTING.md'), 'define / validate / hash / bind / redact / review / verify')
     _require(errors, 'SPEC.md', spec, 'define / validate / hash / bind / redact / review / verify')
-    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'unpublished `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
-    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'latest published package remains `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
+    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published beta package is `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, "python-version: ['3.11', '3.12', '3.13']")

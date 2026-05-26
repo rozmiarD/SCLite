@@ -40,36 +40,22 @@ def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
     assert 'README.md:prerelease_unsafe_package_claim:img.shields.io/pypi/v/sclite-core' in errors
 
 
-def test_public_truth_validator_rejects_unpublished_beta_install_claim() -> None:
+def test_public_truth_validator_accepts_published_beta_install_claim() -> None:
     validator = _load_validator()
     errors: list[str] = []
 
     validator._assert_readme_package_truth(
         errors,
-        'python -m pip install sclite-core==0.8.0b2',
+        '\n'.join([
+            'Version: `0.8.0b2`',
+            'package-sclite--core%200.8.0b2-blueviolet.svg',
+            'https://pypi.org/project/sclite-core/0.8.0b2/',
+            'python -m pip install sclite-core==0.8.0b2',
+        ]),
         '0.8.0b2',
     )
 
-    assert (
-        'README.md:unpublished_candidate_install_claim:'
-        'python -m pip install sclite-core==0.8.0b2'
-    ) in errors
-
-
-def test_public_truth_validator_rejects_unpublished_beta_pypi_claim() -> None:
-    validator = _load_validator()
-    errors: list[str] = []
-
-    validator._assert_unpublished_candidate_truth(
-        errors,
-        {'PUBLIC_STATUS.md': 'PyPI package: `sclite-core==0.8.0b2`'},
-        '0.8.0b2',
-    )
-
-    assert (
-        'PUBLIC_STATUS.md:unpublished_candidate_claimed_published:'
-        'PyPI package: `sclite-core==0.8.0b2`'
-    ) in errors
+    assert errors == []
 
 
 def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
@@ -81,7 +67,7 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         version='0.8.0b2',
         readme=(
             'v0.8 beta surface freeze\n'
-            'Unpublished source candidate\n'
+            'Published current beta line\n'
         ),
         roadmap=(
             '## 0.5.1 — GovEngine integration readiness\n\n'
@@ -89,19 +75,18 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         ),
         spec=(
             'Current package release is `sclite-core==0.5.1`\n'
-            'Current source candidate is `sclite-core==0.8.0b2`; the latest published\n'
-            'package remains `sclite-core==0.8.0a0`\n'
+            'Current package is `sclite-core==0.8.0b2`\n'
             'The current front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw migrated to the\n'
             'current lifecycle/review-bundle front door.\n'
         ),
         artifact_docs=(
-            'Current source candidate: `sclite-core==0.8.0b2`\n'
-            'latest published public package: `sclite-core==0.8.0a0`\n'
+            'Current package: `sclite-core==0.8.0b2`\n'
+            'latest published public package: `sclite-core==0.8.0b2`\n'
             'The current integration front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw\n'
         ),
-        integration_guide='The current 0.8 beta candidate freezes the review-bundle contract.\n',
+        integration_guide='The current 0.8 beta release freezes the review-bundle contract.\n',
     )
 
     assert (
