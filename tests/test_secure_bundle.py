@@ -1,0 +1,174 @@
+from __future__ import annotations
+
+import copy
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from sclite.integrity import build_artifact_chain_manifest
+from sclite.kernel_guard import build_kernel_guard_manifest
+from sclite.secure import SecureBundleError, verify_secure_bundle
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
+GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
+KEY = 'test-kernel-secret'
+KEY_ID = 'test-key-20260526'
+
+
+def _load_manifest(base: Path) -> dict:
+    value = json.loads((base / 'artifact_chain_manifest.json').read_text(encoding='utf-8'))
+    assert isinstance(value, dict)
+    return value
+
+
+def _write_guard(base: Path, *, manifest: dict | None = None) -> Path:
+    manifest = manifest or _load_manifest(base)
+    guard = build_kernel_guard_manifest(
+        manifest,
+        key=KEY,
+        key_id=KEY_ID,
+        nonces=[f'nonce-{index}' for index, _entry in enumerate(manifest['entries'])],
+    )
+    guard_path = base / 'kernel_guard_manifest.json'
+    guard_path.write_text(json.dumps(guard, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    return guard_path
+
+
+def _run(args: list[str], *, env_key: bool = True) -> subprocess.CompletedProcess[str]:
+    env = dict(os.environ)
+    if env_key:
+        env['SCLITE_KERNEL_GUARD_KEY'] = KEY
+    else:
+        env.pop('SCLITE_KERNEL_GUARD_KEY', None)
+    return subprocess.run(
+        [sys.executable, '-m', 'sclite.cli', *args],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        env=env,
+        check=False,
+    )
+
+
+def _copy_fixture(src: Path, dst: Path) -> Path:
+    shutil.copytree(src, dst)
+    return dst
+
+
+def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+
+    result = verify_secure_bundle(bundle / 'artifact_chain_manifest.json', guard_path=guard_path, key=KEY, root=bundle)
+
+    assert result['status'] == 'passed'
+    assert result['secure_profile'] == 'guarded-strict'
+    assert result['security_posture'] == 'guarded_domain_auth'
+    assert result['replay_status'] == 'not_checked'
+    assert result['fail_closed'] is True
+
+
+def test_secure_bundle_cli_accepts_review_bundle_directory_target(tmp_path: Path) -> None:
+    bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
+    _write_guard(bundle)
+    proc = _run(['verify-secure-bundle', str(bundle)])
+
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.startswith('secure_bundle_ok:6:')
+    assert proc.stdout.strip().endswith(':replay_not_checked')
+
+
+def test_secure_bundle_without_guard_fails_closed() -> None:
+    proc = _run(['verify-secure-bundle', str(GOVENGINE_BUNDLE)])
+
+    assert proc.returncode == 1
+    assert 'secure_bundle_failed:missing kernel guard sidecar' in proc.stderr
+
+
+def test_validate_chain_require_guard_fails_on_missing_sidecar() -> None:
+    proc = _run([
+        'validate-chain',
+        str(FIXTURE / 'artifact_chain_manifest.json'),
+        '--strict-lifecycle',
+        '--require-guard',
+    ])
+
+    assert proc.returncode == 1
+    assert 'kernel_guard_failed:missing kernel guard sidecar' in proc.stderr
+
+
+def test_review_require_guard_preflight_fails_on_unguarded_bundle() -> None:
+    proc = _run(['review', str(GOVENGINE_BUNDLE), '--require-guard'])
+
+    assert proc.returncode == 1
+    assert 'review_bundle_failed:missing kernel guard sidecar' in proc.stderr
+
+
+def test_secure_bundle_loose_lifecycle_fails(tmp_path: Path) -> None:
+    artifacts = {
+        'intent_contract': json.loads((FIXTURE / 'intent_contract.json').read_text(encoding='utf-8')),
+        'policy_decision': json.loads((FIXTURE / 'policy_decision.json').read_text(encoding='utf-8')),
+        'execution_contract': json.loads((FIXTURE / 'execution_contract.json').read_text(encoding='utf-8')),
+        'execution_ticket': json.loads((FIXTURE / 'execution_ticket.json').read_text(encoding='utf-8')),
+        'execution_receipt': json.loads((FIXTURE / 'execution_receipt.json').read_text(encoding='utf-8')),
+        'evidence_contract': json.loads((FIXTURE / 'evidence_contract.json').read_text(encoding='utf-8')),
+    }
+    for filename in [
+        'intent_contract.json',
+        'policy_decision.json',
+        'execution_contract.json',
+        'execution_ticket.json',
+        'execution_receipt.json',
+        'evidence_contract.json',
+    ]:
+        (tmp_path / filename).write_text((FIXTURE / filename).read_text(encoding='utf-8'), encoding='utf-8')
+    reordered = [
+        ('intent_contract', 'intent_contract.json', artifacts['intent_contract']),
+        ('policy_decision', 'policy_decision.json', artifacts['policy_decision']),
+        ('execution_ticket', 'execution_ticket.json', artifacts['execution_ticket']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_receipt', 'execution_receipt.json', artifacts['execution_receipt']),
+        ('evidence_contract', 'evidence_contract.json', artifacts['evidence_contract']),
+    ]
+    manifest = build_artifact_chain_manifest(
+        [{'role': role, 'path': path, 'value': value} for role, path, value in reordered],
+        chain_id='loose-lifecycle-test',
+    )
+    (tmp_path / 'artifact_chain_manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    guard_path = _write_guard(tmp_path, manifest=manifest)
+
+    with pytest.raises(SecureBundleError, match='lifecycle roles mismatch'):
+        verify_secure_bundle(tmp_path, guard_path=guard_path, key=KEY)
+
+
+def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    manifest = _load_manifest(bundle)
+    guard_path = _write_guard(bundle, manifest=manifest)
+    spoofed = copy.deepcopy(manifest)
+    spoofed['profile'] = 'runtime-consumable-forged-profile'
+    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path.write_text(json.dumps(spoofed, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+    with pytest.raises(SecureBundleError, match='manifest_metadata_digest mismatch'):
+        verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
+
+
+def test_secure_bundle_full_chain_forgery_with_old_guard_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    original = _load_manifest(bundle)
+    old_guard_path = _write_guard(bundle, manifest=original)
+    forged = copy.deepcopy(original)
+    forged['chain_id'] = 'forged-chain'
+    forged['created_at'] = '2026-05-26T00:00:00+00:00'
+    forged_path = tmp_path / 'artifact_chain_manifest.json'
+    forged_path.write_text(json.dumps(forged, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+    with pytest.raises(SecureBundleError, match='chain_id mismatch|manifest_metadata_digest mismatch'):
+        verify_secure_bundle(forged_path, guard_path=old_guard_path, key=KEY, root=bundle)

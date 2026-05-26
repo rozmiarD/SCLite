@@ -9,10 +9,15 @@
 - Adds optional `kernel_guard_hmac_v1` sidecar verification for
   GovEngine/KERNEL-domain authenticity over existing artifact-chain manifests,
   without mutating artifact bodies or adding runtime dependencies.
+- Adds the fail-closed `verify-secure-bundle` / `guarded-strict` profile for
+  runtime-consumable guarded bundles: strict lifecycle, artifact-chain
+  verification, Kernel Guard HMAC verification, manifest metadata binding, and
+  failure on missing guard. Existing review and chain commands also expose
+  `--require-guard` / `--fail-on-unguarded` for explicit guard preflight.
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.
-- Prepares the unpublished `sclite-core==0.8.0b1` source candidate by freezing
+- Prepares the unpublished `sclite-core==0.8.0b2` source candidate by freezing
   the existing lifecycle/review front door and explicitly retaining current
   schema and fixture identifiers.
 - Distinguishes candidate source truth from the latest published PyPI package,
