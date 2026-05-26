@@ -79,6 +79,25 @@ def test_kernel_guard_rejects_previous_tag_tampering() -> None:
         verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
 
 
+def test_kernel_guard_rejects_required_flag_tampering() -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    tampered = copy.deepcopy(manifest)
+    tampered['entries'][2]['required'] = False
+
+    with pytest.raises(KernelGuardError, match=r'entry\[2\] required mismatch'):
+        verify_kernel_guard_manifest(tampered, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
+
+
+def test_kernel_guard_rejects_sidecar_schema_drift() -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    guard['entry_guards'][0]['unexpected'] = 'schema-drift'
+
+    with pytest.raises(KernelGuardError, match='kernel guard schema validation failed'):
+        verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
+
+
 def test_kernel_guard_rejects_inserted_entry_with_old_guard() -> None:
     manifest = _load_manifest()
     guard = _guard(manifest)

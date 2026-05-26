@@ -160,6 +160,19 @@ def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
         verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
 
 
+def test_secure_bundle_required_flag_tampering_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    manifest = _load_manifest(bundle)
+    guard_path = _write_guard(bundle, manifest=manifest)
+    tampered = copy.deepcopy(manifest)
+    tampered['entries'][3]['required'] = False
+    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path.write_text(json.dumps(tampered, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+    with pytest.raises(SecureBundleError, match=r'entry\[3\] required mismatch'):
+        verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
+
+
 def test_secure_bundle_full_chain_forgery_with_old_guard_fails(tmp_path: Path) -> None:
     bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
     original = _load_manifest(bundle)

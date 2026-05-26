@@ -6,6 +6,7 @@ import json
 import secrets
 from typing import Any, Dict, Mapping, Sequence
 
+from .artifacts import validate_artifact
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 
 KERNEL_GUARD_PROFILE = 'kernel_guard_hmac_v1'
@@ -80,6 +81,7 @@ def _entry_transcript(
         'entry_count': entry_count,
         'role': str(entry.get('role') or ''),
         'path': str(entry.get('path') or ''),
+        'required': bool(entry.get('required', False)),
         'artifact_digest': str(descriptor.get('digest') or ''),
         'artifact_type': str(descriptor.get('artifact_type') or ''),
         'schema_ref': str(descriptor.get('schema_ref') or ''),
@@ -187,6 +189,12 @@ def verify_kernel_guard_manifest(
     require_lifecycle: bool = False,
 ) -> Dict[str, Any]:
     """Verify a sidecar HMAC guard against an artifact-chain manifest."""
+
+    if validate_schemas:
+        try:
+            validate_artifact(guard, KERNEL_GUARD_SCHEMA_REF, root=root, strict_jsonschema=strict_jsonschema)
+        except Exception as exc:
+            raise KernelGuardError(f'kernel guard schema validation failed:{exc}') from exc
 
     if guard.get('profile') != KERNEL_GUARD_PROFILE:
         raise KernelGuardError('kernel guard profile mismatch')
