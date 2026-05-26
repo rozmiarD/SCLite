@@ -85,6 +85,21 @@ sidecar when a GovEngine/KERNEL-domain HMAC secret is available through
 check replay freshness; GovEngine or another runtime must keep the replay
 store for `root_tag`, `chain_id`, ticket/run id, and `key_id`.
 
+For runtime-consumable guarded bundles, prefer the fail-closed profile:
+
+```bash
+SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+python -m sclite.cli verify-secure-bundle examples/govengine-integration \
+  --guard kernel_guard_manifest.json
+```
+
+`verify-secure-bundle` is `guarded-strict`: artifact-chain verification,
+strict lifecycle, `kernel_guard_hmac_v1`, manifest metadata binding, and
+fail-on-missing-guard. `validate-chain`, `verify-lifecycle`,
+`review-lifecycle`, and `review` also expose `--require-guard` /
+`--fail-on-unguarded` for callers that intentionally want guard preflight on
+those older commands.
+
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
@@ -110,10 +125,12 @@ Expected result:
 - GovEngine integration fixture passes with `--fail-on review`;
 - local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation distinguishes the `0.8.0b1` source candidate from
+- public truth validation distinguishes the `0.8.0b2` source candidate from
   the latest published `0.8.0a0` package line;
 - optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
+- secure-bundle verification fails closed on missing guard, loose lifecycle,
+  metadata spoofing, and full-chain forgery attempts using an old guard;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - pytest passes.

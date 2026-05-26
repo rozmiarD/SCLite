@@ -17,7 +17,7 @@ policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
-- Version: `0.8.0b1`
+- Version: `0.8.0b2`
 - Status: **unpublished 0.8 beta candidate: frozen lifecycle/review surface**
 - Latest published package: `sclite-core==0.8.0a0` (`0.8.0-alpha`)
 - Runtime execution: not included
@@ -289,6 +289,33 @@ SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
 `kernel_guard_hmac_v1` authenticates a manifest and its entries only inside the
 domain that knows the HMAC secret. It is not PKI, non-repudiation, public
 identity, replay prevention, or proof that a runtime behaved correctly.
+
+For runtime-consumable guarded bundles, use the fail-closed secure profile
+instead of assembling the weaker pieces manually:
+
+```bash
+SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+  sclite verify-secure-bundle examples/govengine-integration \
+  --guard kernel_guard_manifest.json
+```
+
+`verify-secure-bundle` is the `guarded-strict` profile. It always verifies the
+artifact chain, requires the exact lifecycle role sequence, requires
+`kernel_guard_hmac_v1`, binds manifest metadata, and fails when the guard is
+missing. It still does not check replay freshness; GovEngine owns
+`guarded_domain_auth_fresh` by recording `root_tag` reuse.
+
+Security posture modes:
+
+- `integrity_only`: local SHA-256 artifact-chain consistency only.
+- `strict_lifecycle`: integrity plus exact lifecycle roles, no extras,
+  duplicates, or reorder.
+- `guarded_domain_auth`: strict lifecycle plus HMAC authenticity inside the
+  domain that knows the secret.
+- `guarded_domain_auth_fresh`: HMAC authenticity plus GovEngine replay-store
+  freshness.
+- `public_signed_export`: future public signature/export mode, not implemented
+  in this candidate.
 
 Validate and explain the v0.3 scoped-ticket fixture:
 

@@ -1,7 +1,7 @@
 # SCLite Draft Specification
 
 Status: **unpublished 0.8.0-beta candidate: frozen lifecycle/review surface**.
-Current source candidate is `sclite-core==0.8.0b1`; the latest published
+Current source candidate is `sclite-core==0.8.0b2`; the latest published
 package remains `sclite-core==0.8.0a0`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
@@ -57,6 +57,23 @@ transcripts for each manifest entry plus a root transcript that binds
 `root_chain_digest` and manifest metadata. It provides authenticity only inside
 the GovEngine/KERNEL domain that knows the secret; replay freshness remains a
 GovEngine replay-store responsibility.
+
+`verify-secure-bundle` is the official guarded-strict verification profile for
+runtime-consumable bundles. It is fail-closed and always performs artifact
+chain verification, exact strict lifecycle verification, Kernel Guard HMAC
+verification, and manifest metadata binding. Missing guard material is a
+failure, not a warning. SCLite still reports replay freshness as not checked;
+GovEngine records freshness for the `guarded_domain_auth_fresh` posture.
+
+Security posture modes are explicit:
+
+- `integrity_only`: SHA-256 artifact-chain consistency.
+- `strict_lifecycle`: integrity plus exact lifecycle role semantics.
+- `guarded_domain_auth`: strict lifecycle plus HMAC domain authenticity.
+- `guarded_domain_auth_fresh`: HMAC domain authenticity plus GovEngine replay
+  freshness.
+- `public_signed_export`: future Ed25519/root-anchor export mode, not
+  implemented here.
 
 ## v0.2 Artifact Definitions
 

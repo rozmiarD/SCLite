@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '0.8.0b1'
+__version__ = '0.8.0b2'
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,
@@ -28,6 +28,14 @@ from .kernel_guard import (
     build_kernel_guard_manifest,
     manifest_metadata_digest,
     verify_kernel_guard_manifest,
+)
+from .secure import (
+    SECURE_BUNDLE_POSTURE,
+    SECURE_BUNDLE_PROFILE,
+    SecureBundleError,
+    resolve_guard_path,
+    resolve_manifest_path,
+    verify_secure_bundle,
 )
 from .review import (
     REVIEW_RECORD_SCHEMA,
@@ -84,6 +92,12 @@ __all__ = (
     'build_kernel_guard_manifest',
     'manifest_metadata_digest',
     'verify_kernel_guard_manifest',
+    'SECURE_BUNDLE_POSTURE',
+    'SECURE_BUNDLE_PROFILE',
+    'SecureBundleError',
+    'resolve_guard_path',
+    'resolve_manifest_path',
+    'verify_secure_bundle',
     'REVIEW_RECORD_SCHEMA',
     'REVIEW_RECORD_SCHEMA_REF',
     'ReviewRecordError',

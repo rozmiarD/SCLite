@@ -18,7 +18,7 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '0.8.0b1'
+EXPECTED_VERSION = '0.8.0b2'
 EXPECTED_RELEASE_LABEL = '0.8.0-beta'
 LATEST_PUBLISHED_VERSION = '0.8.0a0'
 LATEST_PUBLISHED_LABEL = '0.8.0-alpha'
@@ -51,6 +51,7 @@ STABLE_IMPORTS = (
     'sclite.profiles:validate_trust_profile_ref',
     'sclite.profiles:validate_carrier_profile_ref',
     'sclite.scope_fidelity:build_lifecycle_scope_fidelity_report',
+    'sclite.secure:verify_secure_bundle',
 )
 REQUIRED_FIXTURES = (
     'examples/lifecycle-review/review_record.json',
