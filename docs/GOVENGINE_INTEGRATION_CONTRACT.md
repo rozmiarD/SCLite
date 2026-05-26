@@ -1,14 +1,15 @@
 # GovEngine Integration Contract
 
 This document defines the SCLite 0.8 lifecycle/review public import surface
-that GovEngine may rely on. It is frozen by the unpublished `0.8.0b2` beta
-candidate and remains compatible with the published `0.8.0a0` baseline.
+that GovEngine may rely on. It is frozen by the published `0.8.0b2` beta
+release and remains compatible with the published `0.8.0a0` baseline for
+legacy integrity/review use.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following import paths in the `sclite-core>=0.8.0a0,<0.9` line:
+GovEngine may rely on the following import paths in the `sclite-core>=0.8.0b2,<0.9` line:
 
 ```python
 from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest
@@ -17,6 +18,7 @@ from sclite.review import build_review_record_from_manifest
 from sclite.bundles import materialize_review_bundle, review_bundle, validate_review_bundle_shape
 from sclite.profiles import validate_trust_profile_ref, validate_carrier_profile_ref
 from sclite.scope_fidelity import build_lifecycle_scope_fidelity_report
+from sclite.secure import verify_secure_bundle
 ```
 
 Anything not listed here is internal or not guaranteed as a stable GovEngine integration surface. `sclite.artifacts` remains importable for schema validation and canonical hashes; the superseded proof-trace helpers and validators have been removed.

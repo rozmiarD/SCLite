@@ -103,7 +103,7 @@ those older commands.
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the `0.8` beta candidate. Consumers may
+boundary for GovEngine and Ravenclaw on the `0.8` beta release. Consumers may
 rely on the canonical `review_bundle` directory shape, the
 `review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
 profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`
@@ -125,8 +125,7 @@ Expected result:
 - GovEngine integration fixture passes with `--fail-on review`;
 - local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation distinguishes the `0.8.0b2` source candidate from
-  the latest published `0.8.0a0` package line;
+- public truth validation confirms the published `0.8.0b2` beta package line;
 - optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - secure-bundle verification fails closed on missing guard, loose lifecycle,
@@ -137,7 +136,7 @@ Expected result:
 
 ## Package build gate
 
-Before any future PyPI/TestPyPI release candidate:
+Before any future PyPI/TestPyPI release:
 
 ```bash
 python -m pip install build twine

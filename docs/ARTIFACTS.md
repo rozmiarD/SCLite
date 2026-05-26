@@ -3,8 +3,8 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current source candidate: `sclite-core==0.8.0b2` (`0.8.0-beta`);
-latest published public package: `sclite-core==0.8.0a0` (`0.8.0-alpha`).
+Current package: `sclite-core==0.8.0b2` (`0.8.0-beta`);
+latest published public package: `sclite-core==0.8.0b2` (`0.8.0-beta`).
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
@@ -31,7 +31,7 @@ flowchart LR
 
 SCLite's current review-bundle surface packages the six lifecycle artifacts, an
 artifact-chain manifest, reviewer Markdown, and a verification receipt into one
-local/public-safe directory. The current beta candidate preserves the 0.5
+local/public-safe directory. The current beta release preserves the 0.5
 review-bundle contract and adds public-truth and multi-fixture hardening around
 it.
 

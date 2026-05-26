@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.0-beta - Lifecycle/review surface freeze (candidate)
+## 0.8.0-beta - Lifecycle/review surface freeze
 
 - Hardens lifecycle verification so `verify-lifecycle` requires the exact
   canonical v0.2 lifecycle role sequence and rejects extra roles, duplicate
@@ -17,11 +17,11 @@
 - Corrects roadmap status language for the already published `0.8.0-alpha`
   line and adds public-truth coverage against reverting published current
   roadmap sections to candidate wording.
-- Prepares the unpublished `sclite-core==0.8.0b2` source candidate by freezing
+- Publishes the `sclite-core==0.8.0b2` package line by freezing
   the existing lifecycle/review front door and explicitly retaining current
   schema and fixture identifiers.
-- Distinguishes candidate source truth from the latest published PyPI package,
-  which remains `sclite-core==0.8.0a0` until an approved release action.
+- Calibrates public package truth so README, status, and validation docs point
+  at the published `sclite-core==0.8.0b2` package line.
 - Removes current-documentation drift that described an active lifecycle
   negative fixture with retired prepared-execution wording or described a
   retained schema-level scoped-ticket artifact as a published package line.

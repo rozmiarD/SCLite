@@ -3,7 +3,7 @@
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
 SCLite is centered on the v0.2 contract lifecycle. The current 0.8 beta
-candidate freezes the 0.5 review-bundle contract as the integration front
+release freezes the 0.5 review-bundle contract as the integration front
 door, retains deterministic review-bundle materialization for active
 consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks,
 trust/carrier references, lifecycle review records, public truth validation,
@@ -135,7 +135,7 @@ assert record["artifact_type"] == "review_record"
 assert record["verdict"] == "pass"
 ```
 
-For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=0.8.0a0,<0.9`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
+For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=0.8.0b2,<0.9`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
 
 ## Carrier guidance
 
