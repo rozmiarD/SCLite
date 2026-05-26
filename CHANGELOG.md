@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Binds `entries[*].required` into the `kernel_guard_hmac_v1` per-entry HMAC
+  transcript so guarded-strict verification rejects required-flag tampering
+  without changing the historical artifact-chain digest algorithm.
+- Validates Kernel Guard sidecar shape during verification, so schema drift and
+  unexpected guard fields fail before transcript comparison.
+
 ## 0.8.0-beta - Lifecycle/review surface freeze
 
 - Hardens lifecycle verification so `verify-lifecycle` requires the exact
