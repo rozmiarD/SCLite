@@ -43,6 +43,12 @@ spoofing, root-chain-digest tampering, previous-tag tampering, nonce/key_id
 tampering, old guard reuse with changed manifest metadata, missing guard, and
 wrong guard key failures.
 
+`verification_result.v1` is validated in secure-bundle tests and strict schema
+validation. Its required layer statuses are `artifact_chain`,
+`strict_lifecycle`, `kernel_guard`, `replay`, `public_identity`, and
+`runtime_enforcement`; replay remains `not_checked` inside SCLite and
+identity/runtime authority remain `not_claimed`.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep

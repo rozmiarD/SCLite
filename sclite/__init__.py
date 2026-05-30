@@ -37,6 +37,10 @@ from .secure import (
     resolve_manifest_path,
     verify_secure_bundle,
 )
+from .verification_result import (
+    VERIFICATION_RESULT_SCHEMA_REF,
+    build_guarded_strict_verification_result,
+)
 from .review import (
     REVIEW_RECORD_SCHEMA,
     REVIEW_RECORD_SCHEMA_REF,
@@ -98,6 +102,8 @@ __all__ = (
     'resolve_guard_path',
     'resolve_manifest_path',
     'verify_secure_bundle',
+    'VERIFICATION_RESULT_SCHEMA_REF',
+    'build_guarded_strict_verification_result',
     'REVIEW_RECORD_SCHEMA',
     'REVIEW_RECORD_SCHEMA_REF',
     'ReviewRecordError',

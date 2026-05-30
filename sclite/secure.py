@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from .kernel_guard import KernelGuardError, verify_kernel_guard_manifest
+from .verification_result import build_guarded_strict_verification_result
 
 SECURE_BUNDLE_PROFILE = 'guarded-strict'
 SECURE_BUNDLE_POSTURE = 'guarded_domain_auth'
@@ -80,6 +81,11 @@ def verify_secure_bundle(
     except KernelGuardError as exc:
         raise SecureBundleError(str(exc)) from exc
 
+    verification_result = build_guarded_strict_verification_result(
+        result,
+        secure_profile=SECURE_BUNDLE_PROFILE,
+        security_posture=SECURE_BUNDLE_POSTURE,
+    )
     return {
         **result,
         'secure_profile': SECURE_BUNDLE_PROFILE,
@@ -88,4 +94,5 @@ def verify_secure_bundle(
         'guard_path': str(sidecar_path),
         'fail_closed': True,
         'replay_status': result.get('replay_status') or 'not_checked',
+        'verification_result': verification_result,
     }

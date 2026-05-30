@@ -312,6 +312,24 @@ artifact chain, requires the exact lifecycle role sequence, requires
 missing. It still does not check replay freshness; GovEngine owns
 `guarded_domain_auth_fresh` by recording `root_tag` reuse.
 
+JSON output includes a stable `verification_result` object with explicit layer
+statuses:
+
+```json
+{
+  "artifact_chain": "pass",
+  "strict_lifecycle": "pass",
+  "kernel_guard": "pass",
+  "replay": "not_checked",
+  "public_identity": "not_claimed",
+  "runtime_enforcement": "not_claimed"
+}
+```
+
+The `verification_result.v1` contract makes SCLite's non-claims
+machine-readable; it does not add replay state, public identity, or runtime
+enforcement.
+
 Security posture modes:
 
 - `integrity_only`: local SHA-256 artifact-chain consistency only.

@@ -44,6 +44,30 @@ def test_strict_jsonschema_validation_accepts_current_execution_contract() -> No
     artifacts.validate_artifact(contract, 'execution_contract.v0.2', strict_jsonschema=True)
 
 
+def test_packaged_verification_result_schema_is_available() -> None:
+    result = {
+        'artifact_type': 'verification_result',
+        'schema_version': 'v1',
+        'schema_ref': 'schemas/verification_result.v1.schema.json',
+        'profile': 'guarded-strict',
+        'security_posture': 'guarded_domain_auth',
+        'status': 'pass',
+        'artifact_chain': 'pass',
+        'strict_lifecycle': 'pass',
+        'kernel_guard': 'pass',
+        'replay': 'not_checked',
+        'public_identity': 'not_claimed',
+        'runtime_enforcement': 'not_claimed',
+        'entry_count': 6,
+        'checked_entries': ['intent_contract', 'policy_decision'],
+        'root_chain_digest': 'a' * 64,
+        'guard_profile': 'kernel_guard_hmac_v1',
+        'guard_root_tag': 'b' * 64,
+        'key_id': 'test-key',
+    }
+    artifacts.validate_artifact(result, 'verification_result.v1', strict_jsonschema=True)
+
+
 def test_strict_jsonschema_cli_accepts_current_execution_contract() -> None:
     result = subprocess.run(
         [
