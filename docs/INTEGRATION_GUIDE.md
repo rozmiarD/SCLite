@@ -2,7 +2,7 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite is centered on the v0.2 contract lifecycle. The current 0.8 beta
+SCLite is centered on the v0.2 contract lifecycle. The current 1.0 release candidate
 release freezes the 0.5 review-bundle contract as the integration front
 door, retains deterministic review-bundle materialization for active
 consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks,

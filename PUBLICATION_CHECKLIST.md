@@ -52,8 +52,9 @@ The security regression gate must pass and must remain synthetic-key-only.
 `verification_result.v1` must keep replay as host-owned state and
 public-identity/runtime-enforcement as explicit non-claims.
 
-For the `0.8.0b2` beta release, current documentation and validation must state
-that the latest published PyPI release is `sclite-core==0.8.0b2`.
+For the `1.0.0rc1` release candidate, current documentation and validation
+must state that the latest published PyPI release is
+`sclite-core==1.0.0rc1`.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current
@@ -91,7 +92,7 @@ Expected state:
 - scoped-ticket validation and ticket-use/evidence-bound checks pass;
 - lifecycle review records, review bundles, GovEngine integration fixture, and negative drift fixture validate as expected;
 - local-admin-change review bundle validates as a second public-safe non-security fixture;
-- public truth validator passes for the current published beta package truth;
+- public truth validator passes for the current published release-candidate package truth;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - pytest passes.

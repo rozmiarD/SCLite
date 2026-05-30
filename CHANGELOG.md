@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+No unreleased changes.
+
+## 1.0.0-rc.1 - Guarded verification contract release candidate
+
+- published `sclite-core==1.0.0rc1` package line as the first 1.0 release
+  candidate.
 - Adds `SECURITY_MODEL.md` and `docs/SECURITY_PROFILES.md` to freeze SCLite's
   security posture meanings for the 1.0 release-candidate path, including
   Kernel Guard transcript/canonicalization compatibility, replay ownership,

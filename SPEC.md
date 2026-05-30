@@ -1,12 +1,13 @@
 # SCLite Draft Specification
 
-Status: **published 0.8.0-beta: frozen lifecycle/review surface**.
-Current package is `sclite-core==0.8.0b2`, and the Python import package remains
+Status: **published 1.0.0-rc.1: frozen lifecycle/review and guarded verification surface**.
+Current package is `sclite-core==1.0.0rc1`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
-and v0.5 review-bundle packaging. The 0.8 beta release freezes that substrate as
-the root API and supports canonical review-bundle materialization for active
-consumers without adding runtime, adapter, PKI, or policy authority.
+v0.5 review-bundle packaging, and guarded-strict verification. The 1.0 release
+candidate freezes that substrate as the root API and supports canonical
+review-bundle materialization for active consumers without adding runtime,
+adapter, PKI, or policy authority.
 
 Artifact schema versions and package release lines are different concepts. New
 integrations should treat the lifecycle/review-bundle path as current. The
@@ -267,7 +268,7 @@ scope/input -> policy decision -> prepared execution spec -> approved execution 
 ```
 
 The legacy builders, fixture validators, schemas owned only by this trace, and
-its fixture directories are not part of the `0.8.0-beta` installed/current
+its fixture directories are not part of the `1.0.0-rc.1` installed/current
 surface. Current work uses the lifecycle/review-bundle model above. Generic
 redaction, snapshot-manifest, Scope Fidelity, and review-record schemas remain
 because the current lifecycle still uses them; their schema suffixes are
