@@ -28,6 +28,7 @@ Run from the repository root:
 ```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
+scripts/security_regression_gate.sh
 python scripts/validate_public_truth.py
 python -m pytest -q
 ```
@@ -46,6 +47,7 @@ replay boundary, and transcript/canonicalization freeze language.
 The Kernel Guard golden-vector test must reject unversioned changes to
 `kernel_guard_hmac_v1` canonicalization, transcript fields, entry tags, or
 root tag.
+The security regression gate must pass and must remain synthetic-key-only.
 
 For the `0.8.0b2` beta release, current documentation and validation must state
 that the latest published PyPI release is `sclite-core==0.8.0b2`.

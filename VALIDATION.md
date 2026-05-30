@@ -18,6 +18,7 @@ Run the full public-safe checklist from the repository root:
 ```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
+scripts/security_regression_gate.sh
 python scripts/validate_public_truth.py
 python -m pytest -q
 ```
@@ -28,6 +29,19 @@ The `kernel_guard_hmac_v1` compatibility golden vector is under
 nonce, key, and key_id inputs, then compares the whole sidecar plus
 hard-coded entry tags and root tag. If canonical JSON, transcript fields, or
 HMAC inputs change without a new profile name, this test must fail.
+
+Security regressions that define the guarded-strict threat boundary are
+grouped in:
+
+```bash
+scripts/security_regression_gate.sh
+```
+
+The gate uses only synthetic fixtures and test-local HMAC keys. It covers
+extra/duplicate lifecycle roles, artifact-body tampering, manifest metadata
+spoofing, root-chain-digest tampering, previous-tag tampering, nonce/key_id
+tampering, old guard reuse with changed manifest metadata, missing guard, and
+wrong guard key failures.
 
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
