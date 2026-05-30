@@ -31,6 +31,8 @@ jobs:
         run: scripts/public_validation_gate.sh
       - name: Strict schema gate
         run: scripts/strict_schema_gate.sh
+      - name: Security regression gate
+        run: scripts/security_regression_gate.sh
       - name: Run tests
         run: python -m pytest -q
 

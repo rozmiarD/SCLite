@@ -8,6 +8,9 @@
   key-rotation boundaries, and explicit non-claims.
 - Adds `kernel_guard_hmac_v1` golden vectors to lock deterministic HMAC entry
   tags and root tag before the 1.0 release-candidate line.
+- Adds a security regression gate for guarded-strict negative scenarios,
+  including lifecycle injection, body/root/metadata tampering, guard transcript
+  tampering, missing guard, and wrong-key failures.
 - Binds `entries[*].required` into the `kernel_guard_hmac_v1` per-entry HMAC
   transcript so guarded-strict verification rejects required-flag tampering
   without changing the historical artifact-chain digest algorithm.

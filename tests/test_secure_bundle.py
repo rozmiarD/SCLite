@@ -40,6 +40,16 @@ def _write_guard(base: Path, *, manifest: dict | None = None) -> Path:
     return guard_path
 
 
+def _load_guard(path: Path) -> dict:
+    value = json.loads(path.read_text(encoding='utf-8'))
+    assert isinstance(value, dict)
+    return value
+
+
+def _write_json(path: Path, value: dict) -> None:
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+
 def _run(args: list[str], *, env_key: bool = True) -> subprocess.CompletedProcess[str]:
     env = dict(os.environ)
     if env_key:
@@ -147,6 +157,87 @@ def test_secure_bundle_loose_lifecycle_fails(tmp_path: Path) -> None:
         verify_secure_bundle(tmp_path, guard_path=guard_path, key=KEY)
 
 
+def test_secure_bundle_extra_role_fails_guarded_strict(tmp_path: Path) -> None:
+    bundle = tmp_path / 'bundle'
+    bundle.mkdir()
+    artifacts = {
+        'intent_contract': json.loads((FIXTURE / 'intent_contract.json').read_text(encoding='utf-8')),
+        'policy_decision': json.loads((FIXTURE / 'policy_decision.json').read_text(encoding='utf-8')),
+        'execution_contract': json.loads((FIXTURE / 'execution_contract.json').read_text(encoding='utf-8')),
+        'execution_ticket': json.loads((FIXTURE / 'execution_ticket.json').read_text(encoding='utf-8')),
+        'execution_receipt': json.loads((FIXTURE / 'execution_receipt.json').read_text(encoding='utf-8')),
+        'evidence_contract': json.loads((FIXTURE / 'evidence_contract.json').read_text(encoding='utf-8')),
+    }
+    for filename in [
+        'intent_contract.json',
+        'policy_decision.json',
+        'execution_contract.json',
+        'execution_ticket.json',
+        'execution_receipt.json',
+        'evidence_contract.json',
+    ]:
+        (bundle / filename).write_text((FIXTURE / filename).read_text(encoding='utf-8'), encoding='utf-8')
+    _write_json(bundle / 'injected_extra_role.json', artifacts['execution_receipt'])
+    entries = [
+        ('intent_contract', 'intent_contract.json', artifacts['intent_contract']),
+        ('policy_decision', 'policy_decision.json', artifacts['policy_decision']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_ticket', 'execution_ticket.json', artifacts['execution_ticket']),
+        ('injected_extra_role', 'injected_extra_role.json', artifacts['execution_receipt']),
+        ('execution_receipt', 'execution_receipt.json', artifacts['execution_receipt']),
+        ('evidence_contract', 'evidence_contract.json', artifacts['evidence_contract']),
+    ]
+    manifest = build_artifact_chain_manifest(
+        [{'role': role, 'path': path, 'value': value} for role, path, value in entries],
+        chain_id='extra-role-guarded-strict-test',
+    )
+    _write_json(bundle / 'artifact_chain_manifest.json', manifest)
+    guard_path = _write_guard(bundle, manifest=manifest)
+
+    with pytest.raises(SecureBundleError, match='lifecycle roles mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
+
+
+def test_secure_bundle_duplicate_role_fails_guarded_strict(tmp_path: Path) -> None:
+    bundle = tmp_path / 'bundle'
+    bundle.mkdir()
+    artifacts = {
+        'intent_contract': json.loads((FIXTURE / 'intent_contract.json').read_text(encoding='utf-8')),
+        'policy_decision': json.loads((FIXTURE / 'policy_decision.json').read_text(encoding='utf-8')),
+        'execution_contract': json.loads((FIXTURE / 'execution_contract.json').read_text(encoding='utf-8')),
+        'execution_ticket': json.loads((FIXTURE / 'execution_ticket.json').read_text(encoding='utf-8')),
+        'execution_receipt': json.loads((FIXTURE / 'execution_receipt.json').read_text(encoding='utf-8')),
+        'evidence_contract': json.loads((FIXTURE / 'evidence_contract.json').read_text(encoding='utf-8')),
+    }
+    for filename in [
+        'intent_contract.json',
+        'policy_decision.json',
+        'execution_contract.json',
+        'execution_ticket.json',
+        'execution_receipt.json',
+        'evidence_contract.json',
+    ]:
+        (bundle / filename).write_text((FIXTURE / filename).read_text(encoding='utf-8'), encoding='utf-8')
+    entries = [
+        ('intent_contract', 'intent_contract.json', artifacts['intent_contract']),
+        ('policy_decision', 'policy_decision.json', artifacts['policy_decision']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_ticket', 'execution_ticket.json', artifacts['execution_ticket']),
+        ('execution_contract', 'execution_contract.json', artifacts['execution_contract']),
+        ('execution_receipt', 'execution_receipt.json', artifacts['execution_receipt']),
+        ('evidence_contract', 'evidence_contract.json', artifacts['evidence_contract']),
+    ]
+    manifest = build_artifact_chain_manifest(
+        [{'role': role, 'path': path, 'value': value} for role, path, value in entries],
+        chain_id='duplicate-role-guarded-strict-test',
+    )
+    _write_json(bundle / 'artifact_chain_manifest.json', manifest)
+    guard_path = _write_guard(bundle, manifest=manifest)
+
+    with pytest.raises(SecureBundleError, match='lifecycle roles mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
+
+
 def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
     bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
     manifest = _load_manifest(bundle)
@@ -160,6 +251,30 @@ def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
         verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
 
 
+def test_secure_bundle_root_chain_digest_tampering_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    manifest = _load_manifest(bundle)
+    guard_path = _write_guard(bundle, manifest=manifest)
+    tampered = copy.deepcopy(manifest)
+    tampered['root_chain_digest'] = '0' * 64
+    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    _write_json(manifest_path, tampered)
+
+    with pytest.raises(SecureBundleError, match='root_chain_digest mismatch'):
+        verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
+
+
+def test_secure_bundle_artifact_body_tampering_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+    intent = json.loads((bundle / 'intent_contract.json').read_text(encoding='utf-8'))
+    intent['intent']['summary'] = 'tampered after guard generation'
+    _write_json(bundle / 'intent_contract.json', intent)
+
+    with pytest.raises(SecureBundleError, match='descriptor mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
+
+
 def test_secure_bundle_required_flag_tampering_fails(tmp_path: Path) -> None:
     bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
     manifest = _load_manifest(bundle)
@@ -171,6 +286,36 @@ def test_secure_bundle_required_flag_tampering_fails(tmp_path: Path) -> None:
 
     with pytest.raises(SecureBundleError, match=r'entry\[3\] required mismatch'):
         verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
+
+
+def test_secure_bundle_nonce_tampering_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+    guard = _load_guard(guard_path)
+    guard['entry_guards'][1]['nonce'] = 'tampered-nonce'
+    _write_json(guard_path, guard)
+
+    with pytest.raises(SecureBundleError, match=r'entry\[1\] tag mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
+
+
+def test_secure_bundle_key_id_tampering_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+    guard = _load_guard(guard_path)
+    guard['key_id'] = 'tampered-key-id'
+    _write_json(guard_path, guard)
+
+    with pytest.raises(SecureBundleError, match=r'entry\[0\] key_id mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
+
+
+def test_secure_bundle_wrong_key_fails(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+
+    with pytest.raises(SecureBundleError, match=r'entry\[0\] tag mismatch'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key='wrong-kernel-secret')
 
 
 def test_secure_bundle_full_chain_forgery_with_old_guard_fails(tmp_path: Path) -> None:
