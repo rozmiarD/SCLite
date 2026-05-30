@@ -54,6 +54,7 @@ STABLE_IMPORTS = (
     'sclite.profiles:validate_carrier_profile_ref',
     'sclite.scope_fidelity:build_lifecycle_scope_fidelity_report',
     'sclite.secure:verify_secure_bundle',
+    'sclite.verification_result:build_guarded_strict_verification_result',
 )
 REQUIRED_FIXTURES = (
     'examples/lifecycle-review/review_record.json',
@@ -389,6 +390,9 @@ def collect_errors() -> list[str]:
     _require(errors, 'VALIDATION.md', validation, 'scripts/security_regression_gate.sh')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'scripts/security_regression_gate.sh')
     _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/security_regression_gate.sh')
+    _require(errors, 'SPEC.md', spec, 'verification_result.v1')
+    _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
+    _require(errors, 'README.md', readme, 'verification_result')
     _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Lifecycle/review surface freeze')
     _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)

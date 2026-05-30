@@ -11,6 +11,9 @@
 - Adds a security regression gate for guarded-strict negative scenarios,
   including lifecycle injection, body/root/metadata tampering, guard transcript
   tampering, missing guard, and wrong-key failures.
+- Adds the `verification_result.v1` contract so secure-bundle JSON output
+  exposes artifact-chain, strict-lifecycle, Kernel Guard, replay, public
+  identity, and runtime-enforcement statuses as machine-readable layer claims.
 - Binds `entries[*].required` into the `kernel_guard_hmac_v1` per-entry HMAC
   transcript so guarded-strict verification rejects required-flag tampering
   without changing the historical artifact-chain digest algorithm.

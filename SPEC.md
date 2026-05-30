@@ -64,6 +64,25 @@ verification, and manifest metadata binding. Missing guard material is a
 failure, not a warning. SCLite still reports replay freshness as not checked;
 GovEngine records freshness for the `guarded_domain_auth_fresh` posture.
 
+The stable verifier-result contract is `verification_result.v1`. Secure-bundle
+JSON output nests it under `verification_result` and keeps the layer statuses
+explicit:
+
+```json
+{
+  "artifact_chain": "pass",
+  "strict_lifecycle": "pass",
+  "kernel_guard": "pass",
+  "replay": "not_checked",
+  "public_identity": "not_claimed",
+  "runtime_enforcement": "not_claimed"
+}
+```
+
+`verification_result.v1` is a local verification receipt only. It makes
+non-claims machine-readable and does not add replay state, public identity,
+policy authorization, or runtime enforcement to SCLite.
+
 Security posture modes are explicit:
 
 - `integrity_only`: SHA-256 artifact-chain consistency.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from sclite.artifacts import validate_artifact
 from sclite.integrity import build_artifact_chain_manifest
 from sclite.kernel_guard import build_kernel_guard_manifest
 from sclite.secure import SecureBundleError, verify_secure_bundle
@@ -82,6 +83,14 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['security_posture'] == 'guarded_domain_auth'
     assert result['replay_status'] == 'not_checked'
     assert result['fail_closed'] is True
+    assert result['verification_result']['artifact_chain'] == 'pass'
+    assert result['verification_result']['strict_lifecycle'] == 'pass'
+    assert result['verification_result']['kernel_guard'] == 'pass'
+    assert result['verification_result']['replay'] == 'not_checked'
+    assert result['verification_result']['public_identity'] == 'not_claimed'
+    assert result['verification_result']['runtime_enforcement'] == 'not_claimed'
+    validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT)
+    validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
 
 
 def test_secure_bundle_cli_accepts_review_bundle_directory_target(tmp_path: Path) -> None:
@@ -92,6 +101,25 @@ def test_secure_bundle_cli_accepts_review_bundle_directory_target(tmp_path: Path
     assert proc.returncode == 0, proc.stderr
     assert proc.stdout.startswith('secure_bundle_ok:6:')
     assert proc.stdout.strip().endswith(':replay_not_checked')
+
+
+def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: Path) -> None:
+    bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
+    _write_guard(bundle)
+    proc = _run(['verify-secure-bundle', str(bundle), '--format', 'json'])
+
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout)
+    verification_result = result['verification_result']
+    assert verification_result['artifact_type'] == 'verification_result'
+    assert verification_result['schema_ref'] == 'schemas/verification_result.v1.schema.json'
+    assert verification_result['artifact_chain'] == 'pass'
+    assert verification_result['strict_lifecycle'] == 'pass'
+    assert verification_result['kernel_guard'] == 'pass'
+    assert verification_result['replay'] == 'not_checked'
+    assert verification_result['public_identity'] == 'not_claimed'
+    assert verification_result['runtime_enforcement'] == 'not_claimed'
+    validate_artifact(verification_result, 'verification_result.v1', root=ROOT)
 
 
 def test_secure_bundle_without_guard_fails_closed() -> None:

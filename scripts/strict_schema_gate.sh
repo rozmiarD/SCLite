@@ -11,6 +11,30 @@ python -m sclite.cli validate-artifact --strict-jsonschema --schema evidence_con
 python -m sclite.cli validate-artifact --strict-jsonschema --schema artifact_chain_manifest.v0.2 examples/govengine-integration/artifact_chain_manifest.json
 python -m sclite.cli validate-artifact --strict-jsonschema --schema review_record.v0.1 examples/govengine-integration/verification_receipt.json
 python - <<'PY'
+from sclite.artifacts import validate_artifact
+sample = {
+    'artifact_type': 'verification_result',
+    'schema_version': 'v1',
+    'schema_ref': 'schemas/verification_result.v1.schema.json',
+    'profile': 'guarded-strict',
+    'security_posture': 'guarded_domain_auth',
+    'status': 'pass',
+    'artifact_chain': 'pass',
+    'strict_lifecycle': 'pass',
+    'kernel_guard': 'pass',
+    'replay': 'not_checked',
+    'public_identity': 'not_claimed',
+    'runtime_enforcement': 'not_claimed',
+    'entry_count': 6,
+    'checked_entries': ['intent_contract'],
+    'root_chain_digest': 'a' * 64,
+    'guard_profile': 'kernel_guard_hmac_v1',
+    'guard_root_tag': 'b' * 64,
+    'key_id': 'test-key',
+}
+validate_artifact(sample, 'verification_result.v1', strict_jsonschema=True)
+PY
+python - <<'PY'
 import json
 from pathlib import Path
 from sclite.scope_fidelity import validate_lifecycle_scope_fidelity_report
