@@ -32,6 +32,17 @@ python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
+Before a release-candidate or stable release, confirm the security model and
+profile freeze docs remain aligned:
+
+- `SECURITY_MODEL.md`
+- `docs/SECURITY_PROFILES.md`
+- `SPEC.md`
+- README security posture section
+
+The public-truth validator must reject removal of the Kernel Guard non-claims,
+replay boundary, and transcript/canonicalization freeze language.
+
 For the `0.8.0b2` beta release, current documentation and validation must state
 that the latest published PyPI release is `sclite-core==0.8.0b2`.
 

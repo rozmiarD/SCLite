@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Adds `SECURITY_MODEL.md` and `docs/SECURITY_PROFILES.md` to freeze SCLite's
+  security posture meanings for the 1.0 release-candidate path, including
+  Kernel Guard transcript/canonicalization compatibility, replay ownership,
+  key-rotation boundaries, and explicit non-claims.
 - Binds `entries[*].required` into the `kernel_guard_hmac_v1` per-entry HMAC
   transcript so guarded-strict verification rejects required-flag tampering
   without changing the historical artifact-chain digest algorithm.

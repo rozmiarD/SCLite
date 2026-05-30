@@ -74,6 +74,15 @@ Security posture modes are explicit:
 - `public_signed_export`: future Ed25519/root-anchor export mode, not
   implemented here.
 
+The security model is frozen for the 1.0 release-candidate path in
+[`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
+[`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md). For
+`kernel_guard_hmac_v1`, SCLite canonical JSON settings, per-entry transcript
+fields, root transcript fields, `manifest_metadata_digest()` semantics, and
+HMAC-SHA256 tag calculation are compatibility-critical. Any incompatible change must use a new profile name.
+For example, use `kernel_guard_hmac_v2`; do not silently change
+`kernel_guard_hmac_v1`.
+
 ## v0.2 Artifact Definitions
 
 ### IntentContract
