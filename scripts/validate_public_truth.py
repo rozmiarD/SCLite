@@ -29,12 +29,14 @@ PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
     'SECURITY.md',
+    'SECURITY_MODEL.md',
     'CONTRIBUTING.md',
     'ROADMAP.md',
     'VALIDATION.md',
     'PUBLICATION_CHECKLIST.md',
     'SPEC.md',
     'docs/ARTIFACTS.md',
+    'docs/SECURITY_PROFILES.md',
     'docs/GOVENGINE_INTEGRATION_CONTRACT.md',
     'docs/INTEGRATION_GUIDE.md',
     'docs/SCLITE_0_5_FREEZE.md',
@@ -347,6 +349,8 @@ def collect_errors() -> list[str]:
     validation = _read('VALIDATION.md')
     publication = _read('PUBLICATION_CHECKLIST.md')
     spec = _read('SPEC.md')
+    security_model = _read('SECURITY_MODEL.md')
+    security_profiles = _read('docs/SECURITY_PROFILES.md')
     artifact_docs = _read('docs/ARTIFACTS.md')
     changelog = _read('CHANGELOG.md')
     integration_contract = _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md')
@@ -391,6 +395,21 @@ def collect_errors() -> list[str]:
     _require(errors, 'CONTRIBUTING.md', _read('CONTRIBUTING.md'), 'define / validate / hash / bind / redact / review / verify')
     _require(errors, 'SPEC.md', spec, 'define / validate / hash / bind / redact / review / verify')
     _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published beta package is `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
+    _require(errors, 'README.md', readme, 'SECURITY_MODEL.md')
+    _require(errors, 'README.md', readme, 'docs/SECURITY_PROFILES.md')
+    _require(errors, 'SPEC.md', spec, 'Any incompatible change must use a new profile name')
+    _require(errors, 'SPEC.md', spec, 'kernel_guard_hmac_v1')
+    _require(errors, 'VALIDATION.md', validation, 'transcript/canonicalization changes require a new profile name')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'profile freeze docs remain aligned')
+    _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite reports replay as `not_checked`')
+    _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
+    _require(errors, 'SECURITY_MODEL.md', security_model, 'HMAC gives authenticity only to parties that already share the secret')
+    _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite does not decide whether an action is authorized')
+    _require(errors, 'SECURITY_MODEL.md', security_model, 'Production replay stores should provide atomic check-and-set behavior')
+    _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, '`guarded-strict`')
+    _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, '`guarded_domain_auth_fresh`')
+    _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'An incompatible change must use a new profile name')
+    _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'replay freshness inside SCLite')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@v6')
     _require(errors, '.github/workflows/ci.yml', workflow, "python-version: ['3.11', '3.12', '3.13']")

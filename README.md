@@ -219,11 +219,18 @@ has moved its public proof projection to the current lifecycle/review-bundle
 model; retained schema identifiers such as `review_record.v0.1` identify
 current formats and are not compatibility product lines.
 
-See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions, integrity chain, compatibility notes, and explicit security boundaries.
+See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions,
+integrity chain, compatibility notes, and explicit security boundaries. See
+[`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
+[`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) for the frozen
+security profile meanings, Kernel Guard transcript/canonicalization freeze,
+and replay/non-claim boundaries for the 1.0 release-candidate path.
 
 ## Project docs
 
 - [`ROADMAP.md`](ROADMAP.md) — versioned accountability-layer evolution and post-0.5 direction.
+- [`SECURITY_MODEL.md`](SECURITY_MODEL.md) — security guarantees, non-claims, Kernel Guard transcript freeze, replay boundary, and key-rotation boundary.
+- [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) — stable profile matrix for `integrity_only`, `strict_lifecycle`, `guarded_domain_auth`, `guarded-strict`, and host-owned freshness.
 - [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.

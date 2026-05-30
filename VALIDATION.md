@@ -22,6 +22,17 @@ python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
+Security-model and profile-freeze claims are guarded by
+`python scripts/validate_public_truth.py`. The validator checks that
+`SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep
+the current boundaries explicit:
+
+- `kernel_guard_hmac_v1` is sidecar/domain-auth HMAC, not PKI;
+- `guarded-strict` is fail-closed secure-bundle verification;
+- replay freshness is `not_checked` in SCLite and belongs to GovEngine/host
+  state;
+- transcript/canonicalization changes require a new profile name.
+
 The dependency-free validator is intentionally a subset validator. It exists so SCLite can keep zero runtime dependencies and still validate the repository's simple schema shapes in offline/minimal environments. It is not a full JSON Schema Draft 2020-12 implementation.
 
 | JSON Schema keyword | Dependency-free subset | Strict `jsonschema` mode |
