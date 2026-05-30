@@ -39,9 +39,13 @@ profile freeze docs remain aligned:
 - `docs/SECURITY_PROFILES.md`
 - `SPEC.md`
 - README security posture section
+- `tests/golden/kernel_guard_hmac_v1/`
 
 The public-truth validator must reject removal of the Kernel Guard non-claims,
 replay boundary, and transcript/canonicalization freeze language.
+The Kernel Guard golden-vector test must reject unversioned changes to
+`kernel_guard_hmac_v1` canonicalization, transcript fields, entry tags, or
+root tag.
 
 For the `0.8.0b2` beta release, current documentation and validation must state
 that the latest published PyPI release is `sclite-core==0.8.0b2`.

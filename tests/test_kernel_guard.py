@@ -19,6 +19,7 @@ from sclite.kernel_guard import (
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
+GOLDEN = ROOT / 'tests' / 'golden' / 'kernel_guard_hmac_v1'
 KEY = 'test-kernel-secret'
 KEY_ID = 'test-key-20260525'
 
@@ -34,6 +35,12 @@ def _guard(manifest: dict) -> dict:
     return build_kernel_guard_manifest(manifest, key=KEY, key_id=KEY_ID, nonces=nonces)
 
 
+def _load_golden(name: str) -> dict | list:
+    value = json.loads((GOLDEN / name).read_text(encoding='utf-8'))
+    assert isinstance(value, (dict, list))
+    return value
+
+
 def test_kernel_guard_builds_schema_valid_sidecar_and_verifies() -> None:
     manifest = _load_manifest()
     guard = _guard(manifest)
@@ -46,6 +53,44 @@ def test_kernel_guard_builds_schema_valid_sidecar_and_verifies() -> None:
     assert result['guard_profile'] == 'kernel_guard_hmac_v1'
     assert result['replay_status'] == 'not_checked'
     assert result['guard_root_tag'] == guard['root_tag']
+
+
+def test_kernel_guard_hmac_v1_golden_vector_freezes_transcript_and_tags() -> None:
+    manifest = _load_golden('manifest.json')
+    guard = _load_golden('kernel_guard_manifest.json')
+    expected_entry_tags = _load_golden('expected_entry_tags.json')
+    expected_root_tag = (GOLDEN / 'expected_root_tag.txt').read_text(encoding='utf-8').strip()
+    key = (GOLDEN / 'key.txt').read_text(encoding='utf-8').strip()
+
+    assert isinstance(manifest, dict)
+    assert isinstance(guard, dict)
+    assert isinstance(expected_entry_tags, list)
+
+    nonces = [str(item['nonce']) for item in guard['entry_guards']]
+    rebuilt = build_kernel_guard_manifest(
+        manifest,
+        key=key,
+        key_id=str(guard['key_id']),
+        nonces=nonces,
+    )
+
+    assert rebuilt == guard
+    assert [
+        {'seq': item['seq'], 'role': item['role'], 'tag': item['tag']}
+        for item in rebuilt['entry_guards']
+    ] == expected_entry_tags
+    assert rebuilt['root_tag'] == expected_root_tag
+
+    result = verify_kernel_guard_manifest(
+        manifest,
+        guard,
+        key=key,
+        root=FIXTURE,
+        require_lifecycle=True,
+    )
+
+    assert result['status'] == 'passed'
+    assert result['guard_root_tag'] == expected_root_tag
 
 
 def test_kernel_guard_rejects_manifest_metadata_spoofing() -> None:
