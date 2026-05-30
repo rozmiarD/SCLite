@@ -24,10 +24,10 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 0.8.0-beta
+## Current baseline: 1.0.0-rc.1
 
-Current package: `sclite-core==0.8.0b2` (`0.8.0-beta`).
-Latest published public package: `sclite-core==0.8.0b2` (`0.8.0-beta`).
+Current package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`).
+Latest published public package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`).
 
 Current lifecycle:
 
@@ -35,15 +35,18 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.x line remains the stable review-bundle shape. The 0.8 beta release
-freezes the lifecycle/review-bundle path as the single curated front door,
-includes the deterministic review-bundle materializer used by active
-consumers, and retains the alpha removal of the superseded proof-trace product
-path after controlled consumer migration. It verifies schema-backed artifacts,
-canonical SHA-256 descriptors, ordered hash-chain manifests, lifecycle role
-order, digest bindings between intent, policy, execution contract, ticket,
-receipt, and evidence, and packaged reviewer-facing bundle output without
-adding runtime, adapter, PKI, or policy authority.
+The v0.5.x line remains the stable review-bundle shape. The 1.0 release
+candidate freezes the lifecycle/review-bundle path as the single curated front
+door, includes the deterministic review-bundle materializer used by active
+consumers, retains the alpha removal of the superseded proof-trace product path
+after controlled consumer migration, and adds guarded verification release
+candidate evidence: security profile docs, Kernel Guard golden vectors,
+security regression gate, and `verification_result.v1`. It verifies
+schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain
+manifests, lifecycle role order, digest bindings between intent, policy,
+execution contract, ticket, receipt, and evidence, and packaged
+reviewer-facing bundle output without adding runtime, adapter, PKI, or policy
+authority.
 
 ## Completed 0.8 beta hardening: strict lifecycle and optional kernel guard
 
@@ -78,7 +81,7 @@ replay store, or protection from a malicious kernel.
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2 -> 1.0.0rc1
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -541,7 +544,7 @@ Success criteria:
 
 ## 0.8.0-beta — Freeze lifecycle/review public responsibility
 
-Status: published current beta line.
+Status: published predecessor beta line.
 
 Candidate scope:
 
@@ -555,6 +558,24 @@ Candidate scope:
    beta line.
 5. Prove GovEngine, Ravenclaw and Tecrax consumption without adding SCLite
    surface breadth.
+
+## 1.0.0-rc.1 — Freeze guarded verification contracts
+
+Status: published current release candidate.
+
+Delivered:
+
+1. Freeze `SECURITY_MODEL.md` and `docs/SECURITY_PROFILES.md` as the public
+   security posture and non-claim contract.
+2. Add `kernel_guard_hmac_v1` golden vectors for deterministic entry tags and
+   root tag.
+3. Add a CI-backed security regression gate for guarded-strict negative
+   scenarios.
+4. Add `verification_result.v1` so secure-bundle JSON output exposes
+   artifact-chain, strict-lifecycle, Kernel Guard, replay, public-identity, and
+   runtime-enforcement statuses as machine-readable claims/non-claims.
+5. Preserve SCLite's no-runtime, no-replay-store, no-PKI, no-KMS, and
+   no-carrier-adapter boundary.
 
 ## Release posture
 

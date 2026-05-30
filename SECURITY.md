@@ -6,7 +6,7 @@ It is not an executor, scanner, authorization authority, sandbox, or vulnerabili
 
 ## Supported versions
 
-The current published beta package is `sclite-core==0.8.0b2`. Security fixes
+The current published release-candidate package is `sclite-core==1.0.0rc1`. Security fixes
 should target `main` until stable release branches exist.
 
 ## Reporting security issues
