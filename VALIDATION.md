@@ -22,6 +22,13 @@ python scripts/validate_public_truth.py
 python -m pytest -q
 ```
 
+The `kernel_guard_hmac_v1` compatibility golden vector is under
+`tests/golden/kernel_guard_hmac_v1/` and is enforced by
+`tests/test_kernel_guard.py`. It rebuilds the sidecar from fixed manifest,
+nonce, key, and key_id inputs, then compares the whole sidecar plus
+hard-coded entry tags and root tag. If canonical JSON, transcript fields, or
+HMAC inputs change without a new profile name, this test must fail.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep

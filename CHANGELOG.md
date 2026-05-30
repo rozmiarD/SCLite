@@ -6,6 +6,8 @@
   security posture meanings for the 1.0 release-candidate path, including
   Kernel Guard transcript/canonicalization compatibility, replay ownership,
   key-rotation boundaries, and explicit non-claims.
+- Adds `kernel_guard_hmac_v1` golden vectors to lock deterministic HMAC entry
+  tags and root tag before the 1.0 release-candidate line.
 - Binds `entries[*].required` into the `kernel_guard_hmac_v1` per-entry HMAC
   transcript so guarded-strict verification rejects required-flag tampering
   without changing the historical artifact-chain digest algorithm.
