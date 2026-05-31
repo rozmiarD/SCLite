@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -12,8 +13,18 @@ BAD_CROSS_HOST = ROOT / 'examples' / 'bad-review-bundle-cross-host'
 SCOPED = ROOT / 'sclite' / 'examples' / 'scoped-ticket-v0.3'
 
 
-def _run(args: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, '-m', 'sclite.cli', *args], cwd=str(ROOT), text=True, capture_output=True, check=False)
+def _run(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    run_env = dict(os.environ)
+    if env:
+        run_env.update(env)
+    return subprocess.run([sys.executable, '-m', 'sclite.cli', *args], cwd=str(ROOT), text=True, capture_output=True, check=False, env=run_env)
+
+
+def _assert_clean_cli_failure(proc: subprocess.CompletedProcess[str], label: str) -> None:
+    assert proc.returncode == 1
+    assert label in proc.stderr
+    assert 'invalid JSON' in proc.stderr
+    assert 'Traceback' not in proc.stderr
 
 
 def test_review_bundle_pass_exit_code_with_fail_on_review() -> None:
@@ -75,3 +86,39 @@ def test_verify_ticket_use_overclaim_exit_code(tmp_path: Path) -> None:
     ])
     assert proc.returncode == 1
     assert 'ticket_use_failed' in proc.stderr
+
+
+def test_malformed_json_validate_artifact_fails_without_traceback(tmp_path: Path) -> None:
+    bad = tmp_path / 'bad.json'
+    bad.write_text('{', encoding='utf-8')
+
+    proc = _run(['validate-artifact', '--schema', 'execution_contract.v0.2', str(bad)])
+
+    _assert_clean_cli_failure(proc, 'security_contract_artifact_failed')
+
+
+def test_malformed_json_validate_chain_fails_without_traceback(tmp_path: Path) -> None:
+    bad = tmp_path / 'bad.json'
+    bad.write_text('{', encoding='utf-8')
+
+    proc = _run(['validate-chain', str(bad)])
+
+    _assert_clean_cli_failure(proc, 'artifact_chain_failed')
+
+
+def test_malformed_json_secure_bundle_fails_without_traceback(tmp_path: Path) -> None:
+    bad = tmp_path / 'bad.json'
+    bad.write_text('{', encoding='utf-8')
+
+    proc = _run(
+        ['verify-secure-bundle', str(bad), '--guard', str(bad)],
+        env={'SCLITE_KERNEL_GUARD_KEY': 'test-key'},
+    )
+
+    _assert_clean_cli_failure(proc, 'secure_bundle_failed')
+
+
+def test_malformed_json_inline_scope_plan_fails_without_traceback() -> None:
+    proc = _run(['scope-fidelity', '--target', 'example.com', '--plan-step-json', '{'])
+
+    _assert_clean_cli_failure(proc, 'scope_fidelity_failed')

@@ -68,6 +68,8 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         readme=(
             'v1.0 release candidate\n'
             'Published current release candidate\n'
+            'It is not an installed/current SCLite surface in the 1.0 release candidate.\n'
+            'When `--guard` is provided explicitly, SCLite resolves it relative to the\n'
         ),
         roadmap=(
             '## 0.5.1 — GovEngine integration readiness\n\n'

@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-No unreleased changes.
+- Cleans up 1.0 release-candidate documentation truth around the retired
+  proof-trace path and guarded sidecar examples.
+- Adds shared JSON input handling so malformed local JSON files produce
+  command-specific CLI failures instead of Python tracebacks.
 
 ## 1.0.0-rc.1 - Guarded verification contract release candidate
 

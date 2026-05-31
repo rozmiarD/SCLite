@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Sequence
 
+from ._json import load_json_object, load_json_value, parse_json_object
 from .artifacts import build_artifact_hash, validate_artifact
 from .bundles import ReviewBundleError, export_review_bundle_markdown, review_bundle, review_bundle_summary
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
@@ -33,11 +34,20 @@ from .tickets import (
 )
 
 
+class CliInputError(ValueError):
+    """Raised when CLI input files or inline JSON cannot be read cleanly."""
+
+
 def _load_json_object(path: Path) -> Dict[str, Any]:
-    value = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise ValueError(f'{path}: JSON root is not an object')
-    return value
+    return load_json_object(path, error_cls=CliInputError)
+
+
+def _load_json_value(path: Path) -> Any:
+    return load_json_value(path, error_cls=CliInputError)
+
+
+def _parse_json_object(text: str, *, source: str) -> Dict[str, Any]:
+    return parse_json_object(text, source=source, error_cls=CliInputError)
 
 
 def _scope_fidelity_exit_code(verdict: str, fail_on: str) -> int:
@@ -59,6 +69,11 @@ def _guard_key_from_env(env_name: str) -> str:
 
 def _require_guard_requested(args: Any) -> bool:
     return bool(getattr(args, 'require_guard', False) or getattr(args, 'fail_on_unguarded', False))
+
+
+def _failed(label: str, exc: BaseException) -> int:
+    print(f'{label}:{exc}', file=sys.stderr)
+    return 1
 
 
 def _verify_required_guard_for_manifest(args: Any, manifest_path: Path, *, require_lifecycle: bool) -> Dict[str, Any]:
@@ -226,17 +241,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == 'validate-artifact':
         artifact_path = Path(str(args.artifact))
-        value = json.loads(artifact_path.read_text(encoding='utf-8'))
-        validate_artifact(value, str(args.schema), strict_jsonschema=bool(args.strict_jsonschema))
+        try:
+            value = _load_json_value(artifact_path)
+            validate_artifact(value, str(args.schema), strict_jsonschema=bool(args.strict_jsonschema))
+        except (CliInputError, ValueError) as exc:
+            return _failed('security_contract_artifact_failed', exc)
         print(f'security_contract_artifact_ok:{artifact_path}')
         return 0
 
     if args.command == 'hash-artifact':
         artifact_path = Path(str(args.artifact))
-        value = json.loads(artifact_path.read_text(encoding='utf-8'))
-        if args.schema:
-            validate_artifact(value, str(args.schema))
-        descriptor = build_artifact_hash(value)
+        try:
+            value = _load_json_value(artifact_path)
+            if args.schema:
+                validate_artifact(value, str(args.schema))
+            descriptor = build_artifact_hash(value)
+        except (CliInputError, ValueError) as exc:
+            return _failed('artifact_hash_failed', exc)
         if args.format == 'digest':
             print(descriptor['digest'])
         else:
@@ -245,10 +266,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command in {'validate-chain', 'verify-lifecycle'}:
         manifest_path = Path(str(args.manifest)).resolve()
-        manifest = _load_json_object(manifest_path)
         root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
         require_lifecycle = args.command == 'verify-lifecycle' or bool(getattr(args, 'strict_lifecycle', False))
         try:
+            manifest = _load_json_object(manifest_path)
             result = verify_artifact_chain_manifest(
                 manifest,
                 root=root,
@@ -264,6 +285,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     require_lifecycle=require_lifecycle,
                 )
         except ChainVerificationError as exc:
+            print(f'artifact_chain_failed:{exc}', file=sys.stderr)
+            return 1
+        except CliInputError as exc:
             print(f'artifact_chain_failed:{exc}', file=sys.stderr)
             return 1
         except SecureBundleError as exc:
@@ -282,14 +306,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == 'verify-guarded-chain':
         manifest_path = Path(str(args.manifest)).resolve()
         guard_path = Path(str(args.guard)).resolve()
-        manifest = _load_json_object(manifest_path)
-        guard = _load_json_object(guard_path)
         root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
         key = os.environ.get(str(args.guard_key_env) or '')
         if not key:
             print(f'kernel_guard_failed:missing guard key env {args.guard_key_env}', file=sys.stderr)
             return 1
         try:
+            manifest = _load_json_object(manifest_path)
+            guard = _load_json_object(guard_path)
             result = verify_kernel_guard_manifest(
                 manifest,
                 guard,
@@ -300,6 +324,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 require_lifecycle=bool(args.strict_lifecycle),
             )
         except KernelGuardError as exc:
+            print(f'kernel_guard_failed:{exc}', file=sys.stderr)
+            return 1
+        except CliInputError as exc:
             print(f'kernel_guard_failed:{exc}', file=sys.stderr)
             return 1
         if args.format == 'json':
@@ -333,15 +360,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == 'validate-ticket':
         ticket_path = Path(str(args.ticket)).resolve()
-        ticket = _load_json_object(ticket_path)
         try:
+            ticket = _load_json_object(ticket_path)
             if args.contract:
                 contract = _load_json_object(Path(str(args.contract)).resolve())
                 checks = validate_ticket_semantics(ticket, contract, strict_jsonschema=bool(args.strict_jsonschema))
             else:
                 validate_ticket_schema(ticket, strict_jsonschema=bool(args.strict_jsonschema))
                 checks = ['ticket_schema']
-        except (TicketSemanticError, AssertionError) as exc:
+        except (TicketSemanticError, AssertionError, CliInputError) as exc:
             print(f'execution_ticket_failed:{exc}', file=sys.stderr)
             return 1
         if args.format == 'json':
@@ -351,16 +378,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == 'explain-ticket':
-        ticket = _load_json_object(Path(str(args.ticket)).resolve())
+        try:
+            ticket = _load_json_object(Path(str(args.ticket)).resolve())
+        except CliInputError as exc:
+            return _failed('execution_ticket_failed', exc)
         print(explain_ticket(ticket))
         return 0
 
     if args.command == 'verify-ticket-use':
-        ticket = _load_json_object(Path(str(args.ticket)).resolve())
-        contract = _load_json_object(Path(str(args.contract)).resolve())
-        receipt = _load_json_object(Path(str(args.receipt)).resolve())
-        evidence = _load_json_object(Path(str(args.evidence_contract)).resolve()) if args.evidence_contract else None
         try:
+            ticket = _load_json_object(Path(str(args.ticket)).resolve())
+            contract = _load_json_object(Path(str(args.contract)).resolve())
+            receipt = _load_json_object(Path(str(args.receipt)).resolve())
+            evidence = _load_json_object(Path(str(args.evidence_contract)).resolve()) if args.evidence_contract else None
             result = verify_ticket_use(
                 ticket,
                 contract,
@@ -368,7 +398,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 evidence,
                 strict_jsonschema=bool(args.strict_jsonschema),
             )
-        except (TicketSemanticError, TicketUseVerificationError, AssertionError) as exc:
+        except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
             print(f'ticket_use_failed:{exc}', file=sys.stderr)
             return 1
         if args.format == 'json':
@@ -380,16 +410,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command in {'validate-trust-profile', 'validate-carrier-profile'}:
         profile_ref_path = Path(str(args.profile_ref)).resolve()
         subject_path = Path(str(args.subject)).resolve()
-        profile_ref = _load_json_object(profile_ref_path)
-        subject = _load_json_object(subject_path)
         try:
+            profile_ref = _load_json_object(profile_ref_path)
+            subject = _load_json_object(subject_path)
             if args.command == 'validate-trust-profile':
                 checks = validate_trust_profile_ref(profile_ref, subject, strict_jsonschema=bool(args.strict_jsonschema))
                 label = 'trust_profile_ref_ok'
             else:
                 checks = validate_carrier_profile_ref(profile_ref, subject, strict_jsonschema=bool(args.strict_jsonschema))
                 label = 'carrier_profile_ref_ok'
-        except (ProfileReferenceError, AssertionError) as exc:
+        except (ProfileReferenceError, AssertionError, CliInputError) as exc:
             print(f'profile_ref_failed:{exc}', file=sys.stderr)
             return 1
         summary = profile_ref_summary(profile_ref)
@@ -405,16 +435,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == 'redaction-receipt':
-        source = _load_json_object(Path(str(args.source_json)))
-        redacted = _load_json_object(Path(str(args.redacted_json)))
-        policy = _load_json_object(Path(str(args.policy_json))) if args.policy_json else None
-        receipt = build_redaction_receipt(
-            source,
-            redacted,
-            policy=policy,
-            source_label=str(args.source_label),
-            redacted_label=str(args.redacted_label),
-        )
+        try:
+            source = _load_json_object(Path(str(args.source_json)))
+            redacted = _load_json_object(Path(str(args.redacted_json)))
+            policy = _load_json_object(Path(str(args.policy_json))) if args.policy_json else None
+            receipt = build_redaction_receipt(
+                source,
+                redacted,
+                policy=policy,
+                source_label=str(args.source_label),
+                redacted_label=str(args.redacted_label),
+            )
+        except (CliInputError, ValueError) as exc:
+            return _failed('redaction_receipt_failed', exc)
         print(json.dumps(receipt, indent=2, sort_keys=True))
         return 0
 
@@ -425,31 +458,37 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == 'snapshot-manifest':
         files = []
-        for item in args.file:
-            path = Path(str(item))
-            value = json.loads(path.read_text(encoding='utf-8'))
-            artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
-            files.append({'path': str(path), 'artifact_type': str(artifact_type or ''), 'schema': '', 'public_safe': True, 'value': value})
-        manifest = build_public_snapshot_manifest(files, snapshot_name=str(args.snapshot_name), snapshot_version=str(args.snapshot_version))
+        try:
+            for item in args.file:
+                path = Path(str(item))
+                value = _load_json_value(path)
+                artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
+                files.append({'path': str(path), 'artifact_type': str(artifact_type or ''), 'schema': '', 'public_safe': True, 'value': value})
+            manifest = build_public_snapshot_manifest(files, snapshot_name=str(args.snapshot_name), snapshot_version=str(args.snapshot_version))
+        except (CliInputError, ValueError) as exc:
+            return _failed('snapshot_manifest_failed', exc)
         print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == 'scope-fidelity':
         if args.approved_spec:
             approved_path = Path(str(args.approved_spec))
-            spec = _load_json_object(approved_path)
-            report = build_scope_fidelity_report_from_approved_spec(spec, source_artifact=args.source_artifact or str(approved_path))
+            try:
+                spec = _load_json_object(approved_path)
+                report = build_scope_fidelity_report_from_approved_spec(spec, source_artifact=args.source_artifact or str(approved_path))
+            except (CliInputError, ValueError) as exc:
+                return _failed('scope_fidelity_failed', exc)
         else:
             if not args.target:
                 print('scope-fidelity requires --approved-spec or --target', file=sys.stderr)
                 return 2
             plan = []
             for item in args.plan_step_json:
-                value = json.loads(str(item))
-                if not isinstance(value, dict):
-                    print('--plan-step-json must decode to a JSON object', file=sys.stderr)
-                    return 2
-                plan.append(value)
+                try:
+                    value = _parse_json_object(str(item), source='--plan-step-json')
+                    plan.append(value)
+                except CliInputError as exc:
+                    return _failed('scope_fidelity_failed', exc)
             target_in_scope = None if args.target_in_scope == 'unknown' else args.target_in_scope == 'true'
             report = build_scope_fidelity_report(
                 target=str(args.target),
@@ -477,7 +516,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if _require_guard_requested(args):
             try:
                 _verify_required_guard_for_manifest(args, manifest_path, require_lifecycle=True)
-            except SecureBundleError as exc:
+            except (SecureBundleError, CliInputError) as exc:
                 print(f'review_lifecycle_failed:{exc}', file=sys.stderr)
                 return 1
         try:
