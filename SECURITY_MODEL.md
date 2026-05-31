@@ -107,7 +107,7 @@ not public verification and it is not non-repudiation.
 
 Future public export may add a separate profile such as an Ed25519 root
 signature. That is intentionally out of scope for the current SCLite 1.0
-release-candidate path.
+release line.
 
 ## Runtime And Policy Boundary
 

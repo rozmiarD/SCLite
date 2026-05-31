@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 1.0.0rc1](https://img.shields.io/badge/package-sclite--core%201.0.0rc1-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.0rc1/)
+[![Package: sclite-core 1.0.0](https://img.shields.io/badge/package-sclite--core%201.0.0-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.0/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -11,15 +11,15 @@ Lightweight Security Contract Layer for auditable AI/security contract lifecycle
 
 SCLite's canonical lifecycle separates what an agent wants, what policy allows,
 what was approved, what was executed, and what can be proven. The published
-1.0 release candidate freezes one review-lifecycle/review-bundle front door and lets active consumers
+1.0 stable release freezes one review-lifecycle/review-bundle front door and lets active consumers
 materialize a canonical review bundle without adding runtime, adapter, PKI, or
 policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
-- Version: `1.0.0rc1`
-- Status: **published 1.0 release candidate: frozen lifecycle/review and guarded verification surface**
-- Latest published package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`)
+- Version: `1.0.0`
+- Status: **published 1.0 stable release: frozen lifecycle/review and guarded verification surface**
+- Latest published package: `sclite-core==1.0.0`
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -44,7 +44,7 @@ SCLite's core is a **contract/review lifecycle**, not an execution engine. Runti
 | v0.7 alpha surface collapse | Curated lifecycle/review-bundle root API plus materialization for active consumers | Delivered migration baseline |
 | v0.8 alpha legacy retirement | Removes the superseded proof-trace product path after consumer migration | Published predecessor baseline |
 | v0.8 beta surface freeze | Freezes the lifecycle/review front door with retained contract identifiers | Published predecessor beta line |
-| v1.0 release candidate | Freezes security profiles, Kernel Guard golden vectors, security regression gate, and verifier-result contract | Published current release candidate |
+| v1.0 stable release | Freezes security profiles, Kernel Guard golden vectors, security regression gate, verifier-result contract, developer gate, and top-level public API | Published current stable release |
 
 ## What problem does SCLite solve?
 
@@ -215,7 +215,7 @@ development:
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-It is not an installed/current SCLite surface in the 1.0 release candidate. Ravenclaw
+It is not an installed/current SCLite surface in the 1.0 stable release. Ravenclaw
 has moved its public proof projection to the current lifecycle/review-bundle
 model; retained schema identifiers such as `review_record.v0.1` identify
 current formats and are not compatibility product lines.
@@ -225,7 +225,7 @@ integrity chain, compatibility notes, and explicit security boundaries. See
 [`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
 [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) for the frozen
 security profile meanings, Kernel Guard transcript/canonicalization freeze,
-and replay/non-claim boundaries for the 1.0 release-candidate path.
+and replay/non-claim boundaries for the 1.0 release line.
 
 ## Project docs
 
@@ -253,7 +253,7 @@ and replay/non-claim boundaries for the 1.0 release-candidate path.
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==1.0.0rc1
+python -m pip install sclite-core==1.0.0
 ```
 
 Install directly from GitHub:

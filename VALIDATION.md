@@ -158,7 +158,7 @@ The frozen top-level Python import surface for the 1.0 line is documented in
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the 1.0 release-candidate line. Consumers may
+boundary for GovEngine and Ravenclaw on the 1.0 stable line. Consumers may
 rely on the canonical `review_bundle` directory shape, the
 `review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
 profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`
@@ -180,7 +180,7 @@ Expected result:
 - GovEngine integration fixture passes with `--fail-on review`;
 - local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation confirms the published `1.0.0rc1` release-candidate package line;
+- public truth validation confirms the published `1.0.0` stable package line;
 - optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - secure-bundle verification fails closed on missing guard, loose lifecycle,

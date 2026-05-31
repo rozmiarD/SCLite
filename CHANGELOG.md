@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+No unreleased changes.
+
+## 1.0.0 - Stable lifecycle and guarded verification surface
+
+- published `sclite-core==1.0.0` package line as the first stable SCLite
+  release.
+- Stabilizes the lifecycle/review and guarded verification surface introduced
+  in `1.0.0rc1` without adding runtime, replay-store, PKI, KMS, policy, or
+  carrier-adapter scope.
 - Cleans up 1.0 release-candidate documentation truth around the retired
   proof-trace path and guarded sidecar examples.
 - Adds shared JSON input handling so malformed local JSON files produce
