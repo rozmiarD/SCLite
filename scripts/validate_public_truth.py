@@ -18,8 +18,8 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '1.0.0rc1'
-EXPECTED_RELEASE_LABEL = '1.0.0-rc.1'
+EXPECTED_VERSION = '1.0.0'
+EXPECTED_RELEASE_LABEL = '1.0.0'
 LATEST_PUBLISHED_VERSION = EXPECTED_VERSION
 LATEST_PUBLISHED_LABEL = EXPECTED_RELEASE_LABEL
 EXPECTED_DISTRIBUTION = 'sclite-core'
@@ -157,9 +157,9 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'v1.0 release candidate')
-    _require(errors, 'README.md', readme, 'Published current release candidate')
-    _require(errors, 'README.md', readme, 'It is not an installed/current SCLite surface in the 1.0 release candidate.')
+    _require(errors, 'README.md', readme, 'v1.0 stable release')
+    _require(errors, 'README.md', readme, 'Published current stable release')
+    _require(errors, 'README.md', readme, 'It is not an installed/current SCLite surface in the 1.0 stable release.')
     _require(errors, 'README.md', readme, 'When `--guard` is provided explicitly, SCLite resolves it relative to the')
     _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are resolved relative to the caller')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
@@ -167,9 +167,11 @@ def _assert_current_claim_docs(
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
-    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 1.0 release candidate')
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 1.0 stable release')
     if 'It is not an installed/current SCLite surface in the 0.8 beta release.' in readme:
         errors.append('README.md:stale_current_release_wording:0.8 beta release')
+    if 'published 1.0 release candidate' in readme:
+        errors.append('README.md:stale_current_release_wording:1.0 release candidate')
     if 'The current 0.6 alpha line' in integration_guide:
         errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 
@@ -191,7 +193,9 @@ def _assert_roadmap_release_truth(errors: list[str], roadmap: str) -> None:
     _require(errors, 'ROADMAP.md', roadmap, '## 0.8.0-beta — Freeze lifecycle/review public responsibility')
     _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor beta line.')
     _require(errors, 'ROADMAP.md', roadmap, '## 1.0.0-rc.1 — Freeze guarded verification contracts')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current release candidate.')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor release candidate.')
+    _require(errors, 'ROADMAP.md', roadmap, '## 1.0.0 — Stable lifecycle/review and guarded verification surface')
+    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current stable release.')
 
 
 def _stable_import_errors() -> list[str]:
@@ -398,7 +402,7 @@ def collect_errors() -> list[str]:
     )
     _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'published 1.0 release candidate')
+    _require(errors, 'README.md', readme, 'published 1.0 stable release')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
@@ -412,7 +416,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'SPEC.md', spec, 'verification_result.v1')
     _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
     _require(errors, 'README.md', readme, 'verification_result')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Guarded verification contract release candidate')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - Stable lifecycle and guarded verification surface')
     _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
@@ -420,7 +424,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')
     _require(errors, 'CONTRIBUTING.md', _read('CONTRIBUTING.md'), 'define / validate / hash / bind / redact / review / verify')
     _require(errors, 'SPEC.md', spec, 'define / validate / hash / bind / redact / review / verify')
-    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published release-candidate package is `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
+    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published stable package is `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
     _require(errors, 'README.md', readme, 'SECURITY_MODEL.md')
     _require(errors, 'README.md', readme, 'docs/SECURITY_PROFILES.md')
     _require(errors, 'SPEC.md', spec, 'Any incompatible change must use a new profile name')

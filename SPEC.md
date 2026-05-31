@@ -1,11 +1,11 @@
 # SCLite Draft Specification
 
-Status: **published 1.0.0-rc.1: frozen lifecycle/review and guarded verification surface**.
-Current package is `sclite-core==1.0.0rc1`, and the Python import package remains
+Status: **published 1.0.0 stable: frozen lifecycle/review and guarded verification surface**.
+Current package is `sclite-core==1.0.0`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
-v0.5 review-bundle packaging, and guarded-strict verification. The 1.0 release
-candidate freezes that substrate as the root API and supports canonical
+v0.5 review-bundle packaging, and guarded-strict verification. The 1.0 stable
+release freezes that substrate as the root API and supports canonical
 review-bundle materialization for active consumers without adding runtime,
 adapter, PKI, or policy authority.
 
@@ -99,7 +99,7 @@ Security posture modes are explicit:
 - `public_signed_export`: future Ed25519/root-anchor export mode, not
   implemented here.
 
-The security model is frozen for the 1.0 release-candidate path in
+The security model is frozen for the 1.0 release line in
 [`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
 [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md). For
 `kernel_guard_hmac_v1`, SCLite canonical JSON settings, per-entry transcript
@@ -273,7 +273,7 @@ scope/input -> policy decision -> prepared execution spec -> approved execution 
 ```
 
 The legacy builders, fixture validators, schemas owned only by this trace, and
-its fixture directories are not part of the `1.0.0-rc.1` installed/current
+its fixture directories are not part of the `1.0.0` installed/current
 surface. Current work uses the lifecycle/review-bundle model above. Generic
 redaction, snapshot-manifest, Scope Fidelity, and review-record schemas remain
 because the current lifecycle still uses them; their schema suffixes are

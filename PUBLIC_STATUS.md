@@ -4,13 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.0rc1`.
-- Release label: `1.0.0-rc.1`.
-- Status: published release candidate for the frozen lifecycle/review and guarded verification substrate.
+- Current release version: `1.0.0`.
+- Release label: `1.0.0`.
+- Status: published stable release for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`).
+- Latest published PyPI package: `sclite-core==1.0.0` (`1.0.0`).
 
 ## Current review path
 
@@ -66,4 +66,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-The published `0.8.0-alpha` line removed the superseded proof-trace product path after consumer migration. The published `0.8.0-beta` line freezes that same lifecycle/review surface. The published `1.0.0-rc.1` line adds release-candidate hardening for security profile docs, Kernel Guard golden vectors, security regression gates, and the `verification_result.v1` contract while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
+The published `0.8.0-alpha` line removed the superseded proof-trace product path after consumer migration. The published `0.8.0-beta` line freezes that same lifecycle/review surface. The published `1.0.0-rc.1` line added release-candidate hardening for security profile docs, Kernel Guard golden vectors, security regression gates, and the `verification_result.v1` contract. The published `1.0.0` line stabilizes that surface with clean CLI input failures, a canonical developer gate, and a frozen top-level Python API while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.

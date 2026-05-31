@@ -24,10 +24,10 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 1.0.0-rc.1
+## Current baseline: 1.0.0
 
-Current package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`).
-Latest published public package: `sclite-core==1.0.0rc1` (`1.0.0-rc.1`).
+Current package: `sclite-core==1.0.0`.
+Latest published public package: `sclite-core==1.0.0`.
 
 Current lifecycle:
 
@@ -35,13 +35,14 @@ Current lifecycle:
 intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
 ```
 
-The v0.5.x line remains the stable review-bundle shape. The 1.0 release
-candidate freezes the lifecycle/review-bundle path as the single curated front
+The v0.5.x line remains the stable review-bundle shape. The 1.0 stable
+release freezes the lifecycle/review-bundle path as the single curated front
 door, includes the deterministic review-bundle materializer used by active
 consumers, retains the alpha removal of the superseded proof-trace product path
-after controlled consumer migration, and adds guarded verification release
-candidate evidence: security profile docs, Kernel Guard golden vectors,
-security regression gate, and `verification_result.v1`. It verifies
+after controlled consumer migration, and stabilizes guarded verification
+evidence: security profile docs, Kernel Guard golden vectors,
+security regression gate, `verification_result.v1`, clean CLI input failures,
+the canonical developer gate, and the frozen top-level public API. It verifies
 schema-backed artifacts, canonical SHA-256 descriptors, ordered hash-chain
 manifests, lifecycle role order, digest bindings between intent, policy,
 execution contract, ticket, receipt, and evidence, and packaged
@@ -81,7 +82,7 @@ replay store, or protection from a malicious kernel.
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2 -> 1.0.0rc1
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2 -> 1.0.0rc1 -> 1.0.0
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
@@ -561,7 +562,7 @@ Candidate scope:
 
 ## 1.0.0-rc.1 — Freeze guarded verification contracts
 
-Status: published current release candidate.
+Status: published predecessor release candidate.
 
 Delivered:
 
@@ -576,6 +577,23 @@ Delivered:
    runtime-enforcement statuses as machine-readable claims/non-claims.
 5. Preserve SCLite's no-runtime, no-replay-store, no-PKI, no-KMS, and
    no-carrier-adapter boundary.
+
+## 1.0.0 — Stable lifecycle/review and guarded verification surface
+
+Status: published current stable release.
+
+Delivered:
+
+1. Promote the guarded verification contract from RC to stable without adding
+   runtime, replay-store, PKI, KMS, policy, or carrier-adapter scope.
+2. Preserve strict lifecycle, `kernel_guard_hmac_v1` sidecar verification,
+   golden vectors, security regression gate, and `verification_result.v1`.
+3. Add clean CLI input failures for malformed local JSON/path inputs so users
+   receive labeled command errors instead of tracebacks.
+4. Add `scripts/dev_gate.sh` and `make validate` as the canonical local
+   development gate.
+5. Freeze the top-level Python public API in `docs/PUBLIC_API.md` with a
+   regression test.
 
 ## Release posture
 
