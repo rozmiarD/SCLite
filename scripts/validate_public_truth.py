@@ -158,12 +158,17 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
     _require(errors, 'README.md', readme, 'v1.0 release candidate')
     _require(errors, 'README.md', readme, 'Published current release candidate')
+    _require(errors, 'README.md', readme, 'It is not an installed/current SCLite surface in the 1.0 release candidate.')
+    _require(errors, 'README.md', readme, 'When `--guard` is provided explicitly, SCLite resolves it relative to the')
+    _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are resolved relative to the caller')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current package: `sclite-core=={version}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 1.0 release candidate')
+    if 'It is not an installed/current SCLite surface in the 0.8 beta release.' in readme:
+        errors.append('README.md:stale_current_release_wording:0.8 beta release')
     if 'The current 0.6 alpha line' in integration_guide:
         errors.append('docs/INTEGRATION_GUIDE.md:stale_current_alpha_line:0.6')
 

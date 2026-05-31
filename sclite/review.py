@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
+from ._json import load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .hosts import extract_host
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
@@ -23,10 +23,7 @@ def _utc_now() -> str:
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
-    value = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise ReviewRecordError(f'{path}: JSON root is not an object')
-    return value
+    return load_json_object(path, error_cls=ReviewRecordError)
 
 
 def _schema_ref(value: Mapping[str, Any]) -> str:

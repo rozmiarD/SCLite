@@ -215,7 +215,7 @@ development:
 scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
 ```
 
-It is not an installed/current SCLite surface in the 0.8 beta release. Ravenclaw
+It is not an installed/current SCLite surface in the 1.0 release candidate. Ravenclaw
 has moved its public proof projection to the current lifecycle/review-bundle
 model; retained schema identifiers such as `review_record.v0.1` identify
 current formats and are not compatibility product lines.
@@ -290,21 +290,27 @@ Optionally verify a GovEngine/KERNEL-domain guard sidecar:
 SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
   sclite verify-guarded-chain \
   sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
-  --guard kernel_guard_manifest.json \
+  --guard /path/to/kernel_guard_manifest.json \
   --strict-lifecycle
 ```
 
 `kernel_guard_hmac_v1` authenticates a manifest and its entries only inside the
 domain that knows the HMAC secret. It is not PKI, non-repudiation, public
 identity, replay prevention, or proof that a runtime behaved correctly.
+When `--guard` is provided explicitly, SCLite resolves it relative to the
+current working directory, not relative to the bundle directory. Omitting
+`--guard` uses `kernel_guard_manifest.json` next to the manifest or review
+bundle target.
 
 For runtime-consumable guarded bundles, use the fail-closed secure profile
-instead of assembling the weaker pieces manually:
+instead of assembling the weaker pieces manually. The guard sidecar is produced
+by the trusted host/GovEngine domain and is not committed in the public example
+bundle:
 
 ```bash
 SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
   sclite verify-secure-bundle examples/govengine-integration \
-  --guard kernel_guard_manifest.json
+  --guard /path/to/kernel_guard_manifest.json
 ```
 
 `verify-secure-bundle` is the `guarded-strict` profile. It always verifies the

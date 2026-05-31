@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
+from sclite._json import load_json_object
 from sclite.artifacts import ARTIFACT_CANONICALIZATION_VERSION, ARTIFACT_HASH_ALGORITHM, build_artifact_hash, validate_artifact
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
@@ -136,10 +137,7 @@ def build_artifact_chain_manifest(
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
-    value = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise ChainVerificationError(f'{path}: JSON root is not an object')
-    return value
+    return load_json_object(path, error_cls=ChainVerificationError)
 
 
 def _link_descriptor(value: Mapping[str, Any], link_name: str) -> Mapping[str, Any]:

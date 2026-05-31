@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from ._json import load_json_object
 from .integrity import build_artifact_chain_manifest
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 
@@ -29,10 +30,7 @@ class ReviewBundleError(ValueError):
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
-    value = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise ReviewBundleError(f'{path}: JSON root is not an object')
-    return value
+    return load_json_object(path, error_cls=ReviewBundleError)
 
 
 def _bundle_path(bundle_dir: Path | str) -> Path:

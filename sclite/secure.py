@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any, Dict
 
+from ._json import load_json_object
 from .kernel_guard import KernelGuardError, verify_kernel_guard_manifest
 from .verification_result import build_guarded_strict_verification_result
 
@@ -18,10 +18,7 @@ class SecureBundleError(ValueError):
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
-    value = json.loads(path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise SecureBundleError(f'{path}: JSON root is not an object')
-    return value
+    return load_json_object(path, error_cls=SecureBundleError)
 
 
 def resolve_manifest_path(target: Path | str) -> Path:

@@ -128,7 +128,7 @@ For runtime-consumable guarded bundles, prefer the fail-closed profile:
 ```bash
 SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
 python -m sclite.cli verify-secure-bundle examples/govengine-integration \
-  --guard kernel_guard_manifest.json
+  --guard /path/to/kernel_guard_manifest.json
 ```
 
 `verify-secure-bundle` is `guarded-strict`: artifact-chain verification,
@@ -137,6 +137,13 @@ fail-on-missing-guard. `validate-chain`, `verify-lifecycle`,
 `review-lifecycle`, and `review` also expose `--require-guard` /
 `--fail-on-unguarded` for callers that intentionally want guard preflight on
 those older commands.
+
+Explicit `--guard` paths are resolved relative to the caller's current working
+directory. If `--guard` is omitted, SCLite looks for
+`kernel_guard_manifest.json` next to the manifest or review-bundle target. The
+public `examples/govengine-integration` fixture is intentionally unguarded;
+guard sidecars are produced by the host/GovEngine domain or by tests using
+synthetic local keys.
 
 ## Review-bundle compatibility
 
