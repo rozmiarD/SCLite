@@ -232,6 +232,7 @@ and replay/non-claim boundaries for the 1.0 release-candidate path.
 - [`ROADMAP.md`](ROADMAP.md) — versioned accountability-layer evolution and post-0.5 direction.
 - [`SECURITY_MODEL.md`](SECURITY_MODEL.md) — security guarantees, non-claims, Kernel Guard transcript freeze, replay boundary, and key-rotation boundary.
 - [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) — stable profile matrix for `integrity_only`, `strict_lifecycle`, `guarded_domain_auth`, `guarded-strict`, and host-owned freshness.
+- [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) — frozen top-level Python API exports for the 1.0 line.
 - [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
@@ -271,6 +272,12 @@ python -m pip install -e '.[dev]'
 
 Runtime dependencies are intentionally empty. The `dev` extra installs `pytest` for local tests.
 Python import package remains `sclite`.
+
+Run the canonical local development gate:
+
+```bash
+scripts/dev_gate.sh
+```
 
 ## CLI quickstart
 

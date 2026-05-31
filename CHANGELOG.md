@@ -6,6 +6,10 @@
   proof-trace path and guarded sidecar examples.
 - Adds shared JSON input handling so malformed local JSON files produce
   command-specific CLI failures instead of Python tracebacks.
+- Adds `scripts/dev_gate.sh` and a small Makefile as the canonical local
+  development validation gate.
+- Documents and tests the frozen top-level Python public API surface for the
+  1.0 line.
 
 ## 1.0.0-rc.1 - Guarded verification contract release candidate
 

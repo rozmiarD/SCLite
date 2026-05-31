@@ -37,6 +37,7 @@ PUBLIC_DOCS = (
     'SPEC.md',
     'docs/ARTIFACTS.md',
     'docs/SECURITY_PROFILES.md',
+    'docs/PUBLIC_API.md',
     'docs/GOVENGINE_INTEGRATION_CONTRACT.md',
     'docs/INTEGRATION_GUIDE.md',
     'docs/SCLITE_0_5_FREEZE.md',
@@ -205,7 +206,14 @@ def _stable_import_errors() -> list[str]:
 
 def _curated_root_export_errors() -> list[str]:
     errors: list[str] = []
-    required = ('materialize_review_bundle', 'review_bundle', 'verify_ticket_use')
+    required = (
+        'materialize_review_bundle',
+        'review_bundle',
+        'verify_ticket_use',
+        'verify_secure_bundle',
+        'build_kernel_guard_manifest',
+        'build_guarded_strict_verification_result',
+    )
     forbidden_legacy = (
         'PROOF_TRACE_FILES',
         'build_proof_trace_artifacts',
@@ -218,6 +226,10 @@ def _curated_root_export_errors() -> list[str]:
     for name in forbidden_legacy:
         if name in sclite.__all__:
             errors.append(f'root_api_exports_legacy_surface:{name}')
+    api_doc = _read('docs/PUBLIC_API.md')
+    for name in sclite.__all__:
+        if f'`{name}`' not in api_doc:
+            errors.append(f'public_api_doc_missing_export:{name}')
     return errors
 
 
