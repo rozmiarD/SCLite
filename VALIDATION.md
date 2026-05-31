@@ -8,8 +8,12 @@ The roadmap in `ROADMAP.md` preserves this boundary: scoped-ticket, receipt-boun
 
 ```bash
 python -m pip install -e '.[dev]'
-python -m pytest -q
+scripts/dev_gate.sh
 ```
+
+For Make users, `make validate` delegates to the same gate. The gate runs the
+public validation checklist, strict schema gate, guarded-strict security
+regression gate, public-truth validator, and full pytest.
 
 ## Publication validation gate
 
@@ -145,10 +149,16 @@ public `examples/govengine-integration` fixture is intentionally unguarded;
 guard sidecars are produced by the host/GovEngine domain or by tests using
 synthetic local keys.
 
+## Public Python API
+
+The frozen top-level Python import surface for the 1.0 line is documented in
+[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) and guarded by
+`tests/test_public_api.py`.
+
 ## Review-bundle compatibility
 
 The stable `0.5` review-bundle shape remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the `0.8` beta release. Consumers may
+boundary for GovEngine and Ravenclaw on the 1.0 release-candidate line. Consumers may
 rely on the canonical `review_bundle` directory shape, the
 `review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
 profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`

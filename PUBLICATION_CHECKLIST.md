@@ -26,11 +26,21 @@ History transparency guardrail: never rewrite already-published history to fix a
 Run from the repository root:
 
 ```bash
+scripts/dev_gate.sh
+```
+
+This expands to public validation, strict schema validation, guarded-strict
+security regression tests, public-truth validation, and full pytest. `make
+validate` delegates to the same command.
+
+Equivalent expanded commands:
+
+```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
 scripts/security_regression_gate.sh
 python scripts/validate_public_truth.py
-python -m pytest -q
+python -m pytest -q -p no:cacheprovider
 ```
 
 Before a release-candidate or stable release, confirm the security model and

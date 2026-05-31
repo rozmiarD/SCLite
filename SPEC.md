@@ -84,6 +84,11 @@ explicit:
 non-claims machine-readable and does not add replay state, public identity,
 policy authorization, or runtime enforcement to SCLite.
 
+The stable top-level Python import surface is documented in
+[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md). Patch releases may add new names,
+but removal or rename of those exports is a compatibility change for the 1.0
+line.
+
 Security posture modes are explicit:
 
 - `integrity_only`: SHA-256 artifact-chain consistency.

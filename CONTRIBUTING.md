@@ -13,8 +13,10 @@ python -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[dev]'
-python -m pytest -q
+scripts/dev_gate.sh
 ```
+
+`make validate` runs the same local gate when `make` is available.
 
 ## Boundary rules
 
@@ -38,4 +40,4 @@ For meaningful changes:
 - add or update tests;
 - update `CHANGELOG.md`;
 - update `SPEC.md` or docs when semantics change;
-- run the local validation commands in `PUBLICATION_CHECKLIST.md` before release-oriented work.
+- run `scripts/dev_gate.sh` before release-oriented work.
