@@ -100,14 +100,21 @@ sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_m
 the lifecycle gate on top and requires the exact canonical v0.2 role sequence
 with no extra roles, duplicate roles, or changed order.
 
-## What the verifier checks
+## What the verifiers check
 
-The v0.2 verifier checks more than raw hashes:
+The v0.2 `validate-chain` verifier checks local chain integrity:
 
 - manifest paths cannot escape the artifact root;
 - artifact descriptors match canonical SHA-256 digests;
-- hash-chain links and root digest recompute correctly;
-- lifecycle artifacts appear in the canonical order;
+- hash-chain links and root digest recompute correctly.
+
+`verify-lifecycle` and `validate-chain --strict-lifecycle` add strict lifecycle
+semantics:
+
+- lifecycle artifacts must appear in the canonical order;
+- no extra roles, duplicate roles, or reordered lifecycle roles are accepted;
+- policy, execution contract, ticket, receipt, and evidence digest links are
+  checked across the lifecycle.
 - policy binds the correct intent digest;
 - ticket binds the correct execution contract digest;
 - receipt binds the correct execution ticket and execution contract digests;

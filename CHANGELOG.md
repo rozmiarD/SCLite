@@ -2,7 +2,21 @@
 
 ## Unreleased
 
-No unreleased changes.
+- Keeps `validate-chain` as integrity-only/generic chain verification by
+  running lifecycle semantic checks only through `verify-lifecycle`,
+  `validate-chain --strict-lifecycle`, or other `require_lifecycle=True`
+  call paths.
+- Hardens schema resolution so artifact-provided `schema_ref` values resolve
+  to packaged SCLite schemas by default; external schema files now require
+  explicit caller opt-in.
+- Registers the packaged `kernel_guard_hmac_v1` schema in the canonical schema
+  registry and adds coverage that the registry matches packaged schema files.
+- Strengthens the named GovEngine integration surface test with fixture-level
+  API and CLI compatibility smokes.
+- Makes repository gate scripts portable across environments that expose
+  `python3` but not `python`.
+- Adds a repository-local verification report for the 2026-06-01 external
+  audit hypothesis.
 
 ## 1.0.0 - Stable lifecycle and guarded verification surface
 

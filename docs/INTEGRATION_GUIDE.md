@@ -109,7 +109,11 @@ from pathlib import Path
 from sclite.integrity import verify_artifact_chain_manifest
 
 # manifest is artifact_chain_manifest.json loaded as a dict.
-result = verify_artifact_chain_manifest(manifest, root=Path("bundle-root"))
+result = verify_artifact_chain_manifest(
+    manifest,
+    root=Path("bundle-root"),
+    require_lifecycle=True,
+)
 assert result["status"] == "passed"
 assert "ticket_binds_execution_contract" in result["semantic_checks"]
 ```

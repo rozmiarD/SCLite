@@ -120,10 +120,11 @@ descriptors plus an ordered hash-linked chain. `validate-chain` verifies local
 chain integrity; `verify-lifecycle` additionally requires the exact canonical
 lifecycle role sequence with no extra or duplicate roles. Lifecycle semantics
 then check policy->intent binding, execution contract->intent/policy binding,
-ticket->execution contract binding, receipt->ticket/contract binding,
-evidence->receipt/ticket binding, and manifest path containment. It detects
-local bundle tampering and lifecycle-link drift, but it does not prove signer
-identity, legal authorization, runtime enforcement, replay freshness, or
+ticket->execution contract binding, and receipt/evidence bindings. Manifest
+path containment is part of both generic chain validation and strict lifecycle
+verification. It detects local bundle tampering and lifecycle-link drift, but
+it does not prove signer identity, legal authorization, runtime enforcement,
+replay freshness, or
 transparency-log inclusion.
 
 The optional Kernel Guard sidecar adds HMAC-SHA256 authenticity inside a
