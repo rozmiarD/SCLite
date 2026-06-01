@@ -88,6 +88,13 @@ def test_v02_chain_manifest_verifies_fixture() -> None:
     assert result['entry_count'] == 6
     assert result['checked_entries'][0] == 'intent_contract'
     assert result['checked_entries'][-1] == 'evidence_contract'
+    assert result['semantic_checks'] == []
+
+
+def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    result = verify_artifact_chain_manifest(manifest, root=FIXTURE, require_lifecycle=True)
+
     assert result['semantic_checks'] == [
         'role_order',
         'policy_binds_intent',
@@ -114,7 +121,12 @@ def test_v02_lifecycle_detects_ticket_execution_contract_digest_mismatch(tmp_pat
     manifest_path = _write_mutated_bundle(tmp_path, artifacts)
 
     with pytest.raises(ChainVerificationError, match='ticket integrity execution_contract digest mismatch'):
-        verify_artifact_chain_manifest(json.loads(manifest_path.read_text()), root=tmp_path, validate_schemas=False)
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
 
 
 def test_v02_lifecycle_detects_receipt_ticket_mismatch(tmp_path: Path) -> None:
@@ -123,7 +135,12 @@ def test_v02_lifecycle_detects_receipt_ticket_mismatch(tmp_path: Path) -> None:
     manifest_path = _write_mutated_bundle(tmp_path, artifacts)
 
     with pytest.raises(ChainVerificationError, match='receipt-ticket digest mismatch'):
-        verify_artifact_chain_manifest(json.loads(manifest_path.read_text()), root=tmp_path, validate_schemas=False)
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
 
 
 def test_v02_lifecycle_detects_evidence_receipt_mismatch(tmp_path: Path) -> None:
@@ -132,7 +149,12 @@ def test_v02_lifecycle_detects_evidence_receipt_mismatch(tmp_path: Path) -> None
     manifest_path = _write_mutated_bundle(tmp_path, artifacts)
 
     with pytest.raises(ChainVerificationError, match='evidence-receipt digest mismatch'):
-        verify_artifact_chain_manifest(json.loads(manifest_path.read_text()), root=tmp_path, validate_schemas=False)
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
 
 
 def test_v02_lifecycle_detects_role_order_mismatch(tmp_path: Path) -> None:
@@ -232,6 +254,26 @@ def test_validate_chain_cli() -> None:
     assert proc.stdout.startswith('artifact_chain_ok:6:')
 
 
+def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'validate-chain',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--format',
+            'json',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert json.loads(proc.stdout)['semantic_checks'] == []
+
+
 def test_verify_lifecycle_cli_alias() -> None:
     proc = subprocess.run(
         [sys.executable, '-m', 'sclite.cli', 'verify-lifecycle', str(FIXTURE / 'artifact_chain_manifest.json')],
@@ -242,3 +284,23 @@ def test_verify_lifecycle_cli_alias() -> None:
     )
 
     assert proc.stdout.startswith('lifecycle_ok:6:')
+
+
+def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'verify-lifecycle',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--format',
+            'json',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert 'ticket_binds_execution_contract' in json.loads(proc.stdout)['semantic_checks']

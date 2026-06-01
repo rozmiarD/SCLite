@@ -1,21 +1,23 @@
 .PHONY: dev validate test public-validation strict-schema security-regression public-truth
 
+PYTHON ?= $(shell if [ -x .venv/bin/python ]; then printf '%s' .venv/bin/python; elif command -v python >/dev/null 2>&1; then printf '%s' python; else printf '%s' python3; fi)
+
 dev: validate
 
 validate:
-	scripts/dev_gate.sh
+	PYTHON=$(PYTHON) scripts/dev_gate.sh
 
 test:
-	python -m pytest -q
+	$(PYTHON) -m pytest -q
 
 public-validation:
-	scripts/public_validation_gate.sh
+	PYTHON=$(PYTHON) scripts/public_validation_gate.sh
 
 strict-schema:
-	scripts/strict_schema_gate.sh
+	PYTHON=$(PYTHON) scripts/strict_schema_gate.sh
 
 security-regression:
-	scripts/security_regression_gate.sh
+	PYTHON=$(PYTHON) scripts/security_regression_gate.sh
 
 public-truth:
-	python scripts/validate_public_truth.py
+	$(PYTHON) scripts/validate_public_truth.py

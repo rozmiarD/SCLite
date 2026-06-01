@@ -243,7 +243,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         artifact_path = Path(str(args.artifact))
         try:
             value = _load_json_value(artifact_path)
-            validate_artifact(value, str(args.schema), strict_jsonschema=bool(args.strict_jsonschema))
+            validate_artifact(
+                value,
+                str(args.schema),
+                strict_jsonschema=bool(args.strict_jsonschema),
+                allow_external_schema_refs=True,
+            )
         except (CliInputError, ValueError) as exc:
             return _failed('security_contract_artifact_failed', exc)
         print(f'security_contract_artifact_ok:{artifact_path}')
@@ -254,7 +259,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             value = _load_json_value(artifact_path)
             if args.schema:
-                validate_artifact(value, str(args.schema))
+                validate_artifact(value, str(args.schema), allow_external_schema_refs=True)
             descriptor = build_artifact_hash(value)
         except (CliInputError, ValueError) as exc:
             return _failed('artifact_hash_failed', exc)

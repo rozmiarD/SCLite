@@ -25,6 +25,7 @@ SCHEMA_FILES = {
     'evidence_contract.v0.2': 'evidence_contract.v0.2.schema.json',
     'artifact_chain_manifest.v0.2': 'artifact_chain_manifest.v0.2.schema.json',
     'verification_result.v1': 'verification_result.v1.schema.json',
+    'kernel_guard_hmac_v1': 'kernel_guard_hmac_v1.schema.json',
     'trust_profile_ref.v0.1': 'trust_profile_ref.v0.1.schema.json',
     'carrier_profile_ref.v0.1': 'carrier_profile_ref.v0.1.schema.json',
 }
@@ -112,24 +113,56 @@ def validate_json_schema_value(schema: Mapping[str, Any], value: Any, path: str 
                 validate_json_schema_value(item_schema, item, f'{path}[{idx}]')
 
 
-def _resolve_schema_ref(schema_ref: str, *, root: Path | None = None) -> Path:
+def _packaged_schema_path(schema_ref: str) -> Path | None:
     raw_ref = str(schema_ref or '')
+    basename = Path(raw_ref).name
+    if raw_ref in SCHEMA_FILES:
+        return schema_dir() / SCHEMA_FILES[raw_ref]
+    if basename in set(SCHEMA_FILES.values()):
+        return schema_dir() / basename
+    return None
+
+
+def _resolve_schema_ref(
+    schema_ref: str,
+    *,
+    root: Path | None = None,
+    allow_external_schema_refs: bool = False,
+) -> Path:
+    raw_ref = str(schema_ref or '')
+    packaged = _packaged_schema_path(raw_ref)
+    if packaged is not None:
+        return packaged
+    if not allow_external_schema_refs:
+        raise JsonSchemaValidationError(
+            f'{schema_ref}: not a packaged SCLite schema; '
+            'external schema refs require allow_external_schema_refs=True'
+        )
+
     candidates: List[Path] = []
+    raw_path = Path(raw_ref)
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
     if root is not None:
         candidates.append(root / raw_ref)
     candidates.append(repo_root() / raw_ref)
-    basename = Path(raw_ref).name
-    if raw_ref in SCHEMA_FILES:
-        basename = SCHEMA_FILES[raw_ref]
-    candidates.append(schema_dir() / basename)
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    return candidates[-1]
+    raise JsonSchemaValidationError(f'{schema_ref}: schema file not found')
 
 
-def load_json_schema(schema_ref: str, *, root: Path | None = None) -> Dict[str, Any]:
-    schema_path = _resolve_schema_ref(schema_ref, root=root)
+def load_json_schema(
+    schema_ref: str,
+    *,
+    root: Path | None = None,
+    allow_external_schema_refs: bool = False,
+) -> Dict[str, Any]:
+    schema_path = _resolve_schema_ref(
+        schema_ref,
+        root=root,
+        allow_external_schema_refs=allow_external_schema_refs,
+    )
     value = json.loads(schema_path.read_text(encoding='utf-8'))
     if not isinstance(value, dict):
         raise JsonSchemaValidationError(f'{schema_ref}: schema root is not an object')
@@ -143,8 +176,13 @@ def validate_schema_ref(
     root: Path | None = None,
     path: str = '$',
     strict_jsonschema: bool = False,
+    allow_external_schema_refs: bool = False,
 ) -> None:
-    schema = load_json_schema(schema_ref, root=root)
+    schema = load_json_schema(
+        schema_ref,
+        root=root,
+        allow_external_schema_refs=allow_external_schema_refs,
+    )
     if strict_jsonschema:
         try:
             import jsonschema
@@ -162,14 +200,29 @@ def validate_schema_ref(
     validate_json_schema_value(schema, value, path=path)
 
 
-def validate_artifact(value: Any, schema_name: str, *, root: Path | None = None, strict_jsonschema: bool = False) -> None:
+def validate_artifact(
+    value: Any,
+    schema_name: str,
+    *,
+    root: Path | None = None,
+    strict_jsonschema: bool = False,
+    allow_external_schema_refs: bool = False,
+) -> None:
     """Validate one artifact against a named SCL schema.
 
     By default this uses SCLite's dependency-free schema subset validator.
     Pass strict_jsonschema=True to use Draft 2020-12 validation via the
-    optional jsonschema extra.
+    optional jsonschema extra. Bundle-provided schema references resolve to
+    packaged SCLite schemas by default; set allow_external_schema_refs=True
+    only for caller-controlled local schema paths.
     """
-    validate_schema_ref(schema_name, value, root=root, strict_jsonschema=strict_jsonschema)
+    validate_schema_ref(
+        schema_name,
+        value,
+        root=root,
+        strict_jsonschema=strict_jsonschema,
+        allow_external_schema_refs=allow_external_schema_refs,
+    )
 
 
 def canonicalize_artifact(value: Any) -> str:

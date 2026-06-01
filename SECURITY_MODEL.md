@@ -41,6 +41,19 @@ compatibility-critical. SCLite must not silently change:
 Any incompatible change requires a new profile name, for example
 `kernel_guard_hmac_v2`.
 
+## Schema Source Boundary
+
+Artifact `schema_ref` values are treated as contract identifiers, not as
+authority to load arbitrary local files from an untrusted bundle. By default
+SCLite resolves schema references to packaged SCLite schemas only, accepting
+canonical schema ids such as `execution_ticket.v0.3` and packaged refs such as
+`schemas/execution_ticket.v0.3.schema.json`.
+
+External schema files are available only through explicit caller opt-in in the
+Python API. CLI `validate-artifact --schema PATH` remains an operator-supplied
+local validation action, but artifact-chain and review-bundle verification do
+not let bundle-provided `schema_ref` values override packaged schemas.
+
 ## Kernel Guard HMAC v1
 
 `kernel_guard_hmac_v1` is a sidecar profile. It does not mutate artifact
