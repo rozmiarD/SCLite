@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, Mapping
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
 ARTIFACT_HASH_ALGORITHM = 'sha256'
@@ -115,11 +115,11 @@ def validate_json_schema_value(schema: Mapping[str, Any], value: Any, path: str 
 
 def _packaged_schema_path(schema_ref: str) -> Path | None:
     raw_ref = str(schema_ref or '')
-    basename = Path(raw_ref).name
     if raw_ref in SCHEMA_FILES:
         return schema_dir() / SCHEMA_FILES[raw_ref]
-    if basename in set(SCHEMA_FILES.values()):
-        return schema_dir() / basename
+    for filename in set(SCHEMA_FILES.values()):
+        if raw_ref in {filename, f'schemas/{filename}'}:
+            return schema_dir() / filename
     return None
 
 
@@ -139,16 +139,18 @@ def _resolve_schema_ref(
             'external schema refs require allow_external_schema_refs=True'
         )
 
-    candidates: List[Path] = []
     raw_path = Path(raw_ref)
-    if raw_path.is_absolute():
-        candidates.append(raw_path)
     if root is not None:
-        candidates.append(root / raw_ref)
-    candidates.append(repo_root() / raw_ref)
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
+        base = Path(root).resolve()
+        candidate = raw_path.resolve() if raw_path.is_absolute() else (base / raw_path).resolve()
+        try:
+            candidate.relative_to(base)
+        except ValueError as exc:
+            raise JsonSchemaValidationError(f'{schema_ref}: external schema path escapes root') from exc
+    else:
+        candidate = raw_path.resolve()
+    if candidate.exists():
+        return candidate
     raise JsonSchemaValidationError(f'{schema_ref}: schema file not found')
 
 

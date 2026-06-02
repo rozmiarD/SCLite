@@ -122,6 +122,19 @@ def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: 
     validate_artifact(verification_result, 'verification_result.v1', root=ROOT)
 
 
+def test_secure_bundle_cli_no_schema_still_validates_guard_sidecar_shape(tmp_path: Path) -> None:
+    bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
+    guard_path = _write_guard(bundle)
+    guard = _load_guard(guard_path)
+    guard['entry_guards'][0]['unexpected'] = 'schema-drift'
+    _write_json(guard_path, guard)
+
+    proc = _run(['verify-secure-bundle', str(bundle), '--no-schema'])
+
+    assert proc.returncode == 1
+    assert 'secure_bundle_failed:kernel guard schema validation failed' in proc.stderr
+
+
 def test_secure_bundle_without_guard_fails_closed() -> None:
     proc = _run(['verify-secure-bundle', str(GOVENGINE_BUNDLE)])
 

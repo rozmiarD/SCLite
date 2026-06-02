@@ -3,12 +3,14 @@ from __future__ import annotations
 import copy
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+import sclite.kernel_guard as kernel_guard_module
 from sclite.artifacts import validate_artifact
 from sclite.kernel_guard import (
     KERNEL_GUARD_SCHEMA_REF,
@@ -115,6 +117,62 @@ def test_kernel_guard_rejects_entry_tag_tampering() -> None:
         verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
 
 
+def test_kernel_guard_enforces_key_id_even_without_sidecar_schema_validation() -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    del guard['key_id']
+
+    with pytest.raises(KernelGuardError, match='kernel guard missing key_id'):
+        verify_kernel_guard_manifest(
+            manifest,
+            guard,
+            key=KEY,
+            root=FIXTURE,
+            validate_guard_schema=False,
+            require_lifecycle=True,
+        )
+
+
+def test_kernel_guard_uses_constant_time_compare_for_entry_and_root_tags(monkeypatch: pytest.MonkeyPatch) -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    real_compare_digest = kernel_guard_module.hmac.compare_digest
+    calls: list[tuple[str, str]] = []
+
+    def spy_compare_digest(left: str, right: str) -> bool:
+        calls.append((left, right))
+        return real_compare_digest(left, right)
+
+    monkeypatch.setattr(kernel_guard_module.hmac, 'compare_digest', spy_compare_digest)
+
+    result = verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
+
+    assert result['status'] == 'passed'
+    assert len(calls) == len(manifest['entries']) + 1
+    assert calls[-1][0] == guard['root_tag']
+
+
+def test_kernel_guard_validates_chain_before_tag_comparison(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    bundle = tmp_path / 'bundle'
+    shutil.copytree(FIXTURE, bundle)
+    manifest = json.loads((bundle / 'artifact_chain_manifest.json').read_text(encoding='utf-8'))
+    guard = _guard(manifest)
+    intent = json.loads((bundle / 'intent_contract.json').read_text(encoding='utf-8'))
+    intent['intent']['summary'] = 'tampered before guard verification'
+    (bundle / 'intent_contract.json').write_text(json.dumps(intent, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    calls: list[tuple[str, str]] = []
+
+    def spy_compare_digest(left: str, right: str) -> bool:
+        calls.append((left, right))
+        return True
+
+    monkeypatch.setattr(kernel_guard_module.hmac, 'compare_digest', spy_compare_digest)
+
+    with pytest.raises(KernelGuardError, match='descriptor mismatch'):
+        verify_kernel_guard_manifest(manifest, guard, key=KEY, root=bundle, require_lifecycle=True)
+    assert calls == []
+
+
 def test_kernel_guard_rejects_previous_tag_tampering() -> None:
     manifest = _load_manifest()
     guard = _guard(manifest)
@@ -141,6 +199,22 @@ def test_kernel_guard_rejects_sidecar_schema_drift() -> None:
 
     with pytest.raises(KernelGuardError, match='kernel guard schema validation failed'):
         verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
+
+
+def test_kernel_guard_sidecar_schema_validation_is_independent_from_artifact_schema_validation() -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    guard['entry_guards'][0]['unexpected'] = 'schema-drift'
+
+    with pytest.raises(KernelGuardError, match='kernel guard schema validation failed'):
+        verify_kernel_guard_manifest(
+            manifest,
+            guard,
+            key=KEY,
+            root=FIXTURE,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
 
 
 def test_kernel_guard_rejects_inserted_entry_with_old_guard() -> None:
@@ -180,3 +254,33 @@ def test_verify_guarded_chain_cli(tmp_path: Path) -> None:
     )
 
     assert proc.stdout.startswith('kernel_guard_ok:6:')
+
+
+def test_verify_guarded_chain_cli_no_schema_still_validates_guard_sidecar_shape(tmp_path: Path) -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    guard['entry_guards'][0]['unexpected'] = 'schema-drift'
+    guard_path = tmp_path / 'kernel_guard_manifest.json'
+    guard_path.write_text(json.dumps(guard, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    env = dict(os.environ)
+    env['SCLITE_KERNEL_GUARD_KEY'] = KEY
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'verify-guarded-chain',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--guard',
+            str(guard_path),
+            '--no-schema',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        env=env,
+        check=False,
+    )
+
+    assert proc.returncode == 1
+    assert 'kernel_guard_failed:kernel guard schema validation failed' in proc.stderr

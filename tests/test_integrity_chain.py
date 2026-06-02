@@ -242,6 +242,20 @@ def test_v02_lifecycle_detects_manifest_path_escape() -> None:
         verify_artifact_chain_manifest(manifest, root=FIXTURE)
 
 
+def test_v02_lifecycle_detects_symlink_manifest_path_escape(tmp_path: Path) -> None:
+    root = tmp_path / 'bundle'
+    root.mkdir()
+    outside = tmp_path / 'outside_intent_contract.json'
+    outside.write_text((FIXTURE / 'intent_contract.json').read_text(encoding='utf-8'), encoding='utf-8')
+    link = root / 'linked_intent_contract.json'
+    link.symlink_to(outside)
+    manifest = _load('artifact_chain_manifest.json')
+    manifest['entries'][0]['path'] = link.name
+
+    with pytest.raises(ChainVerificationError, match='path escapes root'):
+        verify_artifact_chain_manifest(manifest, root=root)
+
+
 def test_validate_chain_cli() -> None:
     proc = subprocess.run(
         [sys.executable, '-m', 'sclite.cli', 'validate-chain', str(FIXTURE / 'artifact_chain_manifest.json')],

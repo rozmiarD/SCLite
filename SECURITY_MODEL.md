@@ -47,12 +47,16 @@ Artifact `schema_ref` values are treated as contract identifiers, not as
 authority to load arbitrary local files from an untrusted bundle. By default
 SCLite resolves schema references to packaged SCLite schemas only, accepting
 canonical schema ids such as `execution_ticket.v0.3` and packaged refs such as
-`schemas/execution_ticket.v0.3.schema.json`.
+`schemas/execution_ticket.v0.3.schema.json`. Path-like aliases that merely end
+with a packaged schema filename are not treated as packaged refs.
 
 External schema files are available only through explicit caller opt-in in the
 Python API. CLI `validate-artifact --schema PATH` remains an operator-supplied
 local validation action, but artifact-chain and review-bundle verification do
 not let bundle-provided `schema_ref` values override packaged schemas.
+When an external schema is explicitly allowed with a `root`, SCLite resolves
+exactly that root-contained path and rejects `..` or symlink escapes. There is
+no fallback to repository-local schema files for untrusted artifact refs.
 
 ## Kernel Guard HMAC v1
 
@@ -78,6 +82,10 @@ The root transcript binds:
 
 This prevents tampering or reordering by an attacker who cannot compute HMACs
 for the domain secret. It does not prove public identity.
+
+Kernel Guard sidecar schema validation is separate from artifact schema
+validation. CLI `--no-schema` skips artifact schema checks for hash/link
+verification only; it does not silently disable the guard sidecar shape check.
 
 ## Replay Boundary
 
