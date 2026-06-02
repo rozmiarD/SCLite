@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from sclite.artifacts import SCHEMA_FILES, JsonSchemaValidationError, schema_dir, validate_artifact
+from sclite.artifacts import SCHEMA_FILES, JsonSchemaValidationError, load_json_schema, schema_dir, validate_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -36,6 +36,13 @@ def test_artifact_schema_ref_uses_packaged_schema_before_bundle_local_schema(tmp
         validate_artifact(artifact, artifact['schema_ref'], root=tmp_path)
 
 
+def test_packaged_schema_resolution_rejects_path_injection_aliases() -> None:
+    with pytest.raises(JsonSchemaValidationError, match='not a packaged SCLite schema'):
+        validate_artifact({}, '/tmp/intent_contract.v0.2.schema.json')
+    with pytest.raises(JsonSchemaValidationError, match='not a packaged SCLite schema'):
+        validate_artifact({}, 'schemas/../intent_contract.v0.2.schema.json')
+
+
 def test_external_schema_ref_requires_explicit_opt_in(tmp_path: Path) -> None:
     schema_path = tmp_path / 'custom.schema.json'
     schema_path.write_text(
@@ -56,6 +63,39 @@ def test_external_schema_ref_requires_explicit_opt_in(tmp_path: Path) -> None:
         validate_artifact(value, str(schema_path), root=tmp_path)
 
     validate_artifact(value, str(schema_path), root=tmp_path, allow_external_schema_refs=True)
+
+
+def test_external_schema_ref_opt_in_rejects_root_relative_escape(tmp_path: Path) -> None:
+    root = tmp_path / 'bundle'
+    root.mkdir()
+    outside_schema = tmp_path / 'outside.schema.json'
+    outside_schema.write_text(
+        json.dumps({'type': 'object', 'additionalProperties': True}) + '\n',
+        encoding='utf-8',
+    )
+
+    with pytest.raises(JsonSchemaValidationError, match='external schema path escapes root'):
+        validate_artifact({}, '../outside.schema.json', root=root, allow_external_schema_refs=True)
+
+
+def test_external_schema_ref_opt_in_rejects_symlink_escape(tmp_path: Path) -> None:
+    root = tmp_path / 'bundle'
+    root.mkdir()
+    outside_schema = tmp_path / 'outside.schema.json'
+    outside_schema.write_text(
+        json.dumps({'type': 'object', 'additionalProperties': True}) + '\n',
+        encoding='utf-8',
+    )
+    link = root / 'linked.schema.json'
+    link.symlink_to(outside_schema)
+
+    with pytest.raises(JsonSchemaValidationError, match='external schema path escapes root'):
+        validate_artifact({}, 'linked.schema.json', root=root, allow_external_schema_refs=True)
+
+
+def test_external_schema_ref_opt_in_does_not_fallback_to_repo_root(tmp_path: Path) -> None:
+    with pytest.raises(JsonSchemaValidationError, match='schema file not found'):
+        load_json_schema('pyproject.toml', root=tmp_path, allow_external_schema_refs=True)
 
 
 def test_cli_explicit_schema_path_remains_operator_opt_in(tmp_path: Path) -> None:

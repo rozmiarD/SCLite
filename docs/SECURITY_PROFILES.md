@@ -35,6 +35,8 @@ profile:
 - root transcript fields;
 - HMAC-SHA256 tag calculation;
 - constant-time tag comparison with `hmac.compare_digest`.
+- Kernel Guard sidecar schema validation remains enforced independently from
+  artifact schema validation.
 
 An incompatible change must use a new profile name. Do not change
 `kernel_guard_hmac_v1` semantics silently.
