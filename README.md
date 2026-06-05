@@ -17,7 +17,7 @@ policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
-- Version: `1.0.0`
+- Version: `1.0.1`
 - Status: **published 1.0 stable release: frozen lifecycle/review and guarded verification surface**
 - Latest published package: `sclite-core==1.0.0`
 - Runtime execution: not included

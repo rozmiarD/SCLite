@@ -18,10 +18,10 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '1.0.0'
-EXPECTED_RELEASE_LABEL = '1.0.0'
-LATEST_PUBLISHED_VERSION = EXPECTED_VERSION
-LATEST_PUBLISHED_LABEL = EXPECTED_RELEASE_LABEL
+EXPECTED_VERSION = '1.0.1'
+EXPECTED_RELEASE_LABEL = '1.0.1'
+LATEST_PUBLISHED_VERSION = '1.0.0'
+LATEST_PUBLISHED_LABEL = '1.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
 EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0b2,<0.9'
@@ -427,7 +427,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')
     _require(errors, 'CONTRIBUTING.md', _read('CONTRIBUTING.md'), 'define / validate / hash / bind / redact / review / verify')
     _require(errors, 'SPEC.md', spec, 'define / validate / hash / bind / redact / review / verify')
-    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published stable package is `{EXPECTED_DISTRIBUTION}=={EXPECTED_VERSION}`')
+    _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published stable package is `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'README.md', readme, 'SECURITY_MODEL.md')
     _require(errors, 'README.md', readme, 'docs/SECURITY_PROFILES.md')
     _require(errors, 'SPEC.md', spec, 'Any incompatible change must use a new profile name')
