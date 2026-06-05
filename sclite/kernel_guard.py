@@ -185,12 +185,13 @@ def verify_kernel_guard_manifest(
     root: Any = None,
     validate_chain: bool = True,
     validate_schemas: bool = True,
+    validate_guard_schema: bool = True,
     strict_jsonschema: bool = False,
     require_lifecycle: bool = False,
 ) -> Dict[str, Any]:
     """Verify a sidecar HMAC guard against an artifact-chain manifest."""
 
-    if validate_schemas:
+    if validate_guard_schema:
         try:
             validate_artifact(guard, KERNEL_GUARD_SCHEMA_REF, root=root, strict_jsonschema=strict_jsonschema)
         except Exception as exc:
