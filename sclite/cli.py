@@ -115,7 +115,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     chain_cmd = sub.add_parser('validate-chain', help='verify a v0.2 lifecycle artifact-chain manifest')
     chain_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
-    chain_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    chain_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     chain_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     chain_cmd.add_argument('--strict-lifecycle', action='store_true', help='require the canonical v0.2 lifecycle role sequence with no extras or duplicates')
     chain_cmd.add_argument('--guard', help='path to kernel_guard_manifest.json when --require-guard is used; defaults to manifest directory')
@@ -127,7 +127,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
     lifecycle_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     lifecycle_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
-    lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip schema validation while checking hashes/links')
+    lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     lifecycle_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     lifecycle_cmd.add_argument('--guard', help='path to kernel_guard_manifest.json when --require-guard is used; defaults to manifest directory')
     lifecycle_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
@@ -243,7 +243,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         artifact_path = Path(str(args.artifact))
         try:
             value = _load_json_value(artifact_path)
-            validate_artifact(value, str(args.schema), strict_jsonschema=bool(args.strict_jsonschema))
+            validate_artifact(
+                value,
+                str(args.schema),
+                strict_jsonschema=bool(args.strict_jsonschema),
+                allow_external_schema_refs=True,
+            )
         except (CliInputError, ValueError) as exc:
             return _failed('security_contract_artifact_failed', exc)
         print(f'security_contract_artifact_ok:{artifact_path}')
@@ -254,7 +259,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             value = _load_json_value(artifact_path)
             if args.schema:
-                validate_artifact(value, str(args.schema))
+                validate_artifact(value, str(args.schema), allow_external_schema_refs=True)
             descriptor = build_artifact_hash(value)
         except (CliInputError, ValueError) as exc:
             return _failed('artifact_hash_failed', exc)

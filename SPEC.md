@@ -176,13 +176,17 @@ Captures the ordered tamper-evident digest chain over lifecycle artifacts. The m
 
 ## v0.2 Integrity Chain
 
-SCLite v0.2 verifies both structural chain integrity and lifecycle semantics:
+SCLite v0.2 separates structural chain integrity from strict lifecycle
+semantics. `validate-chain` verifies:
 
 1. every manifest entry path stays within the selected artifact root;
 2. every artifact descriptor matches the canonical SHA-256 digest of the local JSON artifact;
 3. every `previous_chain_digest` and `chain_digest` is recomputed in order;
-4. the `root_chain_digest` matches the final recomputed chain digest;
-5. `verify-lifecycle` enforces the exact canonical lifecycle role sequence for
+4. the `root_chain_digest` matches the final recomputed chain digest.
+
+`verify-lifecycle` and `validate-chain --strict-lifecycle` additionally verify:
+
+5. the exact canonical lifecycle role sequence for
    v0.2 lifecycle manifests, with no extra or duplicate roles;
 6. `policy_decision` binds the correct `intent_contract` digest;
 7. `execution_contract` binds the correct intent and policy decision digests;
