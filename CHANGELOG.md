@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.0.1 - Stable lifecycle and guarded verification surface
+
+- Prepares the `sclite-core==1.0.1` package line as a stable SCLite security
+  hardening patch; PyPI publication remains gated on downstream
+  GovEngine/Ravenclaw validation.
 - Keeps `validate-chain` as integrity-only/generic chain verification by
   running lifecycle semantic checks only through `verify-lifecycle`,
   `validate-chain --strict-lifecycle`, or other `require_lifecycle=True`

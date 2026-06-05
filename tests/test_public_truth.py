@@ -28,7 +28,7 @@ def test_public_truth_validator_passes() -> None:
         check=True,
     )
 
-    assert result.stdout.strip() == 'public_truth_ok:sclite-core==1.0.0:import=sclite:runtime_deps=0'
+    assert result.stdout.strip() == 'public_truth_ok:sclite-core==1.0.1:import=sclite:runtime_deps=0'
 
 
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
@@ -47,12 +47,12 @@ def test_public_truth_validator_accepts_published_stable_install_claim() -> None
     validator._assert_readme_package_truth(
         errors,
         '\n'.join([
-            'Version: `1.0.0`',
+            'Version: `1.0.1`',
             'package-sclite--core%201.0.0-blueviolet.svg',
             'https://pypi.org/project/sclite-core/1.0.0/',
             'python -m pip install sclite-core==1.0.0',
         ]),
-        '1.0.0',
+        '1.0.1',
     )
 
     assert errors == []

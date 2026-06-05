@@ -3,7 +3,7 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.0.0`;
+Current package: `sclite-core==1.0.1`;
 latest published public package: `sclite-core==1.0.0`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
@@ -14,7 +14,9 @@ The superseded proof-trace product path is retired after Ravenclaw public-proof
 migration, not a current front door for new integrations. The `1.0.0`
 line keeps those builders, validators, owned-only schemas, and fixture
 directories out of the installed/current surface while freezing guarded
-verification contracts.
+verification contracts. The `1.0.1` line tightens schema resolution,
+lifecycle-neutral chain validation, Kernel Guard sidecar validation, and
+release-truth gates without changing artifact schema versions.
 
 ## Lifecycle map
 
