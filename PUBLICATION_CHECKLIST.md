@@ -63,8 +63,7 @@ The security regression gate must pass and must remain synthetic-key-only.
 public-identity/runtime-enforcement as explicit non-claims.
 
 For the `1.0.1` stable release, current documentation and validation must
-state that the latest published PyPI release remains `sclite-core==1.0.0`
-until the 1.0.1 upload is actually completed.
+state that the latest published PyPI release is `sclite-core==1.0.1`.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current

@@ -48,9 +48,9 @@ def test_public_truth_validator_accepts_published_stable_install_claim() -> None
         errors,
         '\n'.join([
             'Version: `1.0.1`',
-            'package-sclite--core%201.0.0-blueviolet.svg',
-            'https://pypi.org/project/sclite-core/1.0.0/',
-            'python -m pip install sclite-core==1.0.0',
+            'package-sclite--core%201.0.1-blueviolet.svg',
+            'https://pypi.org/project/sclite-core/1.0.1/',
+            'python -m pip install sclite-core==1.0.1',
         ]),
         '1.0.1',
     )
