@@ -27,7 +27,7 @@ SCLite must stay deliberately small. The emergence of GovEngine as a broader gov
 ## Current baseline: 1.0.1
 
 Current package: `sclite-core==1.0.1`.
-Latest published public package: `sclite-core==1.0.0`.
+Latest published public package: `sclite-core==1.0.1`.
 
 Current lifecycle:
 
