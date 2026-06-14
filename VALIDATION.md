@@ -208,6 +208,8 @@ Expected result:
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - secure-bundle verification fails closed on missing guard, loose lifecycle,
   metadata spoofing, and full-chain forgery attempts using an old guard;
+- `guarded-strict` rejects manifest and Kernel Guard sidecar paths that escape
+  the verification root after symlink resolution;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - pytest passes.

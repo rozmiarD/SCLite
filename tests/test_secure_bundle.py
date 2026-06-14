@@ -13,7 +13,7 @@ import pytest
 from sclite.artifacts import validate_artifact
 from sclite.integrity import build_artifact_chain_manifest
 from sclite.kernel_guard import build_kernel_guard_manifest
-from sclite.secure import SecureBundleError, verify_secure_bundle
+from sclite.secure import SecureBundleError, resolve_guard_path, verify_secure_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
@@ -96,6 +96,13 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
 
 
+def test_resolve_guard_path_uses_manifest_dir_only_for_default_sidecar() -> None:
+    manifest_path = Path('bundle') / 'artifact_chain_manifest.json'
+
+    assert resolve_guard_path(manifest_path) == Path('bundle') / 'kernel_guard_manifest.json'
+    assert resolve_guard_path(manifest_path, Path('explicit') / 'guard.json') == Path('explicit') / 'guard.json'
+
+
 def test_secure_bundle_cli_accepts_review_bundle_directory_target(tmp_path: Path) -> None:
     bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
     _write_guard(bundle)
@@ -147,6 +154,37 @@ def test_secure_bundle_without_guard_fails_closed() -> None:
 
     assert proc.returncode == 1
     assert 'secure_bundle_failed:missing kernel guard sidecar' in proc.stderr
+
+
+def test_secure_bundle_rejects_explicit_guard_path_outside_root(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    external = tmp_path / 'external'
+    external.mkdir()
+    guard_path = _write_guard(external, manifest=_load_manifest(bundle))
+
+    with pytest.raises(SecureBundleError, match='guard path escapes root'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY, root=bundle)
+
+
+def test_secure_bundle_rejects_default_guard_symlink_escape(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    external = tmp_path / 'external'
+    external.mkdir()
+    guard_path = _write_guard(external, manifest=_load_manifest(bundle))
+    (bundle / 'kernel_guard_manifest.json').symlink_to(guard_path)
+
+    with pytest.raises(SecureBundleError, match='guard path escapes root'):
+        verify_secure_bundle(bundle, key=KEY)
+
+
+def test_secure_bundle_rejects_manifest_path_outside_explicit_root(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+    outside_manifest = tmp_path / 'artifact_chain_manifest.json'
+    outside_manifest.write_text((bundle / 'artifact_chain_manifest.json').read_text(encoding='utf-8'), encoding='utf-8')
+
+    with pytest.raises(SecureBundleError, match='manifest path escapes root'):
+        verify_secure_bundle(outside_manifest, guard_path=guard_path, key=KEY, root=bundle)
 
 
 def test_validate_chain_require_guard_fails_on_missing_sidecar() -> None:
@@ -292,7 +330,7 @@ def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
     guard_path = _write_guard(bundle, manifest=manifest)
     spoofed = copy.deepcopy(manifest)
     spoofed['profile'] = 'runtime-consumable-forged-profile'
-    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path = bundle / 'spoofed_artifact_chain_manifest.json'
     manifest_path.write_text(json.dumps(spoofed, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
     with pytest.raises(SecureBundleError, match='manifest_metadata_digest mismatch'):
@@ -305,7 +343,7 @@ def test_secure_bundle_root_chain_digest_tampering_fails(tmp_path: Path) -> None
     guard_path = _write_guard(bundle, manifest=manifest)
     tampered = copy.deepcopy(manifest)
     tampered['root_chain_digest'] = '0' * 64
-    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path = bundle / 'tampered_artifact_chain_manifest.json'
     _write_json(manifest_path, tampered)
 
     with pytest.raises(SecureBundleError, match='root_chain_digest mismatch'):
@@ -329,7 +367,7 @@ def test_secure_bundle_required_flag_tampering_fails(tmp_path: Path) -> None:
     guard_path = _write_guard(bundle, manifest=manifest)
     tampered = copy.deepcopy(manifest)
     tampered['entries'][3]['required'] = False
-    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path = bundle / 'required_flag_artifact_chain_manifest.json'
     manifest_path.write_text(json.dumps(tampered, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
     with pytest.raises(SecureBundleError, match=r'entry\[3\] required mismatch'):
@@ -373,7 +411,7 @@ def test_secure_bundle_full_chain_forgery_with_old_guard_fails(tmp_path: Path) -
     forged = copy.deepcopy(original)
     forged['chain_id'] = 'forged-chain'
     forged['created_at'] = '2026-05-26T00:00:00+00:00'
-    forged_path = tmp_path / 'artifact_chain_manifest.json'
+    forged_path = bundle / 'forged_artifact_chain_manifest.json'
     forged_path.write_text(json.dumps(forged, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
     with pytest.raises(SecureBundleError, match='chain_id mismatch|manifest_metadata_digest mismatch'):

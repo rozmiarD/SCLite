@@ -21,6 +21,8 @@ This document freezes the public meaning of SCLite security profiles for the
   a shared secret.
 - `verify-secure-bundle` is the public CLI/API entry point for the
   `guarded-strict` profile.
+- `guarded-strict` treats the manifest and Kernel Guard sidecar as
+  root-contained bundle inputs after path and symlink resolution.
 - `guarded_domain_auth_fresh` belongs to GovEngine or another host layer that
   can keep replay state and make runtime admission decisions.
 
