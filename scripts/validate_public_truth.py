@@ -435,6 +435,8 @@ def collect_errors() -> list[str]:
     _require(errors, 'VALIDATION.md', validation, 'transcript/canonicalization changes require a new profile name')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'profile freeze docs remain aligned')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite reports replay as `not_checked`')
+    _require(errors, 'SECURITY_MODEL.md', security_model, '`validate-chain` returns `chain_status: passed`')
+    _require(errors, 'SECURITY_MODEL.md', security_model, '`verify-guarded-chain` adds `guard_status: passed`')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'HMAC gives authenticity only to parties that already share the secret')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite does not decide whether an action is authorized')

@@ -20,6 +20,21 @@ freshness.
 | `guarded-strict` | `verify-secure-bundle` | fail-closed artifact-chain verification, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | no replay freshness, no public identity, no runtime execution proof |
 | `guarded_domain_auth_fresh` | GovEngine/host replay store | guarded-strict plus host-owned freshness/state decision | outside SCLite core |
 
+Verifier JSON surfaces expose layer-specific status fields so callers cannot
+mistake one layer for another:
+
+- `validate-chain` returns `chain_status: passed` and
+  `lifecycle_status: not_checked` unless strict lifecycle verification is
+  explicitly requested.
+- `verify-lifecycle` returns `chain_status: passed` and
+  `lifecycle_status: passed` after v0.2 lifecycle role and digest semantics
+  pass.
+- `verify-guarded-chain` adds `guard_status: passed` while keeping
+  `replay_status: not_checked`.
+- `verify-secure-bundle` combines `chain_status`, `lifecycle_status`,
+  `guard_status`, and `replay_status` with the stable
+  `verification_result.v1` non-claim fields.
+
 ## Canonicalization Freeze
 
 SCLite artifact and Kernel Guard verification rely on deterministic JSON:

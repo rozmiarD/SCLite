@@ -79,6 +79,9 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     result = verify_secure_bundle(bundle / 'artifact_chain_manifest.json', guard_path=guard_path, key=KEY, root=bundle)
 
     assert result['status'] == 'passed'
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert result['guard_status'] == 'passed'
     assert result['secure_profile'] == 'guarded-strict'
     assert result['security_posture'] == 'guarded_domain_auth'
     assert result['replay_status'] == 'not_checked'
@@ -111,6 +114,10 @@ def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: 
     assert proc.returncode == 0, proc.stderr
     result = json.loads(proc.stdout)
     verification_result = result['verification_result']
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert result['guard_status'] == 'passed'
+    assert result['replay_status'] == 'not_checked'
     assert verification_result['artifact_type'] == 'verification_result'
     assert verification_result['schema_ref'] == 'schemas/verification_result.v1.schema.json'
     assert verification_result['artifact_chain'] == 'pass'

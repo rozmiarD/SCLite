@@ -274,8 +274,11 @@ def verify_artifact_chain_manifest(
         _raise_lifecycle_roles_mismatch(checked)
     if require_lifecycle and checked_roles == V02_LIFECYCLE_ROLES:
         semantic_checks = verify_lifecycle_semantics(artifacts_by_role)
+    lifecycle_status = 'passed' if require_lifecycle else 'not_checked'
     return {
         'status': 'passed',
+        'chain_status': 'passed',
+        'lifecycle_status': lifecycle_status,
         'checked_entries': checked,
         'entry_count': len(checked),
         'root_chain_digest': previous,

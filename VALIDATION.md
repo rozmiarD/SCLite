@@ -53,6 +53,16 @@ validation. Its required layer statuses are `artifact_chain`,
 `runtime_enforcement`; replay remains `not_checked` inside SCLite and
 identity/runtime authority remain `not_claimed`.
 
+Verifier JSON output also exposes explicit layer status fields before the
+stable verification-result envelope is built:
+
+- `validate-chain`: `chain_status=passed`, `lifecycle_status=not_checked`;
+- `verify-lifecycle`: `chain_status=passed`, `lifecycle_status=passed`;
+- `verify-guarded-chain`: adds `guard_status=passed`,
+  `replay_status=not_checked`;
+- `verify-secure-bundle`: reports all local verifier layers while preserving
+  replay, public identity, and runtime enforcement as non-claims.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep
