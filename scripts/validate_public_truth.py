@@ -439,6 +439,8 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY_MODEL.md', security_model, '`validate-chain` returns `chain_status: passed`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`verify-guarded-chain` adds `guard_status: passed`')
     _require(errors, 'VALIDATION.md', validation, 'Python callers can use `verify_lifecycle_manifest()`')
+    _require(errors, 'VALIDATION.md', validation, 'authoritative and keeps legacy text markers')
+    _require(errors, 'SPEC.md', spec, '`execution_shape.plan` remains an opaque normalized execution-shape field')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'HMAC gives authenticity only to parties that already share the secret')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite does not decide whether an action is authorized')

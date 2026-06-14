@@ -236,6 +236,22 @@ The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence s
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
 
+Receipt/evidence compatibility decision:
+
+- structured claim booleans such as `requires_completed_execution`,
+  `requires_network_execution`, and `requires_live_execution` are authoritative
+  for current receipt-bounded evidence review;
+- legacy text markers such as `completed_execution`, `command_executed`, and
+  `network_execution` remain a conservative compatibility fallback in v0.2 so
+  old public-safe fixtures cannot bypass receipt bounds by omitting structured
+  fields;
+- an execution receipt vNext should make outcome taxonomy and evidence claim
+  requirements explicit enough that text marker fallback can be deprecated in a
+  future schema line;
+- `execution_shape.plan` remains an opaque normalized execution-shape field in
+  v0.2. It is not planner ownership or runtime permission. Any rename should
+  happen only in a vNext schema.
+
 ## v0.4 Trust/Carrier References and Review Records
 
 The `0.5.x` package line includes the v0.4-oriented trust/carrier and lifecycle-review surfaces:
