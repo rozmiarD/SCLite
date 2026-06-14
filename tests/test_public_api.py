@@ -25,6 +25,7 @@ EXPECTED_PUBLIC_EXPORTS = (
     'artifact_descriptor',
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
+    'verify_lifecycle_manifest',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',
@@ -68,12 +69,14 @@ EXPECTED_PUBLIC_EXPORTS = (
 
 
 def test_top_level_public_api_exports_are_frozen() -> None:
-    assert sclite.__all__ == EXPECTED_PUBLIC_EXPORTS
+    assert sclite.__all__ == EXPECTED_PUBLIC_EXPORTS, (
+        'top-level public API changed; update EXPECTED_PUBLIC_EXPORTS and docs/PUBLIC_API.md intentionally'
+    )
     for name in EXPECTED_PUBLIC_EXPORTS:
-        assert hasattr(sclite, name), name
+        assert hasattr(sclite, name), f'{name} is listed in sclite.__all__ but is not exported'
 
 
 def test_public_api_doc_lists_all_frozen_exports() -> None:
     text = (ROOT / 'docs' / 'PUBLIC_API.md').read_text(encoding='utf-8')
     for name in EXPECTED_PUBLIC_EXPORTS:
-        assert f'`{name}`' in text
+        assert f'`{name}`' in text, f'{name} missing from docs/PUBLIC_API.md; document public API additions intentionally'

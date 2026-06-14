@@ -21,4 +21,12 @@ fi
   tests/test_secure_bundle.py \
   tests/test_integrity_chain.py::test_v02_lifecycle_strict_rejects_extra_role \
   tests/test_integrity_chain.py::test_v02_lifecycle_strict_rejects_duplicate_role_without_overwrite \
+  tests/test_integrity_chain.py::test_v02_lifecycle_rejects_policy_deny_with_executable_chain \
+  tests/test_integrity_chain.py::test_v02_lifecycle_rejects_owner_approval_required_without_consumable_ticket \
+  tests/test_integrity_chain.py::test_v02_lifecycle_rejects_terminal_ticket_approval_statuses \
+  tests/test_integrity_chain.py::test_v02_lifecycle_rejects_missing_ticket_approval_status \
+  tests/test_ticket_use_negative.py::test_ticket_use_rejects_structured_network_overclaim_without_text_marker \
+  tests/test_ticket_use_negative.py::test_ticket_use_keeps_legacy_text_marker_compatibility \
+  tests/test_ticket_use_negative.py::test_ticket_use_rejects_evidence_replay_live_execution_requirement \
+  tests/test_review_bundles.py::test_materialized_review_output_excludes_raw_private_fixture_values \
   -p no:cacheprovider

@@ -33,6 +33,7 @@ authority, or carrier adapters through this API.
 - `artifact_descriptor`
 - `build_artifact_chain_manifest`
 - `verify_artifact_chain_manifest`
+- `verify_lifecycle_manifest`
 
 ## Kernel Guard And Secure Bundles
 

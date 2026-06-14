@@ -9,7 +9,13 @@ from pathlib import Path
 import pytest
 
 from sclite.artifacts import validate_artifact
-from sclite.integrity import ChainVerificationError, artifact_descriptor, build_artifact_chain_manifest, verify_artifact_chain_manifest
+from sclite.integrity import (
+    ChainVerificationError,
+    artifact_descriptor,
+    build_artifact_chain_manifest,
+    verify_artifact_chain_manifest,
+    verify_lifecycle_manifest,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
@@ -85,6 +91,8 @@ def test_v02_chain_manifest_verifies_fixture() -> None:
     result = verify_artifact_chain_manifest(manifest, root=FIXTURE)
 
     assert result['status'] == 'passed'
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'not_checked'
     assert result['entry_count'] == 6
     assert result['checked_entries'][0] == 'intent_contract'
     assert result['checked_entries'][-1] == 'evidence_contract'
@@ -95,6 +103,8 @@ def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
     manifest = _load('artifact_chain_manifest.json')
     result = verify_artifact_chain_manifest(manifest, root=FIXTURE, require_lifecycle=True)
 
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
     assert result['semantic_checks'] == [
         'role_order',
         'policy_binds_intent',
@@ -105,6 +115,16 @@ def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
         'evidence_binds_execution_receipt',
         'evidence_binds_execution_ticket',
     ]
+
+
+def test_verify_lifecycle_manifest_wrapper_is_fail_safe() -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    result = verify_lifecycle_manifest(manifest, root=FIXTURE)
+
+    assert result['status'] == 'passed'
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert 'ticket_binds_execution_contract' in result['semantic_checks']
 
 
 def test_v02_chain_manifest_detects_digest_tampering() -> None:
@@ -121,6 +141,65 @@ def test_v02_lifecycle_detects_ticket_execution_contract_digest_mismatch(tmp_pat
     manifest_path = _write_mutated_bundle(tmp_path, artifacts)
 
     with pytest.raises(ChainVerificationError, match='ticket integrity execution_contract digest mismatch'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
+
+
+def test_v02_lifecycle_rejects_policy_deny_with_executable_chain(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    artifacts['policy_decision']['decision'] = 'deny'
+    artifacts['policy_decision']['reason_codes'] = ['policy_denied_fixture']
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='policy decision denies executable lifecycle'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
+
+
+def test_v02_lifecycle_rejects_owner_approval_required_without_consumable_ticket(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    artifacts['policy_decision']['decision'] = 'owner_approval_required'
+    artifacts['execution_ticket']['approval']['status'] = 'owner_approval_required'
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='owner approval required before executable lifecycle'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
+
+
+@pytest.mark.parametrize('status', ('rejected', 'expired', 'revoked'))
+def test_v02_lifecycle_rejects_terminal_ticket_approval_statuses(tmp_path: Path, status: str) -> None:
+    artifacts = _artifacts()
+    artifacts['execution_ticket']['approval']['status'] = status
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match=f'execution ticket approval is terminal: {status}'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
+
+
+def test_v02_lifecycle_rejects_missing_ticket_approval_status(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    del artifacts['execution_ticket']['approval']['status']
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='execution ticket is not approved for executable lifecycle: missing'):
         verify_artifact_chain_manifest(
             json.loads(manifest_path.read_text()),
             root=tmp_path,
@@ -285,7 +364,10 @@ def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
         check=True,
     )
 
-    assert json.loads(proc.stdout)['semantic_checks'] == []
+    result = json.loads(proc.stdout)
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'not_checked'
+    assert result['semantic_checks'] == []
 
 
 def test_verify_lifecycle_cli_alias() -> None:
@@ -317,4 +399,7 @@ def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
         check=True,
     )
 
-    assert 'ticket_binds_execution_contract' in json.loads(proc.stdout)['semantic_checks']
+    result = json.loads(proc.stdout)
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert 'ticket_binds_execution_contract' in result['semantic_checks']

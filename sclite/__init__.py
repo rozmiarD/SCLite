@@ -21,6 +21,7 @@ from .integrity import (
     artifact_descriptor,
     build_artifact_chain_manifest,
     verify_artifact_chain_manifest,
+    verify_lifecycle_manifest,
 )
 from .kernel_guard import (
     KERNEL_GUARD_PROFILE,
@@ -91,6 +92,7 @@ __all__ = (
     'artifact_descriptor',
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
+    'verify_lifecycle_manifest',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',
