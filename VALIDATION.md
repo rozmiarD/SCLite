@@ -53,6 +53,35 @@ validation. Its required layer statuses are `artifact_chain`,
 `runtime_enforcement`; replay remains `not_checked` inside SCLite and
 identity/runtime authority remain `not_claimed`.
 
+Verifier JSON output also exposes explicit layer status fields before the
+stable verification-result envelope is built:
+
+- `validate-chain`: `chain_status=passed`, `lifecycle_status=not_checked`;
+- `verify-lifecycle`: `chain_status=passed`, `lifecycle_status=passed`;
+- `verify-guarded-chain`: adds `guard_status=passed`,
+  `replay_status=not_checked`;
+- `verify-secure-bundle`: reports all local verifier layers while preserving
+  replay, public identity, and runtime enforcement as non-claims.
+
+Strict lifecycle verification is the executable-chain safety path. It rejects
+policy `deny`, owner-approval-required chains without a consumable approved
+ticket, and terminal ticket approval states such as `rejected`, `expired`, and
+`revoked`. Python callers can use `verify_lifecycle_manifest()` for that
+fail-safe path.
+
+Schema-version compatibility is documented in
+`docs/SCHEMA_COMPATIBILITY.md`. That matrix keeps v0.2 lifecycle, v0.3 scoped
+ticket, receipt/evidence compatibility fallback, review-bundle, and
+`verification_result.v1` support explicit without turning unknown fields or
+artifact IDs into authority.
+
+Receipt-bounded evidence validation treats structured claim fields as
+authoritative and keeps legacy text markers as a conservative compatibility
+fallback. Tests cover benign-looking claims with
+`requires_network_execution=true`, legacy `completed_execution` marker text,
+receipt/evidence descriptor drift, replay live-execution requirements, and
+public-safe review output that must not disclose raw private fixture values.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep
@@ -185,6 +214,8 @@ Expected result:
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - secure-bundle verification fails closed on missing guard, loose lifecycle,
   metadata spoofing, and full-chain forgery attempts using an old guard;
+- `guarded-strict` rejects manifest and Kernel Guard sidecar paths that escape
+  the verification root after symlink resolution;
 - artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
 - hash and Scope Fidelity commands complete;
 - pytest passes.
@@ -194,12 +225,14 @@ Expected result:
 Before any future PyPI/TestPyPI release:
 
 ```bash
-python -m pip install build twine
-python -m build
-python -m twine check dist/*
+scripts/package_smoke.sh
 ```
 
-Then test install from the generated wheel in a clean environment and confirm the distribution name `sclite-core` still imports as `sclite`.
+The package smoke builds wheel/sdist artifacts in a temporary directory, runs
+`twine check`, installs the generated wheel into a clean environment, runs
+`pip check`, and confirms that the distribution name `sclite-core` still
+imports as `sclite`. It is release-readiness evidence only; it does not publish
+or tag.
 
 ## Non-claims
 

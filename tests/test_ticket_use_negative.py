@@ -56,6 +56,31 @@ def test_ticket_use_rejects_evidence_live_execution_overclaim() -> None:
         verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
 
 
+def test_ticket_use_rejects_structured_network_overclaim_without_text_marker() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['claim_type'] = 'bounded_observation'
+    evidence['claims'][0]['statement'] = 'public-safe dry-run observation only'
+    evidence['claims'][0]['requires_network_execution'] = True
+    with pytest.raises(TicketUseVerificationError, match='network execution beyond receipt'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_ticket_use_keeps_legacy_text_marker_compatibility() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['claim_type'] = 'bounded_observation'
+    evidence['claims'][0]['statement'] = 'operator says completed_execution happened'
+    evidence['claims'][0]['requires_completed_execution'] = False
+    with pytest.raises(TicketUseVerificationError, match='executed commands beyond receipt'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
+def test_ticket_use_rejects_evidence_replay_live_execution_requirement() -> None:
+    evidence = _evidence()
+    evidence['replay']['live_execution_required'] = True
+    with pytest.raises(TicketUseVerificationError, match='replay requires live execution forbidden by ticket'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
+
+
 def test_ticket_use_rejects_receipt_contract_digest_drift() -> None:
     receipt = _receipt()
     receipt['links']['execution_contract']['descriptor']['digest'] = '0' * 64

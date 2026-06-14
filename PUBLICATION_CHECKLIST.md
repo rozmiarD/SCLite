@@ -43,6 +43,17 @@ python scripts/validate_public_truth.py
 python -m pytest -q -p no:cacheprovider
 ```
 
+For release readiness, also run the opt-in package smoke:
+
+```bash
+scripts/package_smoke.sh
+```
+
+It builds wheel/sdist artifacts in a temporary directory, runs `twine check`,
+installs the generated wheel into a clean virtual environment, runs
+`pip check`, and confirms the PyPI distribution name `sclite-core` imports as
+the Python package `sclite`.
+
 Before a release-candidate or stable release, confirm the security model and
 profile freeze docs remain aligned:
 
@@ -143,12 +154,11 @@ Confirm docs do not claim that SCLite/SCL v0.2/v0.3:
 Before any TestPyPI or PyPI upload, run from a clean tree:
 
 ```bash
-python -m pip install build twine
-python -m build
-python -m twine check dist/*
+scripts/package_smoke.sh
 ```
 
-Then test-install the generated wheel in a clean environment.
+This is a local release-readiness gate only. It does not upload, tag, or
+authorize publication.
 
 Do not commit `build/`, `dist/`, `*.egg-info`, caches, or virtual environments.
 

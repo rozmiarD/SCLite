@@ -82,6 +82,30 @@ def test_materialize_review_bundle_packages_current_lifecycle_artifacts(tmp_path
     assert review_bundle(target, generated_at='2026-05-21T00:00:00+00:00')['verdict'] == 'pass'
 
 
+def test_materialized_review_output_excludes_raw_private_fixture_values(tmp_path: Path) -> None:
+    source = {
+        role: json.loads((GOVENGINE_INTEGRATION / filename).read_text(encoding='utf-8'))
+        for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items()
+    }
+    source['execution_receipt']['private_debug_token'] = 'sclite-private-fixture-token'
+    target = tmp_path / 'generated-review-bundle'
+
+    record = materialize_review_bundle(
+        target,
+        source,
+        chain_id='public-safe-disclosure-test',
+        created_at='2026-05-21T00:00:00+00:00',
+        generated_at='2026-05-21T00:00:00+00:00',
+        strict_jsonschema=False,
+    )
+    serialized_record = json.dumps(record, sort_keys=True)
+    markdown = (target / 'REVIEW.md').read_text(encoding='utf-8')
+
+    assert 'sclite-private-fixture-token' not in serialized_record
+    assert 'sclite-private-fixture-token' not in markdown
+    assert record['public_safety']['static_analysis_only'] is True
+
+
 @pytest.mark.parametrize('bundle', [GOVENGINE_INTEGRATION, LOCAL_ADMIN_CHANGE])
 def test_alpha_review_bundle_families_keep_review_record_and_cli_summary_aligned(bundle: Path) -> None:
     record = review_bundle(bundle, generated_at='2026-05-21T00:00:00+00:00')

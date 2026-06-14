@@ -85,3 +85,30 @@ It demonstrates:
 - review verdict `pass`.
 
 The fixture is synthetic and public-safe. It does not execute tools or prove authorization.
+
+## Host freshness handoff
+
+`verify_secure_bundle()` gives GovEngine a deterministic local verifier result
+for `guarded-strict`: artifact chain, strict lifecycle, Kernel Guard HMAC, and
+manifest metadata binding. That result is necessary but insufficient for a
+runtime freshness decision.
+
+GovEngine or another host should atomically claim freshness using stable inputs
+such as `root_chain_digest`, `guard_root_tag`, `chain_id`, `key_id`, ticket/run
+id, observed time, and host admission context. Replay persistence, TTL,
+concurrency, cleanup, and rejection policy remain host-owned. SCLite does not
+import GovEngine, keep replay state, or decide runtime admission.
+
+## Optional downstream smoke
+
+The repo-local compatibility smoke is:
+
+```bash
+python -m pytest tests/test_govengine_integration_surface.py -q -p no:cacheprovider
+```
+
+It verifies the documented import surface, public-safe GovEngine fixture, and
+CLI commands without importing GovEngine. If a downstream GovEngine checkout is
+available, run that project's own dependency-widening smoke after installing
+this SCLite tree, but keep the dependency one-way: GovEngine may import SCLite;
+SCLite production code must not import GovEngine.

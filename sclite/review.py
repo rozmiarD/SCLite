@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Mapping
 
 from ._json import load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
-from .hosts import extract_host
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .scope_fidelity import build_lifecycle_scope_fidelity_report, validate_lifecycle_scope_fidelity_report
 

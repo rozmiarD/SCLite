@@ -89,6 +89,10 @@ The stable top-level Python import surface is documented in
 but removal or rename of those exports is a compatibility change for the 1.0
 line.
 
+Supported schema-version combinations, unknown-field policy, artifact ID
+guidance, and GovEngine consumer compatibility are frozen in
+[`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md).
+
 Security posture modes are explicit:
 
 - `integrity_only`: SHA-256 artifact-chain consistency.
@@ -191,8 +195,15 @@ semantics. `validate-chain` verifies:
 6. `policy_decision` binds the correct `intent_contract` digest;
 7. `execution_contract` binds the correct intent and policy decision digests;
 8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;
-9. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
-10. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
+9. denied policy decisions do not continue into an executable lifecycle;
+10. owner-approval-required policy decisions require a consumable approved ticket before executable lifecycle review can pass;
+11. rejected, expired, revoked, missing, or unknown ticket approval states stop executable lifecycle review;
+12. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
+13. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
+
+Python callers can use `verify_lifecycle_manifest()` as the fail-safe wrapper
+for this strict behavior instead of remembering to pass `require_lifecycle=True`
+to `verify_artifact_chain_manifest()`.
 
 ## Optional Kernel Guard HMAC
 
@@ -228,6 +239,22 @@ The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence s
 - `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket, including explicit receipt-source binding and conservative completed-execution/network claim bounds.
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
+
+Receipt/evidence compatibility decision:
+
+- structured claim booleans such as `requires_completed_execution`,
+  `requires_network_execution`, and `requires_live_execution` are authoritative
+  for current receipt-bounded evidence review;
+- legacy text markers such as `completed_execution`, `command_executed`, and
+  `network_execution` remain a conservative compatibility fallback in v0.2 so
+  old public-safe fixtures cannot bypass receipt bounds by omitting structured
+  fields;
+- an execution receipt vNext should make outcome taxonomy and evidence claim
+  requirements explicit enough that text marker fallback can be deprecated in a
+  future schema line;
+- `execution_shape.plan` remains an opaque normalized execution-shape field in
+  v0.2. It is not planner ownership or runtime permission. Any rename should
+  happen only in a vNext schema.
 
 ## v0.4 Trust/Carrier References and Review Records
 

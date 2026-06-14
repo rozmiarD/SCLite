@@ -51,6 +51,9 @@ def test_kernel_guard_builds_schema_valid_sidecar_and_verifies() -> None:
     result = verify_kernel_guard_manifest(manifest, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
 
     assert result['status'] == 'passed'
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert result['guard_status'] == 'passed'
     assert result['entry_count'] == 6
     assert result['guard_profile'] == 'kernel_guard_hmac_v1'
     assert result['replay_status'] == 'not_checked'
@@ -92,6 +95,8 @@ def test_kernel_guard_hmac_v1_golden_vector_freezes_transcript_and_tags() -> Non
     )
 
     assert result['status'] == 'passed'
+    assert result['guard_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
     assert result['guard_root_tag'] == expected_root_tag
 
 
@@ -254,6 +259,40 @@ def test_verify_guarded_chain_cli(tmp_path: Path) -> None:
     )
 
     assert proc.stdout.startswith('kernel_guard_ok:6:')
+
+
+def test_verify_guarded_chain_cli_json_reports_layer_statuses(tmp_path: Path) -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    guard_path = tmp_path / 'kernel_guard_manifest.json'
+    guard_path.write_text(json.dumps(guard, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    env = dict(os.environ)
+    env['SCLITE_KERNEL_GUARD_KEY'] = KEY
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'verify-guarded-chain',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--guard',
+            str(guard_path),
+            '--strict-lifecycle',
+            '--format',
+            'json',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        env=env,
+        check=True,
+    )
+
+    result = json.loads(proc.stdout)
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert result['guard_status'] == 'passed'
+    assert result['replay_status'] == 'not_checked'
 
 
 def test_verify_guarded_chain_cli_no_schema_still_validates_guard_sidecar_shape(tmp_path: Path) -> None:

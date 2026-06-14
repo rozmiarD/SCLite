@@ -38,6 +38,13 @@ def resolve_guard_path(manifest_path: Path | str, guard_path: Path | str | None 
     return Path(manifest_path).parent / DEFAULT_KERNEL_GUARD_FILENAME
 
 
+def _assert_under_root(path: Path, root: Path, *, label: str) -> None:
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise SecureBundleError(f'{label} path escapes root: {path}') from exc
+
+
 def verify_secure_bundle(
     target: Path | str,
     *,
@@ -57,6 +64,9 @@ def verify_secure_bundle(
 
     manifest_path = resolve_manifest_path(target).resolve()
     sidecar_path = resolve_guard_path(manifest_path, guard_path).resolve()
+    root_path = Path(root).resolve() if root else manifest_path.parent
+    _assert_under_root(manifest_path, root_path, label='manifest')
+    _assert_under_root(sidecar_path, root_path, label='guard')
     if not manifest_path.is_file():
         raise SecureBundleError(f'missing artifact-chain manifest: {manifest_path}')
     if not sidecar_path.is_file():
@@ -64,7 +74,6 @@ def verify_secure_bundle(
 
     manifest = _load_json_object(manifest_path)
     guard = _load_json_object(sidecar_path)
-    root_path = Path(root).resolve() if root else manifest_path.parent
     try:
         result = verify_kernel_guard_manifest(
             manifest,
