@@ -268,6 +268,7 @@ def verify_kernel_guard_manifest(
 
     return {
         'status': 'passed',
+        'guard_status': 'passed',
         'checked_entries': [str(entry.get('role') or '') for entry in entries],
         'entry_count': len(entries),
         'root_chain_digest': str(manifest.get('root_chain_digest') or ''),
@@ -275,5 +276,6 @@ def verify_kernel_guard_manifest(
         'guard_root_tag': expected_root_tag,
         'key_id': key_id,
         'replay_status': 'not_checked',
-        'chain_status': chain_result.get('status') if chain_result else 'not_checked',
+        'chain_status': chain_result.get('chain_status') if chain_result else 'not_checked',
+        'lifecycle_status': chain_result.get('lifecycle_status') if chain_result else 'not_checked',
     }
