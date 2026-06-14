@@ -39,6 +39,24 @@ def test_packaged_current_lifecycle_artifacts_validate() -> None:
         artifacts.validate_artifact(artifact, schema)
 
 
+def test_packaged_govengine_fixture_current_contracts_validate() -> None:
+    schemas = {
+        '01_intent_contract.json': 'intent_contract.v0.2',
+        '02_policy_decision.json': 'policy_decision.v0.2',
+        '03_execution_contract.json': 'execution_contract.v0.2',
+        '04_execution_ticket.json': 'execution_ticket.v0.3',
+        '05_execution_receipt.json': 'execution_receipt.v0.2',
+        '06_evidence_contract.json': 'evidence_contract.v0.2',
+        'artifact_chain_manifest.json': 'artifact_chain_manifest.v0.2',
+        'verification_receipt.json': 'review_record.v0.1',
+        'trust_profile_ref.json': 'trust_profile_ref.v0.1',
+        'carrier_profile_ref.json': 'carrier_profile_ref.v0.1',
+    }
+    for filename, schema in schemas.items():
+        artifact = json.loads((PACKAGE_GOVENGINE_BUNDLE_DIR / filename).read_text(encoding='utf-8'))
+        artifacts.validate_artifact(artifact, schema, strict_jsonschema=True)
+
+
 def test_strict_jsonschema_validation_accepts_current_execution_contract() -> None:
     contract = json.loads(PACKAGE_EXECUTION_CONTRACT.read_text(encoding='utf-8'))
     artifacts.validate_artifact(contract, 'execution_contract.v0.2', strict_jsonschema=True)
