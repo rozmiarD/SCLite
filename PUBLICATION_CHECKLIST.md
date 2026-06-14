@@ -14,7 +14,7 @@ git config --get user.email
 Required maintainer value for this publish tree:
 
 ```text
-0x505badc0de <32790662+rozmiarD@users.noreply.github.com>
+Krzysztof Probola <32790662+rozmiarD@users.noreply.github.com>
 ```
 
 External contributors should use their own GitHub-associated identity; this guardrail is not a contributor identity requirement.
