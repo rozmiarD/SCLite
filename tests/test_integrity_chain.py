@@ -85,6 +85,8 @@ def test_v02_chain_manifest_verifies_fixture() -> None:
     result = verify_artifact_chain_manifest(manifest, root=FIXTURE)
 
     assert result['status'] == 'passed'
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'not_checked'
     assert result['entry_count'] == 6
     assert result['checked_entries'][0] == 'intent_contract'
     assert result['checked_entries'][-1] == 'evidence_contract'
@@ -95,6 +97,8 @@ def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
     manifest = _load('artifact_chain_manifest.json')
     result = verify_artifact_chain_manifest(manifest, root=FIXTURE, require_lifecycle=True)
 
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
     assert result['semantic_checks'] == [
         'role_order',
         'policy_binds_intent',
@@ -285,7 +289,10 @@ def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
         check=True,
     )
 
-    assert json.loads(proc.stdout)['semantic_checks'] == []
+    result = json.loads(proc.stdout)
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'not_checked'
+    assert result['semantic_checks'] == []
 
 
 def test_verify_lifecycle_cli_alias() -> None:
@@ -317,4 +324,7 @@ def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
         check=True,
     )
 
-    assert 'ticket_binds_execution_contract' in json.loads(proc.stdout)['semantic_checks']
+    result = json.loads(proc.stdout)
+    assert result['chain_status'] == 'passed'
+    assert result['lifecycle_status'] == 'passed'
+    assert 'ticket_binds_execution_contract' in result['semantic_checks']
