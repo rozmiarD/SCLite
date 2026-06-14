@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.0.2 - Stable lifecycle and guarded verification surface
+
+- published `sclite-core==1.0.2` package line as a stable SCLite roadmap
+  hardening patch after SCLite/GovEngine/Ravenclaw stack validation.
 - Adds explicit verifier layer statuses, fail-safe lifecycle verification,
   receipt/evidence compatibility checks, guarded-strict filesystem-boundary
   tests, and public-safe review-output disclosure coverage.

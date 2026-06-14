@@ -94,10 +94,10 @@ PYTHON=/tmp/sclite-roadmap-venv/bin/python scripts/package_smoke.sh
 
 Observed successful endpoints:
 
-- `public_truth_ok:sclite-core==1.0.1:import=sclite:runtime_deps=0`
+- `public_truth_ok:sclite-core==1.0.2:import=sclite:runtime_deps=0`
 - full pytest completed at 100%;
 - `ruff`: `All checks passed!`
-- package smoke ended with `sclite_package_smoke_ok:1.0.1`.
+- package smoke ended with `sclite_package_smoke_ok:1.0.2`.
 
 ## Remaining Risks Outside SCLite Core
 

@@ -209,7 +209,7 @@ Expected result:
 - GovEngine integration fixture passes with `--fail-on review`;
 - local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
 - the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation confirms the published `1.0.1` stable package line;
+- public truth validation confirms the published `1.0.2` stable package line;
 - optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
   sequence, previous-tag, and root-tag drift when a guard key is supplied;
 - secure-bundle verification fails closed on missing guard, loose lifecycle,

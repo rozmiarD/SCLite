@@ -24,10 +24,10 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 1.0.1
+## Current baseline: 1.0.2
 
-Current package: `sclite-core==1.0.1`.
-Latest published public package: `sclite-core==1.0.1`.
+Current package: `sclite-core==1.0.2`.
+Latest published public package: `sclite-core==1.0.2`.
 
 Current lifecycle:
 
@@ -82,7 +82,7 @@ replay store, or protection from a malicious kernel.
 Roadmap milestones use PEP 440-compatible package-style labels:
 
 ```text
-0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2 -> 1.0.0rc1 -> 1.0.0 -> 1.0.1
+0.2.5 -> 0.3.0 -> 0.3.5 -> 0.4.0 -> 0.4.5 -> 0.5.0 -> 0.5.1 -> 0.6.0a0 -> 0.7.0a0 -> 0.8.0a0 -> 0.8.0b2 -> 1.0.0rc1 -> 1.0.0 -> 1.0.1 -> 1.0.2
 ```
 
 Avoid non-monotonic labels such as `0.25`: under PEP 440, `0.25` sorts after `0.5`, which is not the intended roadmap order. Not every roadmap milestone has to become a PyPI release, but release versions must remain monotonic and PEP 440-compatible.
