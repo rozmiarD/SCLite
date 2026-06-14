@@ -69,6 +69,12 @@ ticket, and terminal ticket approval states such as `rejected`, `expired`, and
 `revoked`. Python callers can use `verify_lifecycle_manifest()` for that
 fail-safe path.
 
+Schema-version compatibility is documented in
+`docs/SCHEMA_COMPATIBILITY.md`. That matrix keeps v0.2 lifecycle, v0.3 scoped
+ticket, receipt/evidence compatibility fallback, review-bundle, and
+`verification_result.v1` support explicit without turning unknown fields or
+artifact IDs into authority.
+
 Receipt-bounded evidence validation treats structured claim fields as
 authoritative and keeps legacy text markers as a conservative compatibility
 fallback. Tests cover benign-looking claims with
@@ -219,12 +225,14 @@ Expected result:
 Before any future PyPI/TestPyPI release:
 
 ```bash
-python -m pip install build twine
-python -m build
-python -m twine check dist/*
+scripts/package_smoke.sh
 ```
 
-Then test install from the generated wheel in a clean environment and confirm the distribution name `sclite-core` still imports as `sclite`.
+The package smoke builds wheel/sdist artifacts in a temporary directory, runs
+`twine check`, installs the generated wheel into a clean environment, runs
+`pip check`, and confirms that the distribution name `sclite-core` still
+imports as `sclite`. It is release-readiness evidence only; it does not publish
+or tag.
 
 ## Non-claims
 

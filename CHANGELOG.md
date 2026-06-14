@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Adds explicit verifier layer statuses, fail-safe lifecycle verification,
+  receipt/evidence compatibility checks, guarded-strict filesystem-boundary
+  tests, and public-safe review-output disclosure coverage.
+- Documents the schema-version compatibility matrix, unknown-field policy,
+  artifact ID guidance, GovEngine downstream smoke, host freshness handoff,
+  and post-1.0 release-readiness gates.
+- Adds an opt-in package smoke for wheel/sdist build, `twine check`, clean
+  wheel install, `pip check`, and `sclite-core` distribution import checks.
+
 ## 1.0.1 - Stable lifecycle and guarded verification surface
 
 - published `sclite-core==1.0.1` package line as a stable SCLite security

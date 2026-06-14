@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import importlib
 import json
-import re
 import sys
 import tomllib
 from pathlib import Path
@@ -431,14 +430,17 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY.md', _read('SECURITY.md'), f'current published stable package is `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'README.md', readme, 'SECURITY_MODEL.md')
     _require(errors, 'README.md', readme, 'docs/SECURITY_PROFILES.md')
+    _require(errors, 'README.md', readme, 'docs/SCHEMA_COMPATIBILITY.md')
     _require(errors, 'SPEC.md', spec, 'Any incompatible change must use a new profile name')
     _require(errors, 'SPEC.md', spec, 'kernel_guard_hmac_v1')
+    _require(errors, 'SPEC.md', spec, 'Supported schema-version combinations')
     _require(errors, 'VALIDATION.md', validation, 'transcript/canonicalization changes require a new profile name')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'profile freeze docs remain aligned')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite reports replay as `not_checked`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`validate-chain` returns `chain_status: passed`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`verify-guarded-chain` adds `guard_status: passed`')
     _require(errors, 'VALIDATION.md', validation, 'Python callers can use `verify_lifecycle_manifest()`')
+    _require(errors, 'VALIDATION.md', validation, 'docs/SCHEMA_COMPATIBILITY.md')
     _require(errors, 'VALIDATION.md', validation, 'authoritative and keeps legacy text markers')
     _require(errors, 'SPEC.md', spec, '`execution_shape.plan` remains an opaque normalized execution-shape field')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
@@ -453,6 +455,10 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Host freshness handoff data')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md'), 'Replay persistence, TTL')
     _require(errors, 'VALIDATION.md', validation, 'rejects manifest and Kernel Guard sidecar paths')
+    schema_compat = _read('docs/SCHEMA_COMPATIBILITY.md')
+    _require(errors, 'docs/SCHEMA_COMPATIBILITY.md', schema_compat, 'Unknown fields are metadata')
+    _require(errors, 'docs/SCHEMA_COMPATIBILITY.md', schema_compat, 'Artifact IDs are labels unless')
+    _require(errors, 'docs/SCHEMA_COMPATIBILITY.md', schema_compat, 'SCLite must not import GovEngine in production code')
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, '`guarded-strict`')
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, '`guarded_domain_auth_fresh`')
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'An incompatible change must use a new profile name')
@@ -466,6 +472,8 @@ def collect_errors() -> list[str]:
     _require(errors, '.github/workflows/ci.yml', workflow, 'package-dry-run:')
     _require(errors, '.github/workflows/ci.yml', workflow, 'rm -rf dist build *.egg-info')
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m twine check dist/*')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'scripts/package_smoke.sh')
+    _require(errors, 'VALIDATION.md', validation, 'release-readiness evidence only')
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m pip check')
 
     errors.extend(_stable_import_errors())

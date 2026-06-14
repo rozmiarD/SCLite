@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
 from sclite._json import load_json_object
-from sclite.artifacts import ARTIFACT_CANONICALIZATION_VERSION, ARTIFACT_HASH_ALGORITHM, build_artifact_hash, validate_artifact
+from sclite.artifacts import build_artifact_hash, validate_artifact
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
 CHAIN_HASH_ALGORITHM = 'sha256'

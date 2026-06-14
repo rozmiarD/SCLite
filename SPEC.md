@@ -89,6 +89,10 @@ The stable top-level Python import surface is documented in
 but removal or rename of those exports is a compatibility change for the 1.0
 line.
 
+Supported schema-version combinations, unknown-field policy, artifact ID
+guidance, and GovEngine consumer compatibility are frozen in
+[`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md).
+
 Security posture modes are explicit:
 
 - `integrity_only`: SHA-256 artifact-chain consistency.
