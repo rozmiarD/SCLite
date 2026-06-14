@@ -25,6 +25,7 @@ EXPECTED_PUBLIC_EXPORTS = (
     'artifact_descriptor',
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
+    'verify_lifecycle_manifest',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',

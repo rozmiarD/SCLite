@@ -19,6 +19,8 @@ V02_LIFECYCLE_ROLES = (
     'execution_receipt',
     'evidence_contract',
 )
+CONSUMABLE_TICKET_APPROVAL_STATUSES = {'approved_for_dry_run', 'approved'}
+TERMINAL_TICKET_APPROVAL_STATUSES = {'rejected', 'expired', 'revoked'}
 
 
 class ChainVerificationError(ValueError):
@@ -160,6 +162,13 @@ def _assert_link_binds(source: Mapping[str, Any], link_name: str, target: Mappin
         raise ChainVerificationError(reason)
 
 
+def _mapping_field(value: Mapping[str, Any], key: str, label: str) -> Mapping[str, Any]:
+    item = value.get(key)
+    if not isinstance(item, Mapping):
+        raise ChainVerificationError(f'{label} missing {key} object')
+    return item
+
+
 def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]]) -> List[str]:
     """Verify v0.2 lifecycle semantics beyond hash-chain integrity.
 
@@ -181,6 +190,18 @@ def verify_lifecycle_semantics(artifacts_by_role: Mapping[str, Mapping[str, Any]
     evidence = artifacts_by_role['evidence_contract']
 
     _assert_link_binds(policy, 'intent', intent, 'policy-intent digest mismatch')
+    policy_decision = str(policy.get('decision') or '')
+    approval = _mapping_field(ticket, 'approval', 'execution_ticket')
+    approval_status = str(approval.get('status') or '')
+    if policy_decision == 'deny':
+        raise ChainVerificationError('policy decision denies executable lifecycle')
+    if policy_decision == 'owner_approval_required' and approval_status not in CONSUMABLE_TICKET_APPROVAL_STATUSES:
+        raise ChainVerificationError('owner approval required before executable lifecycle')
+    if approval_status in TERMINAL_TICKET_APPROVAL_STATUSES:
+        raise ChainVerificationError(f'execution ticket approval is terminal: {approval_status}')
+    if approval_status not in CONSUMABLE_TICKET_APPROVAL_STATUSES:
+        raise ChainVerificationError(f'execution ticket is not approved for executable lifecycle: {approval_status or "missing"}')
+
     _assert_link_binds(contract, 'intent', intent, 'execution_contract-intent digest mismatch')
     _assert_link_binds(contract, 'policy_decision', policy, 'execution_contract-policy digest mismatch')
     _assert_link_binds(ticket, 'execution_contract', contract, 'ticket-execution_contract digest mismatch')
@@ -286,3 +307,21 @@ def verify_artifact_chain_manifest(
         'canonicalization': manifest.get('canonicalization') or CHAIN_CANONICALIZATION_VERSION,
         'hash_algorithm': manifest.get('hash_algorithm') or CHAIN_HASH_ALGORITHM,
     }
+
+
+def verify_lifecycle_manifest(
+    manifest: Mapping[str, Any],
+    *,
+    root: Path | None = None,
+    validate_schemas: bool = True,
+    strict_jsonschema: bool = False,
+) -> Dict[str, Any]:
+    """Verify a v0.2 lifecycle manifest with fail-safe lifecycle semantics."""
+
+    return verify_artifact_chain_manifest(
+        manifest,
+        root=root,
+        validate_schemas=validate_schemas,
+        strict_jsonschema=strict_jsonschema,
+        require_lifecycle=True,
+    )
