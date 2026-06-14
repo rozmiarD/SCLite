@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Mapping, Sequence
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .integrity import artifact_descriptor
+from .json_types import json_array, json_mapping
 
 SCOPED_TICKET_SCHEMA_REF = 'schemas/execution_ticket.v0.3.schema.json'
 TICKET_PROFILES = {'review_record', 'scoped_execution_ticket', 'external_capability_ref'}
@@ -176,12 +177,12 @@ def validate_ticket_semantics(
 def explain_ticket(ticket: Mapping[str, Any]) -> str:
     """Return a concise human-readable explanation of an ExecutionTicket."""
     profile = str(ticket.get('ticket_profile') or 'unknown')
-    semantics = ticket.get('ticket_semantics') if isinstance(ticket.get('ticket_semantics'), Mapping) else {}
-    subject = ticket.get('subject_binding') if isinstance(ticket.get('subject_binding'), Mapping) else {}
-    scope = ticket.get('scope_binding') if isinstance(ticket.get('scope_binding'), Mapping) else {}
-    spend = ticket.get('spend_limits') if isinstance(ticket.get('spend_limits'), Mapping) else {}
-    integrity = ticket.get('integrity') if isinstance(ticket.get('integrity'), Mapping) else {}
-    non_claims = ticket.get('non_claims') if isinstance(ticket.get('non_claims'), list) else []
+    semantics = json_mapping(ticket.get('ticket_semantics'))
+    subject = json_mapping(ticket.get('subject_binding'))
+    scope = json_mapping(ticket.get('scope_binding'))
+    spend = json_mapping(ticket.get('spend_limits'))
+    integrity = json_mapping(ticket.get('integrity'))
+    non_claims = json_array(ticket.get('non_claims'))
 
     lines = [
         f"SCLite ExecutionTicket {ticket.get('schema_version') or 'unknown'}",
@@ -206,9 +207,9 @@ def explain_ticket(ticket: Mapping[str, Any]) -> str:
 
 def ticket_summary(ticket: Mapping[str, Any]) -> Dict[str, Any]:
     """Return a compact machine-readable scoped-ticket summary."""
-    subject = ticket.get('subject_binding') if isinstance(ticket.get('subject_binding'), Mapping) else {}
-    scope = ticket.get('scope_binding') if isinstance(ticket.get('scope_binding'), Mapping) else {}
-    spend = ticket.get('spend_limits') if isinstance(ticket.get('spend_limits'), Mapping) else {}
+    subject = json_mapping(ticket.get('subject_binding'))
+    scope = json_mapping(ticket.get('scope_binding'))
+    spend = json_mapping(ticket.get('spend_limits'))
     return {
         'ticket_id': ticket.get('ticket_id'),
         'schema_version': ticket.get('schema_version'),
@@ -407,7 +408,7 @@ def verify_ticket_use(
             if ticket_mode == 'dry_run' and ('live_vulnerability' in text or 'confirmed_vulnerability' in text):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] exceeds dry-run ticket evidence bounds')
         if ticket_mode == 'dry_run':
-            non_claims = evidence_contract.get('non_claims') if isinstance(evidence_contract.get('non_claims'), list) else []
+            non_claims = json_array(evidence_contract.get('non_claims'))
             if 'does_not_claim_live_vulnerability_evidence' not in {str(item) for item in non_claims}:
                 raise TicketUseVerificationError('dry-run evidence contract must disclaim live vulnerability evidence')
         replay = _require_mapping(evidence_contract.get('replay'), 'evidence_contract.replay')

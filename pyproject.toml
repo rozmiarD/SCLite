@@ -40,6 +40,7 @@ dev = [
   "jsonschema>=4.21,<5",
   "mypy>=1.10,<2",
   "pytest>=8,<9",
+  "types-jsonschema>=4.24,<5",
 ]
 
 [project.scripts]
@@ -93,9 +94,4 @@ testpaths = ["tests"]
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
-follow_imports = "skip"
-files = [
-  "sclite/_json.py",
-  "sclite/hosts.py",
-  "sclite/verification_result.py",
-]
+files = ["sclite"]

@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .json_types import json_mapping
+
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
 ARTIFACT_HASH_ALGORITHM = 'sha256'
 
@@ -129,7 +131,7 @@ def validate_json_schema_value(
         for key in schema.get('required', []):
             if key not in value:
                 raise JsonSchemaValidationError(f'{path}: missing required field {key!r}')
-        properties = schema.get('properties') if isinstance(schema.get('properties'), dict) else {}
+        properties = json_mapping(schema.get('properties'))
         for key, subschema in properties.items():
             if key in value and isinstance(subschema, dict):
                 validate_json_schema_value(subschema, value[key], f'{path}.{key}', root_schema=root)

@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Mapping
 from ._json import load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .json_types import json_array
 from .scope_fidelity import build_lifecycle_scope_fidelity_report, validate_lifecycle_scope_fidelity_report
 from .tickets import verify_ticket_use_profile
 
@@ -115,7 +116,7 @@ def build_review_record_from_manifest(
             strict_jsonschema=strict_jsonschema,
             require_lifecycle=True,
         )
-        semantic_checks = chain_result.get('semantic_checks') if isinstance(chain_result.get('semantic_checks'), list) else []
+        semantic_checks = json_array(chain_result.get('semantic_checks'))
         checks.append(_check('chain_integrity', 'pass', str(chain_result.get('root_chain_digest') or ''), int(chain_result.get('entry_count') or 0)))
         checks.append(_check('lifecycle_binding', 'pass' if semantic_checks else 'review', 'semantic checks present' if semantic_checks else 'manifest did not expose canonical lifecycle semantic checks', len(semantic_checks)))
         statuses.extend(['pass', 'pass' if semantic_checks else 'review'])
@@ -142,7 +143,7 @@ def build_review_record_from_manifest(
         strict_jsonschema=strict_jsonschema,
     )
     ticket_use_status = str(ticket_use_result.get('status') or 'review')
-    ticket_use_checks = ticket_use_result.get('checks') if isinstance(ticket_use_result.get('checks'), list) else []
+    ticket_use_checks = json_array(ticket_use_result.get('checks'))
     checks.append(_check(
         'ticket_use_profile',
         ticket_use_status,

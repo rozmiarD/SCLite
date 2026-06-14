@@ -478,15 +478,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == 'redaction-policy':
-        policy = build_default_redaction_policy(policy_id=str(args.policy_id))
-        print(json.dumps(policy, indent=2, sort_keys=True))
+        default_policy = build_default_redaction_policy(policy_id=str(args.policy_id))
+        print(json.dumps(default_policy, indent=2, sort_keys=True))
         return 0
 
     if args.command == 'redaction-receipt':
         try:
             source = _load_json_object(Path(str(args.source_json)))
             redacted = _load_json_object(Path(str(args.redacted_json)))
-            policy = _load_json_object(Path(str(args.policy_json))) if args.policy_json else None
+            policy: Dict[str, Any] | None = _load_json_object(Path(str(args.policy_json))) if args.policy_json else None
             receipt = build_redaction_receipt(
                 source,
                 redacted,
