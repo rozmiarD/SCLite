@@ -69,6 +69,13 @@ ticket, and terminal ticket approval states such as `rejected`, `expired`, and
 `revoked`. Python callers can use `verify_lifecycle_manifest()` for that
 fail-safe path.
 
+Receipt-bounded evidence validation treats structured claim fields as
+authoritative and keeps legacy text markers as a conservative compatibility
+fallback. Tests cover benign-looking claims with
+`requires_network_execution=true`, legacy `completed_execution` marker text,
+receipt/evidence descriptor drift, replay live-execution requirements, and
+public-safe review output that must not disclose raw private fixture values.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep
