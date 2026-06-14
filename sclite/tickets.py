@@ -64,7 +64,13 @@ def _linked_execution_contract_descriptor(ticket: Mapping[str, Any]) -> Mapping[
     return _require_mapping(execution_contract.get('descriptor'), 'ticket.links.execution_contract.descriptor')
 
 
-def validate_ticket_semantics(ticket: Mapping[str, Any], execution_contract: Mapping[str, Any], *, strict_jsonschema: bool = False) -> List[str]:
+def validate_ticket_semantics(
+    ticket: Mapping[str, Any],
+    execution_contract: Mapping[str, Any],
+    *,
+    strict_jsonschema: bool = False,
+    strict_ticket_profile: bool = False,
+) -> List[str]:
     """Validate v0.3 scoped-ticket semantics against an execution contract.
 
     This is a local/static check. It does not decide trust, authorization,
@@ -141,6 +147,8 @@ def validate_ticket_semantics(ticket: Mapping[str, Any], execution_contract: Map
         raise TicketSemanticError('ticket spend_limits.max_uses exceeds execution_limits.max_runs')
     if bool(spend_limits.get('one_shot')) and max_uses != 1:
         raise TicketSemanticError('one_shot ticket must have max_uses=1')
+    if strict_ticket_profile and bool(spend_limits.get('one_shot')) and max_runs != 1:
+        raise TicketSemanticError('strict one_shot ticket must have execution_limits.max_runs=1')
     if bool(execution_limits.get('one_shot')) and not bool(spend_limits.get('one_shot')):
         raise TicketSemanticError('execution_limits.one_shot requires spend_limits.one_shot')
 
@@ -260,12 +268,16 @@ def _claim_has_marker(claim: Mapping[str, Any], markers: set[str]) -> bool:
     return any(marker in text for marker in markers)
 
 
-def _claim_requires_completed_execution(claim: Mapping[str, Any]) -> bool:
-    return bool(claim.get('requires_completed_execution')) or _claim_has_marker(claim, EXECUTION_CLAIM_MARKERS)
+def _claim_requires_completed_execution(claim: Mapping[str, Any], *, allow_text_markers: bool = True) -> bool:
+    return bool(claim.get('requires_completed_execution')) or (
+        allow_text_markers and _claim_has_marker(claim, EXECUTION_CLAIM_MARKERS)
+    )
 
 
-def _claim_requires_network_execution(claim: Mapping[str, Any]) -> bool:
-    return bool(claim.get('requires_network_execution')) or bool(claim.get('requires_live_execution')) or _claim_has_marker(claim, NETWORK_CLAIM_MARKERS)
+def _claim_requires_network_execution(claim: Mapping[str, Any], *, allow_text_markers: bool = True) -> bool:
+    return bool(claim.get('requires_network_execution')) or bool(claim.get('requires_live_execution')) or (
+        allow_text_markers and _claim_has_marker(claim, NETWORK_CLAIM_MARKERS)
+    )
 
 
 def verify_ticket_use(
@@ -275,6 +287,8 @@ def verify_ticket_use(
     evidence_contract: Mapping[str, Any] | None = None,
     *,
     strict_jsonschema: bool = False,
+    strict_ticket_profile: bool = False,
+    strict_evidence_claims: bool = False,
 ) -> Dict[str, Any]:
     """Verify that receipt/evidence claims stay inside a scoped ticket.
 
@@ -283,7 +297,12 @@ def verify_ticket_use(
     it does not execute tools, decide trust, prove legal authorization, or
     attest that a runtime enforced the ticket.
     """
-    validate_ticket_semantics(ticket, execution_contract, strict_jsonschema=strict_jsonschema)
+    validate_ticket_semantics(
+        ticket,
+        execution_contract,
+        strict_jsonschema=strict_jsonschema,
+        strict_ticket_profile=strict_ticket_profile,
+    )
     schema_ref = str(receipt.get('schema_ref') or '')
     if schema_ref:
         validate_artifact(dict(receipt), schema_ref, strict_jsonschema=strict_jsonschema)
@@ -333,6 +352,8 @@ def verify_ticket_use(
     )
     if bool(spend.get('one_shot')) and executed_count > _as_int(limits.get('max_runs'), 'ticket.execution_limits.max_runs'):
         raise TicketUseVerificationError('receipt executed command count exceeds ticket execution limit')
+    if strict_ticket_profile and bool(spend.get('one_shot')) and executed_count > 1:
+        raise TicketUseVerificationError('strict one_shot receipt executed more than one command')
 
     checks = [
         'ticket_semantics_valid',
@@ -370,11 +391,17 @@ def verify_ticket_use(
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] must declare source_receipt_id')
             if source_receipt_id != str(receipt.get('receipt_id') or ''):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] source_receipt_id mismatch')
-            if _claim_requires_completed_execution(claim) and receipt_status in BLOCKED_RECEIPT_STATUSES:
+            if strict_evidence_claims and _claim_has_marker(claim, EXECUTION_CLAIM_MARKERS) and not bool(claim.get('requires_completed_execution')):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] uses legacy execution text markers in strict evidence profile')
+            if strict_evidence_claims and _claim_has_marker(claim, NETWORK_CLAIM_MARKERS) and not (
+                bool(claim.get('requires_network_execution')) or bool(claim.get('requires_live_execution'))
+            ):
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] uses legacy network text markers in strict evidence profile')
+            if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and receipt_status in BLOCKED_RECEIPT_STATUSES:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires completed execution beyond receipt status')
-            if _claim_requires_completed_execution(claim) and executed_count == 0:
+            if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and executed_count == 0:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires executed commands beyond receipt')
-            if _claim_requires_network_execution(claim) and not network_performed:
+            if _claim_requires_network_execution(claim, allow_text_markers=not strict_evidence_claims) and not network_performed:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires network execution beyond receipt')
             text = _claim_text(claim)
             if ticket_mode == 'dry_run' and ('live_vulnerability' in text or 'confirmed_vulnerability' in text):
@@ -406,4 +433,76 @@ def verify_ticket_use(
             'receipt_runtime': receipt_runtime.get('runtime_ref') or receipt_runtime.get('name'),
             'evidence_checks': evidence_checks,
         },
+    }
+
+
+def verify_ticket_use_profile(
+    artifacts_by_role: Mapping[str, Mapping[str, Any]],
+    *,
+    strict_jsonschema: bool = False,
+    strict_ticket_profile: bool = False,
+    strict_evidence_claims: bool = False,
+) -> Dict[str, Any]:
+    """Evaluate ticket-use verification for a lifecycle artifact set.
+
+    The profile is intentionally static. It consumes already-present lifecycle
+    artifacts and reports whether v0.3 receipt-bounded evidence was actually
+    verified. It does not execute tools or make runtime admission decisions.
+    """
+
+    ticket = artifacts_by_role.get('execution_ticket')
+    if not isinstance(ticket, Mapping):
+        return {
+            'status': 'review',
+            'applicability': 'not_applicable',
+            'detail': 'ticket-use verification requires an execution_ticket artifact',
+            'checks': [],
+        }
+    if str(ticket.get('schema_version') or '') != 'v0.3':
+        return {
+            'status': 'review',
+            'applicability': 'not_applicable',
+            'detail': 'ticket-use verification requires execution_ticket.v0.3 artifacts',
+            'ticket_id': ticket.get('ticket_id'),
+            'checks': [],
+        }
+
+    missing = [
+        role
+        for role in ('execution_contract', 'execution_receipt', 'evidence_contract')
+        if not isinstance(artifacts_by_role.get(role), Mapping)
+    ]
+    if missing:
+        return {
+            'status': 'review',
+            'applicability': 'incomplete',
+            'detail': 'ticket-use verification missing lifecycle artifacts: ' + ', '.join(missing),
+            'ticket_id': ticket.get('ticket_id'),
+            'checks': [],
+        }
+
+    try:
+        result = verify_ticket_use(
+            ticket,
+            artifacts_by_role['execution_contract'],
+            artifacts_by_role['execution_receipt'],
+            artifacts_by_role['evidence_contract'],
+            strict_jsonschema=strict_jsonschema,
+            strict_ticket_profile=strict_ticket_profile,
+            strict_evidence_claims=strict_evidence_claims,
+        )
+    except (TicketSemanticError, TicketUseVerificationError, JsonSchemaValidationError, AssertionError) as exc:
+        return {
+            'status': 'fail',
+            'applicability': 'verified',
+            'detail': str(exc),
+            'ticket_id': ticket.get('ticket_id'),
+            'checks': [],
+        }
+
+    return {
+        **result,
+        'status': 'pass',
+        'applicability': 'verified',
+        'detail': 'ticket-use verification passed',
     }

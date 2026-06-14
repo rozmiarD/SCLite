@@ -14,7 +14,7 @@
       "status": "pass"
     },
     {
-      "count": 8,
+      "count": 14,
       "detail": "semantic checks present",
       "name": "lifecycle_binding",
       "status": "pass"
@@ -26,7 +26,8 @@
       "status": "fail"
     },
     {
-      "detail": "v0.3 ticket-use semantics available for downstream verification",
+      "count": 11,
+      "detail": "ticket-use verification passed",
       "name": "ticket_use_profile",
       "status": "pass"
     }
@@ -137,6 +138,7 @@
   "source_manifest": "artifact_chain_manifest.json",
   "summary": {
     "artifact_count": 6,
+    "receipt_id": "scoped-ticket-receipt-demo-001",
     "review_bundle_files": {
       "evidence_contract": "06_evidence_contract.json",
       "execution_contract": "03_execution_contract.json",
@@ -153,7 +155,10 @@
     "target_hosts": [
       "evil.example.net",
       "example.com"
-    ]
+    ],
+    "ticket_id": "scoped-ticket-demo-001",
+    "ticket_use_applicability": "verified",
+    "ticket_use_status": "pass"
   },
   "verdict": "fail"
 }

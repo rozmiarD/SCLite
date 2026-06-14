@@ -6,10 +6,10 @@ source_manifest: `artifact_chain_manifest.json`
 
 ## Checks
 - `pass` — schema_validation: all manifest artifacts validated against declared schemas
-- `pass` — chain_integrity: ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f
+- `pass` — chain_integrity: 1f7c481fb5f07b9e0e3cd93fe44a31745e3bc23105d79b6aeb3dc9a00fd0cdd4
 - `pass` — lifecycle_binding: semantic checks present
 - `pass` — scope_fidelity: all explicit lifecycle target hosts match
-- `pass` — ticket_use_profile: v0.3 ticket-use semantics available for downstream verification
+- `pass` — ticket_use_profile: ticket-use verification passed
 
 ## Non-claims
 - does_not_execute_tools
@@ -17,4 +17,3 @@ source_manifest: `artifact_chain_manifest.json`
 - does_not_prove_signer_identity
 - does_not_prove_carrier_delivery
 - does_not_replace_runtime_policy_decision
-

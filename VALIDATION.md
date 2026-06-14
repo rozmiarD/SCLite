@@ -49,15 +49,17 @@ wrong guard key failures.
 
 `verification_result.v1` is validated in secure-bundle tests and strict schema
 validation. Its required layer statuses are `artifact_chain`,
-`strict_lifecycle`, `kernel_guard`, `replay`, `public_identity`, and
-`runtime_enforcement`; replay remains `not_checked` inside SCLite and
-identity/runtime authority remain `not_claimed`.
+`strict_lifecycle`, `kernel_guard`, `ticket_use`, `replay`,
+`public_identity`, and `runtime_enforcement`; replay remains `not_checked`
+inside SCLite and identity/runtime authority remain `not_claimed`.
 
 Verifier JSON output also exposes explicit layer status fields before the
 stable verification-result envelope is built:
 
-- `validate-chain`: `chain_status=passed`, `lifecycle_status=not_checked`;
-- `verify-lifecycle`: `chain_status=passed`, `lifecycle_status=passed`;
+- `validate-chain`: `chain_status=passed`,
+  `verification_posture=integrity_only`, `lifecycle_status=not_checked`;
+- `verify-lifecycle`: `chain_status=passed`,
+  `verification_posture=strict_lifecycle`, `lifecycle_status=passed`;
 - `verify-guarded-chain`: adds `guard_status=passed`,
   `replay_status=not_checked`;
 - `verify-secure-bundle`: reports all local verifier layers while preserving
@@ -77,10 +79,16 @@ artifact IDs into authority.
 
 Receipt-bounded evidence validation treats structured claim fields as
 authoritative and keeps legacy text markers as a conservative compatibility
-fallback. Tests cover benign-looking claims with
+fallback. Strict evidence profiles reject legacy marker inference and require
+structured claim fields. Tests cover benign-looking claims with
 `requires_network_execution=true`, legacy `completed_execution` marker text,
 receipt/evidence descriptor drift, replay live-execution requirements, and
 public-safe review output that must not disclose raw private fixture values.
+
+Review records and `verify-secure-bundle` run the ticket-use verifier when a
+complete v0.3 ticket/contract/receipt/evidence lifecycle is present. v0.2-only
+chains remain review/not-applicable for ticket-use rather than failing
+compatibility by accident.
 
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
@@ -106,7 +114,12 @@ The dependency-free validator is intentionally a subset validator. It exists so 
 | `items` with one schema | supported recursively | supported |
 | `minLength` | supported | supported |
 | `minimum` | supported | supported |
-| `pattern`, `format`, `maxLength`, `maximum`, `oneOf`, `anyOf`, `allOf`, `not`, `if/then/else`, `dependentRequired`, `uniqueItems` | not implemented by the subset validator | supported according to `jsonschema` behavior |
+| local `$ref` into packaged schema `$defs` | supported | supported |
+| `pattern` | supported for Python `re` patterns used by packaged schemas | supported |
+| `maxLength` | supported | supported |
+| `maximum` | supported | supported |
+| `minItems` / `maxItems` | supported | supported |
+| `format`, `oneOf`, `anyOf`, `allOf`, `not`, `if/then/else`, `dependentRequired`, `uniqueItems` | not implemented by the subset validator | supported according to `jsonschema` behavior |
 
 For CI and release validation, run both:
 
@@ -165,8 +178,9 @@ python -m sclite.cli verify-secure-bundle examples/govengine-integration \
 ```
 
 `verify-secure-bundle` is `guarded-strict`: artifact-chain verification,
-strict lifecycle, `kernel_guard_hmac_v1`, manifest metadata binding, and
-fail-on-missing-guard. `validate-chain`, `verify-lifecycle`,
+strict lifecycle, `kernel_guard_hmac_v1`, manifest metadata binding,
+ticket-use status for v0.3 bounded evidence, and fail-on-missing-guard.
+`validate-chain`, `verify-lifecycle`,
 `review-lifecycle`, and `review` also expose `--require-guard` /
 `--fail-on-unguarded` for callers that intentionally want guard preflight on
 those older commands.

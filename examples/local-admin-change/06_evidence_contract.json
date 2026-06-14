@@ -50,6 +50,7 @@
   },
   "non_claims": [
     "does_not_claim_live_infrastructure_change",
+    "does_not_claim_live_vulnerability_evidence",
     "does_not_include_credentials",
     "does_not_include_private_inventory",
     "does_not_prove_legal_authorization",

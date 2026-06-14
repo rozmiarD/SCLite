@@ -36,7 +36,8 @@ artifact contracts intentionally remain on earlier schema versions.
 Many current schemas preserve forward compatibility by allowing additional
 properties. Unknown fields are metadata unless SCLite code explicitly names
 and validates them. They do not override known security-critical semantics
-such as descriptor digests, lifecycle role order, ticket approval status,
+such as descriptor digests, lifecycle role order, strict role/schema identity,
+ticket approval status,
 receipt/evidence links, Kernel Guard transcripts, or verifier result
 non-claims.
 

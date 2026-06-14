@@ -8,7 +8,8 @@ A `review_record.v0.1` summarizes:
 - artifact-chain integrity;
 - lifecycle semantic binding;
 - lifecycle-aware Scope Fidelity v0.2;
-- scoped ticket-use readiness;
+- scoped ticket-use verification status when v0.3 receipt/evidence artifacts
+  are present;
 - explicit non-claims.
 
 ## Boundary
@@ -49,6 +50,12 @@ Review records use the same verdict vocabulary as Scope Fidelity:
 - `fail`
 
 The bundled lifecycle-review fixture returns `review` because the v0.2 lifecycle fixture predates scoped `execution_ticket.v0.3` ticket-use semantics. That is intentional: a complete chain can still need reviewer attention when newer downstream semantics are unavailable.
+
+For v0.3 bundles, review records run the same static `verify_ticket_use()`
+receipt-bounded evidence gate exposed by the CLI. The check is `pass` only
+when the ticket, execution contract, receipt, and evidence contract are all
+present and bounded. Missing v0.3 semantics remain `review`/not-applicable
+rather than forcing legacy fixture failure.
 
 ## Scope Fidelity v0.2
 

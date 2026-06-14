@@ -136,6 +136,16 @@ def test_review_bundle_flags_ticket_execution_contract_binding_drift(tmp_path: P
     _assert_fail_detail(review_bundle(bundle), 'ticket integrity execution_contract digest mismatch')
 
 
+def test_review_bundle_flags_ticket_use_evidence_overclaim(tmp_path: Path) -> None:
+    bundle = _copy_bundle(tmp_path)
+    evidence = _load(bundle / '06_evidence_contract.json')
+    evidence['claims'][0]['requires_live_execution'] = True
+    (bundle / '06_evidence_contract.json').write_text(json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    _rewrite_manifest(bundle)
+
+    _assert_fail_detail(review_bundle(bundle), 'requires network execution beyond receipt')
+
+
 def test_bad_cross_host_bundle_returns_fail_verdict() -> None:
     record = review_bundle(BAD_CROSS_HOST)
     assert record['verdict'] == 'fail'

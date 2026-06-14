@@ -85,6 +85,8 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['secure_profile'] == 'guarded-strict'
     assert result['security_posture'] == 'guarded_domain_auth'
     assert result['replay_status'] == 'not_checked'
+    assert result['ticket_use_status'] == 'review'
+    assert result['ticket_use_applicability'] == 'not_applicable'
     assert result['fail_closed'] is True
     assert result['verification_result']['artifact_chain'] == 'pass'
     assert result['verification_result']['strict_lifecycle'] == 'pass'
@@ -130,10 +132,43 @@ def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: 
     assert verification_result['artifact_chain'] == 'pass'
     assert verification_result['strict_lifecycle'] == 'pass'
     assert verification_result['kernel_guard'] == 'pass'
+    assert verification_result['ticket_use'] == 'pass'
+    assert verification_result['ticket_use_applicability'] == 'verified'
     assert verification_result['replay'] == 'not_checked'
     assert verification_result['public_identity'] == 'not_claimed'
     assert verification_result['runtime_enforcement'] == 'not_claimed'
     validate_artifact(verification_result, 'verification_result.v1', root=ROOT)
+
+
+def test_secure_bundle_fails_on_ticket_use_evidence_overclaim(tmp_path: Path) -> None:
+    bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
+    evidence = json.loads((bundle / '06_evidence_contract.json').read_text(encoding='utf-8'))
+    evidence['claims'][0]['requires_live_execution'] = True
+    _write_json(bundle / '06_evidence_contract.json', evidence)
+    artifacts = {
+        'intent_contract': json.loads((bundle / '01_intent_contract.json').read_text(encoding='utf-8')),
+        'policy_decision': json.loads((bundle / '02_policy_decision.json').read_text(encoding='utf-8')),
+        'execution_contract': json.loads((bundle / '03_execution_contract.json').read_text(encoding='utf-8')),
+        'execution_ticket': json.loads((bundle / '04_execution_ticket.json').read_text(encoding='utf-8')),
+        'execution_receipt': json.loads((bundle / '05_execution_receipt.json').read_text(encoding='utf-8')),
+        'evidence_contract': evidence,
+    }
+    manifest = build_artifact_chain_manifest(
+        [
+            {'role': 'intent_contract', 'path': '01_intent_contract.json', 'value': artifacts['intent_contract']},
+            {'role': 'policy_decision', 'path': '02_policy_decision.json', 'value': artifacts['policy_decision']},
+            {'role': 'execution_contract', 'path': '03_execution_contract.json', 'value': artifacts['execution_contract']},
+            {'role': 'execution_ticket', 'path': '04_execution_ticket.json', 'value': artifacts['execution_ticket']},
+            {'role': 'execution_receipt', 'path': '05_execution_receipt.json', 'value': artifacts['execution_receipt']},
+            {'role': 'evidence_contract', 'path': '06_evidence_contract.json', 'value': artifacts['evidence_contract']},
+        ],
+        chain_id='ticket-use-overclaim-secure-test',
+    )
+    _write_json(bundle / 'artifact_chain_manifest.json', manifest)
+    guard_path = _write_guard(bundle, manifest=manifest)
+
+    with pytest.raises(SecureBundleError, match='ticket-use verification failed'):
+        verify_secure_bundle(bundle, guard_path=guard_path, key=KEY)
 
 
 def test_secure_bundle_cli_no_schema_still_validates_guard_sidecar_shape(tmp_path: Path) -> None:

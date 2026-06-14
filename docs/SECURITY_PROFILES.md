@@ -6,7 +6,7 @@ This document freezes the public meaning of SCLite security profiles for the
 | Profile | Owner | Meaning | Failure Mode | Status |
 | --- | --- | --- | --- | --- |
 | `integrity_only` | SCLite | SHA-256 artifact-chain consistency for canonical JSON artifacts | fails when descriptors, chain links, or root digest mismatch | core/current |
-| `strict_lifecycle` | SCLite | `integrity_only` plus exact v0.2 lifecycle role sequence and semantic lifecycle bindings | fails on extra roles, duplicate roles, reorder, or lifecycle digest mismatch | core/current |
+| `strict_lifecycle` | SCLite | `integrity_only` plus exact v0.2 lifecycle role sequence, role/schema identity, and semantic lifecycle bindings | fails on extra roles, duplicate roles, reorder, schema identity drift, or lifecycle digest mismatch | core/current |
 | `guarded_domain_auth` | SCLite | `strict_lifecycle` plus `kernel_guard_hmac_v1` sidecar authenticity inside a shared-secret domain | fails on missing/mismatched guard fields, tags, metadata digest, root tag, or wrong key | secure/current |
 | `guarded-strict` | SCLite | fail-closed secure bundle profile: artifact chain, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | fails closed when guard is missing or any layer fails | stable baseline |
 | `guarded_domain_auth_fresh` | GovEngine or host runtime | `guarded-strict` plus replay freshness/state | outside SCLite; host must reject replayed roots or payloads | host-owned |
@@ -23,6 +23,9 @@ This document freezes the public meaning of SCLite security profiles for the
   `guarded-strict` profile.
 - `guarded-strict` treats the manifest and Kernel Guard sidecar as
   root-contained bundle inputs after path and symlink resolution.
+- `guarded-strict` also reports static ticket-use status for v0.3
+  receipt-bounded evidence and fails on bounded-evidence violations when those
+  artifacts are present.
 - `guarded_domain_auth_fresh` belongs to GovEngine or another host layer that
   can keep replay state and make runtime admission decisions.
 

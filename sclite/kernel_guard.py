@@ -188,6 +188,8 @@ def verify_kernel_guard_manifest(
     validate_guard_schema: bool = True,
     strict_jsonschema: bool = False,
     require_lifecycle: bool = False,
+    max_artifact_bytes: int | None = None,
+    max_manifest_entries: int | None = None,
 ) -> Dict[str, Any]:
     """Verify a sidecar HMAC guard against an artifact-chain manifest."""
 
@@ -214,6 +216,8 @@ def verify_kernel_guard_manifest(
                 validate_schemas=validate_schemas,
                 strict_jsonschema=strict_jsonschema,
                 require_lifecycle=require_lifecycle,
+                max_artifact_bytes=max_artifact_bytes,
+                max_manifest_entries=max_manifest_entries,
             )
         except ChainVerificationError as exc:
             raise KernelGuardError(str(exc)) from exc

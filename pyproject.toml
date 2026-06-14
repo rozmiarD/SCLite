@@ -38,6 +38,7 @@ jsonschema = [
 ]
 dev = [
   "jsonschema>=4.21,<5",
+  "mypy>=1.10,<2",
   "pytest>=8,<9",
 ]
 
@@ -87,3 +88,14 @@ sclite = [
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_configs = true
+follow_imports = "skip"
+files = [
+  "sclite/_json.py",
+  "sclite/hosts.py",
+  "sclite/verification_result.py",
+]

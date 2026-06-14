@@ -5,7 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, Mapping, Sequence
 
 from ._json import load_json_object, load_json_value, parse_json_object
 from .artifacts import build_artifact_hash, validate_artifact
@@ -71,6 +71,15 @@ def _require_guard_requested(args: Any) -> bool:
     return bool(getattr(args, 'require_guard', False) or getattr(args, 'fail_on_unguarded', False))
 
 
+def _optional_positive_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    parsed = int(value)
+    if parsed < 1:
+        raise CliInputError('size guard values must be positive integers')
+    return parsed
+
+
 def _failed(label: str, exc: BaseException) -> int:
     print(f'{label}:{exc}', file=sys.stderr)
     return 1
@@ -93,9 +102,73 @@ def _verify_required_guard_for_manifest(args: Any, manifest_path: Path, *, requi
             validate_schemas=not getattr(args, 'no_schema', False),
             strict_jsonschema=bool(getattr(args, 'strict_jsonschema', False)),
             require_lifecycle=require_lifecycle,
+            max_artifact_bytes=_optional_positive_int(getattr(args, 'max_artifact_bytes', None)),
+            max_manifest_entries=_optional_positive_int(getattr(args, 'max_manifest_entries', None)),
         )
     except KernelGuardError as exc:
         raise SecureBundleError(str(exc)) from exc
+
+
+def _print_chain_result(args: Any, result: Mapping[str, Any], guard_result: Mapping[str, Any] | None, *, require_lifecycle: bool) -> None:
+    if args.format == 'json':
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return
+    label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
+    suffix = f":guarded:{result['guard_root_tag']}" if guard_result is not None else ''
+    posture = str(result.get('verification_posture') or ('strict_lifecycle' if require_lifecycle else 'integrity_only'))
+    lifecycle_marker = 'lifecycle_passed' if result.get('lifecycle_status') == 'passed' else 'lifecycle_not_checked'
+    print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}{suffix}:posture={posture}:{lifecycle_marker}")
+
+
+def _handle_secure_bundle_command(args: Any) -> int:
+    key = os.environ.get(str(args.guard_key_env) or '')
+    if not key:
+        print(f'secure_bundle_failed:missing guard key env {args.guard_key_env}', file=sys.stderr)
+        return 1
+    try:
+        result = verify_secure_bundle(
+            Path(str(args.target)),
+            guard_path=args.guard,
+            key=key,
+            root=Path(str(args.root)).resolve() if args.root else None,
+            validate_schemas=not args.no_schema,
+            strict_jsonschema=bool(args.strict_jsonschema),
+            max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
+            max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
+        )
+    except (SecureBundleError, CliInputError) as exc:
+        print(f'secure_bundle_failed:{exc}', file=sys.stderr)
+        return 1
+    if args.format == 'json':
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(f"secure_bundle_ok:{result['entry_count']}:{result['root_chain_digest']}:{result['guard_root_tag']}:replay_not_checked")
+    return 0
+
+
+def _handle_ticket_use_command(args: Any) -> int:
+    try:
+        ticket = _load_json_object(Path(str(args.ticket)).resolve())
+        contract = _load_json_object(Path(str(args.contract)).resolve())
+        receipt = _load_json_object(Path(str(args.receipt)).resolve())
+        evidence = _load_json_object(Path(str(args.evidence_contract)).resolve()) if args.evidence_contract else None
+        result = verify_ticket_use(
+            ticket,
+            contract,
+            receipt,
+            evidence,
+            strict_jsonschema=bool(args.strict_jsonschema),
+            strict_ticket_profile=bool(args.strict_ticket_profile),
+            strict_evidence_claims=bool(args.strict_evidence_claims),
+        )
+    except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
+        print(f'ticket_use_failed:{exc}', file=sys.stderr)
+        return 1
+    if args.format == 'json':
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(f"ticket_use_ok:{result['ticket_id']}:{result['receipt_id']}:{len(result['checks'])}")
+    return 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -122,6 +195,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     chain_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
     chain_cmd.add_argument('--require-guard', action='store_true', help='fail closed unless a kernel_guard_hmac_v1 sidecar verifies')
     chain_cmd.add_argument('--fail-on-unguarded', action='store_true', help='alias for --require-guard')
+    chain_cmd.add_argument('--max-artifact-bytes', type=int, help='optional maximum JSON bytes per referenced artifact')
+    chain_cmd.add_argument('--max-manifest-entries', type=int, help='optional maximum artifact-chain manifest entries')
     chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
@@ -133,6 +208,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     lifecycle_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
     lifecycle_cmd.add_argument('--require-guard', action='store_true', help='fail closed unless a kernel_guard_hmac_v1 sidecar verifies')
     lifecycle_cmd.add_argument('--fail-on-unguarded', action='store_true', help='alias for --require-guard')
+    lifecycle_cmd.add_argument('--max-artifact-bytes', type=int, help='optional maximum JSON bytes per referenced artifact')
+    lifecycle_cmd.add_argument('--max-manifest-entries', type=int, help='optional maximum artifact-chain manifest entries')
     lifecycle_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     guard_cmd = sub.add_parser('verify-guarded-chain', help='verify an optional kernel_guard_hmac_v1 sidecar for an artifact-chain manifest')
@@ -143,6 +220,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     guard_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     guard_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     guard_cmd.add_argument('--strict-lifecycle', action='store_true', help='require the canonical v0.2 lifecycle role sequence with no extras or duplicates')
+    guard_cmd.add_argument('--max-artifact-bytes', type=int, help='optional maximum JSON bytes per referenced artifact')
+    guard_cmd.add_argument('--max-manifest-entries', type=int, help='optional maximum artifact-chain manifest entries')
     guard_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     secure_cmd = sub.add_parser('verify-secure-bundle', help='verify the guarded-strict secure bundle profile')
@@ -152,6 +231,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     secure_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
     secure_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     secure_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    secure_cmd.add_argument('--max-artifact-bytes', type=int, help='optional maximum JSON bytes per referenced artifact')
+    secure_cmd.add_argument('--max-manifest-entries', type=int, help='optional maximum artifact-chain manifest entries')
     secure_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     ticket_cmd = sub.add_parser('validate-ticket', help='validate an ExecutionTicket and optional execution-contract binding')
@@ -169,6 +250,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     ticket_use_cmd.add_argument('--receipt', required=True, help='path to execution_receipt.json')
     ticket_use_cmd.add_argument('--evidence-contract', help='path to evidence_contract.json')
     ticket_use_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
+    ticket_use_cmd.add_argument('--strict-ticket-profile', action='store_true', help='enforce strict scoped-ticket compatibility edges such as one_shot max_runs=1')
+    ticket_use_cmd.add_argument('--strict-evidence-claims', action='store_true', help='reject legacy text-marker evidence inference; require structured evidence claim fields')
     ticket_use_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     trust_profile_cmd = sub.add_parser('validate-trust-profile', help='validate a digest-bound TrustProfileRef sidecar')
@@ -281,6 +364,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 validate_schemas=not args.no_schema,
                 strict_jsonschema=bool(args.strict_jsonschema),
                 require_lifecycle=require_lifecycle,
+                max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
+                max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
             )
             guard_result = None
             if _require_guard_requested(args):
@@ -300,12 +385,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
         if guard_result is not None:
             result = {**result, 'guard_profile': guard_result['guard_profile'], 'guard_root_tag': guard_result['guard_root_tag'], 'key_id': guard_result['key_id'], 'security_posture': 'guarded_domain_auth'}
-        if args.format == 'json':
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
-            suffix = f":guarded:{result['guard_root_tag']}" if guard_result is not None else ''
-            print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}{suffix}")
+        _print_chain_result(args, result, guard_result, require_lifecycle=require_lifecycle)
         return 0
 
     if args.command == 'verify-guarded-chain':
@@ -327,6 +407,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 validate_schemas=not args.no_schema,
                 strict_jsonschema=bool(args.strict_jsonschema),
                 require_lifecycle=bool(args.strict_lifecycle),
+                max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
+                max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
             )
         except KernelGuardError as exc:
             print(f'kernel_guard_failed:{exc}', file=sys.stderr)
@@ -341,27 +423,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == 'verify-secure-bundle':
-        key = os.environ.get(str(args.guard_key_env) or '')
-        if not key:
-            print(f'secure_bundle_failed:missing guard key env {args.guard_key_env}', file=sys.stderr)
-            return 1
-        try:
-            result = verify_secure_bundle(
-                Path(str(args.target)),
-                guard_path=args.guard,
-                key=key,
-                root=Path(str(args.root)).resolve() if args.root else None,
-                validate_schemas=not args.no_schema,
-                strict_jsonschema=bool(args.strict_jsonschema),
-            )
-        except SecureBundleError as exc:
-            print(f'secure_bundle_failed:{exc}', file=sys.stderr)
-            return 1
-        if args.format == 'json':
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            print(f"secure_bundle_ok:{result['entry_count']}:{result['root_chain_digest']}:{result['guard_root_tag']}:replay_not_checked")
-        return 0
+        return _handle_secure_bundle_command(args)
 
     if args.command == 'validate-ticket':
         ticket_path = Path(str(args.ticket)).resolve()
@@ -391,26 +453,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == 'verify-ticket-use':
-        try:
-            ticket = _load_json_object(Path(str(args.ticket)).resolve())
-            contract = _load_json_object(Path(str(args.contract)).resolve())
-            receipt = _load_json_object(Path(str(args.receipt)).resolve())
-            evidence = _load_json_object(Path(str(args.evidence_contract)).resolve()) if args.evidence_contract else None
-            result = verify_ticket_use(
-                ticket,
-                contract,
-                receipt,
-                evidence,
-                strict_jsonschema=bool(args.strict_jsonschema),
-            )
-        except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
-            print(f'ticket_use_failed:{exc}', file=sys.stderr)
-            return 1
-        if args.format == 'json':
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            print(f"ticket_use_ok:{result['ticket_id']}:{result['receipt_id']}:{len(result['checks'])}")
-        return 0
+        return _handle_ticket_use_command(args)
 
     if args.command in {'validate-trust-profile', 'validate-carrier-profile'}:
         profile_ref_path = Path(str(args.profile_ref)).resolve()

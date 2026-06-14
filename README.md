@@ -100,6 +100,13 @@ sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_m
 the lifecycle gate on top and requires the exact canonical v0.2 role sequence
 with no extra roles, duplicate roles, or changed order.
 
+The summary output intentionally distinguishes these postures:
+
+- `validate-chain ...` reports `posture=integrity_only` and
+  `lifecycle_not_checked`;
+- `verify-lifecycle ...` and `validate-chain --strict-lifecycle ...` report
+  `posture=strict_lifecycle` after lifecycle semantics pass.
+
 ## What the verifiers check
 
 The v0.2 `validate-chain` verifier checks local chain integrity:
@@ -119,6 +126,12 @@ semantics:
 - ticket binds the correct execution contract digest;
 - receipt binds the correct execution ticket and execution contract digests;
 - evidence contract binds the correct receipt and execution ticket digests.
+- each canonical lifecycle role carries the expected artifact type,
+  `schema_version`, and packaged `schema_ref` for strict/secure profiles.
+
+Loose `validate-chain` keeps compatibility for generic hash-chain manifests.
+It may report duplicate, missing, or extra lifecycle roles in JSON, but those
+role-shape findings become fail-closed only when strict lifecycle is requested.
 
 ## JSON Schema validation modes
 
@@ -144,7 +157,9 @@ current lifecycle/review front door: it packages lifecycle artifacts, review
 records, and verification receipts for local public-safe review. The
 scoped-ticket surface still bounds what a runtime may consume, and
 `verify-ticket-use` checks that public-safe evidence stays inside the linked
-receipt. See [`ROADMAP.md`](ROADMAP.md).
+receipt. Review records and guarded secure-bundle verification now consume
+that same static ticket-use check when v0.3 ticket, receipt, and evidence
+artifacts are present. See [`ROADMAP.md`](ROADMAP.md).
 
 It provides:
 

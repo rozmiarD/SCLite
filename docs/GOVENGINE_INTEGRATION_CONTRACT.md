@@ -57,7 +57,9 @@ See [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for exit-code semantics.
   "summary": {
     "artifact_count": 6,
     "root_chain_digest": "...",
-    "scope_fidelity_verdict": "pass|review|fail"
+    "scope_fidelity_verdict": "pass|review|fail",
+    "ticket_use_status": "pass|review|fail",
+    "ticket_use_applicability": "verified|not_applicable|incomplete"
   },
   "checks": [],
   "non_claims": []
@@ -93,11 +95,26 @@ for `guarded-strict`: artifact chain, strict lifecycle, Kernel Guard HMAC, and
 manifest metadata binding. That result is necessary but insufficient for a
 runtime freshness decision.
 
-GovEngine or another host should atomically claim freshness using stable inputs
-such as `root_chain_digest`, `guard_root_tag`, `chain_id`, `key_id`, ticket/run
-id, observed time, and host admission context. Replay persistence, TTL,
-concurrency, cleanup, and rejection policy remain host-owned. SCLite does not
-import GovEngine, keep replay state, or decide runtime admission.
+GovEngine or another host should atomically claim freshness using stable
+inputs shaped like:
+
+```json
+{
+  "root_chain_digest": "<artifact-chain root digest>",
+  "guard_root_tag": "<kernel_guard_hmac_v1 root tag>",
+  "chain_id": "<manifest chain_id>",
+  "key_id": "<guard key_id>",
+  "ticket_id": "<execution_ticket.ticket_id>",
+  "run_id": "<GovEngine-owned run/admission id>",
+  "observed_at": "<GovEngine observation timestamp>",
+  "host_admission_context": "<GovEngine policy/admission reference>",
+  "verifier_profile": "guarded-strict"
+}
+```
+
+Replay persistence, TTL, concurrency, cleanup, and rejection policy remain
+host-owned. SCLite does not import GovEngine, keep replay state, or decide
+runtime admission.
 
 ## Optional downstream smoke
 

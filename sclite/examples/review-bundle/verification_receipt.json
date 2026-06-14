@@ -14,7 +14,7 @@
       "status": "pass"
     },
     {
-      "count": 6,
+      "count": 14,
       "detail": "semantic checks present",
       "name": "lifecycle_binding",
       "status": "pass"
@@ -26,7 +26,8 @@
       "status": "pass"
     },
     {
-      "detail": "ticket-use verification requires scoped execution_ticket.v0.3 artifacts",
+      "count": 0,
+      "detail": "ticket-use verification requires execution_ticket.v0.3 artifacts",
       "name": "ticket_use_profile",
       "status": "review"
     }
@@ -52,7 +53,7 @@
   "schema_version": "v0.1",
   "scope_fidelity_report": {
     "artifact_type": "scope_fidelity_report",
-    "generated_at": "2026-05-15T17:06:10+00:00",
+    "generated_at": "2026-05-15T19:05:00+02:00",
     "lifecycle_targets": [
       {
         "artifact_type": "intent_contract",
@@ -133,20 +134,26 @@
   "source_manifest": "artifact_chain_manifest.json",
   "summary": {
     "artifact_count": 6,
+    "receipt_id": "",
     "review_bundle_files": {
       "evidence_contract": "06_evidence_contract.json",
       "execution_contract": "03_execution_contract.json",
       "execution_receipt": "05_execution_receipt.json",
       "execution_ticket": "04_execution_ticket.json",
       "intent_contract": "01_intent_contract.json",
-      "policy_decision": "02_policy_decision.json"
+      "policy_decision": "02_policy_decision.json",
+      "review_markdown": "REVIEW.md",
+      "verification_receipt": "verification_receipt.json"
     },
     "review_bundle_shape": "canonical-v0.1",
     "root_chain_digest": "ddb006900727142b8095e918a93f3dba484d3820b66fff813c169c3b16c6b295",
     "scope_fidelity_verdict": "pass",
     "target_hosts": [
       "example.com"
-    ]
+    ],
+    "ticket_id": "ticket-demo-001",
+    "ticket_use_applicability": "not_applicable",
+    "ticket_use_status": "review"
   },
   "verdict": "review"
 }
