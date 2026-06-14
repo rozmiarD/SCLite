@@ -102,6 +102,14 @@ Kernel Guard sidecar schema validation is separate from artifact schema
 validation. CLI `--no-schema` skips artifact schema checks for hash/link
 verification only; it does not silently disable the guard sidecar shape check.
 
+For `verify-secure-bundle`, the default sidecar path is
+`kernel_guard_manifest.json` next to the resolved artifact-chain manifest. An
+explicit guard path is resolved as the caller supplied it, but the
+`guarded-strict` secure-bundle profile requires both the manifest and resolved
+guard sidecar to remain under the verification root after symlink resolution.
+The lower-level `verify-guarded-chain` command remains an operator-supplied
+local guard check and does not turn an external sidecar into a bundle member.
+
 ## Replay Boundary
 
 SCLite reports replay as `not_checked`.
@@ -115,6 +123,12 @@ freshness key, such as a database transaction, unique index, Redis `SETNX`, or
 equivalent host-owned mechanism. A local JSON replay file is acceptable for
 demo and development use, but it is not a concurrent production freshness
 primitive by itself.
+
+Host freshness handoff data should be enough for the host to claim one runtime
+use atomically without asking SCLite to keep state. Typical inputs are
+`root_chain_digest`, `guard_root_tag`, `chain_id`, `key_id`, ticket/run id, the
+host's observed time, and the host admission context. TTL, concurrency,
+cleanup, replay persistence, and collision policy are host-owned.
 
 ## Key IDs And Rotation
 
