@@ -85,13 +85,13 @@
       "role": "execution_receipt"
     },
     {
-      "chain_digest": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+      "chain_digest": "1f7c481fb5f07b9e0e3cd93fe44a31745e3bc23105d79b6aeb3dc9a00fd0cdd4",
       "descriptor": {
         "algorithm": "sha256",
         "artifact_type": "evidence_contract",
-        "canonical_bytes": 2081,
+        "canonical_bytes": 2126,
         "canonicalization": "sclite-json-v0.1",
-        "digest": "b21470ef2684bfb32dba7172ee486c042f7c66d6f5f774223a411a9cd61f6221",
+        "digest": "21cadfd2308bf74819578e013ccf5b787b848cc2f10a917dbb9da38a2ec03f81",
         "schema_ref": "schemas/evidence_contract.v0.2.schema.json",
         "schema_version": "v0.2"
       },
@@ -103,7 +103,7 @@
   ],
   "hash_algorithm": "sha256",
   "profile": "sclite-v0.6-alpha-local-admin-change",
-  "root_chain_digest": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+  "root_chain_digest": "1f7c481fb5f07b9e0e3cd93fe44a31745e3bc23105d79b6aeb3dc9a00fd0cdd4",
   "schema_ref": "schemas/artifact_chain_manifest.v0.2.schema.json",
   "schema_version": "v0.2",
   "signature_policy": {

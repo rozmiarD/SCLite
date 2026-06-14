@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Implements the 2026-06-14 audit roadmap v2 hardening without adding
+  runtime, governance, replay-store, PKI/KMS, scanner, or raw-evidence scope.
+- Makes generic `validate-chain` output explicit about
+  `verification_posture=integrity_only` and `lifecycle_status=not_checked`,
+  while preserving loose chain-validation compatibility.
+- Runs real receipt-bounded `verify_ticket_use()` checks inside review records
+  and guarded secure-bundle verification when v0.3 lifecycle artifacts are
+  present.
+- Adds strict/secure role-to-schema/version checks for canonical lifecycle
+  roles without changing default loose `validate-chain` behavior.
+- Adds a concrete host freshness handoff contract in docs while keeping replay
+  storage and check-and-set outside SCLite.
+- Extends the dependency-free schema subset for current packaged-schema
+  keywords, adds parity/golden/generative tests, optional size guards, and an
+  optional strict mypy experiment.
+
 ## 1.0.2 - Stable lifecycle and guarded verification surface
 
 - published `sclite-core==1.0.2` package line as a stable SCLite roadmap

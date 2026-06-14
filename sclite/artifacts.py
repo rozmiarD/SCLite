@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, Mapping
+
+from .json_types import json_mapping
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
 ARTIFACT_HASH_ALGORITHM = 'sha256'
@@ -78,8 +81,32 @@ def _assert_json_schema_type(value: Any, expected: Any, path: str) -> None:
         raise JsonSchemaValidationError(f'{path}: expected {expected_types}, got {actual}')
 
 
-def validate_json_schema_value(schema: Mapping[str, Any], value: Any, path: str = '$') -> None:
+def _resolve_local_ref(root_schema: Mapping[str, Any], ref: str) -> Mapping[str, Any]:
+    if not ref.startswith('#/'):
+        raise JsonSchemaValidationError(f'{ref}: only local JSON Schema refs are supported by the dependency-free validator')
+    current: Any = root_schema
+    for raw_part in ref[2:].split('/'):
+        part = raw_part.replace('~1', '/').replace('~0', '~')
+        if not isinstance(current, Mapping) or part not in current:
+            raise JsonSchemaValidationError(f'{ref}: unresolved JSON Schema ref')
+        current = current[part]
+    if not isinstance(current, Mapping):
+        raise JsonSchemaValidationError(f'{ref}: JSON Schema ref does not resolve to an object')
+    return current
+
+
+def validate_json_schema_value(
+    schema: Mapping[str, Any],
+    value: Any,
+    path: str = '$',
+    *,
+    root_schema: Mapping[str, Any] | None = None,
+) -> None:
     """Validate the JSON Schema subset used by SCL v0.1 artifacts."""
+    root = root_schema or schema
+    if '$ref' in schema:
+        validate_json_schema_value(_resolve_local_ref(root, str(schema['$ref'])), value, path, root_schema=root)
+        return
     if 'const' in schema and value != schema['const']:
         raise JsonSchemaValidationError(f'{path}: expected const {schema["const"]!r}, got {value!r}')
     if 'enum' in schema and value not in schema['enum']:
@@ -88,18 +115,26 @@ def validate_json_schema_value(schema: Mapping[str, Any], value: Any, path: str 
         _assert_json_schema_type(value, schema['type'], path)
     if isinstance(value, str) and 'minLength' in schema and len(value) < int(schema['minLength']):
         raise JsonSchemaValidationError(f'{path}: expected minLength {schema["minLength"]}')
+    if isinstance(value, str) and 'maxLength' in schema and len(value) > int(schema['maxLength']):
+        raise JsonSchemaValidationError(f'{path}: expected maxLength {schema["maxLength"]}')
+    if isinstance(value, str) and 'pattern' in schema:
+        pattern = str(schema['pattern'])
+        if re.search(pattern, value) is None:
+            raise JsonSchemaValidationError(f'{path}: expected pattern {pattern!r}')
     if isinstance(value, (int, float)) and not isinstance(value, bool) and 'minimum' in schema and value < float(schema['minimum']):
         raise JsonSchemaValidationError(f'{path}: expected minimum {schema["minimum"]}')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and 'maximum' in schema and value > float(schema['maximum']):
+        raise JsonSchemaValidationError(f'{path}: expected maximum {schema["maximum"]}')
     if schema.get('type') == 'object':
         if not isinstance(value, dict):
             raise JsonSchemaValidationError(f'{path}: expected object')
         for key in schema.get('required', []):
             if key not in value:
                 raise JsonSchemaValidationError(f'{path}: missing required field {key!r}')
-        properties = schema.get('properties') if isinstance(schema.get('properties'), dict) else {}
+        properties = json_mapping(schema.get('properties'))
         for key, subschema in properties.items():
             if key in value and isinstance(subschema, dict):
-                validate_json_schema_value(subschema, value[key], f'{path}.{key}')
+                validate_json_schema_value(subschema, value[key], f'{path}.{key}', root_schema=root)
         if schema.get('additionalProperties') is False:
             extra = sorted(set(value) - set(properties))
             if extra:
@@ -107,10 +142,14 @@ def validate_json_schema_value(schema: Mapping[str, Any], value: Any, path: str 
     if schema.get('type') == 'array':
         if not isinstance(value, list):
             raise JsonSchemaValidationError(f'{path}: expected array')
+        if 'minItems' in schema and len(value) < int(schema['minItems']):
+            raise JsonSchemaValidationError(f'{path}: expected minItems {schema["minItems"]}')
+        if 'maxItems' in schema and len(value) > int(schema['maxItems']):
+            raise JsonSchemaValidationError(f'{path}: expected maxItems {schema["maxItems"]}')
         item_schema = schema.get('items')
         if isinstance(item_schema, dict):
             for idx, item in enumerate(value):
-                validate_json_schema_value(item_schema, item, f'{path}[{idx}]')
+                validate_json_schema_value(item_schema, item, f'{path}[{idx}]', root_schema=root)
 
 
 def _packaged_schema_path(schema_ref: str) -> Path | None:
@@ -199,7 +238,7 @@ def validate_schema_ref(
             location = '.'.join(str(part) for part in exc.absolute_path) or path
             raise JsonSchemaValidationError(f'{location}: {exc.message}') from exc
         return
-    validate_json_schema_value(schema, value, path=path)
+    validate_json_schema_value(schema, value, path=path, root_schema=schema)
 
 
 def validate_artifact(

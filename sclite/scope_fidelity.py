@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Mapping, Sequence
 
 from .artifacts import validate_schema_ref
 from .hosts import collect_hosts_from_scalars, extract_host
+from .json_types import json_array, json_mapping, json_object
 from .redaction import sanitize_public_artifact
 
 
@@ -144,16 +145,16 @@ def build_scope_fidelity_report(
             'does_not_execute_tools',
         ],
     }
-    return sanitize_public_artifact(report)
+    return json_object(sanitize_public_artifact(report), label='scope_fidelity_report')
 
 
 def build_scope_fidelity_report_from_approved_spec(approved_spec: Mapping[str, Any], *, source_artifact: str = 'approved_execution_spec') -> Dict[str, Any]:
-    target = _safe_str(approved_spec.get('target') or ((approved_spec.get('scope_facts') or {}) if isinstance(approved_spec.get('scope_facts'), dict) else {}).get('target') or '')
-    normalized_args = approved_spec.get('normalized_args') if isinstance(approved_spec.get('normalized_args'), list) else []
-    execution_plan = approved_spec.get('execution_plan') if isinstance(approved_spec.get('execution_plan'), list) else []
+    scope_facts = json_mapping(approved_spec.get('scope_facts'))
+    target = _safe_str(approved_spec.get('target') or scope_facts.get('target') or '')
+    normalized_args = json_array(approved_spec.get('normalized_args'))
+    execution_plan = json_array(approved_spec.get('execution_plan'))
     target_in_scope = approved_spec.get('target_in_scope')
     if not isinstance(target_in_scope, bool):
-        scope_facts = approved_spec.get('scope_facts') if isinstance(approved_spec.get('scope_facts'), dict) else {}
         target_in_scope = scope_facts.get('target_in_scope') if isinstance(scope_facts.get('target_in_scope'), bool) else None
     return build_scope_fidelity_report(
         target=target,
@@ -176,22 +177,22 @@ def _target_entry(role: str, artifact: Mapping[str, Any]) -> Dict[str, Any]:
     host = ''
     source = 'none'
     if role == 'intent_contract':
-        raw_target = artifact.get('target') if isinstance(artifact.get('target'), Mapping) else {}
+        raw_target = json_mapping(artifact.get('target'))
         target = _safe_str(raw_target.get('uri') or raw_target.get('host') or '')
         host = extract_host(raw_target.get('host') or raw_target.get('uri') or '')
         source = 'target'
     elif role == 'policy_decision':
-        raw_scope = artifact.get('scope') if isinstance(artifact.get('scope'), Mapping) else {}
+        raw_scope = json_mapping(artifact.get('scope'))
         target = _safe_str(raw_scope.get('target') or raw_scope.get('target_host') or '')
         host = extract_host(raw_scope.get('target_host') or raw_scope.get('target') or '')
         source = 'scope'
     elif role == 'execution_contract':
-        raw_binding = artifact.get('target_binding') if isinstance(artifact.get('target_binding'), Mapping) else {}
+        raw_binding = json_mapping(artifact.get('target_binding'))
         target = _safe_str(raw_binding.get('target') or raw_binding.get('target_host') or '')
         host = extract_host(raw_binding.get('target_host') or raw_binding.get('target') or '')
         source = 'target_binding'
     elif role == 'execution_ticket':
-        raw_scope = artifact.get('scope_binding') if isinstance(artifact.get('scope_binding'), Mapping) else {}
+        raw_scope = json_mapping(artifact.get('scope_binding'))
         target = _safe_str(raw_scope.get('target_ref') or raw_scope.get('target_host') or '')
         host = extract_host(raw_scope.get('target_host') or raw_scope.get('target_ref') or '')
         source = 'scope_binding'
@@ -282,7 +283,7 @@ def build_lifecycle_scope_fidelity_report(
             'receipt_and_evidence_targets_are_inferred_from_digest_linked_lifecycle_context',
         ],
     }
-    return sanitize_public_artifact(report)
+    return json_object(sanitize_public_artifact(report), label='lifecycle_scope_fidelity_report')
 
 
 def validate_lifecycle_scope_fidelity_report(report: Mapping[str, Any], *, strict_jsonschema: bool = False) -> None:

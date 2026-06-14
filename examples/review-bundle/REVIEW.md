@@ -9,7 +9,7 @@ source_manifest: `artifact_chain_manifest.json`
 - `pass` — chain_integrity: ddb006900727142b8095e918a93f3dba484d3820b66fff813c169c3b16c6b295
 - `pass` — lifecycle_binding: semantic checks present
 - `pass` — scope_fidelity: all explicit lifecycle target hosts match
-- `review` — ticket_use_profile: ticket-use verification requires scoped execution_ticket.v0.3 artifacts
+- `review` — ticket_use_profile: ticket-use verification requires execution_ticket.v0.3 artifacts
 
 ## Non-claims
 - does_not_execute_tools

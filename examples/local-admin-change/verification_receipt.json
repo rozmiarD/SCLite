@@ -9,12 +9,12 @@
     },
     {
       "count": 6,
-      "detail": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+      "detail": "1f7c481fb5f07b9e0e3cd93fe44a31745e3bc23105d79b6aeb3dc9a00fd0cdd4",
       "name": "chain_integrity",
       "status": "pass"
     },
     {
-      "count": 8,
+      "count": 14,
       "detail": "semantic checks present",
       "name": "lifecycle_binding",
       "status": "pass"
@@ -26,7 +26,8 @@
       "status": "pass"
     },
     {
-      "detail": "v0.3 ticket-use semantics available for downstream verification",
+      "count": 11,
+      "detail": "ticket-use verification passed",
       "name": "ticket_use_profile",
       "status": "pass"
     }
@@ -46,7 +47,7 @@
     "static_analysis_only": true,
     "trust_authority_decision": false
   },
-  "review_id": "review-record-ffcc2cee1249",
+  "review_id": "review-record-1f7c481fb5f0",
   "review_profile": "sclite-review-bundle-v0.1",
   "schema_ref": "schemas/review_record.v0.1.schema.json",
   "schema_version": "v0.1",
@@ -133,6 +134,7 @@
   "source_manifest": "artifact_chain_manifest.json",
   "summary": {
     "artifact_count": 6,
+    "receipt_id": "receipt-local-admin-change-001",
     "review_bundle_files": {
       "evidence_contract": "06_evidence_contract.json",
       "execution_contract": "03_execution_contract.json",
@@ -144,11 +146,14 @@
       "verification_receipt": "verification_receipt.json"
     },
     "review_bundle_shape": "canonical-v0.1",
-    "root_chain_digest": "ffcc2cee1249f8536657ddd7e2766fcbb3c9f39c4c3cbfe7103097061368432f",
+    "root_chain_digest": "1f7c481fb5f07b9e0e3cd93fe44a31745e3bc23105d79b6aeb3dc9a00fd0cdd4",
     "scope_fidelity_verdict": "pass",
     "target_hosts": [
       "local.fixture"
-    ]
+    ],
+    "ticket_id": "scoped-ticket-local-admin-change-001",
+    "ticket_use_applicability": "verified",
+    "ticket_use_status": "pass"
   },
   "verdict": "pass"
 }

@@ -7,7 +7,9 @@ from typing import Any, Dict, List, Mapping
 from ._json import load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .json_types import json_array
 from .scope_fidelity import build_lifecycle_scope_fidelity_report, validate_lifecycle_scope_fidelity_report
+from .tickets import verify_ticket_use_profile
 
 REVIEW_RECORD_SCHEMA = 'review_record.v0.1'
 REVIEW_RECORD_SCHEMA_REF = 'schemas/review_record.v0.1.schema.json'
@@ -114,7 +116,7 @@ def build_review_record_from_manifest(
             strict_jsonschema=strict_jsonschema,
             require_lifecycle=True,
         )
-        semantic_checks = chain_result.get('semantic_checks') if isinstance(chain_result.get('semantic_checks'), list) else []
+        semantic_checks = json_array(chain_result.get('semantic_checks'))
         checks.append(_check('chain_integrity', 'pass', str(chain_result.get('root_chain_digest') or ''), int(chain_result.get('entry_count') or 0)))
         checks.append(_check('lifecycle_binding', 'pass' if semantic_checks else 'review', 'semantic checks present' if semantic_checks else 'manifest did not expose canonical lifecycle semantic checks', len(semantic_checks)))
         statuses.extend(['pass', 'pass' if semantic_checks else 'review'])
@@ -136,14 +138,18 @@ def build_review_record_from_manifest(
     checks.append(_check('scope_fidelity', str(scope_report['verdict']), str(scope_report['summary']['reason']), len(scope_report.get('lifecycle_targets') or [])))
     statuses.append(str(scope_report['verdict']))
 
-    ticket_use_status = 'review'
-    ticket = artifacts_by_role.get('execution_ticket')
-    if isinstance(ticket, Mapping) and ticket.get('schema_version') == 'v0.3':
-        ticket_use_status = 'pass'
-        detail = 'v0.3 ticket-use semantics available for downstream verification'
-    else:
-        detail = 'ticket-use verification requires scoped execution_ticket.v0.3 artifacts'
-    checks.append(_check('ticket_use_profile', ticket_use_status, detail))
+    ticket_use_result = verify_ticket_use_profile(
+        artifacts_by_role,
+        strict_jsonschema=strict_jsonschema,
+    )
+    ticket_use_status = str(ticket_use_result.get('status') or 'review')
+    ticket_use_checks = json_array(ticket_use_result.get('checks'))
+    checks.append(_check(
+        'ticket_use_profile',
+        ticket_use_status,
+        str(ticket_use_result.get('detail') or ''),
+        len(ticket_use_checks),
+    ))
     statuses.append(ticket_use_status)
 
     verdict = _status_to_verdict(statuses)
@@ -162,6 +168,10 @@ def build_review_record_from_manifest(
             'target_hosts': target_hosts,
             'root_chain_digest': chain_result.get('root_chain_digest') if chain_result else '',
             'scope_fidelity_verdict': scope_report['verdict'],
+            'ticket_use_status': ticket_use_status,
+            'ticket_use_applicability': ticket_use_result.get('applicability') or '',
+            'ticket_id': ticket_use_result.get('ticket_id') or '',
+            'receipt_id': ticket_use_result.get('receipt_id') or '',
         },
         'checks': checks,
         'scope_fidelity_report': scope_report,

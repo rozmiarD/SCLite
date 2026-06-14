@@ -24,15 +24,16 @@ Verifier JSON surfaces expose layer-specific status fields so callers cannot
 mistake one layer for another:
 
 - `validate-chain` returns `chain_status: passed` and
+  `verification_posture: integrity_only` with
   `lifecycle_status: not_checked` unless strict lifecycle verification is
   explicitly requested.
 - `verify-lifecycle` returns `chain_status: passed` and
-  `lifecycle_status: passed` after v0.2 lifecycle role and digest semantics
-  pass.
+  `verification_posture: strict_lifecycle` with `lifecycle_status: passed`
+  after v0.2 lifecycle role, schema identity, and digest semantics pass.
 - `verify-guarded-chain` adds `guard_status: passed` while keeping
   `replay_status: not_checked`.
 - `verify-secure-bundle` combines `chain_status`, `lifecycle_status`,
-  `guard_status`, and `replay_status` with the stable
+  `guard_status`, `ticket_use_status`, and `replay_status` with the stable
   `verification_result.v1` non-claim fields.
 
 ## Canonicalization Freeze
@@ -129,6 +130,25 @@ use atomically without asking SCLite to keep state. Typical inputs are
 `root_chain_digest`, `guard_root_tag`, `chain_id`, `key_id`, ticket/run id, the
 host's observed time, and the host admission context. TTL, concurrency,
 cleanup, replay persistence, and collision policy are host-owned.
+
+A minimal handoff record should look like this shape:
+
+```json
+{
+  "root_chain_digest": "<artifact-chain root digest>",
+  "guard_root_tag": "<kernel_guard_hmac_v1 root tag when present>",
+  "chain_id": "<manifest chain_id>",
+  "key_id": "<guard key_id when guarded>",
+  "ticket_id": "<execution ticket id>",
+  "run_id": "<host-owned run/admission id>",
+  "observed_at": "<host observation timestamp>",
+  "host_admission_context": "<host-owned policy/admission reference>",
+  "verifier_profile": "guarded-strict"
+}
+```
+
+SCLite may define, emit, or document this handoff shape, but the atomic
+freshness decision and storage remain GovEngine/host responsibilities.
 
 ## Key IDs And Rotation
 

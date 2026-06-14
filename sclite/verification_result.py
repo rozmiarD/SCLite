@@ -10,6 +10,7 @@ def build_guarded_strict_verification_result(
     *,
     secure_profile: str,
     security_posture: str,
+    ticket_use_result: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Build the stable verifier-result contract for guarded-strict bundles.
 
@@ -19,6 +20,7 @@ def build_guarded_strict_verification_result(
     """
 
     checked_entries = [str(item) for item in guard_result.get('checked_entries') or []]
+    ticket_use = ticket_use_result or {}
     return {
         'artifact_type': 'verification_result',
         'schema_version': 'v1',
@@ -29,6 +31,8 @@ def build_guarded_strict_verification_result(
         'artifact_chain': 'pass',
         'strict_lifecycle': 'pass',
         'kernel_guard': 'pass',
+        'ticket_use': str(ticket_use.get('status') or 'review'),
+        'ticket_use_applicability': str(ticket_use.get('applicability') or ''),
         'replay': str(guard_result.get('replay_status') or 'not_checked'),
         'public_identity': 'not_claimed',
         'runtime_enforcement': 'not_claimed',

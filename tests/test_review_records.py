@@ -66,6 +66,7 @@ def test_review_record_aggregates_lifecycle_checks() -> None:
     assert statuses['lifecycle_binding'] == 'pass'
     assert statuses['scope_fidelity'] == 'pass'
     assert statuses['ticket_use_profile'] == 'review'
+    assert record['summary']['ticket_use_applicability'] == 'not_applicable'
 
 
 def test_review_record_markdown_contains_non_claims() -> None:

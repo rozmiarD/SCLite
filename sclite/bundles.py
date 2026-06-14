@@ -6,6 +6,7 @@ from typing import Any, Dict, Mapping
 
 from ._json import load_json_object
 from .integrity import build_artifact_chain_manifest
+from .json_types import json_mapping
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 
 REVIEW_BUNDLE_REQUIRED_FILES = {
@@ -185,7 +186,7 @@ def export_review_bundle_markdown(record: Mapping[str, Any]) -> str:
 
 
 def review_bundle_summary(record: Mapping[str, Any]) -> str:
-    summary = record.get('summary') if isinstance(record.get('summary'), Mapping) else {}
+    summary = json_mapping(record.get('summary'))
     return (
         f"review_bundle:{record.get('verdict')}:{summary.get('artifact_count')}:{summary.get('root_chain_digest')}"
     )

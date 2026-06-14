@@ -9,7 +9,7 @@ source_manifest: `artifact_chain_manifest.json`
 - `pass` — chain_integrity: 713966993dabb224cc2d4501129f650331cc33d8070dcba144e275f62b2d6b7f
 - `pass` — lifecycle_binding: semantic checks present
 - `fail` — scope_fidelity: mismatched lifecycle target hosts: evil.example.net,example.com
-- `pass` — ticket_use_profile: v0.3 ticket-use semantics available for downstream verification
+- `pass` — ticket_use_profile: ticket-use verification passed
 
 ## Non-claims
 - does_not_execute_tools

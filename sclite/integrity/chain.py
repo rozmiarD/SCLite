@@ -19,6 +19,17 @@ V02_LIFECYCLE_ROLES = (
     'execution_receipt',
     'evidence_contract',
 )
+V02_LIFECYCLE_ROLE_SCHEMAS = {
+    'intent_contract': (('v0.2', 'schemas/intent_contract.v0.2.schema.json'),),
+    'policy_decision': (('v0.2', 'schemas/policy_decision.v0.2.schema.json'),),
+    'execution_contract': (('v0.2', 'schemas/execution_contract.v0.2.schema.json'),),
+    'execution_ticket': (
+        ('v0.2', 'schemas/execution_ticket.v0.2.schema.json'),
+        ('v0.3', 'schemas/execution_ticket.v0.3.schema.json'),
+    ),
+    'execution_receipt': (('v0.2', 'schemas/execution_receipt.v0.2.schema.json'),),
+    'evidence_contract': (('v0.2', 'schemas/evidence_contract.v0.2.schema.json'),),
+}
 CONSUMABLE_TICKET_APPROVAL_STATUSES = {'approved_for_dry_run', 'approved'}
 TERMINAL_TICKET_APPROVAL_STATUSES = {'rejected', 'expired', 'revoked'}
 
@@ -138,8 +149,8 @@ def build_artifact_chain_manifest(
     }
 
 
-def _load_json_object(path: Path) -> Dict[str, Any]:
-    return load_json_object(path, error_cls=ChainVerificationError)
+def _load_json_object(path: Path, *, max_bytes: int | None = None) -> Dict[str, Any]:
+    return load_json_object(path, error_cls=ChainVerificationError, max_bytes=max_bytes)
 
 
 def _link_descriptor(value: Mapping[str, Any], link_name: str) -> Mapping[str, Any]:
@@ -237,6 +248,38 @@ def _raise_lifecycle_roles_mismatch(checked: Sequence[str]) -> None:
     )
 
 
+def _lifecycle_role_summary(checked: Sequence[str], duplicate_roles: Sequence[str]) -> Dict[str, Any]:
+    seen = set(checked)
+    expected = set(V02_LIFECYCLE_ROLES)
+    extra_roles = sorted(role for role in seen if role not in expected)
+    missing_roles = [role for role in V02_LIFECYCLE_ROLES if role not in seen]
+    return {
+        'status': 'canonical' if tuple(checked) == V02_LIFECYCLE_ROLES else 'noncanonical',
+        'expected_roles': list(V02_LIFECYCLE_ROLES),
+        'missing_roles': missing_roles,
+        'extra_roles': extra_roles,
+        'duplicate_roles': sorted(set(duplicate_roles)),
+    }
+
+
+def _assert_strict_lifecycle_artifact_shapes(artifacts_by_role: Mapping[str, Mapping[str, Any]]) -> List[str]:
+    checks: List[str] = []
+    for role in V02_LIFECYCLE_ROLES:
+        artifact = artifacts_by_role[role]
+        artifact_type = str(artifact.get('artifact_type') or '')
+        if artifact_type != role:
+            raise ChainVerificationError(f'{role} artifact_type mismatch: expected {role}, got {artifact_type or "missing"}')
+        schema_version = _schema_version(artifact)
+        schema_ref = _schema_ref(artifact)
+        allowed = V02_LIFECYCLE_ROLE_SCHEMAS[role]
+        if (schema_version, schema_ref) not in allowed:
+            allowed_text = ', '.join(f'{version}:{ref}' for version, ref in allowed)
+            actual_text = f'{schema_version or "missing"}:{schema_ref or "missing"}'
+            raise ChainVerificationError(f'{role} schema identity mismatch: expected one of {allowed_text}, got {actual_text}')
+        checks.append(f'{role}_schema_identity')
+    return checks
+
+
 def verify_artifact_chain_manifest(
     manifest: Mapping[str, Any],
     *,
@@ -244,11 +287,15 @@ def verify_artifact_chain_manifest(
     validate_schemas: bool = True,
     strict_jsonschema: bool = False,
     require_lifecycle: bool = False,
+    max_artifact_bytes: int | None = None,
+    max_manifest_entries: int | None = None,
 ) -> Dict[str, Any]:
     """Verify manifest descriptors and hash links against local artifact files."""
     entries = manifest.get('entries')
     if not isinstance(entries, list):
         raise ChainVerificationError('manifest.entries is not an array')
+    if max_manifest_entries is not None and len(entries) > max_manifest_entries:
+        raise ChainVerificationError(f'manifest entry count exceeds max_manifest_entries={max_manifest_entries}')
     base = (root or Path.cwd()).resolve()
     previous = ''
     checked: List[str] = []
@@ -266,7 +313,7 @@ def verify_artifact_chain_manifest(
             artifact_path.relative_to(base)
         except ValueError as exc:
             raise ChainVerificationError(f'entry[{index}] path escapes root: {rel_path}') from exc
-        value = _load_json_object(artifact_path)
+        value = _load_json_object(artifact_path, max_bytes=max_artifact_bytes)
         if validate_schemas:
             schema_ref = _schema_ref(value)
             if schema_ref:
@@ -291,19 +338,24 @@ def verify_artifact_chain_manifest(
         raise ChainVerificationError('root_chain_digest mismatch')
     semantic_checks: List[str] = []
     checked_roles = tuple(checked)
+    role_summary = _lifecycle_role_summary(checked, duplicate_roles)
     if require_lifecycle and checked_roles != V02_LIFECYCLE_ROLES:
         _raise_lifecycle_roles_mismatch(checked)
     if require_lifecycle and checked_roles == V02_LIFECYCLE_ROLES:
-        semantic_checks = verify_lifecycle_semantics(artifacts_by_role)
+        semantic_checks = _assert_strict_lifecycle_artifact_shapes(artifacts_by_role)
+        semantic_checks.extend(verify_lifecycle_semantics(artifacts_by_role))
     lifecycle_status = 'passed' if require_lifecycle else 'not_checked'
+    verification_posture = 'strict_lifecycle' if require_lifecycle else 'integrity_only'
     return {
         'status': 'passed',
         'chain_status': 'passed',
         'lifecycle_status': lifecycle_status,
+        'verification_posture': verification_posture,
         'checked_entries': checked,
         'entry_count': len(checked),
         'root_chain_digest': previous,
         'semantic_checks': semantic_checks,
+        'lifecycle_role_summary': role_summary,
         'canonicalization': manifest.get('canonicalization') or CHAIN_CANONICALIZATION_VERSION,
         'hash_algorithm': manifest.get('hash_algorithm') or CHAIN_HASH_ALGORITHM,
     }
@@ -324,4 +376,6 @@ def verify_lifecycle_manifest(
         validate_schemas=validate_schemas,
         strict_jsonschema=strict_jsonschema,
         require_lifecycle=True,
+        max_artifact_bytes=None,
+        max_manifest_entries=None,
     )

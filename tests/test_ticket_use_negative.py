@@ -74,6 +74,28 @@ def test_ticket_use_keeps_legacy_text_marker_compatibility() -> None:
         verify_ticket_use(_ticket(), _contract(), _receipt(), evidence)
 
 
+def test_strict_evidence_profile_rejects_legacy_text_marker_fallback() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['claim_type'] = 'bounded_observation'
+    evidence['claims'][0]['statement'] = 'operator says completed_execution happened'
+    evidence['claims'][0]['requires_completed_execution'] = False
+    with pytest.raises(TicketUseVerificationError, match='legacy execution text markers'):
+        verify_ticket_use(
+            _ticket(),
+            _contract(),
+            _receipt(),
+            evidence,
+            strict_evidence_claims=True,
+        )
+
+
+def test_strict_one_shot_profile_requires_single_max_run() -> None:
+    ticket = _ticket()
+    ticket['execution_limits']['max_runs'] = 2
+    with pytest.raises(TicketSemanticError, match='strict one_shot ticket'):
+        validate_ticket_semantics(ticket, _contract(), strict_ticket_profile=True)
+
+
 def test_ticket_use_rejects_evidence_replay_live_execution_requirement() -> None:
     evidence = _evidence()
     evidence['replay']['live_execution_required'] = True

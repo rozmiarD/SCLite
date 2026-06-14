@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .json_types import json_array
+
 
 SENSITIVE_VALUE_KEYS = {
     'password',
@@ -55,21 +57,21 @@ def sanitize_public_artifact(value: Any) -> Any:
     """
     if isinstance(value, dict):
         if isinstance(value.get('name'), str) and ('value' in value or 'raw' in value):
-            out = {k: sanitize_public_artifact(v) for k, v in value.items()}
-            out['value'] = PUBLIC_REDACTION_PLACEHOLDER
-            if 'raw' in out:
-                out['raw'] = f"{value.get('name')}: {PUBLIC_REDACTION_PLACEHOLDER}"
-            return out
-        out: Dict[str, Any] = {}
+            named_value = {k: sanitize_public_artifact(v) for k, v in value.items()}
+            named_value['value'] = PUBLIC_REDACTION_PLACEHOLDER
+            if 'raw' in named_value:
+                named_value['raw'] = f"{value.get('name')}: {PUBLIC_REDACTION_PLACEHOLDER}"
+            return named_value
+        sanitized: Dict[str, Any] = {}
         for key, item in value.items():
             key_text = str(key or '').lower()
             if key_text in SENSITIVE_VALUE_KEYS and item:
-                out[key] = PUBLIC_REDACTION_PLACEHOLDER
+                sanitized[key] = PUBLIC_REDACTION_PLACEHOLDER
             elif key_text in {'stdout', 'stderr'}:
-                out[key] = '' if not item else '<omitted_for_public_demo>'
+                sanitized[key] = '' if not item else '<omitted_for_public_demo>'
             else:
-                out[key] = sanitize_public_artifact(item)
-        return out
+                sanitized[key] = sanitize_public_artifact(item)
+        return sanitized
     if isinstance(value, list):
         return [sanitize_public_artifact(item) for item in value]
     if isinstance(value, str):
@@ -178,7 +180,7 @@ def build_redaction_receipt(
     redacted_hash = artifact_sha256(redacted_artifact)
     changed_paths = _count_changed_paths(source_artifact, redacted_artifact)
     status = 'redacted' if source_hash != redacted_hash else 'unchanged'
-    rules = policy_doc.get('rules') if isinstance(policy_doc.get('rules'), list) else []
+    rules = json_array(policy_doc.get('rules'))
     return {
         'artifact_type': REDACTION_RECEIPT_ARTIFACT_TYPE,
         'schema_version': REDACTION_RECEIPT_SCHEMA_VERSION,

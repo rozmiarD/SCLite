@@ -93,10 +93,12 @@ def test_v02_chain_manifest_verifies_fixture() -> None:
     assert result['status'] == 'passed'
     assert result['chain_status'] == 'passed'
     assert result['lifecycle_status'] == 'not_checked'
+    assert result['verification_posture'] == 'integrity_only'
     assert result['entry_count'] == 6
     assert result['checked_entries'][0] == 'intent_contract'
     assert result['checked_entries'][-1] == 'evidence_contract'
     assert result['semantic_checks'] == []
+    assert result['lifecycle_role_summary']['status'] == 'canonical'
 
 
 def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
@@ -105,7 +107,16 @@ def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
 
     assert result['chain_status'] == 'passed'
     assert result['lifecycle_status'] == 'passed'
-    assert result['semantic_checks'] == [
+    assert result['verification_posture'] == 'strict_lifecycle'
+    assert result['semantic_checks'][:6] == [
+        'intent_contract_schema_identity',
+        'policy_decision_schema_identity',
+        'execution_contract_schema_identity',
+        'execution_ticket_schema_identity',
+        'execution_receipt_schema_identity',
+        'evidence_contract_schema_identity',
+    ]
+    assert result['semantic_checks'][6:] == [
         'role_order',
         'policy_binds_intent',
         'contract_binds_intent_and_policy',
@@ -282,6 +293,7 @@ def test_v02_lifecycle_strict_rejects_extra_role(tmp_path: Path) -> None:
 
     loose = verify_artifact_chain_manifest(manifest, root=tmp_path)
     assert loose['semantic_checks'] == []
+    assert loose['lifecycle_role_summary']['extra_roles'] == ['injected_extra_role']
 
     with pytest.raises(ChainVerificationError, match='lifecycle roles mismatch'):
         verify_artifact_chain_manifest(manifest, root=tmp_path, require_lifecycle=True)
@@ -308,9 +320,38 @@ def test_v02_lifecycle_strict_rejects_duplicate_role_without_overwrite(tmp_path:
     loose = verify_artifact_chain_manifest(manifest, root=tmp_path)
     assert loose['checked_entries'].count('execution_contract') == 2
     assert loose['semantic_checks'] == []
+    assert loose['lifecycle_role_summary']['duplicate_roles'] == ['execution_contract']
 
     with pytest.raises(ChainVerificationError, match='lifecycle roles mismatch'):
         verify_artifact_chain_manifest(manifest, root=tmp_path, require_lifecycle=True)
+
+
+def test_strict_lifecycle_rejects_role_schema_identity_drift_without_changing_loose_mode(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    artifacts['execution_ticket']['schema_ref'] = 'schemas/execution_receipt.v0.2.schema.json'
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+
+    loose = verify_artifact_chain_manifest(manifest, root=tmp_path, validate_schemas=False)
+    assert loose['chain_status'] == 'passed'
+    assert loose['lifecycle_status'] == 'not_checked'
+
+    with pytest.raises(ChainVerificationError, match='execution_ticket schema identity mismatch'):
+        verify_artifact_chain_manifest(manifest, root=tmp_path, validate_schemas=False, require_lifecycle=True)
+
+
+def test_strict_lifecycle_rejects_role_artifact_type_drift(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    artifacts['execution_receipt']['artifact_type'] = 'execution_ticket'
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='execution_receipt artifact_type mismatch'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            validate_schemas=False,
+            require_lifecycle=True,
+        )
 
 
 def test_v02_lifecycle_detects_manifest_path_escape() -> None:
@@ -345,6 +386,7 @@ def test_validate_chain_cli() -> None:
     )
 
     assert proc.stdout.startswith('artifact_chain_ok:6:')
+    assert ':posture=integrity_only:lifecycle_not_checked' in proc.stdout
 
 
 def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
@@ -367,6 +409,7 @@ def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
     result = json.loads(proc.stdout)
     assert result['chain_status'] == 'passed'
     assert result['lifecycle_status'] == 'not_checked'
+    assert result['verification_posture'] == 'integrity_only'
     assert result['semantic_checks'] == []
 
 
@@ -380,6 +423,7 @@ def test_verify_lifecycle_cli_alias() -> None:
     )
 
     assert proc.stdout.startswith('lifecycle_ok:6:')
+    assert ':posture=strict_lifecycle:lifecycle_passed' in proc.stdout
 
 
 def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
@@ -403,3 +447,24 @@ def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
     assert result['chain_status'] == 'passed'
     assert result['lifecycle_status'] == 'passed'
     assert 'ticket_binds_execution_contract' in result['semantic_checks']
+
+
+def test_validate_chain_cli_optional_size_guard_fails_closed() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'validate-chain',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--max-artifact-bytes',
+            '1',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert proc.returncode == 1
+    assert 'max_bytes=1' in proc.stderr

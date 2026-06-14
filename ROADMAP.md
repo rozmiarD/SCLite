@@ -29,6 +29,13 @@ SCLite must stay deliberately small. The emergence of GovEngine as a broader gov
 Current package: `sclite-core==1.0.2`.
 Latest published public package: `sclite-core==1.0.2`.
 
+Roadmap v2 hardening from the 2026-06-14 audit is implemented on the
+development branch as the next candidate line. It keeps SCLite as a
+truth-layer package while making verifier posture explicit, integrating
+ticket-use checks into review/secure outputs, tightening strict/secure schema
+identity, documenting host freshness handoff, and adding validation
+regressions.
+
 Current lifecycle:
 
 ```text
@@ -48,6 +55,27 @@ manifests, lifecycle role order, digest bindings between intent, policy,
 execution contract, ticket, receipt, and evidence, and packaged
 reviewer-facing bundle output without adding runtime, adapter, PKI, or policy
 authority.
+
+## Completed 2026-06-14 audit roadmap v2 hardening
+
+The audit roadmap v2 is delivered as narrowly scoped truth-layer work:
+
+1. `validate-chain` reports integrity-only posture unless strict lifecycle is
+   requested.
+2. Review records and guarded secure-bundle verification run the existing
+   `verify_ticket_use()` receipt-bounded evidence gate when v0.3 artifacts are
+   present.
+3. Strict lifecycle and guarded/secure profiles enforce lifecycle
+   role-to-schema/version identity while loose chain validation stays
+   compatibility-preserving.
+4. GovEngine/Tecrax freshness handoff is documented as a host-owned replay
+   contract, not as a SCLite replay DB.
+5. Schema-mode parity, golden output, generated invariant, and optional size
+   guard tests cover the new contract surface.
+
+Still out of scope: runtime execution, planning, orchestration, governance
+policy decisions, replay check-and-set state, PKI/KMS, scanners, and raw
+evidence storage.
 
 ## Completed 0.8 beta hardening: strict lifecycle and optional kernel guard
 

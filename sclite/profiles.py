@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Mapping
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .integrity import artifact_descriptor
+from .json_types import json_array, json_mapping
 
 TRUST_PROFILE_REF_SCHEMA = 'trust_profile_ref.v0.1'
 CARRIER_PROFILE_REF_SCHEMA = 'carrier_profile_ref.v0.1'
@@ -113,11 +114,11 @@ def validate_carrier_profile_ref(
 
 def profile_ref_summary(profile_ref: Mapping[str, Any]) -> Dict[str, Any]:
     """Return a compact JSON-safe trust/carrier profile summary."""
-    integrity = profile_ref.get('integrity') if isinstance(profile_ref.get('integrity'), Mapping) else {}
+    integrity = json_mapping(profile_ref.get('integrity'))
     return {
         'artifact_type': profile_ref.get('artifact_type'),
         'schema_version': profile_ref.get('schema_version'),
         'profile': profile_ref.get('trust_profile') or profile_ref.get('carrier_profile'),
         'subject_artifact_digest': integrity.get('subject_artifact_digest'),
-        'non_claims': profile_ref.get('non_claims') if isinstance(profile_ref.get('non_claims'), list) else [],
+        'non_claims': json_array(profile_ref.get('non_claims')),
     }
