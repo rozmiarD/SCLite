@@ -191,8 +191,15 @@ semantics. `validate-chain` verifies:
 6. `policy_decision` binds the correct `intent_contract` digest;
 7. `execution_contract` binds the correct intent and policy decision digests;
 8. `execution_ticket` binds the correct `execution_contract` descriptor and `integrity.ticket_binds_execution_contract_digest`;
-9. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
-10. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
+9. denied policy decisions do not continue into an executable lifecycle;
+10. owner-approval-required policy decisions require a consumable approved ticket before executable lifecycle review can pass;
+11. rejected, expired, revoked, missing, or unknown ticket approval states stop executable lifecycle review;
+12. `execution_receipt` binds the correct `execution_ticket` and `execution_contract` digests;
+13. `evidence_contract` binds the correct `execution_receipt` and `execution_ticket` digests.
+
+Python callers can use `verify_lifecycle_manifest()` as the fail-safe wrapper
+for this strict behavior instead of remembering to pass `require_lifecycle=True`
+to `verify_artifact_chain_manifest()`.
 
 ## Optional Kernel Guard HMAC
 
