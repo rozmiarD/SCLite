@@ -63,6 +63,12 @@ stable verification-result envelope is built:
 - `verify-secure-bundle`: reports all local verifier layers while preserving
   replay, public identity, and runtime enforcement as non-claims.
 
+Strict lifecycle verification is the executable-chain safety path. It rejects
+policy `deny`, owner-approval-required chains without a consumable approved
+ticket, and terminal ticket approval states such as `rejected`, `expired`, and
+`revoked`. Python callers can use `verify_lifecycle_manifest()` for that
+fail-safe path.
+
 Security-model and profile-freeze claims are guarded by
 `python scripts/validate_public_truth.py`. The validator checks that
 `SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep

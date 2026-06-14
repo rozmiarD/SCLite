@@ -45,6 +45,7 @@ PUBLIC_DOCS = (
 STABLE_IMPORTS = (
     'sclite.integrity:artifact_descriptor',
     'sclite.integrity:verify_artifact_chain_manifest',
+    'sclite.integrity:verify_lifecycle_manifest',
     'sclite.tickets:validate_ticket_semantics',
     'sclite.tickets:verify_ticket_use',
     'sclite.review:build_review_record_from_manifest',
@@ -437,6 +438,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite reports replay as `not_checked`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`validate-chain` returns `chain_status: passed`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`verify-guarded-chain` adds `guard_status: passed`')
+    _require(errors, 'VALIDATION.md', validation, 'Python callers can use `verify_lifecycle_manifest()`')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'HMAC gives authenticity only to parties that already share the secret')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite does not decide whether an action is authorized')
