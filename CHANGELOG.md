@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.0.3 - Stable lifecycle and guarded verification surface
+
+- published `sclite-core==1.0.3` package line as a stable SCLite audit roadmap
+  v2 hardening patch after SCLite/GovEngine/Ravenclaw stack validation.
 - Implements the 2026-06-14 audit roadmap v2 hardening without adding
   runtime, governance, replay-store, PKI/KMS, scanner, or raw-evidence scope.
 - Makes generic `validate-chain` output explicit about

@@ -4,13 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.2`.
-- Release label: `1.0.2`.
+- Current release version: `1.0.3`.
+- Release label: `1.0.3`.
 - Status: published stable release for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.2` (`1.0.2`).
+- Latest published PyPI package: `sclite-core==1.0.3` (`1.0.3`).
 
 ## Current review path
 
@@ -66,4 +66,4 @@ SCLite is the first package in the Ravenclaw/GovEngine/SCLite family published t
 
 Before future releases, run the validation and build gates in `PUBLICATION_CHECKLIST.md` and get explicit operator approval for any tag or upload.
 
-The published `0.8.0-alpha` line removed the superseded proof-trace product path after consumer migration. The published `0.8.0-beta` line freezes that same lifecycle/review surface. The published `1.0.0-rc.1` line added release-candidate hardening for security profile docs, Kernel Guard golden vectors, security regression gates, and the `verification_result.v1` contract. The published `1.0.0` line stabilizes that surface with clean CLI input failures, a canonical developer gate, and a frozen top-level Python API. The published `1.0.1` line tightens schema resolution, lifecycle-neutral chain validation, Kernel Guard sidecar validation, and release-truth gates. The published `1.0.2` line adds explicit verifier statuses, fail-safe lifecycle approval checks, receipt/evidence compatibility hardening, guarded-strict path boundaries, compatibility docs, and release-readiness gates while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.
+The published `0.8.0-alpha` line removed the superseded proof-trace product path after consumer migration. The published `0.8.0-beta` line freezes that same lifecycle/review surface. The published `1.0.0-rc.1` line added release-candidate hardening for security profile docs, Kernel Guard golden vectors, security regression gates, and the `verification_result.v1` contract. The published `1.0.0` line stabilizes that surface with clean CLI input failures, a canonical developer gate, and a frozen top-level Python API. The published `1.0.1` line tightens schema resolution, lifecycle-neutral chain validation, Kernel Guard sidecar validation, and release-truth gates. The published `1.0.2` line adds explicit verifier statuses, fail-safe lifecycle approval checks, receipt/evidence compatibility hardening, guarded-strict path boundaries, compatibility docs, and release-readiness gates. The published `1.0.3` line completes the 2026-06-14 audit roadmap v2 hardening: explicit integrity-only chain posture, ticket-use checks in review/secure paths, strict role/schema identity gates, host-owned freshness handoff docs, schema-mode parity tests, and optional size/type gates while preserving the no-runtime/no-PKI/no-adapter boundary. SCLite remains a local artifact validation and review package, not a policy authority or executor.

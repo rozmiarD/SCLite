@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 1.0.2](https://img.shields.io/badge/package-sclite--core%201.0.2-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.2/)
+[![Package: sclite-core 1.0.3](https://img.shields.io/badge/package-sclite--core%201.0.3-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.3/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -17,9 +17,9 @@ policy authority. The superseded proof-trace product path has been retired.
 
 ## Status
 
-- Version: `1.0.2`
+- Version: `1.0.3`
 - Status: **published 1.0 stable release: frozen lifecycle/review and guarded verification surface**
-- Latest published package: `sclite-core==1.0.2`
+- Latest published package: `sclite-core==1.0.3`
 - Runtime execution: not included
 - Protocol/carrier adapters: not included
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -276,7 +276,7 @@ and replay/non-claim boundaries for the 1.0 release line.
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==1.0.2
+python -m pip install sclite-core==1.0.3
 ```
 
 Install directly from GitHub:
