@@ -73,8 +73,8 @@ The security regression gate must pass and must remain synthetic-key-only.
 `verification_result.v1` must keep replay as host-owned state and
 public-identity/runtime-enforcement as explicit non-claims.
 
-For the `1.0.3` stable release, current documentation and validation must
-state that the latest published PyPI release is `sclite-core==1.0.3`.
+For the `1.0.4` stable release, current documentation and validation must
+state that the latest published PyPI release is `sclite-core==1.0.4`.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current

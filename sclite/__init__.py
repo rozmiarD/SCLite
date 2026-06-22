@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,
@@ -49,6 +49,19 @@ from .review import (
     build_review_record_from_manifest,
     review_record_markdown,
 )
+from .reactions import (
+    ESCALATION_PROPOSAL_SCHEMA_REF,
+    FINDING_SCHEMA_REF,
+    OBSERVATION_SCHEMA_REF,
+    REACTION_PLAN_SCHEMA_REF,
+    build_finding,
+    build_observation_envelope,
+    build_reaction_chain_manifest,
+    build_reaction_plan,
+    reaction_idempotency_key,
+    validate_escalation_proposal,
+    verify_reaction_chain_manifest,
+)
 from .scope_fidelity import (
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
@@ -93,6 +106,17 @@ __all__ = (
     'build_artifact_chain_manifest',
     'verify_artifact_chain_manifest',
     'verify_lifecycle_manifest',
+    'OBSERVATION_SCHEMA_REF',
+    'FINDING_SCHEMA_REF',
+    'REACTION_PLAN_SCHEMA_REF',
+    'ESCALATION_PROPOSAL_SCHEMA_REF',
+    'build_observation_envelope',
+    'build_finding',
+    'build_reaction_plan',
+    'build_reaction_chain_manifest',
+    'reaction_idempotency_key',
+    'validate_escalation_proposal',
+    'verify_reaction_chain_manifest',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',

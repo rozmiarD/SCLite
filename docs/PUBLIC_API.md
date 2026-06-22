@@ -35,6 +35,23 @@ authority, or carrier adapters through this API.
 - `verify_artifact_chain_manifest`
 - `verify_lifecycle_manifest`
 
+## Deterministic Reaction Artifacts
+
+- `OBSERVATION_SCHEMA_REF`
+- `FINDING_SCHEMA_REF`
+- `REACTION_PLAN_SCHEMA_REF`
+- `ESCALATION_PROPOSAL_SCHEMA_REF`
+- `build_observation_envelope`
+- `build_finding`
+- `build_reaction_plan`
+- `build_reaction_chain_manifest`
+- `reaction_idempotency_key`
+- `validate_escalation_proposal`
+- `verify_reaction_chain_manifest`
+
+These functions define and verify the canonical evidence boundary. They do not
+interpret profile rules, authorize a reaction, or execute an operation.
+
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.0.4 - Deterministic reaction evidence contracts
+
+- published `sclite-core==1.0.4` package line for the reaction evidence boundary;
+- added canonical `observation_envelope.v0.1`, `finding.v0.1`,
+  `reaction_plan.v0.1`, and untrusted `escalation_proposal.v0.1` schemas;
+- added builders, bounded reaction-chain verification, semantic digest links,
+  stable idempotency keys, and tamper-detection tests;
+- retained the SCLite boundary: no rule interpretation, policy authority,
+  connector access, or runtime execution was added.
+
 ## 1.0.3 - Stable lifecycle and guarded verification surface
 
 - published `sclite-core==1.0.3` package line as a stable SCLite audit roadmap

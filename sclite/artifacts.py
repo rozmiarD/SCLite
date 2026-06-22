@@ -31,6 +31,10 @@ SCHEMA_FILES = {
     'kernel_guard_hmac_v1': 'kernel_guard_hmac_v1.schema.json',
     'trust_profile_ref.v0.1': 'trust_profile_ref.v0.1.schema.json',
     'carrier_profile_ref.v0.1': 'carrier_profile_ref.v0.1.schema.json',
+    'observation_envelope.v0.1': 'observation_envelope.v0.1.schema.json',
+    'finding.v0.1': 'finding.v0.1.schema.json',
+    'reaction_plan.v0.1': 'reaction_plan.v0.1.schema.json',
+    'escalation_proposal.v0.1': 'escalation_proposal.v0.1.schema.json',
 }
 
 
