@@ -1,18 +1,16 @@
 # GovEngine Integration Contract
 
-This document defines the SCLite lifecycle/review public import surface that
-the currently published GovEngine package line may rely on. Published
-GovEngine still declares `sclite-core>=0.8.0b2,<0.9`; SCLite `1.0.0` keeps
-this surface source-compatible, but downstream dependency widening is a
-separate GovEngine/Ravenclaw release decision.
+This document defines the SCLite lifecycle/review public import surface used by
+GovEngine. Published GovEngine `0.15.0` and the `0.16.0` source candidate both
+declare `sclite-core>=1.0.3,<1.1`. Raising consumer release floors remains a
+separate, coordinated GovEngine/RExecOp/Tecrax release decision.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following import paths in the
-`sclite-core>=0.8.0b2,<0.9` line and in the SCLite `1.0.x` source-compatible
-surface:
+GovEngine may rely on the following import paths in the current
+`sclite-core>=1.0.3,<1.1` supported range:
 
 ```python
 from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest
@@ -28,9 +26,8 @@ Anything not listed here is internal or not guaranteed as a stable GovEngine int
 
 ## Stable CLI surfaces for GovEngine/CI
 
-GovEngine and CI jobs may rely on these CLI commands in the currently
-published downstream range and in the SCLite `1.0.x` source-compatible
-surface:
+GovEngine and CI jobs may rely on these CLI commands in the current SCLite
+`1.0.x` supported range:
 
 ```bash
 sclite validate-chain PATH/TO/artifact_chain_manifest.json
@@ -66,7 +63,9 @@ See [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for exit-code semantics.
 }
 ```
 
-GovEngine should treat any verdict other than `pass` as requiring block/review unless a higher-level profile explicitly permits a weaker result.
+GovEngine should treat any verdict other than `pass` as requiring block/review
+unless an explicit GovEngine policy permits a weaker review posture. SCLite and
+domain profiles do not authorize execution.
 
 ## Integration fixture
 

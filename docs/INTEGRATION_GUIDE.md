@@ -19,17 +19,18 @@ SCL core is intentionally small. It provides schemas, validation helpers, redact
 
 ```mermaid
 flowchart LR
-    Runtime[External runtime: GovEngine or Ravenclaw] --> Produce[produce lifecycle artifacts]
+    Runtime[RExecOp or another host runtime] --> Produce[produce lifecycle artifacts]
+    Runtime --> Governance[GovEngine policy and admission]
+    Governance --> Runtime
     Produce --> SCLite[SCLite validate hash bind review]
     SCLite --> Bundle[review bundle or review record]
     Bundle --> Runtime
 
-    Runtime --> Policy[policy and authorization]
     Runtime --> Runner[tool execution or dry run]
     Runtime --> RawEvidence[raw evidence storage]
     Runtime --> Trust[PKI or signer trust]
 
-    SCLite -. does not decide .-> Policy
+    SCLite -. does not decide .-> Governance
     SCLite -. does not execute .-> Runner
     SCLite -. does not store .-> RawEvidence
     SCLite -. does not verify .-> Trust
@@ -139,7 +140,7 @@ assert record["artifact_type"] == "review_record"
 assert record["verdict"] == "pass"
 ```
 
-For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=0.8.0b2,<0.9`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
+For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=1.0.3,<1.1`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
 
 ## Carrier guidance
 

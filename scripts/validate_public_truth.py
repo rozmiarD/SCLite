@@ -23,7 +23,7 @@ LATEST_PUBLISHED_VERSION = '1.0.4'
 LATEST_PUBLISHED_LABEL = '1.0.4'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=0.8.0b2,<0.9'
+EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.3,<1.1'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -424,8 +424,8 @@ def collect_errors() -> list[str]:
     )
     _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
-    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'this surface source-compatible')
-    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'separate GovEngine/Ravenclaw release decision')
+    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'GovEngine/RExecOp/Tecrax release decision')
+    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'domain profiles do not authorize execution')
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'require_lifecycle=True')
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')

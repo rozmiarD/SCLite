@@ -208,11 +208,14 @@ SCLite is not:
 - a proof of signer identity or PKI trust;
 - a tamper-proof transparency log.
 
-Execution, authorization, raw evidence storage, and trust decisions belong to the host runtime:
+Execution, raw evidence storage, and concrete trust verification belong to the
+host runtime. Governance and admission belong to GovEngine:
 
 ```mermaid
 flowchart LR
-    Runtime[GovEngine or Ravenclaw runtime] --> Artifacts[SCLite artifacts]
+    Runtime[RExecOp or another host runtime] --> Governance[GovEngine governance]
+    Governance --> Runtime
+    Runtime --> Artifacts[SCLite artifacts]
     Artifacts --> SCLite[SCLite validate hash bind review]
     SCLite --> Record[review record or receipt]
     Record --> Runtime

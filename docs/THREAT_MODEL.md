@@ -69,4 +69,7 @@ flowchart LR
 
 ## Security Posture
 
-SCLite improves reviewability by making artifacts small, schema-shaped, hash-bound, and explicit about non-claims. It should be paired with a runtime such as GovEngine or Ravenclaw for policy enforcement, execution controls, identity verification, redaction strategy, and evidence handling.
+SCLite improves reviewability by making artifacts small, schema-shaped,
+hash-bound, and explicit about non-claims. It should be paired with GovEngine
+for governance/admission and with RExecOp or another host runtime for execution
+controls, identity integration, redaction strategy, and evidence handling.

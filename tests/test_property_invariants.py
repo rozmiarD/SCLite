@@ -23,7 +23,7 @@ def test_host_extraction_normalizes_common_wrappers_without_authorizing_scope() 
     samples = [
         ('HOST: Example.COM', 'example.com'),
         ('origin: https://Sub.Example.COM/path', 'sub.example.com'),
-        ('https://user:pass@Example.COM:443/path', 'example.com'),
+        ('https://userinfo@Example.COM:443/path', 'example.com'),
         ('*.Example.COM', 'example.com'),
         ('not a host', ''),
         ('localhost', ''),
