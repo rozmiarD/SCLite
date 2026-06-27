@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `ruff` to the development quality gate and published the PEP 561
+  `py.typed` marker so downstream stack packages can type-check against SCLite.
 - Corrected current GovEngine integration ranges to
   `sclite-core>=1.0.3,<1.1` and clarified that GovEngine owns governance while
   RExecOp or another host runtime owns execution.
