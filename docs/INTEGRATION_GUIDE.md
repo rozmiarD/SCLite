@@ -140,7 +140,7 @@ assert record["artifact_type"] == "review_record"
 assert record["verdict"] == "pass"
 ```
 
-For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=1.0.3,<1.1`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
+For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=1.0.5,<1.1`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
 
 ## Carrier guidance
 

@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+## 1.0.5 - Stack quality gates and typed package marker
+
 - Added `ruff` to the development quality gate and published the PEP 561
   `py.typed` marker so downstream stack packages can type-check against SCLite.
 - Corrected current GovEngine integration ranges to
-  `sclite-core>=1.0.3,<1.1` and clarified that GovEngine owns governance while
+  `sclite-core>=1.0.5,<1.1` and clarified that GovEngine owns governance while
   RExecOp or another host runtime owns execution.
+- published `sclite-core==1.0.5` package line as a truth-layer packaging patch without
+  adding runtime, policy, scheduler, connector, or domain ownership.
 
 ## 1.0.4 - Deterministic reaction evidence contracts
 

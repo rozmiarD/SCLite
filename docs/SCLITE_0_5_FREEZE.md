@@ -2,7 +2,7 @@
 
 These are historical 0.5 freeze notes. The frozen review-bundle behavior remains
 compatible, but the current GovEngine integration contract is
-`sclite-core>=1.0.3,<1.1`; see
+`sclite-core>=1.0.5,<1.1`; see
 [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md).
 
 ## Stable for GovEngine consumption

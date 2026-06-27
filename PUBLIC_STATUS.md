@@ -4,13 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.4`.
-- Release label: `1.0.4`.
+- Current release version: `1.0.5`.
+- Release label: `1.0.5`.
 - Status: published stable release for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.4` (`1.0.4`).
+- Latest published PyPI package: `sclite-core==1.0.5` (`1.0.5`).
 
 ## Current review path
 
@@ -70,5 +70,6 @@ The published `1.0.3` line completes the 2026-06-14 audit roadmap v2 hardening.
 The `1.0.4` patch adds canonical deterministic-reaction evidence contracts,
 digest-bound reaction chains, and an explicitly untrusted escalation-proposal
 shape without adding policy, rule interpretation, adapters, or execution.
-SCLite remains a local artifact validation and review package, not a policy
-authority or executor.
+The `1.0.5` patch adds the typed-package marker and repository quality gates
+for downstream type checking. SCLite remains a local artifact validation and
+review package, not a policy authority or executor.

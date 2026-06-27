@@ -17,13 +17,13 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '1.0.4'
-EXPECTED_RELEASE_LABEL = '1.0.4'
-LATEST_PUBLISHED_VERSION = '1.0.4'
-LATEST_PUBLISHED_LABEL = '1.0.4'
+EXPECTED_VERSION = '1.0.5'
+EXPECTED_RELEASE_LABEL = '1.0.5'
+LATEST_PUBLISHED_VERSION = '1.0.5'
+LATEST_PUBLISHED_LABEL = '1.0.5'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.3,<1.1'
+EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.5,<1.1'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -416,12 +416,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'SPEC.md', spec, 'verification_result.v1')
     _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
     _require(errors, 'README.md', readme, 'verification_result')
-    _require(
-        errors,
-        'CHANGELOG.md',
-        changelog,
-        f'## {EXPECTED_RELEASE_LABEL} - Deterministic reaction evidence contracts',
-    )
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - ')
     _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'GovEngine/RExecOp/Tecrax release decision')

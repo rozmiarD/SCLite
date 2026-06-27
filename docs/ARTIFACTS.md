@@ -3,8 +3,8 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.0.4`;
-latest published public package: `sclite-core==1.0.4`.
+Current package: `sclite-core==1.0.5`;
+latest published public package: `sclite-core==1.0.5`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
@@ -17,6 +17,8 @@ directories out of the installed/current surface while freezing guarded
 verification contracts. The `1.0.3` line completed audit-roadmap hardening.
 The `1.0.4` line adds observation, finding, reaction-plan, escalation-proposal,
 and reaction-chain contracts without interpreting or authorizing reactions.
+The `1.0.5` line adds typed-package metadata and quality gates without changing
+artifact semantics.
 
 ## Lifecycle map
 
