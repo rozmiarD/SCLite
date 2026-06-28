@@ -4,8 +4,8 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.5`.
-- Release label: `1.0.5`.
+- Current release version: `1.0.6`.
+- Release label: `1.0.6`.
 - Status: published stable release for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
@@ -73,3 +73,6 @@ shape without adding policy, rule interpretation, adapters, or execution.
 The `1.0.5` patch adds the typed-package marker and repository quality gates
 for downstream type checking. SCLite remains a local artifact validation and
 review package, not a policy authority or executor.
+The `1.0.6` source line adds the bounded `trigger_decision.v0.1` truth-layer
+artifact used by RExecOp trigger/event decisions without adding trigger
+planning, scheduling, policy, or execution ownership to SCLite.

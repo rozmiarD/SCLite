@@ -52,6 +52,20 @@ authority, or carrier adapters through this API.
 These functions define and verify the canonical evidence boundary. They do not
 interpret profile rules, authorize a reaction, or execute an operation.
 
+## Trigger Decision Artifacts
+
+- `TRIGGER_DECISION_SCHEMA`
+- `TRIGGER_DECISION_SCHEMA_REF`
+- `build_trigger_decision`
+- `trigger_decision_descriptor`
+- `trigger_decision_digest`
+- `validate_trigger_decision`
+
+These functions define the bounded truth-layer projection for trigger/event
+decisions. They record event, rule, GovEngine admission and optional child
+operation references. They do not match trigger rules, authorize planning,
+schedule work, or execute an operation.
+
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`

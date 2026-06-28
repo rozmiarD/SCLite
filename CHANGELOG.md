@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.6 - Trigger decision truth-layer artifact
+
+- Added the `trigger_decision.v0.1` truth-layer artifact contract for bounded
+  trigger/event decisions. It records event, rule-set, rule, GovEngine
+  admission and optional child-operation references without adding trigger
+  planning, policy authority, scheduler logic or execution ownership to SCLite.
+
 ## 1.0.5 - Stack quality gates and typed package marker
 
 - Added `ruff` to the development quality gate and published the PEP 561

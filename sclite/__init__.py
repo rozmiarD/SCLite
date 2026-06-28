@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,
@@ -62,6 +62,14 @@ from .reactions import (
     validate_escalation_proposal,
     verify_reaction_chain_manifest,
 )
+from .triggers import (
+    TRIGGER_DECISION_SCHEMA,
+    TRIGGER_DECISION_SCHEMA_REF,
+    build_trigger_decision,
+    trigger_decision_descriptor,
+    trigger_decision_digest,
+    validate_trigger_decision,
+)
 from .scope_fidelity import (
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
@@ -117,6 +125,12 @@ __all__ = (
     'reaction_idempotency_key',
     'validate_escalation_proposal',
     'verify_reaction_chain_manifest',
+    'TRIGGER_DECISION_SCHEMA',
+    'TRIGGER_DECISION_SCHEMA_REF',
+    'build_trigger_decision',
+    'trigger_decision_descriptor',
+    'trigger_decision_digest',
+    'validate_trigger_decision',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',
