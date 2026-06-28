@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,
@@ -70,6 +70,14 @@ from .triggers import (
     trigger_decision_digest,
     validate_trigger_decision,
 )
+from .watchdog import (
+    WATCHDOG_DECISION_SCHEMA,
+    WATCHDOG_DECISION_SCHEMA_REF,
+    build_watchdog_decision,
+    validate_watchdog_decision,
+    watchdog_decision_descriptor,
+    watchdog_decision_digest,
+)
 from .scope_fidelity import (
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF,
     LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,
@@ -131,6 +139,12 @@ __all__ = (
     'trigger_decision_descriptor',
     'trigger_decision_digest',
     'validate_trigger_decision',
+    'WATCHDOG_DECISION_SCHEMA',
+    'WATCHDOG_DECISION_SCHEMA_REF',
+    'build_watchdog_decision',
+    'watchdog_decision_descriptor',
+    'watchdog_decision_digest',
+    'validate_watchdog_decision',
     'KERNEL_GUARD_PROFILE',
     'KernelGuardError',
     'build_kernel_guard_manifest',

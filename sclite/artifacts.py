@@ -36,6 +36,7 @@ SCHEMA_FILES = {
     'reaction_plan.v0.1': 'reaction_plan.v0.1.schema.json',
     'escalation_proposal.v0.1': 'escalation_proposal.v0.1.schema.json',
     'trigger_decision.v0.1': 'trigger_decision.v0.1.schema.json',
+    'watchdog_decision.v0.1': 'watchdog_decision.v0.1.schema.json',
 }
 
 

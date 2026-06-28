@@ -66,6 +66,21 @@ decisions. They record event, rule, GovEngine admission and optional child
 operation references. They do not match trigger rules, authorize planning,
 schedule work, or execute an operation.
 
+## Watchdog Decision Artifacts
+
+- `WATCHDOG_DECISION_SCHEMA`
+- `WATCHDOG_DECISION_SCHEMA_REF`
+- `build_watchdog_decision`
+- `watchdog_decision_descriptor`
+- `watchdog_decision_digest`
+- `validate_watchdog_decision`
+
+These functions define the bounded truth-layer projection for runner watchdog
+decisions. They record RExecOp runtime-supervisor observations, GovEngine
+admission and affected operation/event/inbox references. They do not supervise
+workers, authorize recovery, monitor infrastructure health, or interpret
+profile semantics.
+
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`

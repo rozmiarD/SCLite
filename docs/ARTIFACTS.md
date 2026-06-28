@@ -3,7 +3,7 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.0.6`;
+Current package: `sclite-core==1.0.7`;
 latest published public package: `sclite-core==1.0.6`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
@@ -17,11 +17,14 @@ directories out of the installed/current surface while freezing guarded
 verification contracts. The `1.0.3` line completed audit-roadmap hardening.
 The `1.0.4` line adds observation, finding, reaction-plan, escalation-proposal,
 and reaction-chain contracts without interpreting or authorizing reactions.
-The current source line adds `trigger_decision.v0.1`, a bounded truth-layer
+The `1.0.6` line adds `trigger_decision.v0.1`, a bounded truth-layer
 projection for trigger/event decisions that records event, rule, GovEngine
 admission and optional child-operation references without making SCLite a
 trigger engine, scheduler, policy authority or executor. The `1.0.5` line adds
 typed-package metadata and quality gates without changing artifact semantics.
+The `1.0.7` line adds `watchdog_decision.v0.1`, a bounded truth-layer
+projection for RExecOp runtime-supervisor decisions without making SCLite a
+worker supervisor, recovery authority, infrastructure monitor or scheduler.
 
 ## Lifecycle map
 

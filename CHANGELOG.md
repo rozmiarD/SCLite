@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.7 - Watchdog decision truth-layer artifact
+
+- Added the `watchdog_decision.v0.1` truth-layer artifact contract for bounded
+  RExecOp runtime-supervisor decisions. It records watchdog observations,
+  GovEngine admission and affected operation/event/inbox references without
+  adding worker supervision, recovery authority, infrastructure monitoring,
+  scheduler logic or execution ownership to SCLite.
+
 ## 1.0.6 - Trigger decision truth-layer artifact
 
 - Added the `trigger_decision.v0.1` truth-layer artifact contract for bounded

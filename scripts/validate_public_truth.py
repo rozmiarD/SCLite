@@ -17,8 +17,8 @@ from sclite.bundles import review_bundle  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '1.0.6'
-EXPECTED_RELEASE_LABEL = '1.0.6'
+EXPECTED_VERSION = '1.0.7'
+EXPECTED_RELEASE_LABEL = '1.0.7'
 LATEST_PUBLISHED_VERSION = '1.0.6'
 LATEST_PUBLISHED_LABEL = '1.0.6'
 EXPECTED_DISTRIBUTION = 'sclite-core'
