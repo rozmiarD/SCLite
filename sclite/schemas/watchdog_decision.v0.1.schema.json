@@ -90,6 +90,17 @@
         "execution_authority": {"const": "rexecop"}
       }
     },
+    "manual_recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_ref", "scope", "human_signoff", "reason"],
+      "properties": {
+        "actor_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+        "scope": {"type": "string", "minLength": 1, "maxLength": 256},
+        "human_signoff": {"type": "boolean"},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    },
     "non_claims": {
       "type": "array",
       "minItems": 1,

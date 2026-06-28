@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.8 - Manual watchdog recovery context
+
+- Extended `watchdog_decision.v0.1` with optional bounded
+  `manual_recovery` context for GovEngine-admitted recovery/break-glass
+  decisions. The context records actor reference, scope, human-signoff flag and
+  reason without adding recovery authority, runtime supervision or policy
+  decision ownership to SCLite.
+
 ## 1.0.7 - Watchdog decision truth-layer artifact
 
 - Added the `watchdog_decision.v0.1` truth-layer artifact contract for bounded

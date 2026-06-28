@@ -3,7 +3,7 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.0.7`;
+Current package: `sclite-core==1.0.8`;
 latest published public package: `sclite-core==1.0.6`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
@@ -25,6 +25,8 @@ typed-package metadata and quality gates without changing artifact semantics.
 The `1.0.7` line adds `watchdog_decision.v0.1`, a bounded truth-layer
 projection for RExecOp runtime-supervisor decisions without making SCLite a
 worker supervisor, recovery authority, infrastructure monitor or scheduler.
+The `1.0.8` line extends that artifact with optional bounded manual-recovery
+context for GovEngine-admitted break-glass/recovery records.
 
 ## Lifecycle map
 

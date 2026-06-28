@@ -69,6 +69,7 @@ def build_watchdog_decision(
     admission: Mapping[str, Any],
     domain_authority: str,
     affected: Mapping[str, Any] | None = None,
+    manual_recovery: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Build a bounded truth-layer projection of a runner watchdog decision.
 
@@ -101,6 +102,8 @@ def build_watchdog_decision(
             'sclite_does_not_interpret_domain_health',
         ],
     }
+    if manual_recovery is not None:
+        artifact['manual_recovery'] = _manual_recovery_ref(manual_recovery)
     _validate_watchdog_decision_semantics(artifact)
     return validate_watchdog_decision(artifact)
 
@@ -130,6 +133,16 @@ def _validate_watchdog_decision_semantics(value: Mapping[str, Any]) -> None:
     if decision in {'move_to_dead_letter', 'retry_later', 'block_autostart'}:
         if admission.get('allowed') is not True:
             raise ValueError(f'{decision} watchdog decision requires allowed admission')
+    if decision in {'renew_lease', 'mark_stale', 'escalate_operator'}:
+        if admission.get('allowed') is not True:
+            raise ValueError(f'{decision} watchdog decision requires allowed admission')
+        manual = value.get('manual_recovery')
+        if not isinstance(manual, Mapping):
+            raise ValueError(f'{decision} watchdog decision requires manual_recovery')
+        if not str(manual.get('actor_ref') or ''):
+            raise ValueError(f'{decision} watchdog decision requires actor_ref')
+        if not str(manual.get('scope') or ''):
+            raise ValueError(f'{decision} watchdog decision requires scope')
     affected = value.get('affected')
     if not isinstance(affected, Mapping):
         raise ValueError('watchdog decision requires affected object')
@@ -146,3 +159,12 @@ def _nullable_str(value: Any) -> str | None:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _manual_recovery_ref(value: Mapping[str, Any]) -> Dict[str, Any]:
+    return {
+        'actor_ref': str(value.get('actor_ref') or ''),
+        'scope': str(value.get('scope') or ''),
+        'human_signoff': bool(value.get('human_signoff', False)),
+        'reason': str(value.get('reason') or ''),
+    }

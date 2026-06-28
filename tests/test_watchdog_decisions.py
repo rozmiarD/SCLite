@@ -74,6 +74,48 @@ def test_dead_letter_watchdog_decision_requires_allowed_admission() -> None:
         )
 
 
+def test_manual_recovery_watchdog_decision_binds_actor_and_scope() -> None:
+    artifact = build_watchdog_decision(
+        decision_id='watchdog-1',
+        decision='mark_stale',
+        reason='operator_break_glass',
+        decided_at='2026-06-28T12:00:00+00:00',
+        source='rexecop.watchdog',
+        observation={**_observation(), 'observation': 'manual_recovery'},
+        admission=_admission(),
+        affected={'operation_id': 'op-1'},
+        domain_authority='runtime-fixture',
+        manual_recovery={
+            'actor_ref': 'operator:local-admin',
+            'scope': 'operation:op-1',
+            'human_signoff': True,
+            'reason': 'operator_break_glass',
+        },
+    )
+
+    assert artifact['manual_recovery'] == {
+        'actor_ref': 'operator:local-admin',
+        'scope': 'operation:op-1',
+        'human_signoff': True,
+        'reason': 'operator_break_glass',
+    }
+
+
+def test_manual_recovery_watchdog_decision_requires_manual_context() -> None:
+    with pytest.raises(ValueError, match='requires manual_recovery'):
+        build_watchdog_decision(
+            decision_id='watchdog-1',
+            decision='mark_stale',
+            reason='operator_break_glass',
+            decided_at='2026-06-28T12:00:00+00:00',
+            source='rexecop.watchdog',
+            observation={**_observation(), 'observation': 'manual_recovery'},
+            admission=_admission(),
+            affected={'operation_id': 'op-1'},
+            domain_authority='runtime-fixture',
+        )
+
+
 def test_watchdog_decision_requires_affected_reference_for_action() -> None:
     with pytest.raises(ValueError, match='requires operation_id'):
         build_watchdog_decision(
