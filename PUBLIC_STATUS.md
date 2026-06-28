@@ -10,7 +10,7 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.5` (`1.0.5`).
+- Latest published PyPI package: `sclite-core==1.0.6` (`1.0.6`).
 
 ## Current review path
 
@@ -73,6 +73,6 @@ shape without adding policy, rule interpretation, adapters, or execution.
 The `1.0.5` patch adds the typed-package marker and repository quality gates
 for downstream type checking. SCLite remains a local artifact validation and
 review package, not a policy authority or executor.
-The `1.0.6` source line adds the bounded `trigger_decision.v0.1` truth-layer
+The `1.0.6` patch adds the bounded `trigger_decision.v0.1` truth-layer
 artifact used by RExecOp trigger/event decisions without adding trigger
 planning, scheduling, policy, or execution ownership to SCLite.

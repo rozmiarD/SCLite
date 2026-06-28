@@ -27,7 +27,7 @@ SCLite must stay deliberately small. The emergence of GovEngine as a broader gov
 ## Current baseline: 1.0.6
 
 Current package: `sclite-core==1.0.6`.
-Latest published public package: `sclite-core==1.0.5`.
+Latest published public package: `sclite-core==1.0.6`.
 
 Roadmap v2 hardening from the 2026-06-14 audit was implemented in `1.0.3`.
 The `1.0.4` patch extends only the truth-layer boundary with versioned reaction
@@ -36,7 +36,7 @@ RExecOp, governance remains in GovEngine, and domain semantics remain in the
 profile.
 The `1.0.5` patch keeps that boundary unchanged and publishes only packaging
 truth: PEP 561 typing metadata plus repository quality gates.
-The `1.0.6` source line adds a narrow `trigger_decision.v0.1` truth-layer
+The `1.0.6` patch adds a narrow `trigger_decision.v0.1` truth-layer
 artifact for RExecOp trigger/event decisions. It records bounded event, rule,
 GovEngine admission and optional child-operation references; trigger matching,
 planning, policy and execution remain outside SCLite.

@@ -8,6 +8,9 @@
   trigger/event decisions. It records event, rule-set, rule, GovEngine
   admission and optional child-operation references without adding trigger
   planning, policy authority, scheduler logic or execution ownership to SCLite.
+- published `sclite-core==1.0.6` package line as a truth-layer trigger-decision
+  artifact patch without adding runtime, policy, scheduler, connector, or domain
+  ownership.
 
 ## 1.0.5 - Stack quality gates and typed package marker
 
