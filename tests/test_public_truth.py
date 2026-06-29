@@ -48,9 +48,9 @@ def test_public_truth_validator_accepts_published_stable_install_claim() -> None
         errors,
             '\n'.join([
             'Version: `1.0.8`',
-            'package-sclite--core%201.0.6-blueviolet.svg',
-            'https://pypi.org/project/sclite-core/1.0.6/',
-            'python -m pip install sclite-core==1.0.6',
+            'package-sclite--core%201.0.8-blueviolet.svg',
+            'https://pypi.org/project/sclite-core/1.0.8/',
+            'python -m pip install sclite-core==1.0.8',
         ]),
         '1.0.8',
     )
@@ -66,9 +66,11 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         errors,
         version='1.0.0',
         readme=(
-            'v1.0 stable release\n'
-            'Published current stable release\n'
-            'It is not an installed/current SCLite surface in the 1.0 stable release.\n'
+            'published 1.0 source and PyPI stable line\n'
+            '## Out of Scope\n'
+            'Runtime execution: out of scope; owned by RExecOp or another host runtime\n'
+            'GovEngine | governance, admission, policy decisions\n'
+            'RExecOp | domain-neutral lifecycle runner\n'
             'When `--guard` is provided explicitly, SCLite resolves it relative to the\n'
         ),
         roadmap=(

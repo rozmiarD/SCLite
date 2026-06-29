@@ -9,6 +9,9 @@
   decisions. The context records actor reference, scope, human-signoff flag and
   reason without adding recovery authority, runtime supervision or policy
   decision ownership to SCLite.
+- published `sclite-core==1.0.8` package line as a truth-layer
+  manual-recovery-context patch without adding runtime, policy, scheduler,
+  connector, recovery, or domain ownership.
 
 ## 1.0.7 - Watchdog decision truth-layer artifact
 

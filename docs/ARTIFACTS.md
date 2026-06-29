@@ -4,7 +4,7 @@ This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
 Current package: `sclite-core==1.0.8`;
-latest published public package: `sclite-core==1.0.6`.
+latest published public package: `sclite-core==1.0.8`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package

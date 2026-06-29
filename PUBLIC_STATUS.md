@@ -6,11 +6,11 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 - Current release version: `1.0.8`.
 - Release label: `1.0.8`.
-- Status: source stable line for the frozen lifecycle/review and guarded verification substrate; latest published PyPI remains listed below.
+- Status: published stable line for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.6` (`1.0.6`).
+- Latest published PyPI package: `sclite-core==1.0.8` (`1.0.8`).
 
 ## Current review path
 
@@ -76,3 +76,10 @@ review package, not a policy authority or executor.
 The `1.0.6` patch adds the bounded `trigger_decision.v0.1` truth-layer
 artifact used by RExecOp trigger/event decisions without adding trigger
 planning, scheduling, policy, or execution ownership to SCLite.
+The `1.0.7` patch adds the bounded `watchdog_decision.v0.1` truth-layer
+artifact for RExecOp runtime-supervisor decisions without adding worker
+supervision, recovery authority, infrastructure monitoring, scheduler logic or
+execution ownership to SCLite.
+The `1.0.8` patch extends `watchdog_decision.v0.1` with optional bounded
+manual-recovery context for GovEngine-admitted recovery/break-glass records
+without adding recovery authority or runtime supervision to SCLite.

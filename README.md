@@ -1,50 +1,50 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 1.0.6](https://img.shields.io/badge/package-sclite--core%201.0.6-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.6/)
+[![Package: sclite-core 1.0.8](https://img.shields.io/badge/package-sclite--core%201.0.8-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.8/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-Lightweight Security Contract Layer for auditable AI/security contract lifecycles.
+Lightweight Security Contract Layer for auditable operation lifecycles.
 
-
-SCLite's canonical lifecycle separates what an agent wants, what policy allows,
-what was approved, what was executed, and what can be proven. The published
-1.0 stable release freezes one review-lifecycle/review-bundle front door and lets active consumers
-materialize a canonical review bundle without adding runtime, adapter, PKI, or
-policy authority. The superseded proof-trace product path has been retired.
+SCLite's canonical lifecycle separates what an agent or caller wants, what
+policy allows, what was approved, what was executed, and what can be proven.
+It is the stack truth layer: it defines, validates, hashes, binds, redacts,
+reviews, and verifies artifacts without becoming a runtime, scheduler,
+governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
 - Version: `1.0.8`
-- Status: **published 1.0 stable release: frozen lifecycle/review and guarded verification surface**
-- Latest published package: `sclite-core==1.0.6`
-- Runtime execution: not included
-- Protocol/carrier adapters: not included
+- Status: **published 1.0 source and PyPI stable line: frozen lifecycle/review and guarded verification surface**
+- Latest published PyPI package: `sclite-core==1.0.8`
+- Runtime execution: out of scope; owned by RExecOp or another host runtime
+- Protocol/carrier adapters: out of scope; owned by host/runtime integrations
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
-- Identity/PKI: not included in core
+- Identity/PKI: out of scope for core; owned by the host/governance trust domain
 
-SCLite's core is a **contract/review lifecycle**, not an execution engine. Runtimes such as Ravenclaw can consume SCLite artifacts and enforce tickets, but executors, sandboxes, policy engines, raw evidence storage, agent loops, and carrier adapters stay outside this package.
+SCLite's core is a **contract/review lifecycle**, not an execution engine.
+Runtimes such as RExecOp can consume SCLite artifacts and enforce tickets, but
+executors, sandboxes, policy engines, raw evidence storage, agent loops, and
+carrier adapters stay outside this package.
 
 ## Project sentence
 
 > SCLite separates what an agent wants, what policy allows, what was approved, what was executed, and what can be proven.
 
-## Version surface map
+## Stack position
 
-| Surface | Role | Current status |
-| --- | --- | --- |
-| legacy proof trace | Superseded public-safe proof fixtures and validation receipts | Retired from the installed/current surface in published 0.8 alpha |
-| v0.2 lifecycle | Canonical intent → policy → contract → ticket → receipt → evidence chain | Canonical lifecycle model |
-| v0.3 scoped tickets | Runtime-consumable ticket semantics and receipt-bounded evidence checks | Available via `validate-ticket`, `explain-ticket`, `verify-ticket-use` |
-| v0.4 references/review records | Digest-bound trust/carrier references and lifecycle review records | Available via profile validators and `review-lifecycle` |
-| v0.5 review bundles | Packaged lifecycle artifacts plus reviewer Markdown and verification receipt | Current frozen review surface |
-| v0.6 alpha substrate | Public truth gate plus GovEngine and local-admin/Tecrax-style fixtures | Delivered predecessor fixture substrate |
-| v0.7 alpha surface collapse | Curated lifecycle/review-bundle root API plus materialization for active consumers | Delivered migration baseline |
-| v0.8 alpha legacy retirement | Removes the superseded proof-trace product path after consumer migration | Published predecessor baseline |
-| v0.8 beta surface freeze | Freezes the lifecycle/review front door with retained contract identifiers | Published predecessor beta line |
-| v1.0 stable release | Freezes security profiles, Kernel Guard golden vectors, security regression gate, verifier-result contract, developer gate, and top-level public API | Published current stable release |
+| Layer | Ownership |
+| --- | --- |
+| SCLite | truth, contracts, evidence metadata, receipts, review bundles, digest binding, validation |
+| GovEngine | governance, admission, policy decisions, obligations, constraints, enforcement planning |
+| RExecOp | domain-neutral lifecycle runner, execution mechanics, connectors, reactions, scheduling, event intake |
+| Tecrax and other profiles | domain semantics, intent catalogs, workflow definitions, finding taxonomy, runbooks |
+
+Detailed package/surface history lives in [`ROADMAP.md`](ROADMAP.md) and
+[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md). Schema-version compatibility lives in
+[`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md).
 
 ## What problem does SCLite solve?
 
@@ -191,22 +191,18 @@ flowchart TB
     Profiles --> Integrity
 ```
 
-## What SCLite is not
+## Out of Scope
 
-SCLite is not:
+SCLite intentionally does not own:
 
-- a security scanner;
-- an executor;
-- a sandbox;
-- a full policy engine;
-- an approval authority by itself;
-- an agent loop;
-- a tool wrapper package for `nmap`, `ffuf`, etc.;
-- an MCP/OpenClaw/A2A protocol replacement;
-- a proof of legal authorization;
-- a proof of live vulnerability evidence;
-- a proof of signer identity or PKI trust;
-- a tamper-proof transparency log.
+| Capability | Owner |
+| --- | --- |
+| Execution, subprocess handling, connectors, scheduler/event intake, reaction loop | RExecOp or another host runtime |
+| Governance, admission, policy decisions, obligations, constraints, human sign-off gates | GovEngine |
+| Infrastructure/security/business semantics, findings, runbooks, target taxonomy | Tecrax, Ravenclaw, or another domain profile |
+| Raw evidence storage, secret storage, replay store, operational logs | Host/operator infrastructure |
+| Signer identity, PKI trust, KMS, transparency log guarantees | Host/governance trust domain |
+| Legal authorization or proof of live vulnerability evidence | Operator/governance process |
 
 Execution, raw evidence storage, and concrete trust verification belong to the
 host runtime. Governance and admission belong to GovEngine:
@@ -234,16 +230,11 @@ flowchart LR
 ## Retired proof-trace path
 
 The older public-safe proof trace was a migration source during alpha
-development:
-
-```text
-scope/input -> policy decision -> prepared execution spec -> approved execution spec -> dry-run execution receipt -> evidence summary
-```
-
-It is not an installed/current SCLite surface in the 1.0 stable release. Ravenclaw
-has moved its public proof projection to the current lifecycle/review-bundle
-model; retained schema identifiers such as `review_record.v0.1` identify
-current formats and are not compatibility product lines.
+development. It is out of scope for the installed/current SCLite surface.
+Ravenclaw moved its public proof projection to the current
+lifecycle/review-bundle model; retained schema identifiers such as
+`review_record.v0.1` identify current formats and are not compatibility product
+lines.
 
 See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions,
 integrity chain, compatibility notes, and explicit security boundaries. See
@@ -279,7 +270,7 @@ and replay/non-claim boundaries for the 1.0 release line.
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==1.0.6
+python -m pip install sclite-core==1.0.8
 ```
 
 Install directly from GitHub:

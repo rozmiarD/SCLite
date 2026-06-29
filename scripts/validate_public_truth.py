@@ -19,8 +19,8 @@ from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 EXPECTED_VERSION = '1.0.8'
 EXPECTED_RELEASE_LABEL = '1.0.8'
-LATEST_PUBLISHED_VERSION = '1.0.6'
-LATEST_PUBLISHED_LABEL = '1.0.6'
+LATEST_PUBLISHED_VERSION = '1.0.8'
+LATEST_PUBLISHED_LABEL = '1.0.8'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
 EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.5,<1.1'
@@ -157,9 +157,11 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'v1.0 stable release')
-    _require(errors, 'README.md', readme, 'Published current stable release')
-    _require(errors, 'README.md', readme, 'It is not an installed/current SCLite surface in the 1.0 stable release.')
+    _require(errors, 'README.md', readme, 'published 1.0 source and PyPI stable line')
+    _require(errors, 'README.md', readme, '## Out of Scope')
+    _require(errors, 'README.md', readme, 'Runtime execution: out of scope; owned by RExecOp or another host runtime')
+    _require(errors, 'README.md', readme, 'GovEngine | governance, admission, policy decisions')
+    _require(errors, 'README.md', readme, 'RExecOp | domain-neutral lifecycle runner')
     _require(errors, 'README.md', readme, 'When `--guard` is provided explicitly, SCLite resolves it relative to the')
     _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are resolved relative to the caller')
     _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
@@ -402,7 +404,7 @@ def collect_errors() -> list[str]:
     )
     _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'published 1.0 stable release')
+    _require(errors, 'README.md', readme, 'published 1.0 source and PyPI stable line')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
