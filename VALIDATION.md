@@ -73,9 +73,9 @@ fail-safe path.
 
 Schema-version compatibility is documented in
 `docs/SCHEMA_COMPATIBILITY.md`. That matrix keeps v0.2 lifecycle, v0.3 scoped
-ticket, receipt/evidence compatibility fallback, review-bundle, and
-`verification_result.v1` support explicit without turning unknown fields or
-artifact IDs into authority.
+ticket, receipt/evidence compatibility fallback, reaction, trigger, watchdog,
+review-bundle, and `verification_result.v1` support explicit without turning
+unknown fields or artifact IDs into authority.
 
 Receipt-bounded evidence validation treats structured claim fields as
 authoritative and keeps legacy text markers as a conservative compatibility
@@ -154,6 +154,7 @@ python -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/r
 python -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
 python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
 python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m pytest -q tests/test_reactions.py tests/test_trigger_decisions.py tests/test_watchdog_decisions.py
 python -m pytest -q
 ```
 

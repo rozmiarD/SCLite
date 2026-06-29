@@ -100,6 +100,33 @@ A governed runtime can use SCLite like this:
 
 The superseded proof-trace product path (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, legacy receipt/evidence builders, and fixture validation CLI) is retired after consumer migration; it is not an installed/current surface claim.
 
+## Automation truth artifacts
+
+Runtimes that implement deterministic automation can use SCLite to record the
+chain without moving ownership into SCLite:
+
+```text
+observation -> finding -> reaction_plan -> optional execution_receipt
+event -> trigger_decision -> optional child operation
+watchdog observation -> watchdog_decision -> optional affected operation/inbox item
+```
+
+Ownership stays split:
+
+- profiles own observation facts, finding taxonomy, thresholds, and domain
+  runbook semantics;
+- RExecOp owns trigger matching, reaction interpretation, scheduling/event
+  intake, watchdog supervision, child-operation planning, and execution;
+- GovEngine owns admission, policy decisions, obligations, constraints, and
+  recovery or break-glass approval;
+- SCLite owns schema validation, descriptor binding, reaction-chain
+  verification, trigger/watchdog decision records, and reviewable non-claims.
+
+An LLM or other advisory lane may produce an `escalation_proposal.v0.1`, but
+that proposal is untrusted. It must not contain executable commands or secrets,
+and it cannot bypass profile validation, GovEngine admission, or RExecOp
+execution mechanics.
+
 ## Minimal Python integration
 
 Verify a v0.2 lifecycle bundle:
@@ -181,6 +208,12 @@ A carrier-agnostic engine that consumes SCLite could expose endpoints such as:
 - `POST /redaction/receipt` -> `RedactionReceipt`
 - `POST /public/validation-surface-index` -> `PublicValidationSurfaceIndex`
 - `POST /public/snapshot-manifest` -> `PublicSnapshotManifest`
+- `POST /automation/observation` -> `ObservationEnvelope`
+- `POST /automation/finding` -> `Finding`
+- `POST /automation/reaction-plan` -> `ReactionPlan`
+- `POST /automation/escalation-proposal` -> `EscalationProposal`
+- `POST /automation/trigger-decision` -> `TriggerDecision`
+- `POST /automation/watchdog-decision` -> `WatchdogDecision`
 
 Those endpoints are not implemented in this repository. They are an integration direction for a separate engine package or runtime.
 

@@ -77,9 +77,10 @@ schedule work, or execute an operation.
 
 These functions define the bounded truth-layer projection for runner watchdog
 decisions. They record RExecOp runtime-supervisor observations, GovEngine
-admission and affected operation/event/inbox references. They do not supervise
-workers, authorize recovery, monitor infrastructure health, or interpret
-profile semantics.
+admission, affected operation/event/inbox references, and optional bounded
+manual-recovery context for GovEngine-admitted recovery or break-glass records.
+They do not supervise workers, run retries, authorize recovery, monitor
+infrastructure health, or interpret profile semantics.
 
 ## Kernel Guard And Secure Bundles
 

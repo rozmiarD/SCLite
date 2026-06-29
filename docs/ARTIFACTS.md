@@ -144,6 +144,67 @@ GovEngine/KERNEL secret domain. It binds existing manifest entries and manifest
 metadata without changing artifact bodies. It is not public PKI and does not
 handle replay without an external replay store.
 
+## Reaction evidence artifacts
+
+The `1.0.4` line added the reaction evidence boundary for deterministic
+automation:
+
+| Artifact | Schema | Owner of semantics |
+| --- | --- | --- |
+| `ObservationEnvelope` | `observation_envelope.v0.1` | profile/runtime observation facts |
+| `Finding` | `finding.v0.1` | profile taxonomy and severity semantics |
+| `ReactionPlan` | `reaction_plan.v0.1` | RExecOp deterministic reaction planning plus GovEngine admission result |
+| `EscalationProposal` | `escalation_proposal.v0.1` | untrusted advisory proposal only |
+
+SCLite validates and binds these artifacts by canonical descriptors. The
+reaction chain verifier accepts:
+
+```text
+observation -> finding -> reaction_plan
+observation -> finding -> reaction_plan -> execution_receipt
+```
+
+It checks that finding and reaction-plan links bind to the expected artifact
+descriptors. It does not interpret profile reaction rules, choose child
+operations, authorize policy, call an LLM, or execute a remediation.
+
+## Trigger decision artifacts
+
+The `1.0.6` line added `trigger_decision.v0.1` for event/trigger decisions.
+The artifact records:
+
+- event reference and payload digest;
+- rule-set and optional rule references;
+- GovEngine admission digest/outcome;
+- decision such as `plan_operation`, `ignore`, `escalate`,
+  `drop_duplicate`, or `cooldown_blocked`;
+- optional child operation reference for admitted `plan_operation` decisions.
+
+SCLite enforces only the bounded truth shape. A `plan_operation` decision must
+carry an allowed admission and an operation reference; non-planning decisions
+cannot carry an operation reference. Event matching, dedupe, cooldown,
+scheduling, and child-operation creation remain RExecOp responsibilities.
+
+## Watchdog decision artifacts
+
+The `1.0.7` line added `watchdog_decision.v0.1`, and `1.0.8` extended it with
+optional `manual_recovery` context. The artifact records:
+
+- watchdog observation reference and digest;
+- GovEngine admission digest/outcome;
+- affected operation, event, trigger, or inbox item reference;
+- decision such as `record_health`, `renew_lease`, `mark_stale`,
+  `move_to_dead_letter`, `retry_later`, `escalate_operator`, or
+  `block_autostart`;
+- optional manual recovery actor/scope/signoff context for admitted recovery
+  or break-glass records.
+
+SCLite enforces the local record shape and non-claims. Recovery decisions that
+change operation handling require allowed GovEngine admission, and selected
+manual paths require bounded manual-recovery context. SCLite still does not
+supervise workers, run retries, authorize recovery, interpret infrastructure
+health, or execute operations.
+
 ## Artifact hash descriptor
 
 SCLite can emit a deterministic SHA-256 descriptor for any JSON-compatible artifact:
