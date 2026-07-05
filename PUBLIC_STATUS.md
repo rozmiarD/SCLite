@@ -4,13 +4,13 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.8`.
-- Release label: `1.0.8`.
+- Current release version: `1.0.9`.
+- Release label: `1.0.9`.
 - Status: published stable line for the frozen lifecycle/review and guarded verification substrate.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.8` (`1.0.8`).
+- Latest published PyPI package: `sclite-core==1.0.9` (`1.0.9`).
 
 ## Current review path
 
@@ -83,3 +83,6 @@ execution ownership to SCLite.
 The `1.0.8` patch extends `watchdog_decision.v0.1` with optional bounded
 manual-recovery context for GovEngine-admitted recovery/break-glass records
 without adding recovery authority or runtime supervision to SCLite.
+The `1.0.9` patch adds `automation_chain.v0.1` for bounded multi-step
+automation-chain truth artifacts without adding traversal, scheduling, policy,
+runtime or domain ownership to SCLite.

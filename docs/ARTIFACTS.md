@@ -3,8 +3,8 @@
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.0.8`;
-latest published public package: `sclite-core==1.0.8`.
+Current package: `sclite-core==1.0.9`;
+latest published public package: `sclite-core==1.0.9`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
@@ -27,7 +27,7 @@ projection for RExecOp runtime-supervisor decisions without making SCLite a
 worker supervisor, recovery authority, infrastructure monitor or scheduler.
 The `1.0.8` line extends that artifact with optional bounded manual-recovery
 context for GovEngine-admitted break-glass/recovery records.
-The next source line adds `automation_chain.v0.1` as the multi-step
+The `1.0.9` line adds `automation_chain.v0.1` as the multi-step
 automation-chain contract baseline: nodes, edges, GovEngine admission refs,
 edge idempotency, depth/reaction budgets, recovery policy and LLM
 proposal-only invariants, without making SCLite a traversal engine, scheduler,

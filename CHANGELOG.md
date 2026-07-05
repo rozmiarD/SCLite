@@ -2,11 +2,16 @@
 
 ## Unreleased
 
+## 1.0.9 - Automation chain truth-layer artifact
+
 - Added `automation_chain.v0.1` as the SCLite-owned multi-step automation-chain
   contract baseline, with public builders, schema validation, invariant
   verification, digest helper and tests for depth/reaction budgets, edge
   idempotency, GovEngine child admission, recovery policy and LLM proposal-only
   boundaries.
+- published `sclite-core==1.0.9` package line as a truth-layer
+  automation-chain artifact patch without adding runtime, policy, scheduler,
+  connector, traversal, recovery, or domain ownership.
 
 ## 1.0.8 - Manual watchdog recovery context
 

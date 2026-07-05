@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 1.0.8](https://img.shields.io/badge/package-sclite--core%201.0.8-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.8/)
+[![Package: sclite-core 1.0.9](https://img.shields.io/badge/package-sclite--core%201.0.9-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.9/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -16,9 +16,9 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `1.0.8`
+- Version: `1.0.9`
 - Status: **published 1.0 source and PyPI stable line: frozen lifecycle/review and guarded verification surface**
-- Latest published PyPI package: `sclite-core==1.0.8`
+- Latest published PyPI package: `sclite-core==1.0.9`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -279,7 +279,7 @@ and replay/non-claim boundaries for the 1.0 release line.
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==1.0.8
+python -m pip install sclite-core==1.0.9
 ```
 
 Install directly from GitHub:
