@@ -82,6 +82,25 @@ manual-recovery context for GovEngine-admitted recovery or break-glass records.
 They do not supervise workers, run retries, authorize recovery, monitor
 infrastructure health, or interpret profile semantics.
 
+## Automation Chain Artifacts
+
+- `AUTOMATION_CHAIN_ARTIFACT_TYPE`
+- `AUTOMATION_CHAIN_NON_CLAIMS`
+- `AUTOMATION_CHAIN_SCHEMA`
+- `AUTOMATION_CHAIN_SCHEMA_REF`
+- `automation_chain_digest`
+- `automation_edge`
+- `automation_node`
+- `build_automation_chain`
+- `validate_automation_chain`
+- `verify_automation_chain`
+
+These functions define and verify the bounded multi-step automation-chain
+contract. The contract records nodes, edges, GovEngine admission refs,
+idempotency keys, recovery policy, depth/reaction budgets and LLM non-authority
+without executing operations, interpreting profile rules, or authorizing child
+operations.
+
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`

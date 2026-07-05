@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added `automation_chain.v0.1` as the SCLite-owned multi-step automation-chain
+  contract baseline, with public builders, schema validation, invariant
+  verification, digest helper and tests for depth/reaction budgets, edge
+  idempotency, GovEngine child admission, recovery policy and LLM proposal-only
+  boundaries.
+
 ## 1.0.8 - Manual watchdog recovery context
 
 - Extended `watchdog_decision.v0.1` with optional bounded

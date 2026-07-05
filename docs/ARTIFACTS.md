@@ -27,6 +27,11 @@ projection for RExecOp runtime-supervisor decisions without making SCLite a
 worker supervisor, recovery authority, infrastructure monitor or scheduler.
 The `1.0.8` line extends that artifact with optional bounded manual-recovery
 context for GovEngine-admitted break-glass/recovery records.
+The next source line adds `automation_chain.v0.1` as the multi-step
+automation-chain contract baseline: nodes, edges, GovEngine admission refs,
+edge idempotency, depth/reaction budgets, recovery policy and LLM
+proposal-only invariants, without making SCLite a traversal engine, scheduler,
+policy authority, runtime or raw-evidence store.
 
 ## Lifecycle map
 

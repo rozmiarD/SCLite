@@ -89,6 +89,15 @@ Current v0.2 artifacts:
 | `EvidenceContract` | Captures public-safe claims, non-claims, replay, verification, and evidence links. |
 | `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. |
 
+SCLite also defines bounded decision-chain artifacts used by host runtimes:
+`observation_envelope.v0.1`, `finding.v0.1`, `reaction_plan.v0.1`,
+`trigger_decision.v0.1`, `watchdog_decision.v0.1` and
+`automation_chain.v0.1`. `automation_chain.v0.1` is the multi-step automation
+contract baseline: it records nodes, edges, GovEngine admission refs,
+idempotency keys, depth/reaction budgets, recovery policy and LLM
+proposal-only invariants. It does not traverse the graph, schedule work,
+authorize child operations or execute anything.
+
 Verify the lifecycle fixture:
 
 ```bash
