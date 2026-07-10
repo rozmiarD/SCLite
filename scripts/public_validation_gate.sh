@@ -30,7 +30,8 @@ if "${PYTHON_BIN}" -m sclite.cli review examples/bad-review-bundle-cross-host --
   echo 'bad review bundle unexpectedly passed --fail-on review' >&2
   exit 1
 fi
-"${PYTHON_BIN}" -m sclite.cli export-review-bundle examples/govengine-integration --format markdown >/dev/null
+"${PYTHON_BIN}" -m sclite.cli export-review-bundle examples/govengine-integration \
+  --mode local_review --format markdown >/dev/null
 "${PYTHON_BIN}" -m sclite.cli validate-artifact --schema review_record.v0.1 examples/govengine-integration/verification_receipt.json
 "${PYTHON_BIN}" -m sclite.cli validate-artifact --schema review_record.v0.1 examples/local-admin-change/verification_receipt.json
 "${PYTHON_BIN}" -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json

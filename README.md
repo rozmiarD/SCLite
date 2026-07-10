@@ -191,6 +191,13 @@ It provides:
 - redaction/public-snapshot helper artifacts;
 - a CLI for local validation and review fixtures.
 
+Review-bundle inspection and publication use separate modes. `review` keeps
+`local_review` compatibility and reports the complete recursive inventory.
+`export-review-bundle` defaults to fail-closed `public_export`, which rejects
+unrecognized files, nested directories, symlinks and special files. Programmatic
+materialization stages and verifies a complete bundle before publishing it by
+rename; replacing an existing target requires explicit `overwrite=True`.
+
 The package stays centered on local validation, review, profile references, and integrity checks:
 
 ```mermaid

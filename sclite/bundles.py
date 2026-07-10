@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import tempfile
+import uuid
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Literal, Mapping
 
 from ._json import VerificationLimits, load_json_object
 from .integrity import build_artifact_chain_manifest
@@ -24,6 +28,8 @@ REVIEW_BUNDLE_SIDECAR_FILES = {
     'review_markdown': REVIEW_BUNDLE_MARKDOWN_FILE,
     'verification_receipt': REVIEW_BUNDLE_RECEIPT_FILE,
 }
+ReviewBundleMode = Literal['public_export', 'local_review']
+REVIEW_BUNDLE_PUBLIC_OPTIONAL_FILES = frozenset({'README.md'})
 
 
 class ReviewBundleError(ValueError):
@@ -52,13 +58,70 @@ def _assert_inside(base: Path, path: Path) -> None:
         raise ReviewBundleError(f'{path}: path escapes review bundle') from exc
 
 
+def _recursive_inventory(base: Path) -> Dict[str, list[str]]:
+    inventory: Dict[str, list[str]] = {
+        'files': [],
+        'directories': [],
+        'symlinks': [],
+        'special_files': [],
+    }
+    pending = [base]
+    try:
+        while pending:
+            current = pending.pop()
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    path = Path(entry.path)
+                    relative = path.relative_to(base).as_posix()
+                    if entry.is_symlink():
+                        inventory['symlinks'].append(relative)
+                    elif entry.is_file(follow_symlinks=False):
+                        inventory['files'].append(relative)
+                    elif entry.is_dir(follow_symlinks=False):
+                        inventory['directories'].append(relative)
+                        pending.append(path)
+                    else:
+                        inventory['special_files'].append(relative)
+    except OSError as exc:
+        raise ReviewBundleError(f'{base}: cannot inventory review bundle: {exc}') from exc
+    for values in inventory.values():
+        values.sort()
+    return inventory
+
+
+def _public_inventory_errors(inventory: Mapping[str, list[str]]) -> list[str]:
+    required_files = {
+        *REVIEW_BUNDLE_REQUIRED_FILES.values(),
+        REVIEW_BUNDLE_MANIFEST_FILE,
+        *REVIEW_BUNDLE_SIDECAR_FILES.values(),
+    }
+    allowed_files = required_files | set(REVIEW_BUNDLE_PUBLIC_OPTIONAL_FILES)
+    extras = sorted(set(inventory['files']) - allowed_files)
+    errors = []
+    if extras:
+        errors.append('extras=' + ','.join(extras))
+    for category in ('directories', 'symlinks', 'special_files'):
+        if inventory[category]:
+            errors.append(category + '=' + ','.join(inventory[category]))
+    return errors
+
+
 def validate_review_bundle_shape(
     bundle_dir: Path | str,
     *,
+    mode: ReviewBundleMode = 'local_review',
     verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Validate canonical review-bundle file placement without running tools."""
+    if mode not in {'public_export', 'local_review'}:
+        raise ReviewBundleError(f'unsupported review bundle mode: {mode}')
     base = _bundle_path(bundle_dir)
+    inventory = _recursive_inventory(base)
+    public_inventory_errors = _public_inventory_errors(inventory)
+    if mode == 'public_export' and public_inventory_errors:
+        raise ReviewBundleError(
+            'public export inventory is not closed-world: ' + '; '.join(public_inventory_errors)
+        )
     missing = []
     files: Dict[str, str] = {}
     for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items():
@@ -93,9 +156,22 @@ def validate_review_bundle_shape(
         raise ReviewBundleError('manifest paths do not match canonical review bundle shape: ' + '; '.join(path_errors))
     return {
         'status': 'passed',
+        'mode': mode,
         'bundle_dir': str(base),
         'files': files,
         'manifest': REVIEW_BUNDLE_MANIFEST_FILE,
+        'inventory': {
+            **inventory,
+            'extras': sorted(
+                set(inventory['files'])
+                - {
+                    *REVIEW_BUNDLE_REQUIRED_FILES.values(),
+                    REVIEW_BUNDLE_MANIFEST_FILE,
+                    *REVIEW_BUNDLE_SIDECAR_FILES.values(),
+                    *REVIEW_BUNDLE_PUBLIC_OPTIONAL_FILES,
+                }
+            ),
+        },
     }
 
 
@@ -112,11 +188,16 @@ def review_bundle(
     *,
     strict_jsonschema: bool = False,
     generated_at: str | None = None,
+    mode: ReviewBundleMode = 'local_review',
     verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Review a canonical SCLite review bundle and return a ReviewRecord."""
     base = _bundle_path(bundle_dir)
-    shape = validate_review_bundle_shape(base, verification_limits=verification_limits)
+    shape = validate_review_bundle_shape(
+        base,
+        mode=mode,
+        verification_limits=verification_limits,
+    )
     try:
         record = build_review_record_from_manifest(
             base / REVIEW_BUNDLE_MANIFEST_FILE,
@@ -130,6 +211,51 @@ def review_bundle(
     return _as_bundle_review_record(record, shape['files'])
 
 
+def _write_text_fsynced(path: Path, payload: str) -> None:
+    with path.open('w', encoding='utf-8', newline='') as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _fsync_directory(path: Path) -> None:
+    flags = os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0)
+    descriptor = os.open(path, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _publish_stage(stage: Path, target: Path, *, overwrite: bool) -> None:
+    if target.is_symlink():
+        raise ReviewBundleError(f'{target}: refusing to replace symlink target')
+    if target.exists() and not target.is_dir():
+        raise ReviewBundleError(f'{target}: target exists and is not a directory')
+    if target.exists() and not overwrite:
+        raise ReviewBundleError(f'{target}: target exists; pass overwrite=True to replace it')
+
+    backup: Path | None = None
+    if target.exists():
+        backup = target.parent / f'.{target.name}.previous-{uuid.uuid4().hex}'
+        os.rename(target, backup)
+    try:
+        os.rename(stage, target)
+    except OSError as exc:
+        if backup is not None and backup.exists() and not target.exists():
+            os.rename(backup, target)
+        raise ReviewBundleError(f'{target}: atomic publish failed: {exc}') from exc
+
+    _fsync_directory(target.parent)
+    if backup is not None:
+        try:
+            shutil.rmtree(backup)
+        except OSError as exc:
+            raise ReviewBundleError(
+                f'{target}: published successfully but previous target cleanup failed: {exc}'
+            ) from exc
+
+
 def materialize_review_bundle(
     bundle_dir: Path | str,
     artifacts_by_role: Mapping[str, Mapping[str, Any]],
@@ -138,6 +264,9 @@ def materialize_review_bundle(
     created_at: str | None = None,
     generated_at: str | None = None,
     strict_jsonschema: bool = False,
+    mode: ReviewBundleMode = 'public_export',
+    overwrite: bool = False,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Write and review a canonical local bundle from lifecycle artifacts.
 
@@ -148,46 +277,63 @@ def materialize_review_bundle(
     if missing:
         raise ReviewBundleError('missing lifecycle artifacts for review bundle: ' + ', '.join(missing))
 
+    if mode not in {'public_export', 'local_review'}:
+        raise ReviewBundleError(f'unsupported review bundle mode: {mode}')
     base = Path(bundle_dir).resolve()
-    base.mkdir(parents=True, exist_ok=True)
-    manifest_inputs: list[Dict[str, Any]] = []
-    for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items():
-        artifact = artifacts_by_role[role]
-        if not isinstance(artifact, Mapping):
-            raise ReviewBundleError(f'{role}: lifecycle artifact is not an object')
-        path = base / filename
-        _assert_inside(base, path)
-        value = dict(artifact)
-        path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-        manifest_inputs.append({'role': role, 'path': filename, 'value': value})
-
-    manifest = build_artifact_chain_manifest(
-        manifest_inputs,
-        chain_id=chain_id,
-        **({'created_at': created_at} if created_at else {}),
-    )
-    (base / REVIEW_BUNDLE_MANIFEST_FILE).write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + '\n',
-        encoding='utf-8',
-    )
+    base.parent.mkdir(parents=True, exist_ok=True)
+    if base.is_symlink():
+        raise ReviewBundleError(f'{base}: refusing to materialize through symlink target')
+    if base.exists() and not overwrite:
+        raise ReviewBundleError(f'{base}: target exists; pass overwrite=True to replace it')
+    stage = Path(tempfile.mkdtemp(prefix=f'.{base.name}.stage-', dir=base.parent))
     try:
+        manifest_inputs: list[Dict[str, Any]] = []
+        for role, filename in REVIEW_BUNDLE_REQUIRED_FILES.items():
+            artifact = artifacts_by_role[role]
+            if not isinstance(artifact, Mapping):
+                raise ReviewBundleError(f'{role}: lifecycle artifact is not an object')
+            path = stage / filename
+            _assert_inside(stage, path)
+            value = dict(artifact)
+            _write_text_fsynced(path, json.dumps(value, indent=2, sort_keys=True) + '\n')
+            manifest_inputs.append({'role': role, 'path': filename, 'value': value})
+
+        manifest = build_artifact_chain_manifest(
+            manifest_inputs,
+            chain_id=chain_id,
+            **({'created_at': created_at} if created_at else {}),
+        )
+        _write_text_fsynced(
+            stage / REVIEW_BUNDLE_MANIFEST_FILE,
+            json.dumps(manifest, indent=2, sort_keys=True) + '\n',
+        )
         record = build_review_record_from_manifest(
-            base / REVIEW_BUNDLE_MANIFEST_FILE,
-            root=base,
+            stage / REVIEW_BUNDLE_MANIFEST_FILE,
+            root=stage,
             strict_jsonschema=strict_jsonschema,
             generated_at=generated_at,
+            verification_limits=verification_limits,
         )
+        files = {**REVIEW_BUNDLE_REQUIRED_FILES, **REVIEW_BUNDLE_SIDECAR_FILES}
+        record = _as_bundle_review_record(record, files)
+        _write_text_fsynced(
+            stage / REVIEW_BUNDLE_RECEIPT_FILE,
+            json.dumps(record, indent=2, sort_keys=True) + '\n',
+        )
+        _write_text_fsynced(stage / REVIEW_BUNDLE_MARKDOWN_FILE, review_record_markdown(record))
+        validate_review_bundle_shape(
+            stage,
+            mode=mode,
+            verification_limits=verification_limits,
+        )
+        _fsync_directory(stage)
+        _publish_stage(stage, base, overwrite=overwrite)
+        return record
     except ReviewRecordError as exc:
         raise ReviewBundleError(str(exc)) from exc
-    files = {**REVIEW_BUNDLE_REQUIRED_FILES, **REVIEW_BUNDLE_SIDECAR_FILES}
-    record = _as_bundle_review_record(record, files)
-    (base / REVIEW_BUNDLE_RECEIPT_FILE).write_text(
-        json.dumps(record, indent=2, sort_keys=True) + '\n',
-        encoding='utf-8',
-    )
-    (base / REVIEW_BUNDLE_MARKDOWN_FILE).write_text(review_record_markdown(record), encoding='utf-8')
-    validate_review_bundle_shape(base)
-    return record
+    finally:
+        if stage.exists():
+            shutil.rmtree(stage, ignore_errors=True)
 
 
 def export_review_bundle_markdown(record: Mapping[str, Any]) -> str:

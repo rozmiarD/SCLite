@@ -35,6 +35,13 @@ duplicate object keys and non-standard `NaN`/`Infinity` numbers.
 - `review_bundle_summary`
 - `validate_review_bundle_shape`
 
+`review_bundle()` and `validate_review_bundle_shape()` accept
+`mode="local_review"` for diagnostic review or `mode="public_export"` for a
+closed-world inventory check. `materialize_review_bundle()` defaults to
+`public_export`, writes into a same-parent staged directory, verifies and
+fsyncs it, and publishes by rename. It never replaces an existing directory
+unless the caller explicitly passes `overwrite=True`.
+
 ## Artifact Chain
 
 - `CHAIN_CANONICALIZATION_VERSION`

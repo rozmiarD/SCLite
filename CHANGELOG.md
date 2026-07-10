@@ -4,6 +4,14 @@
 
 ## 1.1.0rc1 - Strict JSON input policy candidate
 
+- Adds closed-world `public_export` inventory for review bundles: unexpected,
+  hidden, nested, case/Unicode-variant, symlink and special-file entries fail
+  before export, while `local_review` reports inventory without claiming it is
+  publication-safe.
+- Materializes bundles through a same-parent stage, verifies and fsyncs the
+  complete staged tree, then publishes by rename. Existing targets require an
+  explicit `overwrite=True`, and failed replacement rolls the previous target
+  back instead of leaving mixed contents.
 - Adds the public `VerificationLimits` policy with finite per-file, aggregate,
   nesting, node-count and manifest-entry budgets.
 - Routes production JSON file, inline, schema, manifest, Guard, review and
