@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
-from ._json import load_json_object
+from ._json import VerificationLimits, load_json_object
 from .integrity import build_artifact_chain_manifest
 from .json_types import json_mapping
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
@@ -30,8 +30,12 @@ class ReviewBundleError(ValueError):
     """Raised when a review bundle is missing canonical files or fails review."""
 
 
-def _load_json_object(path: Path) -> Dict[str, Any]:
-    return load_json_object(path, error_cls=ReviewBundleError)
+def _load_json_object(
+    path: Path,
+    *,
+    verification_limits: VerificationLimits | None = None,
+) -> Dict[str, Any]:
+    return load_json_object(path, error_cls=ReviewBundleError, limits=verification_limits)
 
 
 def _bundle_path(bundle_dir: Path | str) -> Path:
@@ -48,7 +52,11 @@ def _assert_inside(base: Path, path: Path) -> None:
         raise ReviewBundleError(f'{path}: path escapes review bundle') from exc
 
 
-def validate_review_bundle_shape(bundle_dir: Path | str) -> Dict[str, Any]:
+def validate_review_bundle_shape(
+    bundle_dir: Path | str,
+    *,
+    verification_limits: VerificationLimits | None = None,
+) -> Dict[str, Any]:
     """Validate canonical review-bundle file placement without running tools."""
     base = _bundle_path(bundle_dir)
     missing = []
@@ -72,7 +80,7 @@ def validate_review_bundle_shape(bundle_dir: Path | str) -> Dict[str, Any]:
     if missing:
         raise ReviewBundleError('missing review bundle files: ' + ', '.join(missing))
 
-    manifest = _load_json_object(manifest_path)
+    manifest = _load_json_object(manifest_path, verification_limits=verification_limits)
     entries = manifest.get('entries')
     if not isinstance(entries, list):
         raise ReviewBundleError('artifact_chain_manifest.json has no entries array')
@@ -104,16 +112,18 @@ def review_bundle(
     *,
     strict_jsonschema: bool = False,
     generated_at: str | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Review a canonical SCLite review bundle and return a ReviewRecord."""
     base = _bundle_path(bundle_dir)
-    shape = validate_review_bundle_shape(base)
+    shape = validate_review_bundle_shape(base, verification_limits=verification_limits)
     try:
         record = build_review_record_from_manifest(
             base / REVIEW_BUNDLE_MANIFEST_FILE,
             root=base,
             strict_jsonschema=strict_jsonschema,
             generated_at=generated_at,
+            verification_limits=verification_limits,
         )
     except ReviewRecordError as exc:
         raise ReviewBundleError(str(exc)) from exc

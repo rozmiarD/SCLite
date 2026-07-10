@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
+from ._json import VerificationLimits
 from .artifacts import artifact_sha256, validate_artifact
 from .integrity import (
     ChainVerificationError,
@@ -171,7 +172,11 @@ def _bound_link(source: Mapping[str, Any], name: str, target: Mapping[str, Any])
 
 
 def verify_reaction_chain_manifest(
-    manifest: Mapping[str, Any], *, root: Path, strict_jsonschema: bool = False
+    manifest: Mapping[str, Any],
+    *,
+    root: Path,
+    strict_jsonschema: bool = False,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     result, snapshot = _verify_artifact_chain_manifest_with_snapshot(
         manifest,
@@ -179,6 +184,7 @@ def verify_reaction_chain_manifest(
         strict_jsonschema=strict_jsonschema,
         max_artifact_bytes=1_048_576,
         max_manifest_entries=4,
+        verification_limits=verification_limits,
     )
     roles = tuple(result['checked_entries'])
     if roles not in {REACTION_CHAIN_ROLES, (*REACTION_CHAIN_ROLES, 'execution_receipt')}:

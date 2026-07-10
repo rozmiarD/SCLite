@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 EXPECTED_PUBLIC_EXPORTS = (
     '__version__',
+    'VerificationLimits',
     'REVIEW_BUNDLE_MANIFEST_FILE',
     'REVIEW_BUNDLE_MARKDOWN_FILE',
     'REVIEW_BUNDLE_RECEIPT_FILE',

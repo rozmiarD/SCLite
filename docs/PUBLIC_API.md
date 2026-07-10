@@ -1,6 +1,6 @@
 # SCLite Public API
 
-SCLite `1.0` keeps a deliberately small top-level Python API through
+SCLite `1.x` keeps a deliberately small top-level Python API through
 `import sclite`. These names are the stable convenience surface. Deeper module
 imports remain available for advanced users, but removal or rename of the
 top-level exports below is a compatibility change.
@@ -11,6 +11,16 @@ authority, or carrier adapters through this API.
 ## Version
 
 - `__version__`
+
+## Verification Policy
+
+- `VerificationLimits`
+
+`VerificationLimits` defines finite defaults for per-file and aggregate JSON
+bytes, nesting depth, parsed nodes, and manifest entries. Verification APIs use
+the default policy when the caller does not provide one; a host may pass an
+explicit policy with higher or lower limits. The strict loader always rejects
+duplicate object keys and non-standard `NaN`/`Infinity` numbers.
 
 ## Review Bundles
 
@@ -157,7 +167,7 @@ operations.
 
 ## Compatibility Rule
 
-Patch releases may add new names, but should not remove or rename these exports
+Minor releases may add new names, but should not remove or rename these exports
 without a new major compatibility decision. Changes to Kernel Guard transcript
 or canonical JSON behavior require a new profile name rather than a silent API
 change.

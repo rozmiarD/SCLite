@@ -3,12 +3,18 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from json import JSONDecodeError
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
-from sclite._json import load_json_object
+from sclite._json import (
+    DEFAULT_VERIFICATION_LIMITS,
+    VerificationLimits,
+    _JsonBudget,
+    load_json_document,
+    load_json_object,
+    validate_json_value,
+)
 from sclite.artifacts import build_artifact_hash, validate_artifact
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
@@ -145,20 +151,16 @@ def _load_artifact_snapshot(
     role: str,
     relative_path: str,
     max_bytes: int | None = None,
+    limits: VerificationLimits | None = None,
+    budget: _JsonBudget | None = None,
 ) -> _ArtifactSnapshot:
-    try:
-        if max_bytes is not None and path.stat().st_size > max_bytes:
-            raise ChainVerificationError(f'{path}: JSON file exceeds max_bytes={max_bytes}')
-        raw_text = path.read_text(encoding='utf-8')
-    except OSError as exc:
-        detail = exc.strerror or str(exc)
-        raise ChainVerificationError(f'{path}: cannot read JSON: {detail}') from exc
-    try:
-        parsed = json.loads(raw_text)
-    except JSONDecodeError as exc:
-        raise ChainVerificationError(
-            f'{path}: invalid JSON: {exc.msg} at line {exc.lineno} column {exc.colno}'
-        ) from exc
+    raw_bytes, parsed = load_json_document(
+        path,
+        error_cls=ChainVerificationError,
+        max_bytes=max_bytes,
+        limits=limits,
+        budget=budget,
+    )
     if not isinstance(parsed, dict):
         raise ChainVerificationError(f'{path}: JSON root is not an object')
     descriptor = artifact_descriptor(parsed)
@@ -168,7 +170,7 @@ def _load_artifact_snapshot(
     return _ArtifactSnapshot(
         role=role,
         relative_path=relative_path,
-        raw_bytes=raw_text.encode('utf-8'),
+        raw_bytes=raw_bytes,
         value=frozen_value,
         descriptor=MappingProxyType(dict(descriptor)),
     )
@@ -503,9 +505,19 @@ def _verify_artifact_chain_manifest_with_snapshot(
     require_lifecycle: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> tuple[Dict[str, Any], _VerifiedBundleSnapshot]:
     """Verify one bundle and retain the private snapshot for layered checks."""
     base = (root or Path.cwd()).resolve()
+    limits = verification_limits or DEFAULT_VERIFICATION_LIMITS
+    budget = _JsonBudget(limits)
+    validate_json_value(
+        manifest,
+        source='artifact_chain_manifest',
+        error_cls=ChainVerificationError,
+        limits=limits,
+        budget=budget,
+    )
     _validate_manifest_identity(
         manifest,
         root=base,
@@ -514,8 +526,9 @@ def _verify_artifact_chain_manifest_with_snapshot(
     entries = manifest.get('entries')
     if not isinstance(entries, list):
         raise ChainVerificationError('manifest.entries is not an array')
-    if max_manifest_entries is not None and len(entries) > max_manifest_entries:
-        raise ChainVerificationError(f'manifest entry count exceeds max_manifest_entries={max_manifest_entries}')
+    entry_limit = max_manifest_entries or limits.max_manifest_entries
+    if len(entries) > entry_limit:
+        raise ChainVerificationError(f'manifest entry count exceeds max_manifest_entries={entry_limit}')
     previous = ''
     checked: List[str] = []
     artifacts_by_role: Dict[str, _ArtifactSnapshot] = {}
@@ -538,6 +551,8 @@ def _verify_artifact_chain_manifest_with_snapshot(
             role=role,
             relative_path=normalized_rel_path,
             max_bytes=max_artifact_bytes,
+            limits=limits,
+            budget=budget,
         )
         value = artifact.value
         if validate_schemas:
@@ -629,6 +644,7 @@ def verify_artifact_chain_manifest(
     require_lifecycle: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Verify manifest descriptors and hash links against local artifact files."""
 
@@ -640,6 +656,7 @@ def verify_artifact_chain_manifest(
         require_lifecycle=require_lifecycle,
         max_artifact_bytes=max_artifact_bytes,
         max_manifest_entries=max_manifest_entries,
+        verification_limits=verification_limits,
     )
     return result
 
@@ -650,6 +667,7 @@ def verify_lifecycle_manifest(
     root: Path | None = None,
     validate_schemas: bool = True,
     strict_jsonschema: bool = False,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Verify a v0.2 lifecycle manifest with fail-safe lifecycle semantics."""
 
@@ -661,4 +679,5 @@ def verify_lifecycle_manifest(
         require_lifecycle=True,
         max_artifact_bytes=None,
         max_manifest_entries=None,
+        verification_limits=verification_limits,
     )

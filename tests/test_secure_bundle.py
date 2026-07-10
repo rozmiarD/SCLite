@@ -168,15 +168,15 @@ def test_secure_bundle_reads_each_ticket_use_payload_once(
     )
     payload_paths = {(bundle / name).resolve(): name for name in payload_names}
     reads = {name: 0 for name in payload_names}
-    original_read_text = Path.read_text
+    original_read_bytes = Path.read_bytes
 
-    def tracked_read_text(path: Path, *args: object, **kwargs: object) -> str:
+    def tracked_read_bytes(path: Path, *args: object, **kwargs: object) -> bytes:
         name = payload_paths.get(path.resolve())
         if name is not None:
             reads[name] += 1
-        return original_read_text(path, *args, **kwargs)
+        return original_read_bytes(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, 'read_text', tracked_read_text)
+    monkeypatch.setattr(Path, 'read_bytes', tracked_read_bytes)
     result = verify_secure_bundle(
         bundle,
         guard_path=guard_path,

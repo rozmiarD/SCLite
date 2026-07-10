@@ -136,14 +136,14 @@ def test_reaction_verifier_uses_only_manifest_snapshot_paths(
 
     canonical_paths = {(tmp_path / name).resolve() for name in names}
     canonical_reads: list[Path] = []
-    original_read_text = Path.read_text
+    original_read_bytes = Path.read_bytes
 
-    def tracked_read_text(path: Path, *args: object, **kwargs: object) -> str:
+    def tracked_read_bytes(path: Path, *args: object, **kwargs: object) -> bytes:
         if path.resolve() in canonical_paths:
             canonical_reads.append(path.resolve())
-        return original_read_text(path, *args, **kwargs)
+        return original_read_bytes(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, 'read_text', tracked_read_text)
+    monkeypatch.setattr(Path, 'read_bytes', tracked_read_bytes)
     result = verify_reaction_chain_manifest(
         manifest,
         root=tmp_path,

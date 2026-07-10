@@ -24,6 +24,9 @@ SCLite is designed to help detect:
 - receipt/evidence overclaiming relative to linked ticket or receipt artifacts;
 - simple cross-role target drift visible in explicit host fields;
 - malformed review bundles or missing canonical files.
+- ambiguous JSON with duplicate object keys or non-standard numeric constants;
+- oversized or structurally amplified JSON that exceeds the active
+  `VerificationLimits` policy.
 
 ## Out Of Scope
 

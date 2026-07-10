@@ -6,6 +6,7 @@ import json
 import secrets
 from typing import Any, Dict, Mapping, Sequence
 
+from ._json import VerificationLimits, validate_json_value
 from .artifacts import validate_artifact
 from .integrity.chain import (
     ChainVerificationError,
@@ -203,9 +204,16 @@ def _verify_kernel_guard_manifest_with_snapshot(
     require_lifecycle: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> tuple[Dict[str, Any], _VerifiedBundleSnapshot | None]:
     """Verify a guard and retain the chain snapshot for higher verification layers."""
 
+    validate_json_value(
+        guard,
+        source='kernel_guard_manifest',
+        error_cls=KernelGuardError,
+        limits=verification_limits,
+    )
     if validate_guard_schema:
         try:
             validate_artifact(guard, KERNEL_GUARD_SCHEMA_REF, root=root, strict_jsonschema=strict_jsonschema)
@@ -232,6 +240,7 @@ def _verify_kernel_guard_manifest_with_snapshot(
                 require_lifecycle=require_lifecycle,
                 max_artifact_bytes=max_artifact_bytes,
                 max_manifest_entries=max_manifest_entries,
+                verification_limits=verification_limits,
             )
         except ChainVerificationError as exc:
             raise KernelGuardError(str(exc)) from exc
@@ -313,6 +322,7 @@ def verify_kernel_guard_manifest(
     require_lifecycle: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Verify a sidecar HMAC guard against an artifact-chain manifest."""
 
@@ -328,5 +338,6 @@ def verify_kernel_guard_manifest(
         require_lifecycle=require_lifecycle,
         max_artifact_bytes=max_artifact_bytes,
         max_manifest_entries=max_manifest_entries,
+        verification_limits=verification_limits,
     )
     return result

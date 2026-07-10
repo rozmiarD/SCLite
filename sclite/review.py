@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-from ._json import load_json_object
+from ._json import VerificationLimits, load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
 from .integrity import ChainVerificationError
 from .integrity.chain import _verify_artifact_chain_manifest_with_snapshot
@@ -24,8 +24,12 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def _load_json_object(path: Path) -> Dict[str, Any]:
-    return load_json_object(path, error_cls=ReviewRecordError)
+def _load_json_object(
+    path: Path,
+    *,
+    verification_limits: VerificationLimits | None = None,
+) -> Dict[str, Any]:
+    return load_json_object(path, error_cls=ReviewRecordError, limits=verification_limits)
 
 
 def _schema_ref(value: Mapping[str, Any]) -> str:
@@ -75,6 +79,7 @@ def build_review_record_from_manifest(
     root: Path | str | None = None,
     strict_jsonschema: bool = False,
     generated_at: str | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Build a public-safe lifecycle review record for a local SCLite bundle.
 
@@ -85,7 +90,7 @@ def build_review_record_from_manifest(
     """
     manifest_path = Path(manifest_path).resolve()
     base = Path(root).resolve() if root else manifest_path.parent
-    manifest = _load_json_object(manifest_path)
+    manifest = _load_json_object(manifest_path, verification_limits=verification_limits)
     _assert_manifest_paths_within_root(manifest, base)
     checks: List[Dict[str, Any]] = []
     statuses: List[str] = []
@@ -100,6 +105,7 @@ def build_review_record_from_manifest(
             validate_schemas=True,
             strict_jsonschema=strict_jsonschema,
             require_lifecycle=True,
+            verification_limits=verification_limits,
         )
         artifacts_by_role = {
             role: artifact.value for role, artifact in snapshot.artifacts_by_role.items()

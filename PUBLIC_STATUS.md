@@ -4,9 +4,9 @@ SCLite is a lightweight Security Contract Layer lifecycle package.
 
 ## Current maturity
 
-- Current release version: `1.0.10rc1`.
-- Release label: `1.0.10rc1`.
-- Status: unpublished hotfix candidate for the frozen lifecycle/review and guarded verification substrate.
+- Current release version: `1.1.0rc1`.
+- Release label: `1.1.0rc1`.
+- Status: unpublished verifier-hardening candidate; the published stable line remains `1.0.9`.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
@@ -86,7 +86,9 @@ without adding recovery authority or runtime supervision to SCLite.
 The `1.0.9` patch adds `automation_chain.v0.1` for bounded multi-step
 automation-chain truth artifacts without adding traversal, scheduling, policy,
 runtime or domain ownership to SCLite.
-The `1.0.10rc1` candidate corrects verifier acceptance conditions only: one
+The `1.1.0rc1` candidate retains the P0 acceptance corrections and adds one
+strict JSON input policy with duplicate-key rejection and finite resource
+budgets. It continues to use one
 immutable verified snapshot per verification, manifest identity/policy checks,
 false/unknown scope handling, receipt-window enforcement, and strict
 GovEngine lifecycle handoff. It adds no schema family, runtime, governance,

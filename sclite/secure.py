@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ._json import load_json_object
+from ._json import VerificationLimits, load_json_object
 from .kernel_guard import KernelGuardError, _verify_kernel_guard_manifest_with_snapshot
 from .tickets import verify_ticket_use_profile
 from .verification_result import build_guarded_strict_verification_result
@@ -18,8 +18,12 @@ class SecureBundleError(ValueError):
     """Raised when the guarded-strict secure bundle profile cannot pass."""
 
 
-def _load_json_object(path: Path) -> Dict[str, Any]:
-    return load_json_object(path, error_cls=SecureBundleError)
+def _load_json_object(
+    path: Path,
+    *,
+    verification_limits: VerificationLimits | None = None,
+) -> Dict[str, Any]:
+    return load_json_object(path, error_cls=SecureBundleError, limits=verification_limits)
 
 
 def resolve_manifest_path(target: Path | str) -> Path:
@@ -56,6 +60,7 @@ def verify_secure_bundle(
     strict_jsonschema: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
 ) -> Dict[str, Any]:
     """Verify the guarded-strict secure bundle profile.
 
@@ -75,8 +80,8 @@ def verify_secure_bundle(
     if not sidecar_path.is_file():
         raise SecureBundleError(f'missing kernel guard sidecar: {sidecar_path}')
 
-    manifest = _load_json_object(manifest_path)
-    guard = _load_json_object(sidecar_path)
+    manifest = _load_json_object(manifest_path, verification_limits=verification_limits)
+    guard = _load_json_object(sidecar_path, verification_limits=verification_limits)
     try:
         result, snapshot = _verify_kernel_guard_manifest_with_snapshot(
             manifest,
@@ -88,6 +93,7 @@ def verify_secure_bundle(
             require_lifecycle=True,
             max_artifact_bytes=max_artifact_bytes,
             max_manifest_entries=max_manifest_entries,
+            verification_limits=verification_limits,
         )
     except KernelGuardError as exc:
         raise SecureBundleError(str(exc)) from exc

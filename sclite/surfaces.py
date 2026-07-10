@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Sequence
 
+from ._json import load_json_value
 from .artifacts import build_artifact_hash
 
 
@@ -140,11 +141,9 @@ def build_public_snapshot_manifest(
 
 def manifest_entries_from_paths(paths: Iterable[Path], *, schema: str = '') -> list[Dict[str, Any]]:
     """Load JSON files and return manifest file entries with hashable values."""
-    import json
-
     entries: list[Dict[str, Any]] = []
     for path in paths:
-        value = json.loads(path.read_text(encoding='utf-8'))
+        value = load_json_value(path, error_cls=ValueError)
         artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
         entries.append({
             'path': str(path),

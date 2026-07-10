@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from ._json import load_json_object
 from .json_types import json_mapping
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
@@ -211,10 +212,7 @@ def load_json_schema(
         root=root,
         allow_external_schema_refs=allow_external_schema_refs,
     )
-    value = json.loads(schema_path.read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise JsonSchemaValidationError(f'{schema_ref}: schema root is not an object')
-    return value
+    return load_json_object(schema_path, error_cls=JsonSchemaValidationError)
 
 
 def validate_schema_ref(

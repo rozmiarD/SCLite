@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-__version__ = '1.0.10rc1'
+__version__ = '1.1.0rc1'
+
+from ._json import VerificationLimits
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,
@@ -117,6 +119,7 @@ from .tickets import (
 )
 __all__ = (
     '__version__',
+    'VerificationLimits',
     'REVIEW_BUNDLE_MANIFEST_FILE',
     'REVIEW_BUNDLE_MARKDOWN_FILE',
     'REVIEW_BUNDLE_RECEIPT_FILE',

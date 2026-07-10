@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Package: sclite-core 1.0.10rc1](https://img.shields.io/badge/package-sclite--core%201.0.9-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.9/)
+[![Source candidate: sclite-core 1.1.0rc1](https://img.shields.io/badge/source%20candidate-sclite--core%201.1.0rc1-blueviolet.svg)](pyproject.toml)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -16,8 +16,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `1.0.10rc1`
-- Status: **unpublished 1.0.10rc1 hotfix candidate; the published 1.0 source and PyPI stable line remains the frozen lifecycle/review and guarded verification surface**
+- Version: `1.1.0rc1`
+- Status: **unpublished 1.1.0rc1 verifier-hardening candidate; the published 1.0 source and PyPI stable line remains 1.0.9**
 - Latest published PyPI package: `sclite-core==1.0.9`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
@@ -152,6 +152,13 @@ SCLite has two validation modes:
 | strict Draft 2020-12 validator | optional `jsonschema` extra | CI, release gates, and reviewer validation | uses `jsonschema.Draft202012Validator` |
 
 The default CLI path preserves the zero-runtime-dependency package. Release and CI validation must also run strict mode through `scripts/strict_schema_gate.sh`. See [SCLite Validation](VALIDATION.md) for the supported keyword table and strict-mode commands.
+
+All production JSON input paths use the same strict dependency-free loader.
+It rejects duplicate object keys, non-standard `NaN`/`Infinity` numbers and
+invalid UTF-8 before schema or digest checks. `VerificationLimits` supplies
+finite defaults for per-file and aggregate bytes, nesting depth, parsed nodes
+and manifest entries; Python hosts can pass an explicit policy when a reviewed
+artifact class needs different bounds.
 
 ## What SCLite is
 

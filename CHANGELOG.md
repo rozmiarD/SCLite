@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 1.1.0rc1 - Strict JSON input policy candidate
+
+- Adds the public `VerificationLimits` policy with finite per-file, aggregate,
+  nesting, node-count and manifest-entry budgets.
+- Routes production JSON file, inline, schema, manifest, Guard, review and
+  public-snapshot reads through one strict loader that rejects duplicate object
+  keys, non-standard `NaN`/`Infinity` values and invalid UTF-8.
+- Applies one aggregate structure/byte budget to the manifest and artifacts of
+  an artifact-chain verification while retaining explicit lower legacy CLI
+  guards such as `--max-artifact-bytes`.
+
 ## 1.0.10rc1 - P0 verified-input and lifecycle hotfix candidate
 
 - Uses one private immutable descriptor-verified snapshot for reaction,

@@ -111,15 +111,15 @@ def test_review_record_reads_each_lifecycle_payload_once(
     )
     paths = {(bundle / name).resolve(): name for name in names}
     reads = {name: 0 for name in names}
-    original_read_text = Path.read_text
+    original_read_bytes = Path.read_bytes
 
-    def tracked_read_text(path: Path, *args: object, **kwargs: object) -> str:
+    def tracked_read_bytes(path: Path, *args: object, **kwargs: object) -> bytes:
         name = paths.get(path.resolve())
         if name is not None:
             reads[name] += 1
-        return original_read_text(path, *args, **kwargs)
+        return original_read_bytes(path, *args, **kwargs)
 
-    monkeypatch.setattr(Path, 'read_text', tracked_read_text)
+    monkeypatch.setattr(Path, 'read_bytes', tracked_read_bytes)
     record = build_review_record_from_manifest(
         bundle / 'artifact_chain_manifest.json',
         root=bundle,
