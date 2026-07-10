@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 import secrets
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any, Dict, Literal, Mapping, Sequence
 
 from ._json import VerificationLimits, validate_json_value
 from .artifacts import validate_artifact
@@ -20,6 +20,15 @@ KERNEL_GUARD_ENTRY_PROFILE = 'kernel_guard_hmac_v1.entry'
 KERNEL_GUARD_ROOT_PROFILE = 'kernel_guard_hmac_v1.root'
 KERNEL_GUARD_ALGORITHM = 'hmac-sha256'
 KERNEL_GUARD_SCHEMA_REF = 'schemas/kernel_guard_hmac_v1.schema.json'
+KERNEL_GUARD_MINIMUM_KEY_BYTES = 32
+KernelGuardKeyPolicy = Literal['production', 'legacy_read_only']
+_PLACEHOLDER_KEY_MARKERS = (
+    b'change-me',
+    b'changeme',
+    b'default-key',
+    b'placeholder',
+    b'replace-me',
+)
 
 
 class KernelGuardError(ValueError):
@@ -30,18 +39,40 @@ def _canonical_bytes(value: Mapping[str, Any]) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8')
 
 
-def _key_bytes(key: str | bytes) -> bytes:
+def _key_bytes(
+    key: str | bytes,
+    *,
+    policy: KernelGuardKeyPolicy = 'production',
+) -> bytes:
+    if not isinstance(key, (str, bytes)):
+        raise KernelGuardError('kernel guard key must be str or bytes')
+    if policy not in {'production', 'legacy_read_only'}:
+        raise KernelGuardError(f'unsupported kernel guard key policy: {policy}')
     if isinstance(key, bytes):
-        return key
-    return str(key).encode('utf-8')
+        value = key
+    else:
+        value = key.encode('utf-8')
+    if policy == 'production' and len(value) < KERNEL_GUARD_MINIMUM_KEY_BYTES:
+        raise KernelGuardError(
+            'production kernel guard key must be at least '
+            f'{KERNEL_GUARD_MINIMUM_KEY_BYTES} bytes after UTF-8 encoding; got {len(value)}'
+        )
+    return value
+
+
+def _key_warnings(key: bytes) -> list[str]:
+    lowered = key.lower()
+    if any(marker in lowered for marker in _PLACEHOLDER_KEY_MARKERS):
+        return ['placeholder_like_key']
+    return []
 
 
 def _sha256_hex(value: Mapping[str, Any]) -> str:
     return hashlib.sha256(_canonical_bytes(value)).hexdigest()
 
 
-def _hmac_hex(key: str | bytes, value: Mapping[str, Any]) -> str:
-    return hmac.new(_key_bytes(key), _canonical_bytes(value), hashlib.sha256).hexdigest()
+def _hmac_hex(key: bytes, value: Mapping[str, Any]) -> str:
+    return hmac.new(key, _canonical_bytes(value), hashlib.sha256).hexdigest()
 
 
 def manifest_metadata_digest(manifest: Mapping[str, Any]) -> str:
@@ -129,6 +160,8 @@ def build_kernel_guard_manifest(
 ) -> Dict[str, Any]:
     """Build a sidecar HMAC guard for an already-built artifact-chain manifest."""
 
+    key_bytes = _key_bytes(key, policy='production')
+
     try:
         _validate_manifest_identity(
             manifest,
@@ -153,7 +186,7 @@ def build_kernel_guard_manifest(
             nonce=nonce,
             key_id=key_id,
         )
-        tag = _hmac_hex(key, transcript)
+        tag = _hmac_hex(key_bytes, transcript)
         entry_guards.append({**transcript, 'tag': tag})
         previous_tag = tag
 
@@ -166,7 +199,7 @@ def build_kernel_guard_manifest(
         last_tag=last_tag,
         key_id=key_id,
     )
-    root_tag = _hmac_hex(key, root_transcript)
+    root_tag = _hmac_hex(key_bytes, root_transcript)
     return {
         'artifact_type': 'kernel_guard_manifest',
         'schema_version': 'v0.1',
@@ -205,9 +238,11 @@ def _verify_kernel_guard_manifest_with_snapshot(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
+    key_policy: KernelGuardKeyPolicy = 'production',
 ) -> tuple[Dict[str, Any], _VerifiedBundleSnapshot | None]:
     """Verify a guard and retain the chain snapshot for higher verification layers."""
 
+    key_bytes = _key_bytes(key, policy=key_policy)
     validate_json_value(
         guard,
         source='kernel_guard_manifest',
@@ -272,7 +307,7 @@ def _verify_kernel_guard_manifest_with_snapshot(
         )
         for field, expected in transcript.items():
             _assert_guard_field(entry_guard, field, expected, label=f'kernel guard entry[{seq}]')
-        expected_tag = _hmac_hex(key, transcript)
+        expected_tag = _hmac_hex(key_bytes, transcript)
         if not hmac.compare_digest(str(entry_guard.get('tag') or ''), expected_tag):
             raise KernelGuardError(f'kernel guard entry[{seq}] tag mismatch')
         computed_tags.append(expected_tag)
@@ -289,7 +324,7 @@ def _verify_kernel_guard_manifest_with_snapshot(
         last_tag=last_tag,
         key_id=key_id,
     )
-    expected_root_tag = _hmac_hex(key, root_transcript)
+    expected_root_tag = _hmac_hex(key_bytes, root_transcript)
     if not hmac.compare_digest(str(guard.get('root_tag') or ''), expected_root_tag):
         raise KernelGuardError('kernel guard root_tag mismatch')
 
@@ -305,6 +340,15 @@ def _verify_kernel_guard_manifest_with_snapshot(
         'replay_status': 'not_checked',
         'chain_status': chain_result.get('chain_status') if chain_result else 'not_checked',
         'lifecycle_status': chain_result.get('lifecycle_status') if chain_result else 'not_checked',
+        'key_policy': key_policy,
+        'key_length_bytes': len(key_bytes),
+        'key_entropy_status': 'not_checked',
+        'key_warnings': _key_warnings(key_bytes),
+        'security_posture': (
+            'guarded_domain_auth'
+            if key_policy == 'production'
+            else 'legacy_read_only_guard'
+        ),
     }
     return result, snapshot
 
@@ -323,6 +367,7 @@ def verify_kernel_guard_manifest(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
+    key_policy: KernelGuardKeyPolicy = 'production',
 ) -> Dict[str, Any]:
     """Verify a sidecar HMAC guard against an artifact-chain manifest."""
 
@@ -339,5 +384,6 @@ def verify_kernel_guard_manifest(
         max_artifact_bytes=max_artifact_bytes,
         max_manifest_entries=max_manifest_entries,
         verification_limits=verification_limits,
+        key_policy=key_policy,
     )
     return result

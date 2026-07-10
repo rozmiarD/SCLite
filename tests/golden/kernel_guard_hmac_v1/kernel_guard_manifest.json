@@ -21,7 +21,7 @@
       "schema_ref": "schemas/intent_contract.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 0,
-      "tag": "f4077370aa2eaf667b2ae255eda74fc21d22a9cfe62d93f493fad8da39fac6db"
+      "tag": "070176492d36bfd5df4c528c2d473848a58d93bf7bc146eceb64a164be4b034a"
     },
     {
       "algorithm": "sha256",
@@ -33,14 +33,14 @@
       "key_id": "golden-key-20260531",
       "nonce": "golden-nonce-01",
       "path": "policy_decision.json",
-      "previous_tag": "f4077370aa2eaf667b2ae255eda74fc21d22a9cfe62d93f493fad8da39fac6db",
+      "previous_tag": "070176492d36bfd5df4c528c2d473848a58d93bf7bc146eceb64a164be4b034a",
       "profile": "kernel_guard_hmac_v1.entry",
       "required": true,
       "role": "policy_decision",
       "schema_ref": "schemas/policy_decision.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 1,
-      "tag": "2dbe05997f5ef1826593e8ffc58af98186cc18f8f6aec05a4fcc96b6c6e9fa59"
+      "tag": "a712fca56b53b421b7d593b733449ce8505807385687101b8b0dfaf767211b88"
     },
     {
       "algorithm": "sha256",
@@ -52,14 +52,14 @@
       "key_id": "golden-key-20260531",
       "nonce": "golden-nonce-02",
       "path": "execution_contract.json",
-      "previous_tag": "2dbe05997f5ef1826593e8ffc58af98186cc18f8f6aec05a4fcc96b6c6e9fa59",
+      "previous_tag": "a712fca56b53b421b7d593b733449ce8505807385687101b8b0dfaf767211b88",
       "profile": "kernel_guard_hmac_v1.entry",
       "required": true,
       "role": "execution_contract",
       "schema_ref": "schemas/execution_contract.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 2,
-      "tag": "bfa95639d7766f90db9eb5472baa6bb5b2129750e94ae5a515255fde47ecdd63"
+      "tag": "d380e2cacf1c57d51fa3c76d593b423194eb7aea08d91c23067a713126a3b632"
     },
     {
       "algorithm": "sha256",
@@ -71,14 +71,14 @@
       "key_id": "golden-key-20260531",
       "nonce": "golden-nonce-03",
       "path": "execution_ticket.json",
-      "previous_tag": "bfa95639d7766f90db9eb5472baa6bb5b2129750e94ae5a515255fde47ecdd63",
+      "previous_tag": "d380e2cacf1c57d51fa3c76d593b423194eb7aea08d91c23067a713126a3b632",
       "profile": "kernel_guard_hmac_v1.entry",
       "required": true,
       "role": "execution_ticket",
       "schema_ref": "schemas/execution_ticket.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 3,
-      "tag": "a7634f636cb4c6abca3978a7642df913f3365568e127357b63a4981637eb3588"
+      "tag": "daebaea75b5a7475ab5672b22a021315c90eb4088a2e54c67042b25600061d02"
     },
     {
       "algorithm": "sha256",
@@ -90,14 +90,14 @@
       "key_id": "golden-key-20260531",
       "nonce": "golden-nonce-04",
       "path": "execution_receipt.json",
-      "previous_tag": "a7634f636cb4c6abca3978a7642df913f3365568e127357b63a4981637eb3588",
+      "previous_tag": "daebaea75b5a7475ab5672b22a021315c90eb4088a2e54c67042b25600061d02",
       "profile": "kernel_guard_hmac_v1.entry",
       "required": true,
       "role": "execution_receipt",
       "schema_ref": "schemas/execution_receipt.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 4,
-      "tag": "239db880129ac39bbb3c8fbd44c10626b6203165507fa9285ba03003d283754f"
+      "tag": "2fc6fc10b74e9ab923601d5867d2bd2f137cd6b557fc3757bf5624f43528fa0c"
     },
     {
       "algorithm": "sha256",
@@ -109,23 +109,23 @@
       "key_id": "golden-key-20260531",
       "nonce": "golden-nonce-05",
       "path": "evidence_contract.json",
-      "previous_tag": "239db880129ac39bbb3c8fbd44c10626b6203165507fa9285ba03003d283754f",
+      "previous_tag": "2fc6fc10b74e9ab923601d5867d2bd2f137cd6b557fc3757bf5624f43528fa0c",
       "profile": "kernel_guard_hmac_v1.entry",
       "required": true,
       "role": "evidence_contract",
       "schema_ref": "schemas/evidence_contract.v0.2.schema.json",
       "schema_version": "v0.2",
       "seq": 5,
-      "tag": "e7f0c892227ae05233d94241f47a12aec32506ace4a3d3071f960e1329b95757"
+      "tag": "ccfa2fb52d7a1f531193142b64333dcd371c19c47338c4789be0589e6b5ea0f4"
     }
   ],
-  "first_tag": "f4077370aa2eaf667b2ae255eda74fc21d22a9cfe62d93f493fad8da39fac6db",
+  "first_tag": "070176492d36bfd5df4c528c2d473848a58d93bf7bc146eceb64a164be4b034a",
   "key_id": "golden-key-20260531",
-  "last_tag": "e7f0c892227ae05233d94241f47a12aec32506ace4a3d3071f960e1329b95757",
+  "last_tag": "ccfa2fb52d7a1f531193142b64333dcd371c19c47338c4789be0589e6b5ea0f4",
   "manifest_metadata_digest": "93285c6e2d79106304218964465e799ec656b49aac3b3daa10380d55221af7d4",
   "profile": "kernel_guard_hmac_v1",
   "root_chain_digest": "ddb006900727142b8095e918a93f3dba484d3820b66fff813c169c3b16c6b295",
-  "root_tag": "5cd2029e62c65b484c8bf24030e8aab48ac6f497f8e105f4f5873231ed3ca31a",
+  "root_tag": "becc7ed867fa457be02d21778648d94c58636d28ea4a4807613ed28ee8156279",
   "schema_ref": "schemas/kernel_guard_hmac_v1.schema.json",
   "schema_version": "v0.1"
 }

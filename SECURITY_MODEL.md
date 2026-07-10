@@ -162,6 +162,14 @@ SCLite verifies guard material with the key supplied by the caller. It does not:
 - revoke keys;
 - prove which operator or service controlled a key.
 
+Production Guard creation and verification accept only `str|bytes` keys with
+at least 32 bytes after UTF-8 encoding. This is a configuration floor, not an
+entropy measurement: even a 32-byte repeated value is accepted and reported as
+`key_entropy_status="not_checked"`. Common placeholder markers produce a
+warning but do not change that non-claim. The explicit legacy read-only policy
+may inspect historical short-key guards and always returns the weaker
+`legacy_read_only_guard` posture; it cannot satisfy `guarded-strict`.
+
 Old guarded bundles can be verified only while the caller still has the
 corresponding key for their `key_id`. Key rotation, compromise response, and
 key retention policy are host responsibilities.

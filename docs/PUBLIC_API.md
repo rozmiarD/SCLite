@@ -121,10 +121,20 @@ operations.
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`
+- `KERNEL_GUARD_MINIMUM_KEY_BYTES`
+- `KernelGuardKeyPolicy`
 - `KernelGuardError`
 - `build_kernel_guard_manifest`
 - `manifest_metadata_digest`
 - `verify_kernel_guard_manifest`
+
+Kernel Guard builders and verifiers default to the production key policy:
+`str|bytes`, at least 32 bytes after UTF-8 encoding. Verification results expose
+the byte length, placeholder warnings and `key_entropy_status="not_checked"`.
+The explicit `key_policy="legacy_read_only"` verifier mode may authenticate
+historical short-key sidecars, but reports `legacy_read_only_guard` rather than
+production `guarded_domain_auth`. Secure-bundle verification never uses the
+legacy policy. SCLite does not estimate entropy or own key custody/rotation.
 - `SECURE_BUNDLE_POSTURE`
 - `SECURE_BUNDLE_PROFILE`
 - `SecureBundleError`

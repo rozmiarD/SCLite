@@ -277,7 +277,7 @@ def test_malformed_json_secure_bundle_fails_without_traceback(tmp_path: Path) ->
 
     proc = _run(
         ['verify-secure-bundle', str(bad), '--guard', str(bad)],
-        env={'SCLITE_KERNEL_GUARD_KEY': 'test-key'},
+        env={'SCLITE_KERNEL_GUARD_KEY': 'test-key-that-is-at-least-32-bytes'},
     )
 
     _assert_clean_cli_failure(proc, 'secure_bundle_failed')

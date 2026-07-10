@@ -335,7 +335,7 @@ should also fail closed on the canonical lifecycle role sequence.
 Optionally verify a GovEngine/KERNEL-domain guard sidecar:
 
 ```bash
-SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
   sclite verify-guarded-chain \
   sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
   --guard /path/to/kernel_guard_manifest.json \
@@ -345,6 +345,12 @@ SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
 `kernel_guard_hmac_v1` authenticates a manifest and its entries only inside the
 domain that knows the HMAC secret. It is not PKI, non-repudiation, public
 identity, replay prevention, or proof that a runtime behaved correctly.
+Production build and verification require a `str` or `bytes` key of at least
+32 bytes after UTF-8 encoding. Results always report
+`key_entropy_status="not_checked"`: SCLite enforces a length floor, not
+randomness, custody, rotation or KMS policy. `verify-guarded-chain` alone offers
+`--legacy-read-only-key-policy` for historical short-key verification; that
+mode reports `legacy_read_only_guard`, never `guarded_domain_auth`.
 When `--guard` is provided explicitly, SCLite resolves it relative to the
 current working directory, not relative to the bundle directory. Omitting
 `--guard` uses `kernel_guard_manifest.json` next to the manifest or review
@@ -356,7 +362,7 @@ by the trusted host/GovEngine domain and is not committed in the public example
 bundle:
 
 ```bash
-SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
   sclite verify-secure-bundle examples/govengine-integration \
   --guard /path/to/kernel_guard_manifest.json
 ```

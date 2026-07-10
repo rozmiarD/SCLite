@@ -169,11 +169,15 @@ sidecar when a GovEngine/KERNEL-domain HMAC secret is available through
 `--guard-key-env` (default: `SCLITE_KERNEL_GUARD_KEY`). This command does not
 check replay freshness; GovEngine or another runtime must keep the replay
 store for `root_tag`, `chain_id`, ticket/run id, and `key_id`.
+Production Guard verification requires at least 32 key bytes after UTF-8
+encoding and reports entropy as `not_checked`. Historical short-key inspection
+is limited to `verify-guarded-chain --legacy-read-only-key-policy`; its posture
+is `legacy_read_only_guard` and cannot satisfy the secure production profile.
 
 For runtime-consumable guarded bundles, prefer the fail-closed profile:
 
 ```bash
-SCLITE_KERNEL_GUARD_KEY='local-test-secret' \
+SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
 python -m sclite.cli verify-secure-bundle examples/govengine-integration \
   --guard /path/to/kernel_guard_manifest.json
 ```

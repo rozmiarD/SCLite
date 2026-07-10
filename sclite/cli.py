@@ -227,6 +227,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     guard_cmd.add_argument('--guard', required=True, help='path to kernel_guard_manifest.json')
     guard_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     guard_cmd.add_argument('--guard-key-env', default='SCLITE_KERNEL_GUARD_KEY', help='environment variable containing the HMAC guard key')
+    guard_cmd.add_argument('--legacy-read-only-key-policy', action='store_true', help='allow a historical key below the production floor without claiming guarded_domain_auth')
     guard_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     guard_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
     guard_cmd.add_argument('--strict-lifecycle', action='store_true', help='require the canonical v0.2 lifecycle role sequence with no extras or duplicates')
@@ -420,6 +421,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 require_lifecycle=bool(args.strict_lifecycle),
                 max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
                 max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
+                key_policy='legacy_read_only' if args.legacy_read_only_key_policy else 'production',
             )
         except KernelGuardError as exc:
             print(f'kernel_guard_failed:{exc}', file=sys.stderr)
@@ -430,7 +432,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.format == 'json':
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
-            print(f"kernel_guard_ok:{result['entry_count']}:{result['root_chain_digest']}:{result['guard_root_tag']}")
+            print(
+                f"kernel_guard_ok:{result['entry_count']}:{result['root_chain_digest']}:"
+                f"{result['guard_root_tag']}:posture={result['security_posture']}"
+            )
         return 0 if not args.strict_lifecycle or result.get('lifecycle_status') == 'passed' else 2
 
     if args.command == 'verify-secure-bundle':

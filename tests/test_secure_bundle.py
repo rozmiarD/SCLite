@@ -18,7 +18,7 @@ from sclite.secure import SecureBundleError, resolve_guard_path, verify_secure_b
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
 GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
-KEY = 'test-kernel-secret'
+KEY = 'test-kernel-secret-32-bytes-minimum'
 KEY_ID = 'test-key-20260526'
 LIFECYCLE_FILES = (
     ('intent_contract', 'intent_contract.json'),
@@ -569,7 +569,7 @@ def test_secure_bundle_wrong_key_fails(tmp_path: Path) -> None:
     guard_path = _write_guard(bundle)
 
     with pytest.raises(SecureBundleError, match=r'entry\[0\] tag mismatch'):
-        verify_secure_bundle(bundle, guard_path=guard_path, key='wrong-kernel-secret')
+        verify_secure_bundle(bundle, guard_path=guard_path, key='wrong-kernel-secret-32-bytes-long')
 
 
 def test_secure_bundle_full_chain_forgery_with_old_guard_fails(tmp_path: Path) -> None:

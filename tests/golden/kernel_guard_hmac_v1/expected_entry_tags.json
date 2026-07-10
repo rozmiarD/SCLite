@@ -2,31 +2,31 @@
   {
     "role": "intent_contract",
     "seq": 0,
-    "tag": "f4077370aa2eaf667b2ae255eda74fc21d22a9cfe62d93f493fad8da39fac6db"
+    "tag": "070176492d36bfd5df4c528c2d473848a58d93bf7bc146eceb64a164be4b034a"
   },
   {
     "role": "policy_decision",
     "seq": 1,
-    "tag": "2dbe05997f5ef1826593e8ffc58af98186cc18f8f6aec05a4fcc96b6c6e9fa59"
+    "tag": "a712fca56b53b421b7d593b733449ce8505807385687101b8b0dfaf767211b88"
   },
   {
     "role": "execution_contract",
     "seq": 2,
-    "tag": "bfa95639d7766f90db9eb5472baa6bb5b2129750e94ae5a515255fde47ecdd63"
+    "tag": "d380e2cacf1c57d51fa3c76d593b423194eb7aea08d91c23067a713126a3b632"
   },
   {
     "role": "execution_ticket",
     "seq": 3,
-    "tag": "a7634f636cb4c6abca3978a7642df913f3365568e127357b63a4981637eb3588"
+    "tag": "daebaea75b5a7475ab5672b22a021315c90eb4088a2e54c67042b25600061d02"
   },
   {
     "role": "execution_receipt",
     "seq": 4,
-    "tag": "239db880129ac39bbb3c8fbd44c10626b6203165507fa9285ba03003d283754f"
+    "tag": "2fc6fc10b74e9ab923601d5867d2bd2f137cd6b557fc3757bf5624f43528fa0c"
   },
   {
     "role": "evidence_contract",
     "seq": 5,
-    "tag": "e7f0c892227ae05233d94241f47a12aec32506ace4a3d3071f960e1329b95757"
+    "tag": "ccfa2fb52d7a1f531193142b64333dcd371c19c47338c4789be0589e6b5ea0f4"
   }
 ]

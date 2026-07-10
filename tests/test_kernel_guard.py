@@ -22,7 +22,7 @@ from sclite.kernel_guard import (
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
 GOLDEN = ROOT / 'tests' / 'golden' / 'kernel_guard_hmac_v1'
-KEY = 'test-kernel-secret'
+KEY = 'test-kernel-secret-32-bytes-minimum'
 KEY_ID = 'test-key-20260525'
 
 
@@ -57,6 +57,10 @@ def test_kernel_guard_builds_schema_valid_sidecar_and_verifies() -> None:
     assert result['entry_count'] == 6
     assert result['guard_profile'] == 'kernel_guard_hmac_v1'
     assert result['replay_status'] == 'not_checked'
+    assert result['key_policy'] == 'production'
+    assert result['key_length_bytes'] == len(KEY.encode('utf-8'))
+    assert result['key_entropy_status'] == 'not_checked'
+    assert result['security_posture'] == 'guarded_domain_auth'
     assert result['guard_root_tag'] == guard['root_tag']
 
 
@@ -98,6 +102,96 @@ def test_kernel_guard_hmac_v1_golden_vector_freezes_transcript_and_tags() -> Non
     assert result['guard_status'] == 'passed'
     assert result['lifecycle_status'] == 'passed'
     assert result['guard_root_tag'] == expected_root_tag
+
+
+@pytest.mark.parametrize('length', [0, 1, 15, 31])
+def test_kernel_guard_production_policy_rejects_short_keys(length: int) -> None:
+    manifest = _load_manifest()
+    with pytest.raises(KernelGuardError, match=rf'at least 32 bytes.*got {length}'):
+        build_kernel_guard_manifest(manifest, key=b'x' * length, key_id=KEY_ID)
+
+
+@pytest.mark.parametrize('length', [32, 33])
+def test_kernel_guard_production_policy_accepts_key_floor(length: int) -> None:
+    manifest = _load_manifest()
+    key = b'x' * length
+    guard = build_kernel_guard_manifest(manifest, key=key, key_id=KEY_ID)
+    result = verify_kernel_guard_manifest(manifest, guard, key=key, validate_chain=False)
+
+    assert result['key_length_bytes'] == length
+    assert result['key_entropy_status'] == 'not_checked'
+    assert result['key_warnings'] == []
+
+
+@pytest.mark.parametrize('key', [None, 32, bytearray(b'x' * 32), object()])
+def test_kernel_guard_rejects_non_string_key_types(key: object) -> None:
+    with pytest.raises(KernelGuardError, match='must be str or bytes'):
+        build_kernel_guard_manifest(_load_manifest(), key=key, key_id=KEY_ID)  # type: ignore[arg-type]
+
+
+def test_kernel_guard_uses_utf8_byte_length_not_character_count() -> None:
+    manifest = _load_manifest()
+    key = 'ą' * 16
+    guard = build_kernel_guard_manifest(manifest, key=key, key_id=KEY_ID)
+    result = verify_kernel_guard_manifest(manifest, guard, key=key, validate_chain=False)
+
+    assert len(key) == 16
+    assert result['key_length_bytes'] == 32
+
+
+def test_kernel_guard_reports_placeholder_warning_without_entropy_claim() -> None:
+    manifest = _load_manifest()
+    key = 'change-me-placeholder-key-32-bytes'
+    guard = build_kernel_guard_manifest(manifest, key=key, key_id=KEY_ID)
+    result = verify_kernel_guard_manifest(manifest, guard, key=key, validate_chain=False)
+
+    assert result['key_warnings'] == ['placeholder_like_key']
+    assert result['key_entropy_status'] == 'not_checked'
+
+
+def test_kernel_guard_legacy_read_only_never_returns_production_posture() -> None:
+    manifest = _load_manifest()
+    legacy_key = b'old'
+    guard = build_kernel_guard_manifest(manifest, key=b'x' * 32, key_id=KEY_ID)
+    nonces = [str(item['nonce']) for item in guard['entry_guards']]
+    key_bytes = kernel_guard_module._key_bytes(legacy_key, policy='legacy_read_only')
+    previous_tag = ''
+    for seq, (entry, entry_guard) in enumerate(zip(manifest['entries'], guard['entry_guards'])):
+        transcript = kernel_guard_module._entry_transcript(
+            manifest,
+            entry,
+            seq=seq,
+            entry_count=len(manifest['entries']),
+            previous_tag=previous_tag,
+            nonce=nonces[seq],
+            key_id=KEY_ID,
+        )
+        previous_tag = kernel_guard_module._hmac_hex(key_bytes, transcript)
+        entry_guard.update({**transcript, 'tag': previous_tag})
+    guard['first_tag'] = guard['entry_guards'][0]['tag']
+    guard['last_tag'] = previous_tag
+    root = kernel_guard_module._root_transcript(
+        manifest,
+        entry_count=len(manifest['entries']),
+        first_tag=guard['first_tag'],
+        last_tag=guard['last_tag'],
+        key_id=KEY_ID,
+    )
+    guard['root_tag'] = kernel_guard_module._hmac_hex(key_bytes, root)
+
+    with pytest.raises(KernelGuardError, match='at least 32 bytes'):
+        verify_kernel_guard_manifest(manifest, guard, key=legacy_key, validate_chain=False)
+    result = verify_kernel_guard_manifest(
+        manifest,
+        guard,
+        key=legacy_key,
+        validate_chain=False,
+        key_policy='legacy_read_only',
+    )
+    assert result['guard_status'] == 'passed'
+    assert result['key_policy'] == 'legacy_read_only'
+    assert result['security_posture'] == 'legacy_read_only_guard'
+    assert result['security_posture'] != 'guarded_domain_auth'
 
 
 def test_kernel_guard_rejects_manifest_metadata_spoofing() -> None:
@@ -312,6 +406,39 @@ def test_verify_guarded_chain_cli_json_reports_layer_statuses(tmp_path: Path) ->
     assert result['lifecycle_status'] == 'passed'
     assert result['guard_status'] == 'passed'
     assert result['replay_status'] == 'not_checked'
+    assert result['key_entropy_status'] == 'not_checked'
+    assert result['security_posture'] == 'guarded_domain_auth'
+
+
+def test_verify_guarded_chain_cli_legacy_policy_reports_weaker_posture(tmp_path: Path) -> None:
+    manifest = _load_manifest()
+    production_guard = _guard(manifest)
+    guard_path = tmp_path / 'kernel_guard_manifest.json'
+    guard_path.write_text(json.dumps(production_guard, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    env = dict(os.environ)
+    env['SCLITE_KERNEL_GUARD_KEY'] = 'short'
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'verify-guarded-chain',
+            str(FIXTURE / 'artifact_chain_manifest.json'),
+            '--guard',
+            str(guard_path),
+            '--legacy-read-only-key-policy',
+            '--format',
+            'json',
+        ],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        env=env,
+        check=False,
+    )
+
+    assert proc.returncode == 1
+    assert 'tag mismatch' in proc.stderr
 
 
 def test_verify_guarded_chain_cli_no_schema_still_validates_guard_sidecar_shape(tmp_path: Path) -> None:

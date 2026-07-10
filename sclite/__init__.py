@@ -26,7 +26,9 @@ from .integrity import (
     verify_lifecycle_manifest,
 )
 from .kernel_guard import (
+    KERNEL_GUARD_MINIMUM_KEY_BYTES,
     KERNEL_GUARD_PROFILE,
+    KernelGuardKeyPolicy,
     KernelGuardError,
     build_kernel_guard_manifest,
     manifest_metadata_digest,
@@ -171,6 +173,8 @@ __all__ = (
     'validate_automation_chain',
     'verify_automation_chain',
     'KERNEL_GUARD_PROFILE',
+    'KERNEL_GUARD_MINIMUM_KEY_BYTES',
+    'KernelGuardKeyPolicy',
     'KernelGuardError',
     'build_kernel_guard_manifest',
     'manifest_metadata_digest',

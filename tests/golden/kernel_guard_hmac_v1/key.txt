@@ -1,1 +1,1 @@
-sclite-golden-kernel-secret-v1
+sclite-golden-kernel-secret-v1-32

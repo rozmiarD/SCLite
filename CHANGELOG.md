@@ -4,6 +4,11 @@
 
 ## 1.1.0rc1 - Strict JSON input policy candidate
 
+- Enforces the Kernel Guard production key floor (`str|bytes`, at least 32
+  bytes after UTF-8 encoding), reports byte length, placeholder warnings and
+  the explicit `key_entropy_status=not_checked` non-claim. Historical short-key
+  verification requires `legacy_read_only` and cannot return production
+  `guarded_domain_auth` posture.
 - Adds closed-world `public_export` inventory for review bundles: unexpected,
   hidden, nested, case/Unicode-variant, symlink and special-file entries fail
   before export, while `local_review` reports inventory without claiming it is
