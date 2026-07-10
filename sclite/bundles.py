@@ -160,7 +160,7 @@ def validate_review_bundle_shape(
     return {
         'status': 'passed',
         'mode': mode,
-        'bundle_dir': str(base),
+        'bundle_dir': '.',
         'files': files,
         'manifest': REVIEW_BUNDLE_MANIFEST_FILE,
         'inventory': {

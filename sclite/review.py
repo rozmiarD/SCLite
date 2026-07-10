@@ -179,7 +179,7 @@ def build_review_record_from_manifest(
         'generated_at': record_generated_at,
         'review_id': 'review-record-' + (str(chain_result.get('root_chain_digest'))[:12] if chain_result else 'unverified'),
         'review_profile': 'sclite-lifecycle-review-v0.1',
-        'source_manifest': str(manifest_path),
+        'source_manifest': source_artifact,
         'verdict': verdict,
         'summary': {
             'artifact_count': len(artifacts_by_role),

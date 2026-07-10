@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "disclosure": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "coverage": {
+          "type": "object"
+        },
+        "policy": {
+          "type": "string"
+        },
+        "publication_authorized": {
+          "const": false
+        },
+        "status": {
+          "enum": [
+            "unknown",
+            "operator_asserted",
+            "checks_performed",
+            "externally_verified"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "checks",
+        "policy",
+        "coverage",
+        "publication_authorized"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://sclite.local/schemas/public_snapshot_manifest.v0.2.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_type": {
+      "const": "public_snapshot_manifest"
+    },
+    "disclosure": {
+      "$ref": "#/$defs/disclosure"
+    },
+    "files": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "type": "string"
+          },
+          "disclosure": {
+            "$ref": "#/$defs/disclosure"
+          },
+          "hash": {
+            "type": "object"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "public_safe": {
+            "type": "boolean"
+          },
+          "schema": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "artifact_type",
+          "schema",
+          "disclosure",
+          "public_safe"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "non_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "public_safety": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "v0.2"
+    },
+    "snapshot_name": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "snapshot_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "artifact_type",
+    "schema_version",
+    "snapshot_name",
+    "snapshot_version",
+    "generated_at",
+    "files",
+    "summary",
+    "disclosure",
+    "public_safety",
+    "non_claims"
+  ],
+  "title": "SCLite PublicSnapshotManifest v0.2",
+  "type": "object"
+}

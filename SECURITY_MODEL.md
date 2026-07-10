@@ -231,3 +231,12 @@ SCLite does not protect against:
 - legal authorization failures;
 - runtime policy bypass outside the artifact verifier;
 - raw evidence or log tampering outside SCLite-managed artifacts.
+
+## Disclosure and local paths
+
+Disclosure status is evidence-based and monotonic: `unknown`,
+`operator_asserted`, `checks_performed`, then `externally_verified`. Heuristic
+sanitization reports named checks and coverage, not categorical absence of
+credentials or private paths. Publication authorization is never implied.
+Canonical outputs omit absolute workstation paths; an explicit local-debug
+envelope is operator-facing and must not be published.

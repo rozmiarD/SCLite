@@ -200,6 +200,17 @@ rename; replacing an existing target requires explicit `overwrite=True`.
 
 The package stays centered on local validation, review, profile references, and integrity checks:
 
+Disclosure/publication helpers use the monotonic status model `unknown →
+operator_asserted → checks_performed → externally_verified`. Unknown inputs and
+arbitrary CLI files default to `unknown`; heuristic redaction names its checks
+but does not claim credentials or private paths are absent. The legacy
+`public_safe` boolean is derived and true only for externally verified input.
+No status authorizes publication: that remains a separate host/operator step.
+
+Canonical results contain relative path labels. `verify-secure-bundle
+--local-debug --format json` is the explicit local-only escape hatch for an
+absolute-path debug envelope.
+
 ```mermaid
 flowchart TB
     CLI[CLI] --> Validation[validation]

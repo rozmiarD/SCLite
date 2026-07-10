@@ -4,6 +4,15 @@
 
 ## 1.1.0rc1 - Strict JSON input policy candidate
 
+- Adds evidence-based disclosure v0.2 statuses (`unknown`,
+  `operator_asserted`, `checks_performed`, `externally_verified`) for redaction,
+  validation-surface and snapshot artifacts. Unknown/arbitrary CLI input no
+  longer defaults to `public_safe=true`; heuristic checks do not claim
+  credentials or private paths are absent, and publication authorization stays
+  external.
+- Removes absolute paths from canonical review, secure-bundle and snapshot
+  results. Absolute paths are available only through the explicit local-only
+  `--local-debug` envelope.
 - Adds the frozen `VerificationResult` production outcome,
   `verify_secure_bundle_result()` and a `verification_result.v1.1` serializer
   with bundle digest, policy, verifier version and performed checks. The legacy

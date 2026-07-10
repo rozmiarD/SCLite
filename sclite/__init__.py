@@ -53,6 +53,15 @@ from .verification_result import (
     serialize_verification_result,
 )
 from .errors import SCLiteError, SCLiteSchemaValidationError, SCLiteValidationError
+from .disclosure import (
+    DISCLOSURE_STATUS_ORDER,
+    DisclosureStatus,
+    DisclosureStatusError,
+    build_disclosure_status,
+    legacy_public_safe,
+    relative_public_path,
+    validate_disclosure_transition,
+)
 from .review import (
     REVIEW_RECORD_SCHEMA,
     REVIEW_RECORD_SCHEMA_REF,
@@ -201,6 +210,13 @@ __all__ = (
     'SCLiteError',
     'SCLiteValidationError',
     'SCLiteSchemaValidationError',
+    'DISCLOSURE_STATUS_ORDER',
+    'DisclosureStatus',
+    'DisclosureStatusError',
+    'build_disclosure_status',
+    'legacy_public_safe',
+    'relative_public_path',
+    'validate_disclosure_transition',
     'REVIEW_RECORD_SCHEMA',
     'REVIEW_RECORD_SCHEMA_REF',
     'ReviewRecordError',

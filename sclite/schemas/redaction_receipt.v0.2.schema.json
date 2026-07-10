@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "disclosure": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "coverage": {
+          "type": "object"
+        },
+        "policy": {
+          "type": "string"
+        },
+        "publication_authorized": {
+          "const": false
+        },
+        "status": {
+          "enum": [
+            "unknown",
+            "operator_asserted",
+            "checks_performed",
+            "externally_verified"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "checks",
+        "policy",
+        "coverage",
+        "publication_authorized"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://sclite.local/schemas/redaction_receipt.v0.2.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_type": {
+      "const": "redaction_receipt"
+    },
+    "disclosure": {
+      "$ref": "#/$defs/disclosure"
+    },
+    "generated_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "non_claims": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "policy": {
+      "type": "object"
+    },
+    "public_safety": {
+      "additionalProperties": true,
+      "properties": {
+        "credentials_included": {
+          "enum": [
+            "unknown"
+          ]
+        },
+        "private_paths_included": {
+          "enum": [
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "credentials_included",
+        "private_paths_included"
+      ],
+      "type": "object"
+    },
+    "redacted": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "v0.2"
+    },
+    "source": {
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "redacted",
+        "unchanged"
+      ]
+    },
+    "summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "artifact_type",
+    "schema_version",
+    "generated_at",
+    "policy",
+    "source",
+    "redacted",
+    "status",
+    "summary",
+    "disclosure",
+    "public_safety",
+    "non_claims"
+  ],
+  "title": "SCLite RedactionReceipt v0.2",
+  "type": "object"
+}

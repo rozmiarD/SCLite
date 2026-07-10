@@ -176,6 +176,21 @@ verification. The old root-level `build_guarded_strict_verification_result`
 name remains a compatibility alias through 2.0; formal warnings begin no
 earlier than 1.3.
 
+## Disclosure status
+
+- `DISCLOSURE_STATUS_ORDER`
+- `DisclosureStatus`
+- `DisclosureStatusError`
+- `build_disclosure_status`
+- `legacy_public_safe`
+- `relative_public_path`
+- `validate_disclosure_transition`
+
+The monotonic disclosure model is `unknown → operator_asserted →
+checks_performed → externally_verified`. `public_safe` is a deprecated derived
+boolean and becomes true only for `externally_verified`; publication
+authorization remains a separate host decision.
+
 ## Review Records
 
 - `REVIEW_RECORD_SCHEMA`

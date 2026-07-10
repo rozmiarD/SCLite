@@ -150,6 +150,7 @@ def _handle_secure_bundle_command(args: Any) -> int:
             strict_jsonschema=bool(args.strict_jsonschema),
             max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
             max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
+            include_local_debug=bool(args.local_debug),
         )
     except (SecureBundleError, CliInputError) as exc:
         print(f'secure_bundle_failed:{exc}', file=sys.stderr)
@@ -250,6 +251,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     secure_cmd.add_argument('--max-artifact-bytes', type=int, help='optional maximum JSON bytes per referenced artifact')
     secure_cmd.add_argument('--max-manifest-entries', type=int, help='optional maximum artifact-chain manifest entries')
     secure_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
+    secure_cmd.add_argument('--local-debug', action='store_true', help='include absolute local paths in an explicit local_debug JSON envelope')
 
     ticket_cmd = sub.add_parser('validate-ticket', help='validate an ExecutionTicket and optional execution-contract binding')
     ticket_cmd.add_argument('ticket', help='path to execution_ticket.json')
@@ -538,7 +540,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 path = Path(str(item))
                 value = _load_json_value(path)
                 artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
-                files.append({'path': str(path), 'artifact_type': str(artifact_type or ''), 'schema': '', 'public_safe': True, 'value': value})
+                files.append({'path': path.name, 'artifact_type': str(artifact_type or ''), 'schema': '', 'value': value})
             manifest = build_public_snapshot_manifest(files, snapshot_name=str(args.snapshot_name), snapshot_version=str(args.snapshot_version))
         except (CliInputError, ValueError) as exc:
             return _failed('snapshot_manifest_failed', exc)

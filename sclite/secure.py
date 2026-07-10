@@ -68,6 +68,7 @@ def _verify_secure_bundle(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
+    include_local_debug: bool = False,
 ) -> tuple[Dict[str, Any], VerificationResult]:
     """Verify the guarded-strict secure bundle profile.
 
@@ -143,14 +144,20 @@ def _verify_secure_bundle(
         'ticket_use_status': ticket_use_result.get('status') or 'review',
         'ticket_use_applicability': ticket_use_result.get('applicability') or '',
         'ticket_use_detail': ticket_use_result.get('detail') or '',
-        'manifest_path': str(manifest_path),
-        'guard_path': str(sidecar_path),
+        'manifest_path': str(manifest_path.relative_to(root_path)),
+        'guard_path': str(sidecar_path.relative_to(root_path)),
         'chain_id': str(manifest.get('chain_id') or ''),
         'ticket_id': str(artifacts_by_role.get('execution_ticket', {}).get('ticket_id') or ''),
         'fail_closed': True,
         'replay_status': result.get('replay_status') or 'not_checked',
         'verification_result': serialized_result,
     }
+    if include_local_debug:
+        response['local_debug'] = {
+            'manifest_path': str(manifest_path),
+            'guard_path': str(sidecar_path),
+            'root_path': str(root_path),
+        }
     return response, verification_result
 
 
@@ -165,6 +172,7 @@ def verify_secure_bundle(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
+    include_local_debug: bool = False,
 ) -> Dict[str, Any]:
     """Compatibility dictionary API for guarded-strict verification."""
 
@@ -178,6 +186,7 @@ def verify_secure_bundle(
         max_artifact_bytes=max_artifact_bytes,
         max_manifest_entries=max_manifest_entries,
         verification_limits=verification_limits,
+        include_local_debug=include_local_debug,
     )
     return response
 

@@ -6,12 +6,18 @@ from typing import Any, Dict, Iterable, Mapping, Sequence
 
 from ._json import load_json_value
 from .artifacts import build_artifact_hash
+from .disclosure import (
+    DisclosureStatus,
+    build_disclosure_status,
+    legacy_public_safe,
+    relative_public_path,
+)
 
 
 PUBLIC_VALIDATION_SURFACE_INDEX_ARTIFACT_TYPE = 'public_validation_surface_index'
-PUBLIC_VALIDATION_SURFACE_INDEX_SCHEMA_VERSION = 'v0.1'
+PUBLIC_VALIDATION_SURFACE_INDEX_SCHEMA_VERSION = 'v0.2'
 PUBLIC_SNAPSHOT_MANIFEST_ARTIFACT_TYPE = 'public_snapshot_manifest'
-PUBLIC_SNAPSHOT_MANIFEST_SCHEMA_VERSION = 'v0.1'
+PUBLIC_SNAPSHOT_MANIFEST_SCHEMA_VERSION = 'v0.2'
 
 
 def _utc_now() -> str:
@@ -32,7 +38,8 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'purpose': 'Validate a static lifecycle review aggregate and its scope-fidelity result.',
             'schemas': ['review_record.v0.1', 'scope_fidelity_report.v0.2'],
             'commands': ['sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json'],
-            'public_safe': True,
+            'disclosure': build_disclosure_status(status='operator_asserted'),
+            'public_safe': False,
         },
         {
             'surface_id': 'review_bundle_fixture',
@@ -41,7 +48,8 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'purpose': 'Validate and export a canonical SCLite current lifecycle/review bundle.',
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2'],
             'commands': ['sclite review examples/review-bundle --format json', 'sclite export-review-bundle examples/review-bundle --format markdown'],
-            'public_safe': True,
+            'disclosure': build_disclosure_status(status='operator_asserted'),
+            'public_safe': False,
         },
         {
             'surface_id': 'govengine_integration_fixture',
@@ -55,7 +63,8 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
                 'sclite validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json',
                 'sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json',
             ],
-            'public_safe': True,
+            'disclosure': build_disclosure_status(status='operator_asserted'),
+            'public_safe': False,
         },
         {
             'surface_id': 'local_admin_change_fixture',
@@ -64,7 +73,8 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'purpose': 'Validate the current local-admin-change fixture as a non-security multi-runtime proof surface.',
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3'],
             'commands': ['sclite review examples/local-admin-change --format json --fail-on review'],
-            'public_safe': True,
+            'disclosure': build_disclosure_status(status='operator_asserted'),
+            'public_safe': False,
         },
     ]
     return {
@@ -76,6 +86,7 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'surface_count': len(surfaces),
             'public_safe_surface_count': sum(1 for item in surfaces if item.get('public_safe') is True),
         },
+        'disclosure': build_disclosure_status(status='operator_asserted'),
         'public_safety': {
             'live_target_execution': False,
             'protocol_adapter_work': False,
@@ -104,11 +115,23 @@ def build_public_snapshot_manifest(
     """
     normalized = []
     for item in files:
+        requested_status = str(item.get('disclosure_status') or '')
+        if not requested_status and item.get('public_safe') is True:
+            requested_status = 'operator_asserted'
+        status: DisclosureStatus = (
+            requested_status if requested_status else 'unknown'  # type: ignore[assignment]
+        )
+        disclosure = build_disclosure_status(
+            status=status,
+            checks=[str(value) for value in item.get('disclosure_checks', [])],
+            policy=str(item.get('disclosure_policy') or ''),
+        )
         entry: Dict[str, Any] = {
-            'path': str(item.get('path') or ''),
+            'path': relative_public_path(str(item.get('path') or 'artifact.json')),
             'artifact_type': str(item.get('artifact_type') or ''),
             'schema': str(item.get('schema') or ''),
-            'public_safe': bool(item.get('public_safe', True)),
+            'disclosure': disclosure,
+            'public_safe': legacy_public_safe(status),
         }
         if 'value' in item:
             entry['hash'] = build_artifact_hash(item['value'])
@@ -125,6 +148,7 @@ def build_public_snapshot_manifest(
             'hashed_file_count': sum(1 for item in normalized if 'hash' in item),
             'public_safe_file_count': sum(1 for item in normalized if item.get('public_safe') is True),
         },
+        'disclosure': build_disclosure_status(status='unknown'),
         'public_safety': {
             'live_target_execution': False,
             'protocol_adapter_work': False,
@@ -146,10 +170,10 @@ def manifest_entries_from_paths(paths: Iterable[Path], *, schema: str = '') -> l
         value = load_json_value(path, error_cls=ValueError)
         artifact_type = value.get('artifact_type') if isinstance(value, dict) else ''
         entries.append({
-            'path': str(path),
+            'path': relative_public_path(path),
             'artifact_type': str(artifact_type or ''),
             'schema': schema,
-            'public_safe': True,
+            'disclosure_status': 'unknown',
             'value': value,
         })
     return entries

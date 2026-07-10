@@ -229,17 +229,27 @@ It is not a signature, identity proof, authorization proof, or tamper-proof audi
 
 ## RedactionPolicy and RedactionReceipt
 
-`RedactionPolicy` documents public-safe redaction rules. `RedactionReceipt` records a redaction operation using policy/source/redacted hashes and summary counts while excluding raw source material.
+`RedactionPolicy` documents heuristic redaction rules. `RedactionReceipt` records a redaction operation using policy/source/redacted hashes, the concrete rules performed, and coverage statuses while excluding raw source material.
 
 They are useful for reviewer traceability, but they are not a complete secret scanner, not proof that upstream data never contained secrets, and not publication authorization.
 
-The redaction helpers are blacklist-oriented public-safe fixture helpers. Treat them as part of publication hygiene, not as DLP or a general-purpose secret scanner.
+The redaction helpers are blacklist-oriented fixture helpers. Their v0.2
+receipts report `checks_performed`, while credentials/private-path coverage is
+heuristic and the corresponding inclusion claim stays `unknown`. Treat them as
+publication hygiene, not DLP, a general-purpose secret scanner, or publication
+authorization.
 
 ## PublicValidationSurfaceIndex and PublicSnapshotManifest
 
-`PublicValidationSurfaceIndex` lists public-safe validation surfaces and commands. `PublicSnapshotManifest` describes selected public-safe files and can include SCLite canonical hash descriptors.
+`PublicValidationSurfaceIndex` lists validation surfaces and commands.
+`PublicSnapshotManifest` describes selected files and can include SCLite
+canonical hash descriptors. Their v0.2 disclosure status defaults to `unknown`;
+repository fixture labels are at most `operator_asserted`.
 
-These artifacts help reviewers understand what can be validated locally. They do not claim live execution, protocol adapter coverage, signed provenance, or push/package publication authorization.
+These artifacts help reviewers understand what can be validated locally. A
+deprecated `public_safe` boolean is true only for an explicitly
+`externally_verified` item with named checks and policy. Even then publication
+authorization remains a separate host decision.
 
 ## ScopeFidelityReport
 
@@ -269,10 +279,10 @@ python -m sclite.cli validate-trust-profile sclite/examples/trust-carrier-profil
 python -m sclite.cli validate-carrier-profile sclite/examples/trust-carrier-profiles/carrier_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.cli hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
-python -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-python -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m sclite.cli scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
 ```
 

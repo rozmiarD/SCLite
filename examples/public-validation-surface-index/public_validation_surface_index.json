@@ -1,6 +1,17 @@
 {
   "artifact_type": "public_validation_surface_index",
-  "generated_at": "2026-05-21T12:10:00+00:00",
+  "disclosure": {
+    "checks": [],
+    "coverage": {
+      "credentials": "not_checked",
+      "private_paths": "not_checked",
+      "raw_output": "not_checked"
+    },
+    "policy": "",
+    "publication_authorized": false,
+    "status": "operator_asserted"
+  },
+  "generated_at": "2026-05-05T21:30:00+00:00",
   "non_claims": [
     "does_not_claim_live_vulnerability_evidence",
     "does_not_authorize_publication",
@@ -12,9 +23,9 @@
     "public_push_authorized": false,
     "raw_live_evidence_included": false
   },
-  "schema_version": "v0.1",
+  "schema_version": "v0.2",
   "summary": {
-    "public_safe_surface_count": 4,
+    "public_safe_surface_count": 0,
     "surface_count": 4
   },
   "surfaces": [
@@ -22,9 +33,20 @@
       "commands": [
         "sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json"
       ],
+      "disclosure": {
+        "checks": [],
+        "coverage": {
+          "credentials": "not_checked",
+          "private_paths": "not_checked",
+          "raw_output": "not_checked"
+        },
+        "policy": "",
+        "publication_authorized": false,
+        "status": "operator_asserted"
+      },
       "kind": "json_artifact",
       "path": "examples/lifecycle-review/review_record.json",
-      "public_safe": true,
+      "public_safe": false,
       "purpose": "Validate a static lifecycle review aggregate and its scope-fidelity result.",
       "schemas": [
         "review_record.v0.1",
@@ -37,9 +59,20 @@
         "sclite review examples/review-bundle --format json",
         "sclite export-review-bundle examples/review-bundle --format markdown"
       ],
+      "disclosure": {
+        "checks": [],
+        "coverage": {
+          "credentials": "not_checked",
+          "private_paths": "not_checked",
+          "raw_output": "not_checked"
+        },
+        "policy": "",
+        "publication_authorized": false,
+        "status": "operator_asserted"
+      },
       "kind": "review_bundle_directory",
       "path": "examples/review-bundle",
-      "public_safe": true,
+      "public_safe": false,
       "purpose": "Validate and export a canonical SCLite current lifecycle/review bundle.",
       "schemas": [
         "review_record.v0.1",
@@ -50,12 +83,24 @@
     {
       "commands": [
         "sclite review examples/govengine-integration --format json --fail-on review",
+        "sclite verify-secure-bundle examples/govengine-integration --guard /path/to/kernel_guard_manifest.json",
         "sclite validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json",
         "sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json"
       ],
+      "disclosure": {
+        "checks": [],
+        "coverage": {
+          "credentials": "not_checked",
+          "private_paths": "not_checked",
+          "raw_output": "not_checked"
+        },
+        "policy": "",
+        "publication_authorized": false,
+        "status": "operator_asserted"
+      },
       "kind": "review_bundle_directory",
       "path": "examples/govengine-integration",
-      "public_safe": true,
+      "public_safe": false,
       "purpose": "Validate the current downstream integration fixture for GovEngine consumption.",
       "schemas": [
         "review_record.v0.1",
@@ -70,9 +115,20 @@
       "commands": [
         "sclite review examples/local-admin-change --format json --fail-on review"
       ],
+      "disclosure": {
+        "checks": [],
+        "coverage": {
+          "credentials": "not_checked",
+          "private_paths": "not_checked",
+          "raw_output": "not_checked"
+        },
+        "policy": "",
+        "publication_authorized": false,
+        "status": "operator_asserted"
+      },
       "kind": "review_bundle_directory",
       "path": "examples/local-admin-change",
-      "public_safe": true,
+      "public_safe": false,
       "purpose": "Validate the current local-admin-change fixture as a non-security multi-runtime proof surface.",
       "schemas": [
         "review_record.v0.1",

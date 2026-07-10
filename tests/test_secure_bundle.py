@@ -149,6 +149,9 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['ticket_use_status'] == 'review'
     assert result['ticket_use_applicability'] == 'not_applicable'
     assert result['fail_closed'] is True
+    assert result['manifest_path'] == 'artifact_chain_manifest.json'
+    assert result['guard_path'] == 'kernel_guard_manifest.json'
+    assert 'local_debug' not in result
     assert result['verification_result']['artifact_chain'] == 'pass'
     assert result['verification_result']['strict_lifecycle'] == 'pass'
     assert result['verification_result']['kernel_guard'] == 'pass'
@@ -157,6 +160,22 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['verification_result']['runtime_enforcement'] == 'not_claimed'
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT)
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
+
+
+def test_secure_bundle_absolute_paths_require_explicit_local_debug(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+
+    result = verify_secure_bundle(
+        bundle,
+        guard_path=guard_path,
+        key=KEY,
+        include_local_debug=True,
+    )
+
+    assert result['manifest_path'] == 'artifact_chain_manifest.json'
+    assert result['local_debug']['manifest_path'] == str((bundle / 'artifact_chain_manifest.json').resolve())
+    assert result['local_debug']['guard_path'] == str(guard_path.resolve())
 
 
 def test_secure_bundle_typed_api_returns_verified_provenance(tmp_path: Path) -> None:

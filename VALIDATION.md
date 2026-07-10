@@ -154,10 +154,10 @@ python -m sclite.cli review examples/bad-review-bundle-cross-host --format json 
 python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 python -m sclite.cli export-review-bundle examples/govengine-integration --format markdown
-python -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-python -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m pytest -q tests/test_reactions.py tests/test_trigger_decisions.py tests/test_watchdog_decisions.py
 python -m pytest -q
 ```

@@ -1,5 +1,16 @@
 {
   "artifact_type": "redaction_policy",
+  "disclosure": {
+    "checks": [],
+    "coverage": {
+      "credentials": "not_checked",
+      "private_paths": "not_checked",
+      "raw_output": "not_checked"
+    },
+    "policy": "",
+    "publication_authorized": false,
+    "status": "operator_asserted"
+  },
   "mode": "public_safe_fixture_redaction",
   "non_claims": [
     "does_not_claim_complete_secret_detection",
@@ -8,9 +19,9 @@
   ],
   "policy_id": "sclite-public-safe-v0.1",
   "public_safety": {
-    "credentials_included": false,
+    "credentials_included": "unknown",
     "live_target_execution": false,
-    "private_paths_included": false,
+    "private_paths_included": "unknown",
     "raw_live_evidence_included": false,
     "raw_stdout_stderr_included": false
   },
@@ -62,5 +73,5 @@
       "rule_id": "header_like_secrets"
     }
   ],
-  "schema_version": "v0.1"
+  "schema_version": "v0.2"
 }

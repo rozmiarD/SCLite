@@ -59,6 +59,8 @@ STABLE_IMPORTS = (
     'sclite.verification_result:build_guarded_strict_verification_result',
     'sclite.verification_result:serialize_verification_result',
     'sclite.testing:build_guarded_strict_verification_result_fixture',
+    'sclite.disclosure:build_disclosure_status',
+    'sclite.disclosure:validate_disclosure_transition',
 )
 REQUIRED_FIXTURES = (
     'examples/lifecycle-review/review_record.json',
@@ -222,6 +224,8 @@ def _curated_root_export_errors() -> list[str]:
         'verify_secure_bundle',
         'verify_secure_bundle_result',
         'serialize_verification_result',
+        'build_disclosure_status',
+        'validate_disclosure_transition',
         'build_kernel_guard_manifest',
         'build_guarded_strict_verification_result',
     )

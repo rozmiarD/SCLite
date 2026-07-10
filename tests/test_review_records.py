@@ -91,6 +91,7 @@ def test_review_record_aggregates_lifecycle_checks() -> None:
     assert statuses['scope_fidelity'] == 'pass'
     assert statuses['ticket_use_profile'] == 'review'
     assert record['summary']['ticket_use_applicability'] == 'not_applicable'
+    assert record['source_manifest'] == 'artifact_chain_manifest.json'
 
 
 @pytest.mark.parametrize('strict_jsonschema', [False, True])

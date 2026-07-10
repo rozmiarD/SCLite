@@ -125,9 +125,9 @@ def test_artifact_hash_changes_when_artifact_changes() -> None:
 def test_redaction_policy_and_receipt_schemas_validate_fixtures() -> None:
     policy = json.loads(PACKAGE_REDACTION_POLICY_FIXTURE.read_text(encoding='utf-8'))
     receipt = json.loads(PACKAGE_REDACTION_RECEIPT_FIXTURE.read_text(encoding='utf-8'))
-    artifacts.validate_artifact(policy, 'redaction_policy.v0.1')
-    artifacts.validate_artifact(receipt, 'redaction_receipt.v0.1')
-    assert policy['public_safety']['credentials_included'] is False
+    artifacts.validate_artifact(policy, 'redaction_policy.v0.2')
+    artifacts.validate_artifact(receipt, 'redaction_receipt.v0.2')
+    assert policy['public_safety']['credentials_included'] == 'unknown'
     assert receipt['public_safety']['raw_source_included'] is False
 
 
@@ -135,7 +135,7 @@ def test_redaction_receipt_builder_records_hash_change_without_raw_source() -> N
     source = {'artifact_type': 'example', 'token': 'synthetic-demo-token', 'stdout': 'synthetic output'}
     redacted = redact_prepared_spec(source)
     receipt = build_redaction_receipt(source, redacted, policy=build_default_redaction_policy(), generated_at='2026-05-05T21:30:00+00:00')
-    artifacts.validate_artifact(receipt, 'redaction_receipt.v0.1')
+    artifacts.validate_artifact(receipt, 'redaction_receipt.v0.2')
     assert receipt['status'] == 'redacted'
     assert receipt['summary']['changed_paths_estimate'] >= 1
     assert 'synthetic-demo-token' not in json.dumps(receipt, sort_keys=True)
@@ -144,8 +144,8 @@ def test_redaction_receipt_builder_records_hash_change_without_raw_source() -> N
 def test_public_surface_index_and_snapshot_manifest_schemas_validate_fixtures() -> None:
     index = json.loads(PACKAGE_SURFACE_INDEX_FIXTURE.read_text(encoding='utf-8'))
     manifest = json.loads(PACKAGE_SNAPSHOT_MANIFEST_FIXTURE.read_text(encoding='utf-8'))
-    artifacts.validate_artifact(index, 'public_validation_surface_index.v0.1')
-    artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.1')
+    artifacts.validate_artifact(index, 'public_validation_surface_index.v0.2')
+    artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.2')
     assert index['summary']['surface_count'] >= 3
     assert manifest['summary']['hashed_file_count'] == manifest['summary']['file_count']
 
@@ -170,8 +170,8 @@ def test_surface_and_manifest_builders_accept_current_artifact() -> None:
     manifest = build_public_snapshot_manifest([
         {'path': '03_execution_contract.json', 'artifact_type': 'execution_contract', 'schema': 'execution_contract.v0.2', 'public_safe': True, 'value': contract}
     ], generated_at='2026-05-05T21:30:00+00:00')
-    artifacts.validate_artifact(index, 'public_validation_surface_index.v0.1')
-    artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.1')
+    artifacts.validate_artifact(index, 'public_validation_surface_index.v0.2')
+    artifacts.validate_artifact(manifest, 'public_snapshot_manifest.v0.2')
 
 
 def test_hash_artifact_cli_emits_same_digest_as_helper() -> None:
@@ -189,9 +189,9 @@ def test_public_surface_clis_emit_schema_valid_json() -> None:
     policy_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'redaction-policy'], capture_output=True, text=True, check=True)
     index_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'validation-surface-index', '--generated-at', '2026-05-05T21:30:00+00:00'], capture_output=True, text=True, check=True)
     snapshot_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'snapshot-manifest', '--file', str(PACKAGE_EXECUTION_CONTRACT)], capture_output=True, text=True, check=True)
-    artifacts.validate_artifact(json.loads(policy_proc.stdout), 'redaction_policy.v0.1')
-    artifacts.validate_artifact(json.loads(index_proc.stdout), 'public_validation_surface_index.v0.1')
-    artifacts.validate_artifact(json.loads(snapshot_proc.stdout), 'public_snapshot_manifest.v0.1')
+    artifacts.validate_artifact(json.loads(policy_proc.stdout), 'redaction_policy.v0.2')
+    artifacts.validate_artifact(json.loads(index_proc.stdout), 'public_validation_surface_index.v0.2')
+    artifacts.validate_artifact(json.loads(snapshot_proc.stdout), 'public_snapshot_manifest.v0.2')
 
 
 def test_current_fixture_is_synthetic_not_private_runtime_export() -> None:

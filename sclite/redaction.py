@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Mapping
 
 from .json_types import json_array
+from .disclosure import build_disclosure_status
 
 
 SENSITIVE_VALUE_KEYS = {
@@ -23,9 +24,9 @@ SENSITIVE_VALUE_KEYS = {
 PUBLIC_REDACTION_PLACEHOLDER = '<redacted>'
 PATH_REDACTION_PLACEHOLDER = '<local_path_omitted>'
 REDACTION_POLICY_ARTIFACT_TYPE = 'redaction_policy'
-REDACTION_POLICY_SCHEMA_VERSION = 'v0.1'
+REDACTION_POLICY_SCHEMA_VERSION = 'v0.2'
 REDACTION_RECEIPT_ARTIFACT_TYPE = 'redaction_receipt'
-REDACTION_RECEIPT_SCHEMA_VERSION = 'v0.1'
+REDACTION_RECEIPT_SCHEMA_VERSION = 'v0.2'
 
 
 def _repo_root() -> Path:
@@ -130,12 +131,13 @@ def build_default_redaction_policy(*, policy_id: str = 'sclite-public-safe-v0.1'
         'policy_id': policy_id,
         'mode': 'public_safe_fixture_redaction',
         'rules': rules,
+        'disclosure': build_disclosure_status(status='operator_asserted'),
         'public_safety': {
             'live_target_execution': False,
             'raw_live_evidence_included': False,
             'raw_stdout_stderr_included': False,
-            'credentials_included': False,
-            'private_paths_included': False,
+            'credentials_included': 'unknown',
+            'private_paths_included': 'unknown',
         },
         'non_claims': [
             'does_not_claim_complete_secret_detection',
@@ -203,12 +205,22 @@ def build_redaction_receipt(
             'changed_paths_estimate': changed_paths,
             'source_and_redacted_hash_match': source_hash == redacted_hash,
         },
+        'disclosure': build_disclosure_status(
+            status='checks_performed',
+            checks=[str(rule.get('rule_id') or '') for rule in rules if rule.get('rule_id')],
+            policy=str(policy_doc.get('policy_id') or ''),
+            coverage={
+                'credentials': 'heuristic_checked',
+                'private_paths': 'heuristic_checked',
+                'raw_output': 'heuristic_checked',
+            },
+        ),
         'public_safety': {
             'raw_source_included': False,
             'raw_live_evidence_included': False,
             'raw_stdout_stderr_included': False,
-            'credentials_included': False,
-            'private_paths_included': False,
+            'credentials_included': 'unknown',
+            'private_paths_included': 'unknown',
         },
         'non_claims': [
             'does_not_claim_complete_secret_detection',

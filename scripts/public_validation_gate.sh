@@ -34,7 +34,7 @@ fi
   --mode local_review --format markdown >/dev/null
 "${PYTHON_BIN}" -m sclite.cli validate-artifact --schema review_record.v0.1 examples/govengine-integration/verification_receipt.json
 "${PYTHON_BIN}" -m sclite.cli validate-artifact --schema review_record.v0.1 examples/local-admin-change/verification_receipt.json
-"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+"${PYTHON_BIN}" -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
