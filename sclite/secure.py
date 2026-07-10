@@ -4,9 +4,14 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ._json import VerificationLimits, load_json_object
+from .errors import SCLiteValidationError
 from .kernel_guard import KernelGuardError, _verify_kernel_guard_manifest_with_snapshot
 from .tickets import verify_ticket_use_profile
-from .verification_result import build_guarded_strict_verification_result
+from .verification_result import (
+    VerificationResult,
+    _verification_result_from_verified_guard,
+    build_guarded_strict_verification_result,
+)
 
 SECURE_BUNDLE_PROFILE = 'guarded-strict'
 SECURE_BUNDLE_POSTURE = 'guarded_domain_auth'
@@ -14,8 +19,10 @@ DEFAULT_KERNEL_GUARD_FILENAME = 'kernel_guard_manifest.json'
 DEFAULT_ARTIFACT_CHAIN_MANIFEST = 'artifact_chain_manifest.json'
 
 
-class SecureBundleError(ValueError):
+class SecureBundleError(SCLiteValidationError):
     """Raised when the guarded-strict secure bundle profile cannot pass."""
+
+    default_code = 'secure_bundle_failed'
 
 
 def _load_json_object(
@@ -50,7 +57,7 @@ def _assert_under_root(path: Path, root: Path, *, label: str) -> None:
         raise SecureBundleError(f'{label} path escapes root: {path}') from exc
 
 
-def verify_secure_bundle(
+def _verify_secure_bundle(
     target: Path | str,
     *,
     guard_path: Path | str | None = None,
@@ -61,7 +68,7 @@ def verify_secure_bundle(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
-) -> Dict[str, Any]:
+) -> tuple[Dict[str, Any], VerificationResult]:
     """Verify the guarded-strict secure bundle profile.
 
     This profile is fail-closed by design: it always requires the canonical
@@ -117,13 +124,19 @@ def verify_secure_bundle(
     ):
         raise SecureBundleError('ticket-use verification failed:' + str(ticket_use_result.get('detail') or 'unknown'))
 
-    verification_result = build_guarded_strict_verification_result(
+    verification_result = _verification_result_from_verified_guard(
         result,
         secure_profile=SECURE_BUNDLE_PROFILE,
         security_posture=SECURE_BUNDLE_POSTURE,
         ticket_use_result=ticket_use_result,
     )
-    return {
+    serialized_result = build_guarded_strict_verification_result(
+        result,
+        secure_profile=SECURE_BUNDLE_PROFILE,
+        security_posture=SECURE_BUNDLE_POSTURE,
+        ticket_use_result=ticket_use_result,
+    )
+    response = {
         **result,
         'secure_profile': SECURE_BUNDLE_PROFILE,
         'security_posture': SECURE_BUNDLE_POSTURE,
@@ -136,5 +149,62 @@ def verify_secure_bundle(
         'ticket_id': str(artifacts_by_role.get('execution_ticket', {}).get('ticket_id') or ''),
         'fail_closed': True,
         'replay_status': result.get('replay_status') or 'not_checked',
-        'verification_result': verification_result,
+        'verification_result': serialized_result,
     }
+    return response, verification_result
+
+
+def verify_secure_bundle(
+    target: Path | str,
+    *,
+    guard_path: Path | str | None = None,
+    key: str | bytes,
+    root: Path | str | None = None,
+    validate_schemas: bool = True,
+    strict_jsonschema: bool = False,
+    max_artifact_bytes: int | None = None,
+    max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
+) -> Dict[str, Any]:
+    """Compatibility dictionary API for guarded-strict verification."""
+
+    response, _result = _verify_secure_bundle(
+        target,
+        guard_path=guard_path,
+        key=key,
+        root=root,
+        validate_schemas=validate_schemas,
+        strict_jsonschema=strict_jsonschema,
+        max_artifact_bytes=max_artifact_bytes,
+        max_manifest_entries=max_manifest_entries,
+        verification_limits=verification_limits,
+    )
+    return response
+
+
+def verify_secure_bundle_result(
+    target: Path | str,
+    *,
+    guard_path: Path | str | None = None,
+    key: str | bytes,
+    root: Path | str | None = None,
+    validate_schemas: bool = True,
+    strict_jsonschema: bool = False,
+    max_artifact_bytes: int | None = None,
+    max_manifest_entries: int | None = None,
+    verification_limits: VerificationLimits | None = None,
+) -> VerificationResult:
+    """Verify a guarded-strict bundle and return the typed production result."""
+
+    _response, result = _verify_secure_bundle(
+        target,
+        guard_path=guard_path,
+        key=key,
+        root=root,
+        validate_schemas=validate_schemas,
+        strict_jsonschema=strict_jsonschema,
+        max_artifact_bytes=max_artifact_bytes,
+        max_manifest_entries=max_manifest_entries,
+        verification_limits=verification_limits,
+    )
+    return result

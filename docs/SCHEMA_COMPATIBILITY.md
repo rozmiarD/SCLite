@@ -25,6 +25,7 @@ artifact contracts intentionally remain on earlier schema versions.
 | Artifact chain manifest | `artifact_chain_manifest.v0.2` | current | lifecycle and review fixtures | Security binding comes from descriptors and `root_chain_digest`, not arbitrary IDs. |
 | Kernel Guard sidecar | `kernel_guard_hmac_v1.schema.json` | current guarded profile | `tests/golden/kernel_guard_hmac_v1/` | HMAC domain authenticity only; incompatible transcript changes require a new profile name. |
 | Verification result | `verification_result.v1` | current secure verifier result | `tests/test_secure_bundle.py`, `tests/test_internal_package.py` | Layer statuses keep replay, public identity, and runtime enforcement as non-claims. |
+| Typed verification result | `verification_result.v1.1` | additive typed verifier serialization | `tests/test_typed_verification_result.py`, `tests/test_secure_bundle.py` | Adds bundle digest, policy, verifier version and performed checks; type/schema shape is not authentication. |
 | Review record | `review_record.v0.1` | current review output | `examples/govengine-integration/verification_receipt.json` | Static public-safe review result. |
 | Review bundle shape | `0.5` directory convention | current downstream boundary | `examples/review-bundle/`, `examples/govengine-integration/` | Directory contract, not a separate JSON schema version. |
 

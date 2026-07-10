@@ -16,6 +16,7 @@ from sclite._json import (
     validate_json_value,
 )
 from sclite.artifacts import build_artifact_hash, validate_artifact
+from sclite.errors import SCLiteValidationError
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
 CHAIN_HASH_ALGORITHM = 'sha256'
@@ -52,8 +53,10 @@ CONSUMABLE_TICKET_APPROVAL_STATUSES = {'approved_for_dry_run', 'approved'}
 TERMINAL_TICKET_APPROVAL_STATUSES = {'rejected', 'expired', 'revoked'}
 
 
-class ChainVerificationError(ValueError):
+class ChainVerificationError(SCLiteValidationError):
     """Raised when an artifact-chain manifest does not match its payloads."""
+
+    default_code = 'chain_verification_failed'
 
 
 @dataclass(frozen=True)

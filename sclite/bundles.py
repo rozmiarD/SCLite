@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Literal, Mapping
 
 from ._json import VerificationLimits, load_json_object
+from .errors import SCLiteValidationError
 from .integrity import build_artifact_chain_manifest
 from .json_types import json_mapping
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
@@ -32,8 +33,10 @@ ReviewBundleMode = Literal['public_export', 'local_review']
 REVIEW_BUNDLE_PUBLIC_OPTIONAL_FILES = frozenset({'README.md'})
 
 
-class ReviewBundleError(ValueError):
+class ReviewBundleError(SCLiteValidationError):
     """Raised when a review bundle is missing canonical files or fails review."""
+
+    default_code = 'review_bundle_failed'
 
 
 def _load_json_object(

@@ -55,7 +55,10 @@ STABLE_IMPORTS = (
     'sclite.profiles:validate_carrier_profile_ref',
     'sclite.scope_fidelity:build_lifecycle_scope_fidelity_report',
     'sclite.secure:verify_secure_bundle',
+    'sclite.secure:verify_secure_bundle_result',
     'sclite.verification_result:build_guarded_strict_verification_result',
+    'sclite.verification_result:serialize_verification_result',
+    'sclite.testing:build_guarded_strict_verification_result_fixture',
 )
 REQUIRED_FIXTURES = (
     'examples/lifecycle-review/review_record.json',
@@ -217,6 +220,8 @@ def _curated_root_export_errors() -> list[str]:
         'review_bundle',
         'verify_ticket_use',
         'verify_secure_bundle',
+        'verify_secure_bundle_result',
+        'serialize_verification_result',
         'build_kernel_guard_manifest',
         'build_guarded_strict_verification_result',
     )

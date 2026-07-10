@@ -8,6 +8,7 @@ from typing import Any, Dict, Literal, Mapping, Sequence
 
 from ._json import VerificationLimits, validate_json_value
 from .artifacts import validate_artifact
+from .errors import SCLiteValidationError
 from .integrity.chain import (
     ChainVerificationError,
     _VerifiedBundleSnapshot,
@@ -31,8 +32,10 @@ _PLACEHOLDER_KEY_MARKERS = (
 )
 
 
-class KernelGuardError(ValueError):
+class KernelGuardError(SCLiteValidationError):
     """Raised when a kernel guard sidecar does not authenticate a manifest."""
+
+    default_code = 'kernel_guard_failed'
 
 
 def _canonical_bytes(value: Mapping[str, Any]) -> bytes:

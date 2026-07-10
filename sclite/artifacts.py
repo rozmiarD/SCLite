@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Mapping
 
 from ._json import load_json_object
+from .errors import SCLiteSchemaValidationError
 from .json_types import json_mapping
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
@@ -29,6 +30,7 @@ SCHEMA_FILES = {
     'evidence_contract.v0.2': 'evidence_contract.v0.2.schema.json',
     'artifact_chain_manifest.v0.2': 'artifact_chain_manifest.v0.2.schema.json',
     'verification_result.v1': 'verification_result.v1.schema.json',
+    'verification_result.v1.1': 'verification_result.v1.1.schema.json',
     'kernel_guard_hmac_v1': 'kernel_guard_hmac_v1.schema.json',
     'trust_profile_ref.v0.1': 'trust_profile_ref.v0.1.schema.json',
     'carrier_profile_ref.v0.1': 'carrier_profile_ref.v0.1.schema.json',
@@ -42,8 +44,8 @@ SCHEMA_FILES = {
 }
 
 
-class JsonSchemaValidationError(AssertionError):
-    pass
+class JsonSchemaValidationError(SCLiteSchemaValidationError):
+    """Compatibility name for schema validation failures through SCLite 2.0."""
 
 
 def repo_root() -> Path:

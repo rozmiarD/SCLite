@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Mapping
 
 from ._json import VerificationLimits, load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
+from .errors import SCLiteValidationError
 from .integrity import ChainVerificationError
 from .integrity.chain import _verify_artifact_chain_manifest_with_snapshot
 from .json_types import json_array
@@ -16,8 +17,10 @@ REVIEW_RECORD_SCHEMA = 'review_record.v0.1'
 REVIEW_RECORD_SCHEMA_REF = 'schemas/review_record.v0.1.schema.json'
 
 
-class ReviewRecordError(ValueError):
+class ReviewRecordError(SCLiteValidationError):
     """Raised when a lifecycle review cannot be produced cleanly."""
+
+    default_code = 'review_record_failed'
 
 
 def _utc_now() -> str:

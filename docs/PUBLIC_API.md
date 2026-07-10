@@ -141,11 +141,40 @@ legacy policy. SCLite does not estimate entropy or own key custody/rotation.
 - `resolve_guard_path`
 - `resolve_manifest_path`
 - `verify_secure_bundle`
+- `verify_secure_bundle_result`
 
 ## Verification Result
 
 - `VERIFICATION_RESULT_SCHEMA_REF`
+- `VERIFICATION_RESULT_SCHEMA_REF_V1_1`
+- `VerificationResult`
 - `build_guarded_strict_verification_result`
+- `serialize_verification_result`
+- `SCLiteError`
+- `SCLiteValidationError`
+- `SCLiteSchemaValidationError`
+
+`verify_secure_bundle_result()` returns a frozen `VerificationResult` only after
+the guarded-strict verifier completes. `serialize_verification_result()` emits
+`verification_result.v1.1` with bundle digest, policy, verifier version and
+performed checks. The object and JSON remain forgeable representations, not
+proof tokens; hosts must re-verify source bytes or use an authenticated trusted
+channel.
+
+`JsonSchemaValidationError` remains the compatibility name through 2.0. It now
+inherits from `SCLiteSchemaValidationError` / `SCLiteValidationError`, carries
+stable code `schema_validation_failed`, and no longer inherits from
+`AssertionError`. Other public validation exceptions retain `ValueError`
+compatibility through the same base hierarchy and expose stable `.code` values.
+
+## Testing helpers
+
+- `sclite.testing.build_guarded_strict_verification_result_fixture`
+
+This helper intentionally creates forgeable v1 fixture JSON and performs no
+verification. The old root-level `build_guarded_strict_verification_result`
+name remains a compatibility alias through 2.0; formal warnings begin no
+earlier than 1.3.
 
 ## Review Records
 

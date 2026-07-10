@@ -13,7 +13,13 @@ import pytest
 from sclite.artifacts import validate_artifact
 from sclite.integrity import artifact_descriptor, build_artifact_chain_manifest
 from sclite.kernel_guard import build_kernel_guard_manifest
-from sclite.secure import SecureBundleError, resolve_guard_path, verify_secure_bundle
+from sclite.secure import (
+    SecureBundleError,
+    resolve_guard_path,
+    verify_secure_bundle,
+    verify_secure_bundle_result,
+)
+from sclite.verification_result import VerificationResult, serialize_verification_result
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
@@ -151,6 +157,28 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['verification_result']['runtime_enforcement'] == 'not_claimed'
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT)
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
+
+
+def test_secure_bundle_typed_api_returns_verified_provenance(tmp_path: Path) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    guard_path = _write_guard(bundle)
+
+    result = verify_secure_bundle_result(bundle, guard_path=guard_path, key=KEY)
+    payload = serialize_verification_result(result)
+
+    assert isinstance(result, VerificationResult)
+    assert result.policy == 'guarded-strict'
+    assert result.bundle_digest == _load_manifest(bundle)['root_chain_digest']
+    assert result.verifier_version
+    assert result.checks == (
+        'artifact_chain',
+        'strict_lifecycle',
+        'kernel_guard_hmac',
+        'manifest_metadata_binding',
+        'ticket_use_profile',
+    )
+    validate_artifact(payload, 'verification_result.v1.1', root=ROOT)
+    validate_artifact(payload, 'verification_result.v1.1', root=ROOT, strict_jsonschema=True)
 
 
 @pytest.mark.parametrize('strict_jsonschema', [False, True])

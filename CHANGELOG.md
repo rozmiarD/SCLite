@@ -4,6 +4,16 @@
 
 ## 1.1.0rc1 - Strict JSON input policy candidate
 
+- Adds the frozen `VerificationResult` production outcome,
+  `verify_secure_bundle_result()` and a `verification_result.v1.1` serializer
+  with bundle digest, policy, verifier version and performed checks. The legacy
+  v1 dictionary API remains compatible, while raw fixture construction is
+  explicitly available under `sclite.testing`; neither type nor schema shape is
+  claimed as unforgeable.
+- Adds `SCLiteError` / `SCLiteValidationError` /
+  `SCLiteSchemaValidationError` with stable error codes. The compatibility
+  `JsonSchemaValidationError` is no longer an `AssertionError`, so programmer
+  assertions are not treated as invalid caller input.
 - Enforces the Kernel Guard production key floor (`str|bytes`, at least 32
   bytes after UTF-8 encoding), reports byte length, placeholder warnings and
   the explicit `key_entropy_status=not_checked` non-claim. Historical short-key

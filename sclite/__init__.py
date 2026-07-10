@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-__version__ = '1.1.0rc1'
+from ._version import SCLITE_VERSION
+
+__version__ = SCLITE_VERSION
 
 from ._json import VerificationLimits
 
@@ -41,11 +43,16 @@ from .secure import (
     resolve_guard_path,
     resolve_manifest_path,
     verify_secure_bundle,
+    verify_secure_bundle_result,
 )
 from .verification_result import (
+    VERIFICATION_RESULT_SCHEMA_REF_V1_1,
     VERIFICATION_RESULT_SCHEMA_REF,
+    VerificationResult,
     build_guarded_strict_verification_result,
+    serialize_verification_result,
 )
+from .errors import SCLiteError, SCLiteSchemaValidationError, SCLiteValidationError
 from .review import (
     REVIEW_RECORD_SCHEMA,
     REVIEW_RECORD_SCHEMA_REF,
@@ -185,8 +192,15 @@ __all__ = (
     'resolve_guard_path',
     'resolve_manifest_path',
     'verify_secure_bundle',
+    'verify_secure_bundle_result',
     'VERIFICATION_RESULT_SCHEMA_REF',
+    'VERIFICATION_RESULT_SCHEMA_REF_V1_1',
+    'VerificationResult',
     'build_guarded_strict_verification_result',
+    'serialize_verification_result',
+    'SCLiteError',
+    'SCLiteValidationError',
+    'SCLiteSchemaValidationError',
     'REVIEW_RECORD_SCHEMA',
     'REVIEW_RECORD_SCHEMA_REF',
     'ReviewRecordError',

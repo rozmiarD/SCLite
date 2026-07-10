@@ -391,6 +391,20 @@ The `verification_result.v1` contract makes SCLite's non-claims
 machine-readable; it does not add replay state, public identity, or runtime
 enforcement.
 
+For new Python integrations, `verify_secure_bundle_result()` is the production
+front door and returns an immutable `VerificationResult`. Serialize it with
+`serialize_verification_result()` to the additive `verification_result.v1.1`
+contract, which records `bundle_digest`, verifier policy/version and the checks
+actually performed. The type reduces accidental misuse; it is not an
+authentication token and can be instantiated or forged inside Python. A host
+must re-verify the source bundle or authenticate the serialized result through
+a separately trusted channel.
+
+`verify_secure_bundle()` and its embedded `verification_result.v1` dictionary
+remain for compatibility. Raw all-pass fixture construction lives in
+`sclite.testing`; the old builder name remains an alias through 2.0 and performs
+no verification.
+
 Security posture modes:
 
 - `integrity_only`: local SHA-256 artifact-chain consistency only.

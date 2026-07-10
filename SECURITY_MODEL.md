@@ -36,6 +36,13 @@ mistake one layer for another:
   `guard_status`, `ticket_use_status`, and `replay_status` with the stable
   `verification_result.v1` non-claim fields.
 
+`VerificationResult` is a frozen convenience type, not a capability or proof
+token. Python code can instantiate it, and schema-valid JSON can be forged.
+Acceptance therefore requires re-verifying the referenced bundle or receiving
+the result through a separately authenticated trusted channel. The additive
+v1.1 serializer records bundle digest, selected policy, verifier version and
+performed checks so a host can bind acceptance to explicit provenance.
+
 ## Canonicalization Freeze
 
 SCLite artifact and Kernel Guard verification rely on deterministic JSON:

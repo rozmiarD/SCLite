@@ -52,6 +52,10 @@ validation. Its required layer statuses are `artifact_chain`,
 `strict_lifecycle`, `kernel_guard`, `ticket_use`, `replay`,
 `public_identity`, and `runtime_enforcement`; replay remains `not_checked`
 inside SCLite and identity/runtime authority remain `not_claimed`.
+The typed production API additionally serializes
+`verification_result.v1.1`, including bundle digest, policy, verifier version
+and performed checks. Tests explicitly demonstrate that neither the frozen
+Python type nor schema-valid JSON is unforgeable.
 
 Verifier JSON output also exposes explicit layer status fields before the
 stable verification-result envelope is built:

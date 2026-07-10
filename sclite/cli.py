@@ -16,6 +16,7 @@ from .bundles import (
     review_bundle,
     review_bundle_summary,
 )
+from .errors import SCLiteValidationError
 from .integrity import ChainVerificationError, verify_artifact_chain_manifest
 from .kernel_guard import KernelGuardError, verify_kernel_guard_manifest
 from .profiles import (
@@ -40,8 +41,10 @@ from .tickets import (
 )
 
 
-class CliInputError(ValueError):
+class CliInputError(SCLiteValidationError):
     """Raised when CLI input files or inline JSON cannot be read cleanly."""
+
+    default_code = 'cli_input_failed'
 
 
 def _load_json_object(path: Path) -> Dict[str, Any]:
@@ -87,7 +90,9 @@ def _optional_positive_int(value: Any) -> int | None:
 
 
 def _failed(label: str, exc: BaseException) -> int:
-    print(f'{label}:{exc}', file=sys.stderr)
+    code = getattr(exc, 'code', None)
+    suffix = f':error_code={code}' if isinstance(code, str) and code else ''
+    print(f'{label}:{exc}{suffix}', file=sys.stderr)
     return 1
 
 
@@ -171,7 +176,7 @@ def _handle_ticket_use_command(args: Any) -> int:
             strict_ticket_profile=bool(args.strict_ticket_profile),
             strict_evidence_claims=bool(args.strict_evidence_claims),
         )
-    except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
+    except (TicketSemanticError, TicketUseVerificationError, CliInputError) as exc:
         print(f'ticket_use_failed:{exc}', file=sys.stderr)
         return 1
     if args.format == 'json':
@@ -451,7 +456,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             else:
                 validate_ticket_schema(ticket, strict_jsonschema=bool(args.strict_jsonschema))
                 checks = ['ticket_schema']
-        except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
+        except (TicketSemanticError, TicketUseVerificationError, CliInputError) as exc:
             print(f'execution_ticket_failed:{exc}', file=sys.stderr)
             return 1
         validation_status = (
@@ -489,7 +494,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             else:
                 checks = validate_carrier_profile_ref(profile_ref, subject, strict_jsonschema=bool(args.strict_jsonschema))
                 label = 'carrier_profile_ref_ok'
-        except (ProfileReferenceError, AssertionError, CliInputError) as exc:
+        except (ProfileReferenceError, CliInputError) as exc:
             print(f'profile_ref_failed:{exc}', file=sys.stderr)
             return 1
         summary = profile_ref_summary(profile_ref)
@@ -595,7 +600,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 root=Path(str(args.root)).resolve() if args.root else None,
                 strict_jsonschema=bool(args.strict_jsonschema),
             )
-        except (ReviewRecordError, AssertionError, ValueError) as exc:
+        except (ReviewRecordError, ValueError) as exc:
             print(f'review_lifecycle_failed:{exc}', file=sys.stderr)
             return 1
         if args.format == 'markdown':
@@ -623,7 +628,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 bundle_dir,
                 strict_jsonschema=bool(args.strict_jsonschema),
             )
-        except (ReviewBundleError, AssertionError, ValueError) as exc:
+        except (ReviewBundleError, ValueError) as exc:
             print(f'review_bundle_failed:{exc}', file=sys.stderr)
             return 1
         if args.format == 'markdown':
@@ -641,7 +646,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 strict_jsonschema=bool(args.strict_jsonschema),
                 mode=cast(ReviewBundleMode, str(args.mode)),
             )
-        except (ReviewBundleError, AssertionError, ValueError) as exc:
+        except (ReviewBundleError, ValueError) as exc:
             print(f'export_review_bundle_failed:{exc}', file=sys.stderr)
             return 1
         payload = json.dumps(record, indent=2, sort_keys=True) + '\n' if args.format == 'json' else export_review_bundle_markdown(record)

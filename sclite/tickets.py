@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Mapping, Sequence
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
+from .errors import SCLiteValidationError
 from .integrity import artifact_descriptor
 from .json_types import json_array, json_mapping
 
@@ -24,12 +25,16 @@ EXECUTION_CLAIM_MARKERS = {
 NETWORK_CLAIM_MARKERS = {'live_network', 'network_execution', 'network_observed'}
 
 
-class TicketSemanticError(ValueError):
+class TicketSemanticError(SCLiteValidationError):
     """Raised when an ExecutionTicket is well-shaped but semantically unsafe."""
 
+    default_code = 'ticket_semantics_failed'
 
-class TicketUseVerificationError(ValueError):
+
+class TicketUseVerificationError(SCLiteValidationError):
     """Raised when a receipt/evidence bundle exceeds a scoped ticket."""
+
+    default_code = 'ticket_use_verification_failed'
 
 
 def normalized_args_digest(normalized_args: Sequence[Any]) -> str:
@@ -603,7 +608,7 @@ def verify_ticket_use_profile(
             strict_ticket_profile=strict_ticket_profile,
             strict_evidence_claims=strict_evidence_claims,
         )
-    except (TicketSemanticError, TicketUseVerificationError, JsonSchemaValidationError, AssertionError) as exc:
+    except (TicketSemanticError, TicketUseVerificationError, JsonSchemaValidationError) as exc:
         return {
             'status': 'fail',
             'applicability': 'verified',

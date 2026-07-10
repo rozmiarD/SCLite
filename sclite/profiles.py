@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Mapping
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
+from .errors import SCLiteValidationError
 from .integrity import artifact_descriptor
 from .json_types import json_array, json_mapping
 
@@ -29,8 +30,10 @@ CARRIER_PROFILES = {
 }
 
 
-class ProfileReferenceError(ValueError):
+class ProfileReferenceError(SCLiteValidationError):
     """Raised when a trust/carrier profile reference is not digest-bound."""
+
+    default_code = 'profile_reference_failed'
 
 
 def _require_mapping(value: Any, label: str) -> Mapping[str, Any]:
