@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-__version__ = '1.0.9'
+__version__ = '1.0.10rc1'
 
 from .bundles import (
     REVIEW_BUNDLE_MANIFEST_FILE,

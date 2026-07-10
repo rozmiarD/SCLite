@@ -59,6 +59,32 @@ def _artifacts() -> dict[str, dict]:
     return {role: copy.deepcopy(_load(path)) for role, path in LIFECYCLE_FILES}
 
 
+def _rebind_lifecycle_artifacts(artifacts: dict[str, dict]) -> None:
+    intent = artifacts['intent_contract']
+    policy = artifacts['policy_decision']
+    contract = artifacts['execution_contract']
+    ticket = artifacts['execution_ticket']
+    receipt = artifacts['execution_receipt']
+    evidence = artifacts['evidence_contract']
+
+    intent_descriptor = artifact_descriptor(intent)
+    policy['links']['intent']['descriptor'] = intent_descriptor
+    policy_descriptor = artifact_descriptor(policy)
+    contract['links']['intent']['descriptor'] = intent_descriptor
+    contract['links']['policy_decision']['descriptor'] = policy_descriptor
+    contract_descriptor = artifact_descriptor(contract)
+    ticket['links']['intent']['descriptor'] = intent_descriptor
+    ticket['links']['policy_decision']['descriptor'] = policy_descriptor
+    ticket['links']['execution_contract']['descriptor'] = contract_descriptor
+    ticket['integrity']['ticket_binds_execution_contract_digest'] = contract_descriptor['digest']
+    ticket_descriptor = artifact_descriptor(ticket)
+    receipt['links']['execution_contract']['descriptor'] = contract_descriptor
+    receipt['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    receipt_descriptor = artifact_descriptor(receipt)
+    evidence['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    evidence['links']['execution_receipt']['descriptor'] = receipt_descriptor
+
+
 def _write_lifecycle_files(tmp_path: Path, artifacts: dict[str, dict]) -> None:
     for role, path in LIFECYCLE_FILES:
         (tmp_path / path).write_text(json.dumps(artifacts[role], indent=2, sort_keys=True) + '\n', encoding='utf-8')
@@ -125,7 +151,18 @@ def test_v02_lifecycle_manifest_verifies_semantics_when_required() -> None:
         'receipt_binds_execution_contract',
         'evidence_binds_execution_receipt',
         'evidence_binds_execution_ticket',
+        'target_in_scope_legacy_assertion',
+        'receipt_within_ticket_validity',
     ]
+
+
+def test_strict_lifecycle_accepts_registered_rexecop_manifest_profile() -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    manifest['profile'] = 'sclite-v0.5-rexecop-integrity'
+
+    result = verify_artifact_chain_manifest(manifest, root=FIXTURE, require_lifecycle=True)
+
+    assert result['lifecycle_status'] == 'passed'
 
 
 def test_verify_lifecycle_manifest_wrapper_is_fail_safe() -> None:
@@ -138,12 +175,187 @@ def test_verify_lifecycle_manifest_wrapper_is_fail_safe() -> None:
     assert 'ticket_binds_execution_contract' in result['semantic_checks']
 
 
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_strict_lifecycle_rejects_explicitly_false_scope(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _artifacts()
+    artifacts['policy_decision']['scope']['target_in_scope'] = False
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='lifecycle target_in_scope is explicitly false'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            strict_jsonschema=strict_jsonschema,
+            require_lifecycle=True,
+        )
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_strict_lifecycle_marks_unknown_scope_for_review(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _artifacts()
+    del artifacts['policy_decision']['scope']['target_in_scope']
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    result = verify_artifact_chain_manifest(
+        json.loads(manifest_path.read_text()),
+        root=tmp_path,
+        strict_jsonschema=strict_jsonschema,
+        require_lifecycle=True,
+    )
+
+    assert result['status'] == 'review'
+    assert result['lifecycle_status'] == 'review'
+    assert result['scope_status'] == 'not_checked'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_strict_lifecycle_rejects_receipt_outside_ticket_validity_window(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _artifacts()
+    artifacts['execution_ticket']['validity'] = {
+        'not_before': '1970-01-01T00:00:00+00:00',
+        'not_after': '1970-01-01T00:01:00+00:00',
+    }
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='outside ticket validity window'):
+        verify_artifact_chain_manifest(
+            json.loads(manifest_path.read_text()),
+            root=tmp_path,
+            strict_jsonschema=strict_jsonschema,
+            require_lifecycle=True,
+        )
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_strict_lifecycle_marks_missing_receipt_timestamps_for_review(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _artifacts()
+    artifacts['execution_receipt']['execution'].pop('started_at')
+    artifacts['execution_receipt']['execution'].pop('ended_at')
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    result = verify_artifact_chain_manifest(
+        json.loads(manifest_path.read_text()),
+        root=tmp_path,
+        strict_jsonschema=strict_jsonschema,
+        require_lifecycle=True,
+    )
+
+    assert result['status'] == 'review'
+    assert result['ticket_validity_status'] == 'review'
+
+
 def test_v02_chain_manifest_detects_digest_tampering() -> None:
     manifest = _load('artifact_chain_manifest.json')
     manifest['entries'][0]['descriptor']['digest'] = '0' * 64
 
     with pytest.raises(ChainVerificationError, match='descriptor mismatch'):
         verify_artifact_chain_manifest(manifest, root=FIXTURE)
+
+
+@pytest.mark.parametrize(
+    ('label', 'mutate', 'error'),
+    [
+        ('artifact_type', lambda value: value.__setitem__('artifact_type', 'forged_manifest'), 'manifest schema validation failed'),
+        ('schema_version', lambda value: value.__setitem__('schema_version', 'v999'), 'manifest schema validation failed'),
+        ('schema_ref', lambda value: value.__setitem__('schema_ref', 'schemas/intent_contract.v0.2.schema.json'), 'manifest schema validation failed'),
+        ('profile', lambda value: value.__setitem__('profile', 'forged-runtime-profile'), 'unsupported manifest profile'),
+        ('canonicalization', lambda value: value.__setitem__('canonicalization', 'none'), 'manifest schema validation failed'),
+        ('hash_algorithm', lambda value: value.__setitem__('hash_algorithm', 'md5'), 'manifest schema validation failed'),
+        (
+            'signature_policy',
+            lambda value: value.__setitem__('signature_policy', {
+                'mode': 'signed_identity',
+                'identity_signature_required': True,
+                'note': 'no signature is verified by this profile',
+            }),
+            'unsupported manifest signature_policy.mode',
+        ),
+    ],
+)
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_manifest_identity_and_policy_spoofing_are_rejected_before_entries(
+    label: str,
+    mutate: object,
+    error: str,
+    strict_jsonschema: bool,
+) -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    assert callable(mutate), label
+    mutate(manifest)
+
+    with pytest.raises(ChainVerificationError, match=error):
+        verify_artifact_chain_manifest(
+            manifest,
+            root=FIXTURE,
+            strict_jsonschema=strict_jsonschema,
+            require_lifecycle=True,
+        )
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_manifest_result_reports_executed_constants_and_keeps_v02_extensions_open(
+    strict_jsonschema: bool,
+) -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    manifest['audit_unknown_extension'] = {'value': True}
+
+    result = verify_artifact_chain_manifest(
+        manifest,
+        root=FIXTURE,
+        strict_jsonschema=strict_jsonschema,
+        require_lifecycle=True,
+    )
+
+    assert result['status'] == 'passed'
+    assert result['canonicalization'] == 'sclite-artifact-chain-v0.2'
+    assert result['hash_algorithm'] == 'sha256'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_manifest_spoofing_cli_fails_closed(tmp_path: Path, strict_jsonschema: bool) -> None:
+    manifest = _load('artifact_chain_manifest.json')
+    manifest['hash_algorithm'] = 'md5'
+    manifest_path = tmp_path / 'artifact_chain_manifest.json'
+    manifest_path.write_text(json.dumps(manifest), encoding='utf-8')
+    args = [
+        sys.executable,
+        '-m',
+        'sclite.cli',
+        'validate-chain',
+        str(manifest_path),
+        '--root',
+        str(FIXTURE),
+        '--strict-lifecycle',
+    ]
+    if strict_jsonschema:
+        args.append('--strict-jsonschema')
+
+    proc = subprocess.run(
+        args,
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert proc.returncode == 1
+    assert 'artifact_chain_failed:manifest schema validation failed' in proc.stderr
 
 
 def test_v02_lifecycle_detects_ticket_execution_contract_digest_mismatch(tmp_path: Path) -> None:

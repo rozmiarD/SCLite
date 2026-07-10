@@ -7,7 +7,12 @@ import secrets
 from typing import Any, Dict, Mapping, Sequence
 
 from .artifacts import validate_artifact
-from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .integrity.chain import (
+    ChainVerificationError,
+    _VerifiedBundleSnapshot,
+    _validate_manifest_identity,
+    _verify_artifact_chain_manifest_with_snapshot,
+)
 
 KERNEL_GUARD_PROFILE = 'kernel_guard_hmac_v1'
 KERNEL_GUARD_ENTRY_PROFILE = 'kernel_guard_hmac_v1.entry'
@@ -123,6 +128,14 @@ def build_kernel_guard_manifest(
 ) -> Dict[str, Any]:
     """Build a sidecar HMAC guard for an already-built artifact-chain manifest."""
 
+    try:
+        _validate_manifest_identity(
+            manifest,
+            root=None,
+            strict_jsonschema=False,
+        )
+    except ChainVerificationError as exc:
+        raise KernelGuardError(str(exc)) from exc
     entries = _entries(manifest)
     if nonces is not None and len(nonces) != len(entries):
         raise KernelGuardError('nonce count must match manifest entry count')
@@ -177,7 +190,7 @@ def _assert_guard_field(guard: Mapping[str, Any], key: str, expected: Any, *, la
         raise KernelGuardError(f'{label} {key} mismatch')
 
 
-def verify_kernel_guard_manifest(
+def _verify_kernel_guard_manifest_with_snapshot(
     manifest: Mapping[str, Any],
     guard: Mapping[str, Any],
     *,
@@ -190,8 +203,8 @@ def verify_kernel_guard_manifest(
     require_lifecycle: bool = False,
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
-) -> Dict[str, Any]:
-    """Verify a sidecar HMAC guard against an artifact-chain manifest."""
+) -> tuple[Dict[str, Any], _VerifiedBundleSnapshot | None]:
+    """Verify a guard and retain the chain snapshot for higher verification layers."""
 
     if validate_guard_schema:
         try:
@@ -208,9 +221,10 @@ def verify_kernel_guard_manifest(
         raise KernelGuardError('kernel guard missing key_id')
 
     chain_result: Dict[str, Any] | None = None
+    snapshot: _VerifiedBundleSnapshot | None = None
     if validate_chain:
         try:
-            chain_result = verify_artifact_chain_manifest(
+            chain_result, snapshot = _verify_artifact_chain_manifest_with_snapshot(
                 manifest,
                 root=root,
                 validate_schemas=validate_schemas,
@@ -270,8 +284,8 @@ def verify_kernel_guard_manifest(
     if not hmac.compare_digest(str(guard.get('root_tag') or ''), expected_root_tag):
         raise KernelGuardError('kernel guard root_tag mismatch')
 
-    return {
-        'status': 'passed',
+    result = {
+        'status': chain_result.get('status') if chain_result else 'passed',
         'guard_status': 'passed',
         'checked_entries': [str(entry.get('role') or '') for entry in entries],
         'entry_count': len(entries),
@@ -283,3 +297,36 @@ def verify_kernel_guard_manifest(
         'chain_status': chain_result.get('chain_status') if chain_result else 'not_checked',
         'lifecycle_status': chain_result.get('lifecycle_status') if chain_result else 'not_checked',
     }
+    return result, snapshot
+
+
+def verify_kernel_guard_manifest(
+    manifest: Mapping[str, Any],
+    guard: Mapping[str, Any],
+    *,
+    key: str | bytes,
+    root: Any = None,
+    validate_chain: bool = True,
+    validate_schemas: bool = True,
+    validate_guard_schema: bool = True,
+    strict_jsonschema: bool = False,
+    require_lifecycle: bool = False,
+    max_artifact_bytes: int | None = None,
+    max_manifest_entries: int | None = None,
+) -> Dict[str, Any]:
+    """Verify a sidecar HMAC guard against an artifact-chain manifest."""
+
+    result, _snapshot = _verify_kernel_guard_manifest_with_snapshot(
+        manifest,
+        guard,
+        key=key,
+        root=root,
+        validate_chain=validate_chain,
+        validate_schemas=validate_schemas,
+        validate_guard_schema=validate_guard_schema,
+        strict_jsonschema=strict_jsonschema,
+        require_lifecycle=require_lifecycle,
+        max_artifact_bytes=max_artifact_bytes,
+        max_manifest_entries=max_manifest_entries,
+    )
+    return result

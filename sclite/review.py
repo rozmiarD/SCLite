@@ -6,7 +6,8 @@ from typing import Any, Dict, List, Mapping
 
 from ._json import load_json_object
 from .artifacts import JsonSchemaValidationError, validate_artifact
-from .integrity import ChainVerificationError, verify_artifact_chain_manifest
+from .integrity import ChainVerificationError
+from .integrity.chain import _verify_artifact_chain_manifest_with_snapshot
 from .json_types import json_array
 from .scope_fidelity import build_lifecycle_scope_fidelity_report, validate_lifecycle_scope_fidelity_report
 from .tickets import verify_ticket_use_profile
@@ -46,25 +47,26 @@ def _check(name: str, status: str, detail: str = '', count: int | None = None) -
     return result
 
 
-def _artifact_paths_from_manifest(manifest: Mapping[str, Any], root: Path) -> Dict[str, Path]:
+def _assert_manifest_paths_within_root(manifest: Mapping[str, Any], root: Path) -> None:
+    """Reject escaped paths before the snapshot loader opens any payload."""
+
     entries = manifest.get('entries')
     if not isinstance(entries, list):
-        raise ReviewRecordError('manifest.entries is not an array')
+        return
     base = root.resolve()
-    result: Dict[str, Path] = {}
-    for entry in entries:
+    for index, entry in enumerate(entries):
         if not isinstance(entry, Mapping):
             continue
-        role = str(entry.get('role') or '')
         rel_path = str(entry.get('path') or '')
-        if role and rel_path:
-            artifact_path = (base / rel_path).resolve()
-            try:
-                artifact_path.relative_to(base)
-            except ValueError as exc:
-                raise ReviewRecordError(f'manifest entry path escapes root: {rel_path}') from exc
-            result[role] = artifact_path
-    return result
+        if not rel_path:
+            continue
+        artifact_path = (base / rel_path).resolve()
+        try:
+            artifact_path.relative_to(base)
+        except ValueError as exc:
+            raise ReviewRecordError(
+                f'manifest entry[{index}] path escapes root: {rel_path}'
+            ) from exc
 
 
 def build_review_record_from_manifest(
@@ -84,46 +86,53 @@ def build_review_record_from_manifest(
     manifest_path = Path(manifest_path).resolve()
     base = Path(root).resolve() if root else manifest_path.parent
     manifest = _load_json_object(manifest_path)
+    _assert_manifest_paths_within_root(manifest, base)
     checks: List[Dict[str, Any]] = []
     statuses: List[str] = []
     record_generated_at = generated_at or _utc_now()
 
-    artifact_paths = _artifact_paths_from_manifest(manifest, base)
     artifacts_by_role: Dict[str, Mapping[str, Any]] = {}
-    schema_errors: List[str] = []
-    for role, path in artifact_paths.items():
-        try:
-            value = _load_json_object(path)
-            artifacts_by_role[role] = value
-            schema_ref = _schema_ref(value)
-            if schema_ref:
-                validate_artifact(value, schema_ref, root=base, strict_jsonschema=strict_jsonschema)
-        except (OSError, ValueError, JsonSchemaValidationError) as exc:
-            schema_errors.append(f'{role}:{exc}')
-    if schema_errors:
-        checks.append(_check('schema_validation', 'fail', '; '.join(schema_errors), len(schema_errors)))
-        statuses.append('fail')
-    else:
-        checks.append(_check('schema_validation', 'pass', 'all manifest artifacts validated against declared schemas', len(artifact_paths)))
-        statuses.append('pass')
-
     chain_result: Dict[str, Any] | None = None
     try:
-        chain_result = verify_artifact_chain_manifest(
+        chain_result, snapshot = _verify_artifact_chain_manifest_with_snapshot(
             manifest,
             root=base,
             validate_schemas=True,
             strict_jsonschema=strict_jsonschema,
             require_lifecycle=True,
         )
+        artifacts_by_role = {
+            role: artifact.value for role, artifact in snapshot.artifacts_by_role.items()
+        }
+        checks.append(_check(
+            'schema_validation',
+            'pass',
+            'all manifest artifacts validated against declared schemas',
+            len(artifacts_by_role),
+        ))
+        statuses.append('pass')
         semantic_checks = json_array(chain_result.get('semantic_checks'))
         checks.append(_check('chain_integrity', 'pass', str(chain_result.get('root_chain_digest') or ''), int(chain_result.get('entry_count') or 0)))
-        checks.append(_check('lifecycle_binding', 'pass' if semantic_checks else 'review', 'semantic checks present' if semantic_checks else 'manifest did not expose canonical lifecycle semantic checks', len(semantic_checks)))
-        statuses.extend(['pass', 'pass' if semantic_checks else 'review'])
+        lifecycle_status = str(chain_result.get('lifecycle_status') or 'review')
+        lifecycle_check_status = 'pass' if lifecycle_status == 'passed' else 'review'
+        if lifecycle_check_status == 'pass':
+            lifecycle_detail = 'semantic checks present and strict lifecycle passed'
+        elif chain_result.get('scope_status') != 'operator_asserted':
+            lifecycle_detail = str(chain_result.get('scope_detail') or 'strict lifecycle scope was not verified')
+        else:
+            lifecycle_detail = str(chain_result.get('ticket_validity_detail') or 'strict lifecycle ticket validity was not verified')
+        checks.append(_check(
+            'lifecycle_binding',
+            lifecycle_check_status,
+            lifecycle_detail,
+            len(semantic_checks),
+        ))
+        statuses.extend(['pass', lifecycle_check_status])
     except (ChainVerificationError, JsonSchemaValidationError) as exc:
+        checks.append(_check('schema_validation', 'fail', str(exc)))
         checks.append(_check('chain_integrity', 'fail', str(exc)))
         checks.append(_check('lifecycle_binding', 'fail', str(exc)))
-        statuses.extend(['fail', 'fail'])
+        statuses.extend(['fail', 'fail', 'fail'])
 
     try:
         source_artifact = str(manifest_path.relative_to(base))
@@ -164,7 +173,7 @@ def build_review_record_from_manifest(
         'source_manifest': str(manifest_path),
         'verdict': verdict,
         'summary': {
-            'artifact_count': len(artifact_paths),
+            'artifact_count': len(artifacts_by_role),
             'target_hosts': target_hosts,
             'root_chain_digest': chain_result.get('root_chain_digest') if chain_result else '',
             'scope_fidelity_verdict': scope_report['verdict'],

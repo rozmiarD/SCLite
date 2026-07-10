@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict
 
 from ._json import load_json_object
-from .kernel_guard import KernelGuardError, verify_kernel_guard_manifest
+from .kernel_guard import KernelGuardError, _verify_kernel_guard_manifest_with_snapshot
 from .tickets import verify_ticket_use_profile
 from .verification_result import build_guarded_strict_verification_result
 
@@ -46,29 +46,6 @@ def _assert_under_root(path: Path, root: Path, *, label: str) -> None:
         raise SecureBundleError(f'{label} path escapes root: {path}') from exc
 
 
-def _artifacts_from_manifest(
-    manifest: Mapping[str, Any],
-    root: Path,
-    *,
-    max_artifact_bytes: int | None = None,
-) -> Dict[str, Mapping[str, Any]]:
-    entries = manifest.get('entries')
-    if not isinstance(entries, list):
-        raise SecureBundleError('manifest.entries is not an array')
-    artifacts: Dict[str, Mapping[str, Any]] = {}
-    for index, entry in enumerate(entries):
-        if not isinstance(entry, Mapping):
-            raise SecureBundleError(f'manifest entry[{index}] is not an object')
-        role = str(entry.get('role') or '')
-        rel_path = str(entry.get('path') or '')
-        if not role or not rel_path:
-            continue
-        artifact_path = (root / rel_path).resolve()
-        _assert_under_root(artifact_path, root, label=f'artifact {role}')
-        artifacts[role] = load_json_object(artifact_path, error_cls=SecureBundleError, max_bytes=max_artifact_bytes)
-    return artifacts
-
-
 def verify_secure_bundle(
     target: Path | str,
     *,
@@ -101,7 +78,7 @@ def verify_secure_bundle(
     manifest = _load_json_object(manifest_path)
     guard = _load_json_object(sidecar_path)
     try:
-        result = verify_kernel_guard_manifest(
+        result, snapshot = _verify_kernel_guard_manifest_with_snapshot(
             manifest,
             guard,
             key=key,
@@ -115,14 +92,23 @@ def verify_secure_bundle(
     except KernelGuardError as exc:
         raise SecureBundleError(str(exc)) from exc
 
-    artifacts_by_role = _artifacts_from_manifest(manifest, root_path, max_artifact_bytes=max_artifact_bytes)
+    if snapshot is None:  # pragma: no cover - guarded secure verification always verifies the chain
+        raise SecureBundleError('secure bundle verification did not produce a verified snapshot')
+    if result.get('lifecycle_status') != 'passed':
+        raise SecureBundleError('strict lifecycle verification did not pass')
+    artifacts_by_role = {
+        role: artifact.value for role, artifact in snapshot.artifacts_by_role.items()
+    }
     ticket_use_result = verify_ticket_use_profile(
         artifacts_by_role,
         strict_jsonschema=strict_jsonschema,
         strict_ticket_profile=True,
         strict_evidence_claims=True,
     )
-    if ticket_use_result.get('status') == 'fail':
+    if ticket_use_result.get('status') == 'fail' or (
+        ticket_use_result.get('status') == 'review'
+        and ticket_use_result.get('applicability') == 'verified'
+    ):
         raise SecureBundleError('ticket-use verification failed:' + str(ticket_use_result.get('detail') or 'unknown'))
 
     verification_result = build_guarded_strict_verification_result(
@@ -140,6 +126,8 @@ def verify_secure_bundle(
         'ticket_use_detail': ticket_use_result.get('detail') or '',
         'manifest_path': str(manifest_path),
         'guard_path': str(sidecar_path),
+        'chain_id': str(manifest.get('chain_id') or ''),
+        'ticket_id': str(artifacts_by_role.get('execution_ticket', {}).get('ticket_id') or ''),
         'fail_closed': True,
         'replay_status': result.get('replay_status') or 'not_checked',
         'verification_result': verification_result,

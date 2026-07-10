@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 from sclite.artifacts import validate_artifact
 from sclite.review import build_review_record_from_manifest, review_record_markdown
@@ -53,6 +56,27 @@ def test_lifecycle_scope_fidelity_v02_fails_on_policy_target_drift() -> None:
     assert sorted(report['summary']['mismatched_hosts_detected']) == ['evil.example.net', 'example.com']
 
 
+@pytest.mark.parametrize(
+    ('scope_value', 'expected_verdict'),
+    [(False, 'fail'), (None, 'review')],
+)
+def test_lifecycle_scope_fidelity_never_passes_false_or_unknown_scope(
+    scope_value: bool | None,
+    expected_verdict: str,
+) -> None:
+    artifacts = _artifacts()
+    if scope_value is None:
+        del artifacts['policy_decision']['scope']['target_in_scope']
+    else:
+        artifacts['policy_decision']['scope']['target_in_scope'] = scope_value
+
+    report = build_lifecycle_scope_fidelity_report(artifacts)
+    validate_lifecycle_scope_fidelity_report(report, strict_jsonschema=True)
+
+    assert report['verdict'] == expected_verdict
+    assert report['summary']['lifecycle_target_status'] == 'consistent'
+
+
 def test_review_record_aggregates_lifecycle_checks() -> None:
     record = build_review_record_from_manifest(MANIFEST, generated_at='2026-05-15T19:00:00+02:00')
     validate_artifact(record, 'review_record.v0.1', strict_jsonschema=True)
@@ -67,6 +91,43 @@ def test_review_record_aggregates_lifecycle_checks() -> None:
     assert statuses['scope_fidelity'] == 'pass'
     assert statuses['ticket_use_profile'] == 'review'
     assert record['summary']['ticket_use_applicability'] == 'not_applicable'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_review_record_reads_each_lifecycle_payload_once(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    strict_jsonschema: bool,
+) -> None:
+    bundle = tmp_path / 'bundle'
+    shutil.copytree(LIFECYCLE, bundle)
+    names = (
+        'intent_contract.json',
+        'policy_decision.json',
+        'execution_contract.json',
+        'execution_ticket.json',
+        'execution_receipt.json',
+        'evidence_contract.json',
+    )
+    paths = {(bundle / name).resolve(): name for name in names}
+    reads = {name: 0 for name in names}
+    original_read_text = Path.read_text
+
+    def tracked_read_text(path: Path, *args: object, **kwargs: object) -> str:
+        name = paths.get(path.resolve())
+        if name is not None:
+            reads[name] += 1
+        return original_read_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, 'read_text', tracked_read_text)
+    record = build_review_record_from_manifest(
+        bundle / 'artifact_chain_manifest.json',
+        root=bundle,
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert record['verdict'] == 'review'
+    assert reads == {name: 1 for name in names}
 
 
 def test_review_record_markdown_contains_non_claims() -> None:

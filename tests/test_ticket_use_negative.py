@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from sclite.integrity import artifact_descriptor
 from sclite.tickets import TicketSemanticError, TicketUseVerificationError, validate_ticket_semantics, verify_ticket_use
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +33,31 @@ def _receipt() -> dict:
 
 def _evidence() -> dict:
     return copy.deepcopy(_load('evidence_contract.json'))
+
+
+def _scoped_artifacts() -> dict[str, dict]:
+    return {
+        'execution_contract': _contract(),
+        'execution_ticket': _ticket(),
+        'execution_receipt': _receipt(),
+        'evidence_contract': _evidence(),
+    }
+
+
+def _rebind_scoped_artifacts(artifacts: dict[str, dict]) -> None:
+    contract = artifacts['execution_contract']
+    ticket = artifacts['execution_ticket']
+    receipt = artifacts['execution_receipt']
+    evidence = artifacts['evidence_contract']
+    contract_descriptor = artifact_descriptor(contract)
+    ticket['links']['execution_contract']['descriptor'] = contract_descriptor
+    ticket['integrity']['ticket_binds_execution_contract_digest'] = contract_descriptor['digest']
+    ticket_descriptor = artifact_descriptor(ticket)
+    receipt['links']['execution_contract']['descriptor'] = contract_descriptor
+    receipt['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    receipt_descriptor = artifact_descriptor(receipt)
+    evidence['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    evidence['links']['execution_receipt']['descriptor'] = receipt_descriptor
 
 
 def test_ticket_use_rejects_dry_run_receipt_claiming_completed_live_execution() -> None:
@@ -132,3 +158,203 @@ def test_ticket_semantics_reject_target_tool_and_args_drift() -> None:
     ticket['scope_binding']['normalized_args_digest'] = 'sha256:' + ('0' * 64)
     with pytest.raises(TicketSemanticError, match='normalized_args_digest mismatch'):
         validate_ticket_semantics(ticket, _contract())
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_ticket_use_rejects_explicitly_out_of_scope_contract(
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['target_binding']['target_in_scope'] = False
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketUseVerificationError, match='target_in_scope is explicitly false'):
+        verify_ticket_use(
+            artifacts['execution_ticket'],
+            artifacts['execution_contract'],
+            artifacts['execution_receipt'],
+            artifacts['evidence_contract'],
+            strict_jsonschema=strict_jsonschema,
+        )
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_ticket_use_marks_unknown_scope_for_review(
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _scoped_artifacts()
+    del artifacts['execution_contract']['target_binding']['target_in_scope']
+    _rebind_scoped_artifacts(artifacts)
+
+    result = verify_ticket_use(
+        artifacts['execution_ticket'],
+        artifacts['execution_contract'],
+        artifacts['execution_receipt'],
+        artifacts['evidence_contract'],
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert result['status'] == 'review'
+    assert result['summary']['scope_status'] == 'not_checked'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+@pytest.mark.parametrize(
+    ('validity', 'execution'),
+    [
+        (
+            {
+                'not_before': '2026-05-13T20:54:00+00:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T20:54:00+00:00',
+                'ended_at': '2026-05-14T20:54:00+00:00',
+            },
+        ),
+        (
+            {
+                'not_before': '2026-05-13T22:54:00+02:00',
+                'not_after': '2026-05-14T22:54:00+02:00',
+            },
+            {
+                'started_at': '2026-05-13T22:54:00+02:00',
+                'ended_at': '2026-05-14T22:54:00+02:00',
+            },
+        ),
+    ],
+)
+def test_ticket_use_accepts_exact_and_offset_aware_validity_boundaries(
+    strict_jsonschema: bool,
+    validity: dict[str, str],
+    execution: dict[str, str],
+) -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_ticket']['validity'] = validity
+    artifacts['execution_receipt']['execution'].update(execution)
+    _rebind_scoped_artifacts(artifacts)
+
+    result = verify_ticket_use(
+        artifacts['execution_ticket'],
+        artifacts['execution_contract'],
+        artifacts['execution_receipt'],
+        artifacts['evidence_contract'],
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert result['status'] == 'passed'
+    assert result['summary']['ticket_validity_status'] == 'passed'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+@pytest.mark.parametrize(
+    ('validity', 'execution', 'error'),
+    [
+        (
+            {
+                'not_before': '2026-05-13T20:54:00+00:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T20:53:59+00:00',
+                'ended_at': '2026-05-13T21:05:00+00:00',
+            },
+            'outside ticket validity window',
+        ),
+        (
+            {
+                'not_before': '2026-05-13T20:54:00+00:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T21:05:00+00:00',
+                'ended_at': '2026-05-14T20:54:01+00:00',
+            },
+            'outside ticket validity window',
+        ),
+        (
+            {
+                'not_before': '2026-05-13T20:54:00+00:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T20:53:59+00:00',
+                'ended_at': '2026-05-14T20:54:01+00:00',
+            },
+            'outside ticket validity window',
+        ),
+        (
+            {
+                'not_before': '2026-05-14T20:54:00+00:00',
+                'not_after': '2026-05-13T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T21:05:00+00:00',
+                'ended_at': '2026-05-13T21:05:00+00:00',
+            },
+            'not_before is after not_after',
+        ),
+        (
+            {
+                'not_before': '2026-05-13T20:54:00+00:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T21:06:00+00:00',
+                'ended_at': '2026-05-13T21:05:00+00:00',
+            },
+            'started_at is after ended_at',
+        ),
+        (
+            {
+                'not_before': '2026-05-13T20:54:00',
+                'not_after': '2026-05-14T20:54:00+00:00',
+            },
+            {
+                'started_at': '2026-05-13T21:05:00+00:00',
+                'ended_at': '2026-05-13T21:05:00+00:00',
+            },
+            'offset-aware RFC3339',
+        ),
+    ],
+)
+def test_ticket_use_rejects_invalid_or_out_of_window_receipt_intervals(
+    strict_jsonschema: bool,
+    validity: dict[str, str],
+    execution: dict[str, str],
+    error: str,
+) -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_ticket']['validity'] = validity
+    artifacts['execution_receipt']['execution'].update(execution)
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketUseVerificationError, match=error):
+        verify_ticket_use(
+            artifacts['execution_ticket'],
+            artifacts['execution_contract'],
+            artifacts['execution_receipt'],
+            artifacts['evidence_contract'],
+            strict_jsonschema=strict_jsonschema,
+        )
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_ticket_use_marks_missing_receipt_timestamps_for_review(
+    strict_jsonschema: bool,
+) -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_receipt']['execution'].pop('started_at')
+    artifacts['execution_receipt']['execution'].pop('ended_at')
+    _rebind_scoped_artifacts(artifacts)
+
+    result = verify_ticket_use(
+        artifacts['execution_ticket'],
+        artifacts['execution_contract'],
+        artifacts['execution_receipt'],
+        artifacts['evidence_contract'],
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert result['status'] == 'review'
+    assert result['summary']['ticket_validity_status'] == 'review'

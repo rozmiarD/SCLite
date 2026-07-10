@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from sclite.artifacts import validate_artifact
-from sclite.integrity import build_artifact_chain_manifest
+from sclite.integrity import artifact_descriptor, build_artifact_chain_manifest
 from sclite.kernel_guard import build_kernel_guard_manifest
 from sclite.secure import SecureBundleError, resolve_guard_path, verify_secure_bundle
 
@@ -20,6 +20,14 @@ FIXTURE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
 GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
 KEY = 'test-kernel-secret'
 KEY_ID = 'test-key-20260526'
+LIFECYCLE_FILES = (
+    ('intent_contract', 'intent_contract.json'),
+    ('policy_decision', 'policy_decision.json'),
+    ('execution_contract', 'execution_contract.json'),
+    ('execution_ticket', 'execution_ticket.json'),
+    ('execution_receipt', 'execution_receipt.json'),
+    ('evidence_contract', 'evidence_contract.json'),
+)
 
 
 def _load_manifest(base: Path) -> dict:
@@ -72,6 +80,53 @@ def _copy_fixture(src: Path, dst: Path) -> Path:
     return dst
 
 
+def _lifecycle_artifacts(base: Path) -> dict[str, dict]:
+    return {
+        role: json.loads((base / filename).read_text(encoding='utf-8'))
+        for role, filename in LIFECYCLE_FILES
+    }
+
+
+def _rebind_lifecycle_artifacts(artifacts: dict[str, dict]) -> None:
+    intent = artifacts['intent_contract']
+    policy = artifacts['policy_decision']
+    contract = artifacts['execution_contract']
+    ticket = artifacts['execution_ticket']
+    receipt = artifacts['execution_receipt']
+    evidence = artifacts['evidence_contract']
+    intent_descriptor = artifact_descriptor(intent)
+    policy['links']['intent']['descriptor'] = intent_descriptor
+    policy_descriptor = artifact_descriptor(policy)
+    contract['links']['intent']['descriptor'] = intent_descriptor
+    contract['links']['policy_decision']['descriptor'] = policy_descriptor
+    contract_descriptor = artifact_descriptor(contract)
+    ticket['links']['intent']['descriptor'] = intent_descriptor
+    ticket['links']['policy_decision']['descriptor'] = policy_descriptor
+    ticket['links']['execution_contract']['descriptor'] = contract_descriptor
+    ticket['integrity']['ticket_binds_execution_contract_digest'] = contract_descriptor['digest']
+    ticket_descriptor = artifact_descriptor(ticket)
+    receipt['links']['execution_contract']['descriptor'] = contract_descriptor
+    receipt['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    receipt_descriptor = artifact_descriptor(receipt)
+    evidence['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    evidence['links']['execution_receipt']['descriptor'] = receipt_descriptor
+
+
+def _write_lifecycle_manifest(base: Path, artifacts: dict[str, dict]) -> dict:
+    for role, filename in LIFECYCLE_FILES:
+        _write_json(base / filename, artifacts[role])
+    manifest = build_artifact_chain_manifest(
+        [
+            {'role': role, 'path': filename, 'value': artifacts[role]}
+            for role, filename in LIFECYCLE_FILES
+        ],
+        chain_id='secure-lifecycle-scope-window-test',
+        created_at='2026-07-10T10:00:00+00:00',
+    )
+    _write_json(base / 'artifact_chain_manifest.json', manifest)
+    return manifest
+
+
 def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) -> None:
     bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
     guard_path = _write_guard(bundle)
@@ -96,6 +151,84 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['verification_result']['runtime_enforcement'] == 'not_claimed'
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT)
     validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_secure_bundle_reads_each_ticket_use_payload_once(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    strict_jsonschema: bool,
+) -> None:
+    bundle = _copy_fixture(GOVENGINE_BUNDLE, tmp_path / 'govengine-integration')
+    guard_path = _write_guard(bundle)
+    payload_names = (
+        '04_execution_ticket.json',
+        '05_execution_receipt.json',
+        '06_evidence_contract.json',
+    )
+    payload_paths = {(bundle / name).resolve(): name for name in payload_names}
+    reads = {name: 0 for name in payload_names}
+    original_read_text = Path.read_text
+
+    def tracked_read_text(path: Path, *args: object, **kwargs: object) -> str:
+        name = payload_paths.get(path.resolve())
+        if name is not None:
+            reads[name] += 1
+        return original_read_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, 'read_text', tracked_read_text)
+    result = verify_secure_bundle(
+        bundle,
+        guard_path=guard_path,
+        key=KEY,
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert result['status'] == 'passed'
+    assert reads == {name: 1 for name in payload_names}
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+@pytest.mark.parametrize(
+    ('mutate', 'error'),
+    [
+        (
+            lambda artifacts: artifacts['policy_decision']['scope'].__setitem__('target_in_scope', False),
+            'target_in_scope is explicitly false',
+        ),
+        (
+            lambda artifacts: artifacts['execution_ticket'].__setitem__(
+                'validity',
+                {
+                    'not_before': '1970-01-01T00:00:00+00:00',
+                    'not_after': '1970-01-01T00:01:00+00:00',
+                },
+            ),
+            'outside ticket validity window',
+        ),
+    ],
+)
+def test_secure_bundle_rejects_false_scope_and_expired_ticket(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+    mutate: object,
+    error: str,
+) -> None:
+    bundle = _copy_fixture(FIXTURE, tmp_path / 'bundle')
+    artifacts = _lifecycle_artifacts(bundle)
+    assert callable(mutate)
+    mutate(artifacts)
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest = _write_lifecycle_manifest(bundle, artifacts)
+    guard_path = _write_guard(bundle, manifest=manifest)
+
+    with pytest.raises(SecureBundleError, match=error):
+        verify_secure_bundle(
+            bundle,
+            guard_path=guard_path,
+            key=KEY,
+            strict_jsonschema=strict_jsonschema,
+        )
 
 
 def test_resolve_guard_path_uses_manifest_dir_only_for_default_sidecar() -> None:
@@ -368,7 +501,7 @@ def test_secure_bundle_metadata_spoofing_fails(tmp_path: Path) -> None:
     manifest_path = bundle / 'spoofed_artifact_chain_manifest.json'
     manifest_path.write_text(json.dumps(spoofed, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
-    with pytest.raises(SecureBundleError, match='manifest_metadata_digest mismatch'):
+    with pytest.raises(SecureBundleError, match='unsupported manifest profile'):
         verify_secure_bundle(manifest_path, guard_path=guard_path, key=KEY, root=bundle)
 
 

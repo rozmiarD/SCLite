@@ -7,6 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from sclite.integrity import artifact_descriptor
+
 ROOT = Path(__file__).resolve().parents[1]
 GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
 BAD_CROSS_HOST = ROOT / 'examples' / 'bad-review-bundle-cross-host'
@@ -25,6 +29,41 @@ def _assert_clean_cli_failure(proc: subprocess.CompletedProcess[str], label: str
     assert label in proc.stderr
     assert 'invalid JSON' in proc.stderr
     assert 'Traceback' not in proc.stderr
+
+
+def _write_scoped_bundle(bundle: Path, *, target_in_scope: bool | None = True, validity: dict[str, str] | None = None) -> None:
+    shutil.copytree(SCOPED, bundle)
+    contract_path = bundle / 'execution_contract.json'
+    ticket_path = bundle / 'execution_ticket.json'
+    receipt_path = bundle / 'execution_receipt.json'
+    evidence_path = bundle / 'evidence_contract.json'
+    contract = json.loads(contract_path.read_text(encoding='utf-8'))
+    ticket = json.loads(ticket_path.read_text(encoding='utf-8'))
+    receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+    evidence = json.loads(evidence_path.read_text(encoding='utf-8'))
+    if target_in_scope is None:
+        contract['target_binding'].pop('target_in_scope')
+    else:
+        contract['target_binding']['target_in_scope'] = target_in_scope
+    if validity is not None:
+        ticket['validity'] = validity
+
+    contract_descriptor = artifact_descriptor(contract)
+    ticket['links']['execution_contract']['descriptor'] = contract_descriptor
+    ticket['integrity']['ticket_binds_execution_contract_digest'] = contract_descriptor['digest']
+    ticket_descriptor = artifact_descriptor(ticket)
+    receipt['links']['execution_contract']['descriptor'] = contract_descriptor
+    receipt['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    receipt_descriptor = artifact_descriptor(receipt)
+    evidence['links']['execution_ticket']['descriptor'] = ticket_descriptor
+    evidence['links']['execution_receipt']['descriptor'] = receipt_descriptor
+    for path, value in (
+        (contract_path, contract),
+        (ticket_path, ticket),
+        (receipt_path, receipt),
+        (evidence_path, evidence),
+    ):
+        path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
 
 def test_review_bundle_pass_exit_code_with_fail_on_review() -> None:
@@ -86,6 +125,132 @@ def test_verify_ticket_use_overclaim_exit_code(tmp_path: Path) -> None:
     ])
     assert proc.returncode == 1
     assert 'ticket_use_failed' in proc.stderr
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_verify_ticket_use_cli_rejects_explicitly_false_scope(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    bundle = tmp_path / 'scoped'
+    _write_scoped_bundle(bundle, target_in_scope=False)
+    args = [
+        'verify-ticket-use',
+        str(bundle / 'execution_ticket.json'),
+        '--contract',
+        str(bundle / 'execution_contract.json'),
+        '--receipt',
+        str(bundle / 'execution_receipt.json'),
+        '--evidence-contract',
+        str(bundle / 'evidence_contract.json'),
+    ]
+    if strict_jsonschema:
+        args.append('--strict-jsonschema')
+
+    proc = _run(args)
+
+    assert proc.returncode == 1
+    assert 'ticket_use_failed:execution_contract target_in_scope is explicitly false' in proc.stderr
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_verify_ticket_use_cli_rejects_expired_window(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    bundle = tmp_path / 'scoped'
+    _write_scoped_bundle(
+        bundle,
+        validity={
+            'not_before': '1970-01-01T00:00:00+00:00',
+            'not_after': '1970-01-01T00:01:00+00:00',
+        },
+    )
+    args = [
+        'verify-ticket-use',
+        str(bundle / 'execution_ticket.json'),
+        '--contract',
+        str(bundle / 'execution_contract.json'),
+        '--receipt',
+        str(bundle / 'execution_receipt.json'),
+        '--evidence-contract',
+        str(bundle / 'evidence_contract.json'),
+    ]
+    if strict_jsonschema:
+        args.append('--strict-jsonschema')
+
+    proc = _run(args)
+
+    assert proc.returncode == 1
+    assert 'ticket_use_failed:receipt execution interval is outside ticket validity window' in proc.stderr
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_verify_ticket_use_cli_marks_unknown_scope_for_review(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    bundle = tmp_path / 'scoped'
+    _write_scoped_bundle(bundle, target_in_scope=None)
+    args = [
+        'verify-ticket-use',
+        str(bundle / 'execution_ticket.json'),
+        '--contract',
+        str(bundle / 'execution_contract.json'),
+        '--receipt',
+        str(bundle / 'execution_receipt.json'),
+        '--evidence-contract',
+        str(bundle / 'evidence_contract.json'),
+        '--format',
+        'json',
+    ]
+    if strict_jsonschema:
+        args.append('--strict-jsonschema')
+
+    proc = _run(args)
+
+    assert proc.returncode == 2
+    assert json.loads(proc.stdout)['status'] == 'review'
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_validate_ticket_cli_rejects_false_scope_and_reviews_unknown_scope(
+    tmp_path: Path,
+    strict_jsonschema: bool,
+) -> None:
+    false_bundle = tmp_path / 'false-scope'
+    _write_scoped_bundle(false_bundle, target_in_scope=False)
+    false_args = [
+        'validate-ticket',
+        str(false_bundle / 'execution_ticket.json'),
+        '--contract',
+        str(false_bundle / 'execution_contract.json'),
+    ]
+    if strict_jsonschema:
+        false_args.append('--strict-jsonschema')
+
+    false_proc = _run(false_args)
+
+    assert false_proc.returncode == 1
+    assert 'execution_ticket_failed:execution_contract target_in_scope is explicitly false' in false_proc.stderr
+
+    unknown_bundle = tmp_path / 'unknown-scope'
+    _write_scoped_bundle(unknown_bundle, target_in_scope=None)
+    unknown_args = [
+        'validate-ticket',
+        str(unknown_bundle / 'execution_ticket.json'),
+        '--contract',
+        str(unknown_bundle / 'execution_contract.json'),
+        '--format',
+        'json',
+    ]
+    if strict_jsonschema:
+        unknown_args.append('--strict-jsonschema')
+
+    unknown_proc = _run(unknown_args)
+
+    assert unknown_proc.returncode == 2
+    assert json.loads(unknown_proc.stdout)['status'] == 'review'
 
 
 def test_malformed_json_validate_artifact_fails_without_traceback(tmp_path: Path) -> None:

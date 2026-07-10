@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 import sys
 
+import pytest
+
 from sclite import artifacts
 from sclite.scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 
@@ -36,6 +38,27 @@ def test_scope_fidelity_cross_host_drift_fails() -> None:
     assert report['request_shape']['target_host_match_status'] == 'mixed'
     assert report['request_shape']['request_shape_hygiene_status'] == 'cross_host_mismatch'
     assert report['request_shape']['mismatched_hosts_detected'] == ['evil.example.net']
+
+
+@pytest.mark.parametrize('strict_jsonschema', [False, True])
+def test_scope_fidelity_explicitly_out_of_scope_never_passes(
+    strict_jsonschema: bool,
+) -> None:
+    report = build_scope_fidelity_report(
+        target='https://example.com',
+        normalized_args=['https://example.com/login'],
+        execution_plan=[{'tool': 'http_probe', 'args': ['https://example.com/login']}],
+        target_in_scope=False,
+    )
+
+    artifacts.validate_artifact(
+        report,
+        str(report['schema_ref']),
+        strict_jsonschema=strict_jsonschema,
+    )
+
+    assert report['verdict'] == 'fail'
+    assert report['request_shape']['request_shape_hygiene_reason'] == 'target_explicitly_out_of_scope'
 
 
 def test_scope_fidelity_missing_detected_hosts_requires_review() -> None:
@@ -94,3 +117,25 @@ def test_scope_fidelity_cli_fail_on_review_exit_code() -> None:
     )
     assert proc.returncode == 2
     assert '"verdict": "review"' in proc.stdout
+
+
+def test_scope_fidelity_cli_fails_for_explicit_false_scope() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            '-m',
+            'sclite.cli',
+            'scope-fidelity',
+            '--target',
+            'https://example.com',
+            '--normalized-arg',
+            'https://example.com/login',
+            '--target-in-scope',
+            'false',
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 2
+    assert '"verdict": "fail"' in proc.stdout

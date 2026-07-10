@@ -116,7 +116,11 @@ def _print_chain_result(args: Any, result: Mapping[str, Any], guard_result: Mapp
     label = 'lifecycle_ok' if args.command == 'verify-lifecycle' else 'artifact_chain_ok'
     suffix = f":guarded:{result['guard_root_tag']}" if guard_result is not None else ''
     posture = str(result.get('verification_posture') or ('strict_lifecycle' if require_lifecycle else 'integrity_only'))
-    lifecycle_marker = 'lifecycle_passed' if result.get('lifecycle_status') == 'passed' else 'lifecycle_not_checked'
+    lifecycle_status = str(result.get('lifecycle_status') or 'not_checked')
+    lifecycle_marker = {
+        'passed': 'lifecycle_passed',
+        'review': 'lifecycle_review',
+    }.get(lifecycle_status, 'lifecycle_not_checked')
     print(f"{label}:{result['entry_count']}:{result['root_chain_digest']}{suffix}:posture={posture}:{lifecycle_marker}")
 
 
@@ -168,7 +172,7 @@ def _handle_ticket_use_command(args: Any) -> int:
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
         print(f"ticket_use_ok:{result['ticket_id']}:{result['receipt_id']}:{len(result['checks'])}")
-    return 0
+    return 0 if result.get('status') == 'passed' else 2
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -386,7 +390,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if guard_result is not None:
             result = {**result, 'guard_profile': guard_result['guard_profile'], 'guard_root_tag': guard_result['guard_root_tag'], 'key_id': guard_result['key_id'], 'security_posture': 'guarded_domain_auth'}
         _print_chain_result(args, result, guard_result, require_lifecycle=require_lifecycle)
-        return 0
+        return 0 if not require_lifecycle or result.get('lifecycle_status') == 'passed' else 2
 
     if args.command == 'verify-guarded-chain':
         manifest_path = Path(str(args.manifest)).resolve()
@@ -420,7 +424,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
         else:
             print(f"kernel_guard_ok:{result['entry_count']}:{result['root_chain_digest']}:{result['guard_root_tag']}")
-        return 0
+        return 0 if not args.strict_lifecycle or result.get('lifecycle_status') == 'passed' else 2
 
     if args.command == 'verify-secure-bundle':
         return _handle_secure_bundle_command(args)
@@ -435,14 +439,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             else:
                 validate_ticket_schema(ticket, strict_jsonschema=bool(args.strict_jsonschema))
                 checks = ['ticket_schema']
-        except (TicketSemanticError, AssertionError, CliInputError) as exc:
+        except (TicketSemanticError, TicketUseVerificationError, AssertionError, CliInputError) as exc:
             print(f'execution_ticket_failed:{exc}', file=sys.stderr)
             return 1
+        validation_status = (
+            'review'
+            if 'execution_contract_target_in_scope_not_checked' in checks
+            else 'passed'
+        )
         if args.format == 'json':
-            print(json.dumps({'status': 'passed', 'checks': checks, 'summary': ticket_summary(ticket)}, indent=2, sort_keys=True))
+            print(json.dumps({'status': validation_status, 'checks': checks, 'summary': ticket_summary(ticket)}, indent=2, sort_keys=True))
         else:
-            print(f"execution_ticket_ok:{ticket.get('schema_version') or 'unknown'}:{ticket.get('ticket_profile') or 'unknown'}:{len(checks)}")
-        return 0
+            label = 'execution_ticket_ok' if validation_status == 'passed' else 'execution_ticket_review'
+            print(f"{label}:{ticket.get('schema_version') or 'unknown'}:{ticket.get('ticket_profile') or 'unknown'}:{len(checks)}")
+        return 0 if validation_status == 'passed' else 2
 
     if args.command == 'explain-ticket':
         try:

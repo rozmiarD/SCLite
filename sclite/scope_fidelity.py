@@ -112,6 +112,13 @@ def build_scope_fidelity_report(
         normalized_args=list(normalized_args or []),
         execution_plan=list(execution_plan or []),
     )
+    verdict = str(summary['verdict'])
+    if target_in_scope is False:
+        verdict = 'fail'
+        summary['request_shape_hygiene_reason'] = 'target_explicitly_out_of_scope'
+    elif target_in_scope is not True and verdict != 'fail':
+        verdict = 'review'
+        summary['request_shape_hygiene_reason'] = 'target_scope_not_checked'
     report = {
         'artifact_type': SCOPE_FIDELITY_ARTIFACT_TYPE,
         'schema_version': SCOPE_FIDELITY_SCHEMA_VERSION,
@@ -121,7 +128,7 @@ def build_scope_fidelity_report(
         'target_host': summary['target_host'],
         'target_in_scope': target_in_scope,
         'source_artifact': _safe_str(source_artifact),
-        'verdict': summary['verdict'],
+        'verdict': verdict,
         'request_shape': {
             'arg_hosts_detected': summary['arg_hosts_detected'],
             'execution_plan_hosts_detected': summary['execution_plan_hosts_detected'],
@@ -207,6 +214,15 @@ def _target_entry(role: str, artifact: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _lifecycle_target_in_scope(artifacts_by_role: Mapping[str, Mapping[str, Any]], role: str) -> bool | None:
+    artifact = artifacts_by_role.get(role)
+    if not isinstance(artifact, Mapping):
+        return None
+    field = 'scope' if role == 'policy_decision' else 'target_binding'
+    value = json_mapping(artifact.get(field)).get('target_in_scope')
+    return value if isinstance(value, bool) else None
+
+
 def build_lifecycle_scope_fidelity_report(
     artifacts_by_role: Mapping[str, Mapping[str, Any]],
     *,
@@ -254,6 +270,29 @@ def build_lifecycle_scope_fidelity_report(
         verdict = 'review'
         status = 'no_explicit_targets'
         reason = 'no explicit target hosts found in lifecycle artifacts'
+
+    # v0.2 has a frozen lifecycle_target_status enum that describes host
+    # consistency. Scope assertion is therefore expressed by the verdict and
+    # reason, without inventing a schema-incompatible status value.
+    scope_assertions = [
+        _lifecycle_target_in_scope(artifacts_by_role, 'policy_decision'),
+        _lifecycle_target_in_scope(artifacts_by_role, 'execution_contract'),
+    ]
+    present_scope_assertions = [
+        value for role, value in zip(
+            ('policy_decision', 'execution_contract'),
+            scope_assertions,
+        )
+        if isinstance(artifacts_by_role.get(role), Mapping)
+    ]
+    if any(value is False for value in present_scope_assertions):
+        verdict = 'fail'
+        reason = 'lifecycle target_in_scope is explicitly false'
+    elif len(present_scope_assertions) == 2 and any(
+        value is not True for value in present_scope_assertions
+    ) and verdict != 'fail':
+        verdict = 'review'
+        reason = 'legacy lifecycle target_in_scope assertion is missing or unknown'
     report = {
         'artifact_type': SCOPE_FIDELITY_ARTIFACT_TYPE,
         'schema_version': LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION,

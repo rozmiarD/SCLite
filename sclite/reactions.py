@@ -8,8 +8,8 @@ from .integrity import (
     ChainVerificationError,
     artifact_descriptor,
     build_artifact_chain_manifest,
-    verify_artifact_chain_manifest,
 )
+from .integrity.chain import _verify_artifact_chain_manifest_with_snapshot
 
 OBSERVATION_SCHEMA_REF = 'schemas/observation_envelope.v0.1.schema.json'
 FINDING_SCHEMA_REF = 'schemas/finding.v0.1.schema.json'
@@ -173,7 +173,7 @@ def _bound_link(source: Mapping[str, Any], name: str, target: Mapping[str, Any])
 def verify_reaction_chain_manifest(
     manifest: Mapping[str, Any], *, root: Path, strict_jsonschema: bool = False
 ) -> Dict[str, Any]:
-    result = verify_artifact_chain_manifest(
+    result, snapshot = _verify_artifact_chain_manifest_with_snapshot(
         manifest,
         root=root,
         strict_jsonschema=strict_jsonschema,
@@ -183,9 +183,12 @@ def verify_reaction_chain_manifest(
     roles = tuple(result['checked_entries'])
     if roles not in {REACTION_CHAIN_ROLES, (*REACTION_CHAIN_ROLES, 'execution_receipt')}:
         raise ChainVerificationError(f'reaction roles mismatch: {list(roles)}')
-    observation = _read_artifact(root, '01_observation.json')
-    finding = _read_artifact(root, '02_finding.json')
-    plan = _read_artifact(root, '03_reaction_plan.json')
+    try:
+        observation = snapshot.artifacts_by_role['observation'].value
+        finding = snapshot.artifacts_by_role['finding'].value
+        plan = snapshot.artifacts_by_role['reaction_plan'].value
+    except KeyError as exc:  # pragma: no cover - role validation above is the public failure path
+        raise ChainVerificationError(f'reaction snapshot missing role: {exc.args[0]}') from exc
     if not _bound_link(finding, 'observation', observation):
         raise ChainVerificationError('finding-observation digest mismatch')
     if not _bound_link(plan, 'observation', observation):
@@ -194,12 +197,3 @@ def verify_reaction_chain_manifest(
         raise ChainVerificationError('reaction_plan-finding digest mismatch')
     result['reaction_semantics'] = 'passed'
     return result
-
-
-def _read_artifact(root: Path, name: str) -> Dict[str, Any]:
-    import json
-
-    value = json.loads((root / name).read_text(encoding='utf-8'))
-    if not isinstance(value, dict):
-        raise ChainVerificationError(f'{name} is not an object')
-    return value

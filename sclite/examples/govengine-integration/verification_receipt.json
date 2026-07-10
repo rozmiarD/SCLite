@@ -14,8 +14,8 @@
       "status": "pass"
     },
     {
-      "count": 14,
-      "detail": "semantic checks present",
+      "count": 16,
+      "detail": "semantic checks present and strict lifecycle passed",
       "name": "lifecycle_binding",
       "status": "pass"
     },
@@ -26,7 +26,7 @@
       "status": "pass"
     },
     {
-      "count": 11,
+      "count": 12,
       "detail": "ticket-use verification passed",
       "name": "ticket_use_profile",
       "status": "pass"

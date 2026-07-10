@@ -109,8 +109,27 @@ def test_kernel_guard_rejects_manifest_metadata_spoofing() -> None:
         'identity_signature_required': True,
     }
 
-    with pytest.raises(KernelGuardError, match='manifest_metadata_digest mismatch'):
+    with pytest.raises(KernelGuardError, match='unsupported manifest signature_policy.mode'):
         verify_kernel_guard_manifest(spoofed, guard, key=KEY, root=FIXTURE, require_lifecycle=True)
+
+
+@pytest.mark.parametrize(
+    ('field', 'value', 'error'),
+    [
+        ('profile', 'forged-runtime-profile', 'unsupported manifest profile'),
+        ('hash_algorithm', 'md5', 'manifest schema validation failed'),
+    ],
+)
+def test_kernel_guard_builder_refuses_unverified_manifest_identity(
+    field: str,
+    value: str,
+    error: str,
+) -> None:
+    manifest = _load_manifest()
+    manifest[field] = value
+
+    with pytest.raises(KernelGuardError, match=error):
+        _guard(manifest)
 
 
 def test_kernel_guard_rejects_entry_tag_tampering() -> None:

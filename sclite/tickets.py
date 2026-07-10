@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime
 from typing import Any, Dict, List, Mapping, Sequence
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
@@ -108,6 +109,8 @@ def validate_ticket_semantics(
         raise TicketSemanticError('ticket integrity execution_contract digest mismatch')
 
     target_binding = _require_mapping(execution_contract.get('target_binding'), 'execution_contract.target_binding')
+    scope_status = _legacy_execution_contract_scope_status(execution_contract)
+    _ticket_validity_window(ticket)
     execution_shape = _require_mapping(execution_contract.get('execution_shape'), 'execution_contract.execution_shape')
     execution_bounds = _require_mapping(execution_contract.get('execution_bounds'), 'execution_contract.execution_bounds')
     execution_limits = _require_mapping(ticket.get('execution_limits'), 'ticket.execution_limits')
@@ -166,11 +169,13 @@ def validate_ticket_semantics(
         'ticket_runtime_consumption_semantics',
         'ticket_binds_execution_contract',
         'ticket_scope_matches_execution_contract',
+        f'execution_contract_target_in_scope_{scope_status}',
         'ticket_mode_within_execution_bounds',
         'ticket_tool_matches_execution_contract',
         'ticket_args_digest_matches_execution_contract',
         'ticket_spend_limits_within_execution_limits',
         'ticket_receipt_and_evidence_obligations',
+        'ticket_validity_window_well_formed',
     ]
 
 
@@ -259,6 +264,74 @@ def _as_int(value: Any, label: str) -> int:
         raise TicketUseVerificationError(f'{label} must be an integer') from exc
 
 
+def _parse_offset_aware_rfc3339(value: Any, label: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise TicketUseVerificationError(f'{label} must be an offset-aware RFC3339 timestamp')
+    normalized = value[:-1] + '+00:00' if value.endswith('Z') else value
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise TicketUseVerificationError(f'{label} must be an offset-aware RFC3339 timestamp') from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise TicketUseVerificationError(f'{label} must be an offset-aware RFC3339 timestamp')
+    return parsed
+
+
+def _ticket_validity_window(ticket: Mapping[str, Any]) -> tuple[datetime, datetime]:
+    validity = _require_mapping(ticket.get('validity'), 'ticket.validity')
+    not_before = _parse_offset_aware_rfc3339(
+        validity.get('not_before'),
+        'ticket.validity.not_before',
+    )
+    not_after = _parse_offset_aware_rfc3339(
+        validity.get('not_after'),
+        'ticket.validity.not_after',
+    )
+    if not_before > not_after:
+        raise TicketUseVerificationError('ticket validity not_before is after not_after')
+    return not_before, not_after
+
+
+def _legacy_execution_contract_scope_status(execution_contract: Mapping[str, Any]) -> str:
+    target_binding = _require_mapping(
+        execution_contract.get('target_binding'),
+        'execution_contract.target_binding',
+    )
+    target_in_scope = target_binding.get('target_in_scope')
+    if target_in_scope is False:
+        raise TicketUseVerificationError('execution_contract target_in_scope is explicitly false')
+    return 'operator_asserted' if target_in_scope is True else 'not_checked'
+
+
+def _receipt_within_ticket_window_status(
+    ticket: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+    *,
+    receipt_status: str,
+) -> tuple[str, str]:
+    not_before, not_after = _ticket_validity_window(ticket)
+    execution = _require_mapping(receipt.get('execution'), 'receipt.execution')
+    started_raw = execution.get('started_at')
+    ended_raw = execution.get('ended_at')
+    if started_raw is None or ended_raw is None:
+        return (
+            'review',
+            'receipt execution timestamps are missing; ticket validity was not fully checked',
+        )
+    started_at = _parse_offset_aware_rfc3339(started_raw, 'receipt.execution.started_at')
+    ended_at = _parse_offset_aware_rfc3339(ended_raw, 'receipt.execution.ended_at')
+    if started_at > ended_at:
+        raise TicketUseVerificationError('receipt execution started_at is after ended_at')
+    if started_at < not_before or ended_at > not_after:
+        raise TicketUseVerificationError('receipt execution interval is outside ticket validity window')
+    if receipt_status in BLOCKED_RECEIPT_STATUSES:
+        return (
+            'review',
+            'receipt is non-executed/blocked; ticket validity is not an execution pass',
+        )
+    return ('passed', 'receipt execution interval is within ticket validity window')
+
+
 def _claim_text(claim: Mapping[str, Any]) -> str:
     parts = [claim.get('claim_type'), claim.get('id'), claim.get('statement')]
     return ' '.join(str(part or '').lower() for part in parts)
@@ -320,6 +393,7 @@ def verify_ticket_use(
     receipt_runtime = _require_mapping(receipt.get('runtime'), 'receipt.runtime')
     receipt_execution = _require_mapping(receipt.get('execution'), 'receipt.execution')
     outcome = _require_mapping(receipt.get('outcome'), 'receipt.outcome')
+    scope_status = _legacy_execution_contract_scope_status(execution_contract)
 
     ticket_mode = str(scope.get('mode') or limits.get('mode') or '')
     receipt_mode = str(receipt_runtime.get('mode') or '')
@@ -364,10 +438,16 @@ def verify_ticket_use(
         'receipt_mode_within_ticket',
         'receipt_network_within_ticket',
         'receipt_use_within_ticket',
+        'receipt_within_ticket_validity',
     ]
 
     receipt_status = str(outcome.get('status') or '').lower()
     network_performed = bool(receipt_execution.get('network_execution_performed'))
+    ticket_time_status, ticket_time_detail = _receipt_within_ticket_window_status(
+        ticket,
+        receipt,
+        receipt_status=receipt_status,
+    )
 
     evidence_checks: List[str] = []
     if bool(spend.get('requires_evidence_contract')) and evidence_contract is None:
@@ -422,8 +502,17 @@ def verify_ticket_use(
         ]
         checks.extend(evidence_checks)
 
+    status = 'passed'
+    review_reasons: List[str] = []
+    if scope_status != 'operator_asserted':
+        status = 'review'
+        review_reasons.append('execution_contract target_in_scope is not checked')
+    if ticket_time_status != 'passed':
+        status = 'review'
+        review_reasons.append(ticket_time_detail)
+
     return {
-        'status': 'passed',
+        'status': status,
         'checks': checks,
         'ticket_id': ticket.get('ticket_id'),
         'receipt_id': receipt.get('receipt_id'),
@@ -433,7 +522,10 @@ def verify_ticket_use(
             'receipt_status': outcome.get('status'),
             'receipt_runtime': receipt_runtime.get('runtime_ref') or receipt_runtime.get('name'),
             'evidence_checks': evidence_checks,
+            'scope_status': scope_status,
+            'ticket_validity_status': ticket_time_status,
         },
+        'detail': '; '.join(review_reasons),
     }
 
 
@@ -470,7 +562,7 @@ def verify_ticket_use_profile(
 
     missing = [
         role
-        for role in ('execution_contract', 'execution_receipt', 'evidence_contract')
+        for role in ('policy_decision', 'execution_contract', 'execution_receipt', 'evidence_contract')
         if not isinstance(artifacts_by_role.get(role), Mapping)
     ]
     if missing:
@@ -478,6 +570,25 @@ def verify_ticket_use_profile(
             'status': 'review',
             'applicability': 'incomplete',
             'detail': 'ticket-use verification missing lifecycle artifacts: ' + ', '.join(missing),
+            'ticket_id': ticket.get('ticket_id'),
+            'checks': [],
+        }
+
+    policy_scope = artifacts_by_role['policy_decision'].get('scope')
+    if not isinstance(policy_scope, Mapping):
+        return {
+            'status': 'review',
+            'applicability': 'verified',
+            'detail': 'policy_decision target_in_scope is not checked',
+            'ticket_id': ticket.get('ticket_id'),
+            'checks': [],
+        }
+    policy_target_in_scope = policy_scope.get('target_in_scope')
+    if policy_target_in_scope is False:
+        return {
+            'status': 'fail',
+            'applicability': 'verified',
+            'detail': 'policy_decision target_in_scope is explicitly false',
             'ticket_id': ticket.get('ticket_id'),
             'checks': [],
         }
@@ -501,6 +612,19 @@ def verify_ticket_use_profile(
             'checks': [],
         }
 
+    if result.get('status') != 'passed' or policy_target_in_scope is not True:
+        detail = str(result.get('detail') or '')
+        if policy_target_in_scope is not True:
+            detail = '; '.join(filter(None, [
+                detail,
+                'policy_decision target_in_scope is not checked',
+            ]))
+        return {
+            **result,
+            'status': 'review',
+            'applicability': 'verified',
+            'detail': detail or 'ticket-use verification is incomplete',
+        }
     return {
         **result,
         'status': 'pass',

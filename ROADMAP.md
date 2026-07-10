@@ -24,9 +24,9 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 1.0.9
+## Current baseline: 1.0.10rc1 candidate
 
-Current package: `sclite-core==1.0.9`.
+Current package: `sclite-core==1.0.10rc1`.
 Latest published public package: `sclite-core==1.0.9`.
 
 Roadmap v2 hardening from the 2026-06-14 audit was implemented in `1.0.3`.
@@ -50,6 +50,9 @@ automation-chain truth artifact for runner-owned child-operation graphs. It
 records nodes, edges, GovEngine admission refs, edge idempotency, budgets,
 recovery policy and LLM proposal-only invariants; traversal, execution, policy
 and domain semantics remain outside SCLite.
+The `1.0.10rc1` hotfix candidate corrects verified-input, manifest-identity,
+scope, and receipt-validity acceptance conditions without adding a new public
+API, schema family, runtime capability, or authority claim.
 
 Current lifecycle:
 

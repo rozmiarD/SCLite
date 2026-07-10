@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 1.0.10rc1 - P0 verified-input and lifecycle hotfix candidate
+
+- Uses one private immutable descriptor-verified snapshot for reaction,
+  review, secure-bundle, ticket-use, and GovEngine handoff paths; payloads are
+  not reopened after descriptor verification.
+- Validates artifact-chain manifest identity, supported profile and declared
+  signature policy before entries, and reports the verifier's actual
+  canonicalization/hash policy rather than untrusted metadata.
+- Fails explicit false scope assertions, keeps unknown scope/timestamps at
+  review, and requires `not_before <= started_at <= ended_at <= not_after` for
+  strict lifecycle and ticket-use pass paths.
+- Keeps generic integrity available, but requires strict lifecycle pass for
+  GovEngine lifecycle transitions. This candidate is unpublished; the latest
+  published package remains `sclite-core==1.0.9`.
+
 ## 1.0.9 - Automation chain truth-layer artifact
 
 - Added `automation_chain.v0.1` as the SCLite-owned multi-step automation-chain

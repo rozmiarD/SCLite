@@ -16,8 +16,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `1.0.9`
-- Status: **published 1.0 source and PyPI stable line: frozen lifecycle/review and guarded verification surface**
+- Version: `1.0.10rc1`
+- Status: **unpublished 1.0.10rc1 hotfix candidate; the published 1.0 source and PyPI stable line remains the frozen lifecycle/review and guarded verification surface**
 - Latest published PyPI package: `sclite-core==1.0.9`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations

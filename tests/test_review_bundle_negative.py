@@ -43,7 +43,7 @@ def _rewrite_manifest(base: Path) -> None:
         artifacts,
         chain_id='unit-test-review-bundle',
         created_at='2026-05-15T22:30:00+00:00',
-        profile='unit-test',
+        profile='sclite-v0.5-govengine-integration-integrity',
     )
     (base / 'artifact_chain_manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
