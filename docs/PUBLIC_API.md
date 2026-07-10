@@ -106,6 +106,7 @@ infrastructure health, or interpret profile semantics.
 - `AUTOMATION_CHAIN_SCHEMA`
 - `AUTOMATION_CHAIN_SCHEMA_REF`
 - `automation_chain_digest`
+- `automation_owner_migration_contract`
 - `automation_edge`
 - `automation_node`
 - `build_automation_chain`

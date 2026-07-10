@@ -7,6 +7,7 @@ from sclite import (
     automation_chain_digest,
     automation_edge,
     automation_node,
+    automation_owner_migration_contract,
     build_automation_chain,
     validate_automation_chain,
     verify_automation_chain,
@@ -173,6 +174,13 @@ def test_automation_chain_contract_verifies_multi_step_shape() -> None:
     assert result['child_edge_count'] == 1
     assert result['max_depth'] == 1
     assert result['root_chain_digest'] == automation_chain_digest(chain)
+    assert result['verification_posture'] == 'automation_bridge_partial_v0.1'
+    assert 'edge_endpoints_exist' in result['checked']
+    assert 'graph_acyclicity' in result['not_checked']
+    assert 'node_depth' in result['host_asserted']
+    assert result['requires_external_verification']['graph_and_runtime_semantics'] == 'rexecop'
+    assert result['requires_external_verification']['admission_authenticity_and_decision_binding'] == 'govengine'
+    assert 'child_edge_governance_admission' not in result['invariants']
 
 
 def test_automation_chain_rejects_duplicate_node_ids() -> None:
@@ -199,12 +207,15 @@ def test_automation_chain_rejects_child_edge_without_idempotency() -> None:
         validate_automation_chain(chain)
 
 
-def test_automation_chain_rejects_child_edge_without_govengine_admission() -> None:
+def test_automation_chain_treats_admission_owner_and_status_as_host_asserted() -> None:
     chain = _chain()
     chain['edges'][3]['admission']['owner_layer'] = 'rexecop'
+    chain['edges'][3]['admission']['status'] = 'blocked'
 
-    with pytest.raises(ChainVerificationError, match='GovEngine-owned'):
-        validate_automation_chain(chain)
+    result = verify_automation_chain(chain)
+    assert result['status'] == 'passed'
+    assert 'admission_owner_layer' in result['host_asserted']
+    assert 'admission_authenticity' in result['not_checked']
 
 
 def test_automation_chain_rejects_depth_budget_drift() -> None:
@@ -238,3 +249,56 @@ def test_automation_chain_schema_rejects_executable_llm_flag() -> None:
 
     with pytest.raises(JsonSchemaValidationError, match='llm_may_execute'):
         validate_automation_chain(chain)
+
+
+@pytest.mark.parametrize('mutation', ['cycle', 'self_loop', 'orphan', 'fake_depth'])
+def test_automation_bridge_accepts_unverified_graph_semantics_without_claiming_them(
+    mutation: str,
+) -> None:
+    chain = _chain()
+    if mutation == 'cycle':
+        chain['edges'].append(
+            automation_edge(
+                edge_id='cycle-edge',
+                edge_type='continued_as',
+                from_node='receipt-child',
+                to_node='op-source',
+                depth=1,
+            )
+        )
+    elif mutation == 'self_loop':
+        chain['edges'].append(
+            automation_edge(
+                edge_id='self-loop',
+                edge_type='continued_as',
+                from_node='obs-1',
+                to_node='obs-1',
+                depth=0,
+            )
+        )
+    elif mutation == 'orphan':
+        chain['nodes'].append(
+            automation_node(
+                node_id='orphan',
+                node_type='external_ref',
+                depth=0,
+                status='pending',
+                owner_layer='operator',
+                authority_level='none',
+            )
+        )
+    else:
+        chain['nodes'][1]['depth'] = 2
+
+    result = verify_automation_chain(chain)
+    assert result['status'] == 'passed'
+    assert 'graph_acyclicity' in result['not_checked']
+    assert 'graph_connectivity' in result['not_checked']
+    assert 'computed_depth' in result['not_checked']
+
+
+def test_automation_owner_migration_contract_is_explicit() -> None:
+    contract = automation_owner_migration_contract()
+    assert contract['bridge_owner'] == 'sclite'
+    assert 'dag_roots_connectivity' in contract['external_owners']['rexecop']
+    assert 'admission_decision_binding' in contract['external_owners']['govengine']

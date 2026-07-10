@@ -13,6 +13,7 @@ AUTOMATION_CHAIN_NON_CLAIMS = (
     'Does not replace GovEngine admission for automation transitions.',
     'Does not store raw evidence, connector payloads, secrets, or private topology.',
     'Does not make LLM proposals executable authority.',
+    'Does not verify DAG shape, roots, connectivity, computed depth, transitions, recovery execution, checkpoints, or admission authenticity.',
 )
 CHILD_EDGE_TYPES = {'admitted_child', 'spawned_child'}
 REACTION_NODE_TYPES = {'reaction_plan'}
@@ -84,6 +85,41 @@ def verify_automation_chain(
     child_edge_count = sum(
         1 for edge in edges.values() if str(edge.get('edge_type') or '') in CHILD_EDGE_TYPES
     )
+    checked = [
+        'schema_shape',
+        'unique_node_ids',
+        'unique_edge_ids',
+        'edge_endpoints_exist',
+        'node_count_within_declared_budget',
+        'declared_depth_values_within_declared_budget',
+        'reaction_node_count_within_declared_budget',
+        'source_operation_id_represented',
+        'child_edge_idempotency_key_present',
+        'child_admission_reference_shape',
+        'llm_proposal_shape',
+    ]
+    not_checked = [
+        'graph_acyclicity',
+        'graph_roots',
+        'graph_connectivity',
+        'computed_depth',
+        'transition_semantics',
+        'recovery_semantics',
+        'checkpoint_semantics',
+        'global_idempotency',
+        'admission_authenticity',
+        'admission_decision_binding',
+    ]
+    host_asserted = [
+        'node_depth',
+        'edge_depth',
+        'node_status',
+        'controls',
+        'recovery',
+        'compatibility',
+        'admission_status',
+        'admission_owner_layer',
+    ]
     return {
         'status': 'passed',
         'schema_ref': AUTOMATION_CHAIN_SCHEMA_REF,
@@ -93,19 +129,48 @@ def verify_automation_chain(
         'reaction_count': reaction_count,
         'child_edge_count': child_edge_count,
         'max_depth': _max_depth(nodes, edges),
+        'max_depth_semantics': 'host_asserted_not_computed',
         'root_chain_digest': automation_chain_digest(artifact),
-        'verification_posture': 'automation_chain_contract_v0.1',
-        'invariants': [
-            'schema_valid',
-            'unique_node_ids',
-            'unique_edge_ids',
-            'edge_endpoints_exist',
-            'depth_limits',
-            'reaction_budget',
-            'child_edge_idempotency',
-            'child_edge_governance_admission',
-            'llm_proposal_only',
+        'verification_posture': 'automation_bridge_partial_v0.1',
+        'checked': checked,
+        'not_checked': not_checked,
+        'host_asserted': host_asserted,
+        'requires_external_verification': {
+            'graph_and_runtime_semantics': 'rexecop',
+            'recovery_and_checkpoint_semantics': 'rexecop',
+            'admission_authenticity_and_decision_binding': 'govengine',
+            'profile_transition_semantics': 'profile',
+        },
+        'invariants': checked,
+    }
+
+
+def automation_owner_migration_contract() -> Dict[str, Any]:
+    """Return the frozen owner split for migration away from the bridge."""
+
+    return {
+        'schema': 'sclite.automation_owner_migration.v0.1',
+        'bridge_owner': 'sclite',
+        'bridge_checks': [
+            'shape',
+            'referential_endpoints',
+            'declared_resource_budgets',
+            'source_reference_presence',
+            'llm_proposal_shape',
+            'child_reference_shape',
         ],
+        'external_owners': {
+            'rexecop': [
+                'dag_roots_connectivity',
+                'computed_depth',
+                'transition_semantics',
+                'global_idempotency',
+                'recovery_and_checkpoints',
+            ],
+            'govengine': ['admission_authenticity', 'admission_decision_binding'],
+            'profile': ['profile_transition_semantics'],
+        },
+        'migration_target': 'owner adapters in 1.3.x; bridge removal no earlier than 2.0',
     }
 
 
@@ -320,10 +385,6 @@ def _verify_edge(
     if not isinstance(admission, Mapping):
         raise ChainVerificationError('automation child edge missing admission')
     if bool(controls.get('requires_govengine_admission')):
-        if admission.get('owner_layer') != 'govengine':
-            raise ChainVerificationError('automation child edge admission must be GovEngine-owned')
-        if admission.get('status') != 'admitted':
-            raise ChainVerificationError('automation child edge is not admitted')
         if not str(admission.get('decision_id') or ''):
             raise ChainVerificationError('automation child edge missing admission decision_id')
         if not _is_digest(str(admission.get('decision_digest') or '')):

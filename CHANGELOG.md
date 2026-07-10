@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Makes `automation_chain.v0.1` verification claims explicit through
+  `checked`, `not_checked`, `host_asserted` and external-owner fields. The
+  frozen migration contract keeps graph/recovery semantics in RExecOp and
+  admission authenticity/decision binding in GovEngine; SCLite remains the
+  shape, reference and declared-budget verifier.
+
 ## 1.1.0rc1 - Strict JSON input policy candidate
 
 - Adds evidence-based disclosure v0.2 statuses (`unknown`,

@@ -96,8 +96,12 @@ SCLite also defines bounded decision-chain artifacts used by host runtimes:
 `automation_chain.v0.1`. `automation_chain.v0.1` is the multi-step automation
 contract baseline: it records nodes, edges, GovEngine admission refs,
 idempotency keys, depth/reaction budgets, recovery policy and LLM
-proposal-only invariants. It does not traverse the graph, schedule work,
-authorize child operations or execute anything.
+proposal-only declarations. Verification reports `checked`, `not_checked`,
+`host_asserted` and `requires_external_verification`: SCLite checks artifact
+shape, references and declared budgets, but does not claim DAG, computed-depth,
+transition, recovery/checkpoint or admission-authenticity verification. Those
+semantics belong to RExecOp and GovEngine. SCLite does not traverse the graph,
+schedule work, authorize child operations or execute anything.
 
 Verify the lifecycle fixture:
 
