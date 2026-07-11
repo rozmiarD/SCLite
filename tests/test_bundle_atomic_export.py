@@ -110,6 +110,16 @@ def test_public_export_rejects_special_file(tmp_path: Path) -> None:
         validate_review_bundle_shape(bundle, mode='public_export')
 
 
+def test_public_export_rejects_hardlinked_file(tmp_path: Path) -> None:
+    bundle = _copy_public_bundle(tmp_path)
+    original = bundle / '01_intent_contract.json'
+    outside = tmp_path / 'outside.json'
+    original.replace(outside)
+    os.link(outside, original)
+    with pytest.raises(ReviewBundleError, match='hardlinks=01_intent_contract.json'):
+        validate_review_bundle_shape(bundle, mode='public_export')
+
+
 def test_materialization_publishes_complete_closed_world_bundle(tmp_path: Path) -> None:
     target = tmp_path / 'published'
 
@@ -268,7 +278,7 @@ def test_export_cli_is_public_export_by_default_with_explicit_local_escape_hatch
     )
 
     assert public_result.returncode == 1
-    assert 'public export inventory is not closed-world' in public_result.stderr
+    assert 'input_validation_failed' in public_result.stderr
     assert local_result.returncode == 0, local_result.stderr
     assert local_result.stdout.startswith('# SCLite Review Record')
 

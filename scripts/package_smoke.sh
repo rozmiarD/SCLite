@@ -36,16 +36,23 @@ trap cleanup EXIT
 
 "${PYTHON_BIN}" -m venv "${TMPDIR_ROOT}/build-venv"
 BUILD_PY="${TMPDIR_ROOT}/build-venv/bin/python"
-"${BUILD_PY}" -m pip install --upgrade pip >/dev/null
-"${BUILD_PY}" -m pip install build twine >/dev/null
+"${BUILD_PY}" -m pip install -r "${REPO_ROOT}/.github/release-build-requirements.txt" >/dev/null
 "${BUILD_PY}" -m build --outdir "${TMPDIR_ROOT}/dist"
+scripts/normalize_sdist.sh "${TMPDIR_ROOT}"/dist/*.tar.gz
 "${BUILD_PY}" -m twine check "${TMPDIR_ROOT}"/dist/*
 
 "${PYTHON_BIN}" -m venv "${TMPDIR_ROOT}/install-venv"
 INSTALL_PY="${TMPDIR_ROOT}/install-venv/bin/python"
-"${INSTALL_PY}" -m pip install --upgrade pip >/dev/null
+"${INSTALL_PY}" -m pip install pip==26.1.2 >/dev/null
 "${INSTALL_PY}" -m pip install "${TMPDIR_ROOT}"/dist/*.whl >/dev/null
 "${INSTALL_PY}" -m pip check
+
+"${PYTHON_BIN}" -m venv "${TMPDIR_ROOT}/sdist-install-venv"
+SDIST_INSTALL_PY="${TMPDIR_ROOT}/sdist-install-venv/bin/python"
+"${SDIST_INSTALL_PY}" -m pip install pip==26.1.2 >/dev/null
+"${SDIST_INSTALL_PY}" -m pip install "${TMPDIR_ROOT}"/dist/*.tar.gz >/dev/null
+"${SDIST_INSTALL_PY}" -m pip check
+"${SDIST_INSTALL_PY}" -c "import importlib.metadata as md, sclite; assert md.version('sclite-core') == sclite.__version__"
 
 cd "${TMPDIR_ROOT}"
 "${INSTALL_PY}" - <<'PY'

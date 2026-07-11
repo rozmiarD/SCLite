@@ -54,6 +54,10 @@ installs the generated wheel into a clean virtual environment, runs
 `pip check`, and confirms the PyPI distribution name `sclite-core` imports as
 the Python package `sclite`.
 
+The smoke environment installs `.github/release-build-requirements.txt`; it does
+not resolve floating build or upload-tool versions. The release workflow uses
+separate exact audit/SBOM and test requirement sets before running `dev_gate.sh`.
+
 Before a release-candidate or stable release, confirm the security model and
 profile freeze docs remain aligned:
 

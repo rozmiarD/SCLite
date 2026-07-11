@@ -67,6 +67,7 @@ def _recursive_inventory(base: Path, *, limits: VerificationLimits) -> Dict[str,
         'directories': [],
         'symlinks': [],
         'special_files': [],
+        'hardlinks': [],
     }
     pending = [(base, 0)]
     entry_count = 0
@@ -89,7 +90,10 @@ def _recursive_inventory(base: Path, *, limits: VerificationLimits) -> Dict[str,
                     if entry.is_symlink():
                         inventory['symlinks'].append(relative)
                     elif entry.is_file(follow_symlinks=False):
-                        inventory['files'].append(relative)
+                        if entry.stat(follow_symlinks=False).st_nlink != 1:
+                            inventory['hardlinks'].append(relative)
+                        else:
+                            inventory['files'].append(relative)
                     elif entry.is_dir(follow_symlinks=False):
                         inventory['directories'].append(relative)
                         pending.append((path, depth + 1))
@@ -113,7 +117,7 @@ def _public_inventory_errors(inventory: Mapping[str, list[str]]) -> list[str]:
     errors = []
     if extras:
         errors.append('extras=' + ','.join(extras))
-    for category in ('directories', 'symlinks', 'special_files'):
+    for category in ('directories', 'symlinks', 'special_files', 'hardlinks'):
         if inventory[category]:
             errors.append(category + '=' + ','.join(inventory[category]))
     return errors

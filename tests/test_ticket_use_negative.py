@@ -115,6 +115,26 @@ def test_strict_evidence_profile_rejects_legacy_text_marker_fallback() -> None:
         )
 
 
+def test_strict_execution_claim_requires_completed_execution_flag() -> None:
+    evidence = _evidence()
+    evidence['claims'][0].update({
+        'claim_type': 'receipt_bounded_execution',
+        'statement': 'Production host fully compromised',
+        'requires_completed_execution': False,
+        'requires_network_execution': False,
+        'requires_live_execution': False,
+    })
+    with pytest.raises(TicketUseVerificationError, match='must require completed execution'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence, strict_evidence_claims=True)
+
+
+def test_strict_dry_run_claim_rejects_execution_flags() -> None:
+    evidence = _evidence()
+    evidence['claims'][0]['requires_completed_execution'] = True
+    with pytest.raises(TicketUseVerificationError, match='non-execution claim cannot require execution'):
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence, strict_evidence_claims=True)
+
+
 def test_strict_one_shot_profile_requires_single_max_run() -> None:
     ticket = _ticket()
     ticket['execution_limits']['max_runs'] = 2

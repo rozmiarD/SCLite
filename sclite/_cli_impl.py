@@ -101,10 +101,11 @@ def _optional_positive_int(value: Any) -> int | None:
     return parsed
 
 
-def _failed(label: str, exc: BaseException) -> int:
+def _failed(label: str, exc: BaseException, *, public_safe: bool = False) -> int:
     code = getattr(exc, 'code', None)
     suffix = f':error_code={code}' if isinstance(code, str) and code else ''
-    print(f'{label}:{exc}{suffix}', file=sys.stderr)
+    detail = 'input_validation_failed' if public_safe else str(exc)
+    print(f'{label}:{detail}{suffix}', file=sys.stderr)
     return 1
 
 
@@ -369,7 +370,7 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
                 allow_external_schema_refs=True,
             )
         except (CliInputError, ValueError) as exc:
-            return _failed('security_contract_artifact_failed', exc)
+            return _failed('security_contract_artifact_failed', exc, public_safe=True)
         print(f'security_contract_artifact_ok:{artifact_path}')
         return 0
 
@@ -666,7 +667,8 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
                 mode=cast(ReviewBundleMode, str(args.mode)),
             )
         except (ReviewBundleError, ValueError) as exc:
-            print(f'export_review_bundle_failed:{exc}', file=sys.stderr)
+            code = getattr(exc, 'code', 'review_bundle_failed')
+            print(f'export_review_bundle_failed:input_validation_failed:error_code={code}', file=sys.stderr)
             return 1
         payload = json.dumps(record, indent=2, sort_keys=True) + '\n' if args.format == 'json' else export_review_bundle_markdown(record)
         if args.output:

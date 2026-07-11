@@ -25,10 +25,10 @@ def _run(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.Co
     return subprocess.run([sys.executable, '-m', module, *args], cwd=str(ROOT), text=True, capture_output=True, check=False, env=run_env)
 
 
-def _assert_clean_cli_failure(proc: subprocess.CompletedProcess[str], label: str) -> None:
+def _assert_clean_cli_failure(proc: subprocess.CompletedProcess[str], label: str, detail: str = 'invalid JSON') -> None:
     assert proc.returncode == 1
     assert label in proc.stderr
-    assert 'invalid JSON' in proc.stderr
+    assert detail in proc.stderr
     assert 'Traceback' not in proc.stderr
 
 
@@ -260,7 +260,16 @@ def test_malformed_json_validate_artifact_fails_without_traceback(tmp_path: Path
 
     proc = _run(['validate-artifact', '--schema', 'execution_contract.v0.2', str(bad)])
 
-    _assert_clean_cli_failure(proc, 'security_contract_artifact_failed')
+    _assert_clean_cli_failure(proc, 'security_contract_artifact_failed', 'input_validation_failed')
+
+
+def test_validate_artifact_does_not_reflect_invalid_value(tmp_path: Path) -> None:
+    bad = tmp_path / 'bad.json'
+    bad.write_text('{"artifact_type":"SECRET_TOKEN_VALUE"}', encoding='utf-8')
+    proc = _run(['validate-artifact', '--schema', 'redaction_policy.v0.2', str(bad)])
+    assert proc.returncode == 1
+    assert 'SECRET_TOKEN_VALUE' not in proc.stderr
+    assert str(bad) not in proc.stderr
 
 
 def test_malformed_json_validate_chain_fails_without_traceback(tmp_path: Path) -> None:

@@ -18,7 +18,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13'
-      - run: python -m pip install --upgrade -r .github/release-requirements.txt
+      - run: python -m pip install --upgrade -r .github/release-build-requirements.txt
+      - run: python -m pip install -r .github/release-requirements.txt
+      - run: python -m pip install -r .github/release-test-requirements.txt
       - name: Full source security gate
         run: scripts/dev_gate.sh
       - name: Dependency audit
@@ -31,6 +33,7 @@ jobs:
           scripts/package_smoke.sh
           scripts/reproducible_build_gate.sh
       - run: python -m build
+      - run: scripts/normalize_sdist.sh dist/*.tar.gz
       - run: python -m twine check dist/*
       - name: Bind tag to package version
         run: |

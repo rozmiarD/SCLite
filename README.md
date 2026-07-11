@@ -211,7 +211,7 @@ It provides:
 Review-bundle inspection and publication use separate modes. `review` keeps
 `local_review` compatibility and reports the complete recursive inventory.
 `export-review-bundle` defaults to fail-closed `public_export`, which rejects
-unrecognized files, nested directories, symlinks and special files. Programmatic
+unrecognized files, nested directories, symlinks, hard links and special files. Programmatic
 materialization stages and verifies a complete bundle before publishing it by
 rename; replacing an existing target requires explicit `overwrite=True`.
 

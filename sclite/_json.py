@@ -204,6 +204,8 @@ def load_json_document(
         metadata = os.fstat(descriptor)
         if not stat.S_ISREG(metadata.st_mode):
             raise error_cls(f'{json_path}: JSON input is not a regular file')
+        if metadata.st_nlink != 1:
+            raise error_cls(f'{json_path}: JSON input must have exactly one hard link')
         limit_label = f'max_bytes={max_bytes}' if max_bytes is not None else f'max_file_bytes={read_limit}'
         if metadata.st_size > read_limit:
             raise error_cls(f'{json_path}: JSON file exceeds {limit_label}')

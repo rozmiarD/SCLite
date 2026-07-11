@@ -313,6 +313,10 @@ Receipt/evidence compatibility decision:
   `network_execution` remain a conservative compatibility fallback in v0.2 so
   old public-safe fixtures cannot bypass receipt bounds by omitting structured
   fields;
+- strict evidence verification binds each supported machine `claim_type` to
+  required execution flags and receipt status. Free-form `statement` text is
+  reviewer context only: it is not interpreted as proof and cannot relax the
+  machine-field requirements;
 - an execution receipt vNext should make outcome taxonomy and evidence claim
   requirements explicit enough that text marker fallback can be deprecated in a
   future schema line;
