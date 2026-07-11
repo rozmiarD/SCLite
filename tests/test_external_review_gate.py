@@ -131,3 +131,53 @@ def test_stable_release_rejects_unknown_field(tmp_path: Path) -> None:
     result = _run(path, wheel, sdist)
     assert result.returncode == 1
     assert "external_review_unknown_field:approval_override" in result.stdout
+
+
+@pytest.mark.parametrize(("medium", "low", "accepted"), [
+    (1, 0, []),
+    (0, 1, ["L-01"]),
+])
+def test_review_approved_requires_zero_findings(
+    tmp_path: Path,
+    medium: int,
+    low: int,
+    accepted: list[str],
+) -> None:
+    wheel, sdist = _artifacts(tmp_path)
+    record = _record(wheel, sdist)
+    record.update({
+        "review_verdict": "approved",
+        "unresolved_medium": medium,
+        "unresolved_low": low,
+        "accepted_findings": accepted,
+    })
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps(record), encoding="utf-8")
+    result = _run(path, wheel, sdist)
+    assert result.returncode == 1
+    assert "external_review_approved_requires_zero_findings" in result.stdout
+
+
+@pytest.mark.parametrize(("medium", "low", "accepted"), [
+    (0, 0, []),
+    (1, 1, ["M-01"]),
+    (0, 1, []),
+])
+def test_review_approved_with_findings_requires_matching_accepted_ids(
+    tmp_path: Path,
+    medium: int,
+    low: int,
+    accepted: list[str],
+) -> None:
+    wheel, sdist = _artifacts(tmp_path)
+    record = _record(wheel, sdist)
+    record.update({
+        "unresolved_medium": medium,
+        "unresolved_low": low,
+        "accepted_findings": accepted,
+    })
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps(record), encoding="utf-8")
+    result = _run(path, wheel, sdist)
+    assert result.returncode == 1
+    assert "external_review_accepted_findings_mismatch" in result.stdout

@@ -7,6 +7,10 @@
 - Makes release rerun full gates and bind tag/version, source commit and exact artifacts to external review using pinned build tooling.
 - Completes audit remediation by rejecting hard-linked inputs, enforcing claim-type/flag semantics, making public-export and artifact-validation failures non-reflective, requiring stable review binding arguments, and comparing reproducible wheel and sdist builds.
 - Makes stable review records non-self-referential through a source-parent plus record-only commit protocol, validates duplicate-free records with complete finding/report metadata, runs tag verification on Python 3.11-3.13, and labels HMAC-only Guard checks separately.
+- Makes stable provenance identify the tagged record commit actually used for
+  publication, after byte-for-byte comparison with the reviewed parent build;
+  binds review verdicts to finding counts, narrows dry-run claim statuses, and
+  reruns Ruff, mypy and Node conformance in the release matrix.
 
 - Removes the deprecated reaction, trigger, watchdog and automation modules,
   built-in schemas and root exports for the 2.0 major line; RExecOp provides

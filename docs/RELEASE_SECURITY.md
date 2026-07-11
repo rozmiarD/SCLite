@@ -9,7 +9,8 @@ The supported Python matrix, adversarial regression gate, property tests and
 the language-neutral conformance corpus must pass before a tag is created.
 Unresolved High or Critical findings block release.
 
-The tag workflow reruns the full source and package gates for the tagged SHA,
+The tag workflow reruns the full source and package gates, including Ruff,
+strict mypy and the language-neutral Node.js conformance vectors,
 requires `v<project.version>`, and for stable releases compares the review's
 source commit, release line and two artifact SHA-256 values with the exact wheel
 and sdist built for publication. Build and release-test tooling is
@@ -34,14 +35,21 @@ Stable release uses two commits to avoid a self-referential record:
    `security/EXTERNAL_REVIEW.json`;
 3. the stable tag points to `B`;
 4. the workflow proves the parent/diff relationship, preserves the record,
-   checks out `A`, runs Python 3.11-3.13 gates, and builds/publishes from `A`;
-5. source, artifact and report hashes are checked before publication.
+   checks out `A`, runs Python 3.11-3.13 gates, and builds candidate artifacts;
+5. the workflow checks out `B`, rebuilds, requires identical artifact names and
+   bytes to the build from `A`, and publishes/attests the build from `B`;
+6. source and artifact hashes are checked before publication. Standard GitHub
+   provenance therefore identifies the commit actually used for the published
+   build (`B`), while the equality gate binds those bytes to reviewed source
+   commit `A`.
 
 The completion record is release-owner-attested metadata. CI verifies strict
 record shape and source/artifact binding, but does not authenticate reviewer
-identity, reviewer consent, or report authorship. `report_sha256`, review
-date/verdict, all severity counts and accepted finding IDs preserve the handoff
-to the separately shared report.
+identity, reviewer consent, or report authorship. `report_sha256` records the
+release owner's claimed digest of the retained report. CI validates its format
+but does not retrieve or hash the report. Review date/verdict, all severity
+counts and accepted finding IDs preserve the handoff to that separately shared
+report.
 
 Security-sensitive descriptor traversal and release tooling are supported and
 tested on Linux/Unix. Windows secure-bundle and release-tooling behavior is not

@@ -161,6 +161,24 @@ def test_strict_dry_run_claim_requires_zero_executed_commands() -> None:
         verify_ticket_use(_ticket(), _contract(), receipt, evidence, strict_ticket_profile=True, strict_evidence_claims=True)
 
 
+@pytest.mark.parametrize('status', ['blocked', 'rejected', 'denied', 'failed'])
+def test_strict_dry_run_claim_rejects_blocked_or_failed_receipt(status: str) -> None:
+    receipt = _receipt()
+    receipt['outcome']['status'] = status
+    receipt['execution']['executed_command_count'] = 0
+    evidence = _evidence()
+    evidence['links']['execution_receipt']['descriptor'] = artifact_descriptor(receipt)
+    with pytest.raises(TicketUseVerificationError, match='requires dry-run receipt status'):
+        verify_ticket_use(
+            _ticket(),
+            _contract(),
+            receipt,
+            evidence,
+            strict_ticket_profile=True,
+            strict_evidence_claims=True,
+        )
+
+
 def test_strict_one_shot_profile_requires_single_max_run() -> None:
     ticket = _ticket()
     ticket['execution_limits']['max_runs'] = 2

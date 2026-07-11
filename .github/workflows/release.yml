@@ -33,6 +33,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -r .github/release-test-requirements.txt
       - run: scripts/dev_gate.sh
+      - run: python -m ruff check .
+      - run: python -m mypy
+      - run: node scripts/verify_vectors.mjs conformance/sclite-2.0-vectors.json
 
   publish:
     needs: verify-source
@@ -68,9 +71,25 @@ jobs:
         run: |
           scripts/package_smoke.sh
           scripts/reproducible_build_gate.sh
-      - run: python -m build
-      - run: scripts/normalize_sdist.sh dist/*.tar.gz
-      - run: python -m twine check dist/*
+      - name: Build reviewed source artifacts
+        run: |
+          rm -rf dist build *.egg-info
+          python -m build
+          scripts/normalize_sdist.sh dist/*.tar.gz
+          python -m twine check dist/*
+          mkdir -p "${RUNNER_TEMP}/reviewed-dist"
+          cp dist/*.whl dist/*.tar.gz "${RUNNER_TEMP}/reviewed-dist/"
+      - name: Build tagged record commit and prove artifact equality
+        if: ${{ !contains(github.ref_name, 'rc') }}
+        run: |
+          git checkout --detach "${GITHUB_SHA}"
+          rm -rf dist build *.egg-info
+          python -m build
+          scripts/normalize_sdist.sh dist/*.tar.gz
+          python -m twine check dist/*
+          python scripts/compare_release_builds.py \
+            --reviewed "${RUNNER_TEMP}/reviewed-dist" \
+            --published dist
       - name: Bind tag to source package version
         run: |
           VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")

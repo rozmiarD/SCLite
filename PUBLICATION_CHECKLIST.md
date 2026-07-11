@@ -186,3 +186,11 @@ reviewer confirm that commit and reproducible artifacts. Then create one
 record-only child commit changing `security/EXTERNAL_REVIEW.json`, and tag that
 child. Never mix code, version, workflow, documentation, or fixture changes into
 the record commit; the release workflow rejects such a tag.
+
+The stable workflow builds reviewed source commit `A`, then rebuilds tagged
+record commit `B`. It requires the wheel and normalized sdist names and bytes to
+match exactly, rejects a packaged external-review record, publishes the `B`
+build, and attests `B` as the actual build commit. Before creating `B`, confirm
+that `review_verdict`, all severity counts and `accepted_findings` agree.
+`report_sha256` is release-owner-attested metadata: CI validates its format but
+does not retrieve or independently hash the retained report.

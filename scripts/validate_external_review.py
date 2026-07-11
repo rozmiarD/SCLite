@@ -113,6 +113,27 @@ def main() -> int:
             errors.append("external_review_date")
         if record.get("review_verdict") not in VERDICTS:
             errors.append("external_review_verdict")
+        accepted_findings = record.get("accepted_findings")
+        medium = counts["unresolved_medium"]
+        low = counts["unresolved_low"]
+        if record.get("review_verdict") == "approved" and (
+            medium not in {None, 0}
+            or low not in {None, 0}
+            or accepted_findings not in (None, [])
+        ):
+            errors.append("external_review_approved_requires_zero_findings")
+        if (
+            record.get("review_verdict") == "approved_with_low_or_medium_findings"
+            and medium is not None
+            and low is not None
+            and isinstance(accepted_findings, list)
+            and (
+                medium + low == 0
+                or not accepted_findings
+                or len(accepted_findings) != medium + low
+            )
+        ):
+            errors.append("external_review_accepted_findings_mismatch")
         report_hash = record.get("report_sha256")
         if not isinstance(report_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", report_hash):
             errors.append("external_review_report_sha256")
