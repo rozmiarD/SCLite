@@ -12,9 +12,9 @@ def test_public_export_inventory_is_complete_and_classified() -> None:
     assert {record["classification"] for record in records.values()} == {
         "stable",
         "bridge",
-        "testing",
         "internal",
     }
+    assert all(record["classification"] != "testing" for record in records.values())
     assert all(record["owner"] and record["disposition"] for record in records.values())
 
 

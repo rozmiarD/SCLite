@@ -16,6 +16,12 @@ imports against that allowlist; a new deep import fails until the contract is
 reviewed. This inventory does not claim knowledge of private or external PyPI
 consumers.
 
+Installed `sclite` and `scl` entrypoints expose only kernel validation,
+verification, ticket, review and materialization workflows. Local inspection,
+snapshot, scope-report and heuristic-redaction commands use
+`sclite-devtools`. The historical `python -m sclite.cli` dispatcher remains a
+warning compatibility path through 2.0.
+
 ## Version
 
 - `__version__`
@@ -176,7 +182,6 @@ legacy policy. SCLite does not estimate entropy or own key custody/rotation.
 - `VERIFICATION_RESULT_SCHEMA_REF`
 - `VERIFICATION_RESULT_SCHEMA_REF_V1_1`
 - `VerificationResult`
-- `build_guarded_strict_verification_result`
 - `serialize_verification_result`
 - `SCLiteError`
 - `SCLiteValidationError`
@@ -200,9 +205,9 @@ compatibility through the same base hierarchy and expose stable `.code` values.
 - `sclite.testing.build_guarded_strict_verification_result_fixture`
 
 This helper intentionally creates forgeable v1 fixture JSON and performs no
-verification. The old root-level `build_guarded_strict_verification_result`
-name remains a compatibility alias through 2.0; formal warnings begin no
-earlier than 1.3.
+verification. The old root attribute
+`build_guarded_strict_verification_result` remains an unadvertised
+compatibility shim through 2.0, but is no longer in `sclite.__all__`.
 
 ## Disclosure status
 

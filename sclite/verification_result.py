@@ -123,7 +123,7 @@ def build_guarded_strict_verification_result(
     Production callers should use ``verify_secure_bundle_result``.
     """
 
-    from .testing import build_guarded_strict_verification_result_fixture
+    from .devtools_fixtures import build_guarded_strict_verification_result_fixture
 
     return build_guarded_strict_verification_result_fixture(
         guard_result,

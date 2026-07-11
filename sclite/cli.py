@@ -26,6 +26,18 @@ from .profiles import (
     validate_trust_profile_ref,
 )
 from .redaction import build_default_redaction_policy, build_redaction_receipt
+
+KERNEL_COMMANDS = frozenset({
+    'validate-artifact', 'validate-chain', 'verify-lifecycle',
+    'verify-guarded-chain', 'verify-secure-bundle', 'validate-ticket',
+    'verify-ticket-use', 'validate-trust-profile', 'validate-carrier-profile',
+    'review', 'export-review-bundle',
+})
+DEVTOOLS_COMMANDS = frozenset({
+    'hash-artifact', 'explain-ticket', 'redaction-policy',
+    'redaction-receipt', 'validation-surface-index', 'snapshot-manifest',
+    'scope-fidelity', 'review-lifecycle',
+})
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .secure import SecureBundleError, resolve_guard_path, verify_secure_bundle
@@ -187,7 +199,7 @@ def _handle_ticket_use_command(args: Any) -> int:
     return 0 if result.get('status') == 'passed' else 2
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) -> int:
     parser = argparse.ArgumentParser(description='Security Contract Layer validation CLI.')
     sub = parser.add_subparsers(dest='command', required=True)
 
@@ -341,6 +353,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     export_review_cmd.add_argument('--output', help='write output to this path instead of stdout')
 
     args = parser.parse_args(argv)
+    if emit_deprecation and args.command in DEVTOOLS_COMMANDS:
+        print(
+            f'deprecated_cli_alias:{args.command}:use sclite-devtools {args.command}',
+            file=sys.stderr,
+        )
     if args.command == 'validate-artifact':
         artifact_path = Path(str(args.artifact))
         try:

@@ -45,8 +45,9 @@ dev = [
 ]
 
 [project.scripts]
-sclite = "sclite.cli:main"
-scl = "sclite.cli:main"
+sclite = "sclite.kernel_cli:main"
+scl = "sclite.kernel_cli:main"
+sclite-devtools = "sclite.devtools:main"
 
 [tool.setuptools]
 include-package-data = true

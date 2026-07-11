@@ -49,7 +49,7 @@ from .verification_result import (
     VERIFICATION_RESULT_SCHEMA_REF_V1_1,
     VERIFICATION_RESULT_SCHEMA_REF,
     VerificationResult,
-    build_guarded_strict_verification_result,
+    build_guarded_strict_verification_result as build_guarded_strict_verification_result,
     serialize_verification_result,
 )
 from .errors import SCLiteError, SCLiteSchemaValidationError, SCLiteValidationError
@@ -221,7 +221,6 @@ __all__ = (
     'VERIFICATION_RESULT_SCHEMA_REF',
     'VERIFICATION_RESULT_SCHEMA_REF_V1_1',
     'VerificationResult',
-    'build_guarded_strict_verification_result',
     'serialize_verification_result',
     'SCLiteError',
     'SCLiteValidationError',

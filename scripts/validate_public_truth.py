@@ -229,7 +229,6 @@ def _curated_root_export_errors() -> list[str]:
         'build_disclosure_status',
         'validate_disclosure_transition',
         'build_kernel_guard_manifest',
-        'build_guarded_strict_verification_result',
     )
     forbidden_legacy = (
         'PROOF_TRACE_FILES',

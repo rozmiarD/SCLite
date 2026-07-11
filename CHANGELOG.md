@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Splits the installed CLI entrypoints: `sclite`/`scl` accept kernel
+  verification/materialization workflows, while `sclite-devtools` owns local
+  inspection, fixture and heuristic-redaction commands. `python -m sclite.cli`
+  remains a warning compatibility path. The forgeable fixture verdict builder
+  is removed from `sclite.__all__` but remains an importable shim through 2.0.
 - Adds immutable `policy_decision.v0.3` and `execution_contract.v0.3` schema
   identities for scope provenance. Strict lifecycle verification binds the
   embedded GovEngine decision digest, assertion equality and exact target;

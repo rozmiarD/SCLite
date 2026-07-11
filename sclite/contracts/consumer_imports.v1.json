@@ -93,6 +93,10 @@
     }
   },
   "external_consumers_are_not_covered": true,
+  "non_production_namespaces": {
+    "sclite.devtools": "local inspection and heuristic redaction",
+    "sclite.testing": "forgeable fixture builders"
+  },
   "public_exports": {
     "ArtifactDescriptor": {
       "classification": "stable",
@@ -408,11 +412,6 @@
       "classification": "bridge",
       "disposition": "migrate_to_owner_contract_1.3",
       "owner": "rexecop"
-    },
-    "build_guarded_strict_verification_result": {
-      "classification": "testing",
-      "disposition": "move_to_testing_namespace_1.3",
-      "owner": "sclite.testing"
     },
     "build_kernel_guard_manifest": {
       "classification": "stable",

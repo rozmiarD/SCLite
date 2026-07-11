@@ -84,7 +84,6 @@ EXPECTED_PUBLIC_EXPORTS = (
     'VERIFICATION_RESULT_SCHEMA_REF',
     'VERIFICATION_RESULT_SCHEMA_REF_V1_1',
     'VerificationResult',
-    'build_guarded_strict_verification_result',
     'serialize_verification_result',
     'SCLiteError',
     'SCLiteValidationError',
