@@ -5,7 +5,11 @@ cd "$(dirname "$0")/.."
 repo_root="$(pwd)"
 python_candidate="${PYTHON:-python3}"
 if [[ "$python_candidate" == */* ]]; then
-  python_bin="$(realpath "$python_candidate")"
+  if [[ "$python_candidate" = /* ]]; then
+    python_bin="$python_candidate"
+  else
+    python_bin="$(pwd)/$python_candidate"
+  fi
 else
   python_bin="$(command -v "$python_candidate")"
 fi
