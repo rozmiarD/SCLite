@@ -37,6 +37,9 @@ class ImmutableSchemaResolver:
     """Deterministic resolver backed by canonical JSON bytes, with no discovery or I/O."""
 
     __slots__ = ("_schemas", "_inventory", "_frozen")
+    _schemas: Mapping[str, bytes]
+    _inventory: tuple[SchemaInventoryEntry, ...]
+    _frozen: bool
 
     def __init__(self, schemas: Mapping[str, Mapping[str, Any]]) -> None:
         encoded: dict[str, bytes] = {}
