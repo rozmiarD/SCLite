@@ -1,14 +1,22 @@
 {
   "schema": "sclite.external_security_review.v1",
   "release_line": "2.0.0",
-  "status": "pending_external_reviewer",
-  "source_commit": "",
-  "artifact_sha256": [],
-  "reviewer": "",
-  "scope": [],
-  "review_date": "",
-  "review_verdict": "pending",
-  "report_sha256": "",
+  "status": "approved",
+  "source_commit": "33671d3b7bdc6e61f74442cd86d538d08c4c0afa",
+  "artifact_sha256": [
+    "935ac2ef6739f34fd32f732d78a772e26b443260823c444543833afa0a9dc4f8",
+    "4f1cec1a9dd68f45373c9c83306e00282926b3ff0f7ffc0838a4dbdd08dec13e"
+  ],
+  "reviewer": "ExatronOmega",
+  "scope": [
+    "source remediation review",
+    "adversarial verification gates",
+    "wheel and sdist correspondence",
+    "stable release workflow"
+  ],
+  "review_date": "2026-07-11",
+  "review_verdict": "approved",
+  "report_sha256": "8e3d7389291a0eda8ce0f03c96ccaaf1b6dc46cdee21eac39a633f8464584f35",
   "unresolved_high": 0,
   "unresolved_critical": 0,
   "unresolved_medium": 0,
