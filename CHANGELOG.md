@@ -1,5 +1,11 @@
 # Changelog
 
+## Post-tag release tooling
+
+- Updates SBOM/audit tooling to versions compatible with fixed `lxml` after the
+  original `v2.0.0` run failed closed before publication, and adds an immutable-
+  tag recovery dispatch with explicit signed recovery provenance.
+
 ## 2.0.0 - Stable verifier hardening and neutral boundaries
 
 - Hardens untrusted JSON and bundle reads with bounded descriptor-based regular-file access, finite-number/Unicode checks, parser-depth error normalization and finite inventory budgets.

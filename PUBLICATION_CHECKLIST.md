@@ -196,3 +196,9 @@ Accepted finding IDs must use `M-...` or `L-...` and match the corresponding
 counter; the review date must be a real ISO calendar date.
 `report_sha256` is release-owner-attested metadata: CI validates its format but
 does not retrieve or independently hash the retained report.
+
+If release tooling fails closed before upload, never move or recreate the
+public tag. Correct the tooling on `main`, validate the new pins, and invoke the
+Release workflow manually with the existing immutable tag. The recovery path
+must revalidate A/B, reproduce identical artifacts and emit its explicit signed
+recovery attestation.

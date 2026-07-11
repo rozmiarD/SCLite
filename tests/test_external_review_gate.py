@@ -52,8 +52,18 @@ def _run(path: Path, wheel: Path, sdist: Path) -> subprocess.CompletedProcess[st
     ], cwd=ROOT, text=True, capture_output=True)
 
 
-def test_stable_release_rejects_pending_external_review() -> None:
-    result = subprocess.run([sys.executable, str(SCRIPT), "--stable"], cwd=ROOT, text=True, capture_output=True)
+def test_stable_release_rejects_pending_external_review(tmp_path: Path) -> None:
+    wheel, sdist = _artifacts(tmp_path)
+    record = _record(wheel, sdist)
+    record["status"] = "pending_external_reviewer"
+    path = tmp_path / "pending-review.json"
+    path.write_text(json.dumps(record), encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--stable", "--record", str(path)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
     assert result.returncode == 1
     assert "external_review_not_approved" in result.stdout
     assert "external_review_binding_missing:source_commit" in result.stdout

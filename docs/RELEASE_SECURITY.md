@@ -47,6 +47,13 @@ The publish job exports `SOURCE_DATE_EPOCH=1704067200` for every package build.
 Regular CI also creates a real record-only child commit, waits across a clock
 tick, builds both commits and runs the same byte-comparison gate.
 
+If a tag-triggered release fails before publication because a release-tool
+dependency becomes vulnerable, the immutable tag is not moved. The same
+workflow may be dispatched from corrected `main` with that existing tag. It
+revalidates the tagged record commit and reviewed parent, rebuilds both, checks
+artifact equality, and emits a signed recovery attestation naming the reviewed
+source, tagged record commit and recovery-workflow commit before publishing.
+
 The completion record is release-owner-attested metadata. CI verifies strict
 record shape and source/artifact binding, but does not authenticate reviewer
 identity, reviewer consent, or report authorship. `report_sha256` records the
