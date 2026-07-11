@@ -651,7 +651,7 @@ def test_v02_lifecycle_detects_symlink_manifest_path_escape(tmp_path: Path) -> N
     manifest = _load('artifact_chain_manifest.json')
     manifest['entries'][0]['path'] = link.name
 
-    with pytest.raises(ChainVerificationError, match='path escapes root'):
+    with pytest.raises(ChainVerificationError, match='cannot read JSON'):
         verify_artifact_chain_manifest(manifest, root=root)
 
 

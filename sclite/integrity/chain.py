@@ -163,6 +163,7 @@ def _load_artifact_snapshot(
     max_bytes: int | None = None,
     limits: VerificationLimits | None = None,
     budget: _JsonBudget | None = None,
+    root: Path | None = None,
 ) -> _ArtifactSnapshot:
     raw_bytes, parsed = load_json_document(
         path,
@@ -170,6 +171,8 @@ def _load_artifact_snapshot(
         max_bytes=max_bytes,
         limits=limits,
         budget=budget,
+        root=root,
+        relative_path=relative_path,
     )
     if not isinstance(parsed, dict):
         raise ChainVerificationError(f'{path}: JSON root is not an object')
@@ -590,12 +593,11 @@ def _verify_artifact_chain_manifest_with_snapshot(
         rel_path = str(entry.get('path') or '')
         if not rel_path:
             raise ChainVerificationError(f'entry[{index}] has empty path')
-        artifact_path = (base / rel_path).resolve()
-        try:
-            artifact_path.relative_to(base)
-        except ValueError as exc:
-            raise ChainVerificationError(f'entry[{index}] path escapes root: {rel_path}') from exc
-        normalized_rel_path = artifact_path.relative_to(base).as_posix()
+        relative = Path(rel_path)
+        if relative.is_absolute() or '..' in relative.parts:
+            raise ChainVerificationError(f'entry[{index}] path escapes root: {rel_path}')
+        normalized_rel_path = relative.as_posix()
+        artifact_path = base / relative
         artifact = _load_artifact_snapshot(
             artifact_path,
             role=role,
@@ -603,6 +605,7 @@ def _verify_artifact_chain_manifest_with_snapshot(
             max_bytes=max_artifact_bytes,
             limits=limits,
             budget=budget,
+            root=base,
         )
         value = artifact.value
         if validate_schemas:

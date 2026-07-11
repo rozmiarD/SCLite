@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import math
+import os
+import stat
 from dataclasses import dataclass
 from json import JSONDecodeError
 from pathlib import Path
@@ -19,6 +22,9 @@ class VerificationLimits:
     max_nesting_depth: int = 64
     max_nodes: int = 100_000
     max_manifest_entries: int = 256
+    max_inventory_entries: int = 1_024
+    max_directory_depth: int = 16
+    max_path_bytes: int = 65_536
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -27,6 +33,9 @@ class VerificationLimits:
             ('max_nesting_depth', self.max_nesting_depth),
             ('max_nodes', self.max_nodes),
             ('max_manifest_entries', self.max_manifest_entries),
+            ('max_inventory_entries', self.max_inventory_entries),
+            ('max_directory_depth', self.max_directory_depth),
+            ('max_path_bytes', self.max_path_bytes),
         ):
             if isinstance(value, bool) or not isinstance(value, int) or value < 1:
                 raise ValueError(f'{name} must be a positive integer')
@@ -104,6 +113,13 @@ def _validate_structure(
             stack.extend((item, depth + 1) for item in current.values())
         elif isinstance(current, list):
             stack.extend((item, depth + 1) for item in current)
+        elif isinstance(current, float) and not math.isfinite(current):
+            raise ValueError(f'{source}: JSON number is not finite')
+        elif isinstance(current, str):
+            try:
+                current.encode('utf-8')
+            except UnicodeEncodeError as exc:
+                raise ValueError(f'{source}: JSON string contains an invalid Unicode surrogate') from exc
     return nodes
 
 
@@ -133,6 +149,8 @@ def _decode_json(
         raise error_cls(f'{source}: invalid JSON: duplicate object key {exc.args[0]!r}') from exc
     except _NonStandardConstantError as exc:
         raise error_cls(f'{source}: invalid JSON: non-standard number {exc.args[0]!r}') from exc
+    except RecursionError as exc:
+        raise error_cls(f'{source}: JSON nesting exceeds parser safety limit') from exc
     try:
         if budget is None:
             _validate_structure(value, source=source, limits=limits)
@@ -150,6 +168,8 @@ def load_json_document(
     limits: VerificationLimits | None = None,
     budget: _JsonBudget | None = None,
     max_bytes: int | None = None,
+    root: Path | None = None,
+    relative_path: str | None = None,
 ) -> tuple[bytes, Any]:
     json_path = Path(path)
     policy = limits or DEFAULT_VERIFICATION_LIMITS
@@ -160,12 +180,52 @@ def load_json_document(
             max_nesting_depth=policy.max_nesting_depth,
             max_nodes=policy.max_nodes,
             max_manifest_entries=policy.max_manifest_entries,
+            max_inventory_entries=policy.max_inventory_entries,
+            max_directory_depth=policy.max_directory_depth,
+            max_path_bytes=policy.max_path_bytes,
         )
+    read_limit = policy.max_file_bytes
+    flags = os.O_RDONLY | getattr(os, 'O_CLOEXEC', 0) | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0)
+    descriptor = -1
+    parent_descriptor = -1
     try:
-        raw = json_path.read_bytes()
+        if root is not None and relative_path is not None:
+            parts = Path(relative_path).parts
+            if not parts or Path(relative_path).is_absolute() or '..' in parts:
+                raise error_cls('JSON path escapes trusted root')
+            parent_descriptor = os.open(root, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0))
+            for part in parts[:-1]:
+                next_descriptor = os.open(part, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0), dir_fd=parent_descriptor)
+                os.close(parent_descriptor)
+                parent_descriptor = next_descriptor
+            descriptor = os.open(parts[-1], flags, dir_fd=parent_descriptor)
+        else:
+            descriptor = os.open(json_path, flags)
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise error_cls(f'{json_path}: JSON input is not a regular file')
+        limit_label = f'max_bytes={max_bytes}' if max_bytes is not None else f'max_file_bytes={read_limit}'
+        if metadata.st_size > read_limit:
+            raise error_cls(f'{json_path}: JSON file exceeds {limit_label}')
+        chunks: list[bytes] = []
+        remaining = read_limit + 1
+        while remaining:
+            chunk = os.read(descriptor, min(65_536, remaining))
+            if not chunk:
+                break
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        raw = b''.join(chunks)
+        if len(raw) > read_limit:
+            raise error_cls(f'{json_path}: JSON file exceeds {limit_label}')
     except OSError as exc:
         detail = exc.strerror or str(exc)
         raise error_cls(f'{json_path}: cannot read JSON: {detail}') from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        if parent_descriptor >= 0:
+            os.close(parent_descriptor)
     if max_bytes is not None and len(raw) > max_bytes:
         raise error_cls(f'{json_path}: JSON file exceeds max_bytes={max_bytes}')
     return raw, _decode_json(
@@ -184,6 +244,8 @@ def load_json_value(
     max_bytes: int | None = None,
     limits: VerificationLimits | None = None,
     budget: _JsonBudget | None = None,
+    root: Path | None = None,
+    relative_path: str | None = None,
 ) -> Any:
     _raw, value = load_json_document(
         path,
@@ -191,6 +253,8 @@ def load_json_value(
         max_bytes=max_bytes,
         limits=limits,
         budget=budget,
+        root=root,
+        relative_path=relative_path,
     )
     return value
 
@@ -220,6 +284,8 @@ def load_json_object(
     max_bytes: int | None = None,
     limits: VerificationLimits | None = None,
     budget: _JsonBudget | None = None,
+    root: Path | None = None,
+    relative_path: str | None = None,
 ) -> Dict[str, Any]:
     value = load_json_value(
         path,
@@ -227,6 +293,8 @@ def load_json_object(
         max_bytes=max_bytes,
         limits=limits,
         budget=budget,
+        root=root,
+        relative_path=relative_path,
     )
     if not isinstance(value, dict):
         raise error_cls(f'{Path(path)}: JSON root is not an object')

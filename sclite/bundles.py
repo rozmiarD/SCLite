@@ -61,28 +61,38 @@ def _assert_inside(base: Path, path: Path) -> None:
         raise ReviewBundleError(f'{path}: path escapes review bundle') from exc
 
 
-def _recursive_inventory(base: Path) -> Dict[str, list[str]]:
+def _recursive_inventory(base: Path, *, limits: VerificationLimits) -> Dict[str, list[str]]:
     inventory: Dict[str, list[str]] = {
         'files': [],
         'directories': [],
         'symlinks': [],
         'special_files': [],
     }
-    pending = [base]
+    pending = [(base, 0)]
+    entry_count = 0
+    path_bytes = 0
     try:
         while pending:
-            current = pending.pop()
+            current, depth = pending.pop()
+            if depth > limits.max_directory_depth:
+                raise ReviewBundleError('review bundle inventory exceeds max_directory_depth')
             with os.scandir(current) as entries:
                 for entry in entries:
                     path = Path(entry.path)
                     relative = path.relative_to(base).as_posix()
+                    entry_count += 1
+                    path_bytes += len(relative.encode('utf-8'))
+                    if entry_count > limits.max_inventory_entries:
+                        raise ReviewBundleError('review bundle inventory exceeds max_inventory_entries')
+                    if path_bytes > limits.max_path_bytes:
+                        raise ReviewBundleError('review bundle inventory exceeds max_path_bytes')
                     if entry.is_symlink():
                         inventory['symlinks'].append(relative)
                     elif entry.is_file(follow_symlinks=False):
                         inventory['files'].append(relative)
                     elif entry.is_dir(follow_symlinks=False):
                         inventory['directories'].append(relative)
-                        pending.append(path)
+                        pending.append((path, depth + 1))
                     else:
                         inventory['special_files'].append(relative)
     except OSError as exc:
@@ -119,7 +129,8 @@ def validate_review_bundle_shape(
     if mode not in {'public_export', 'local_review'}:
         raise ReviewBundleError(f'unsupported review bundle mode: {mode}')
     base = _bundle_path(bundle_dir)
-    inventory = _recursive_inventory(base)
+    limits = verification_limits or VerificationLimits()
+    inventory = _recursive_inventory(base, limits=limits)
     public_inventory_errors = _public_inventory_errors(inventory)
     if mode == 'public_export' and public_inventory_errors:
         raise ReviewBundleError(

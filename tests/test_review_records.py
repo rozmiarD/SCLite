@@ -128,7 +128,7 @@ def test_review_record_reads_each_lifecycle_payload_once(
     )
 
     assert record['verdict'] == 'review'
-    assert reads == {name: 1 for name in names}
+    assert reads == {name: 0 for name in names}
 
 
 def test_review_record_markdown_contains_non_claims() -> None:

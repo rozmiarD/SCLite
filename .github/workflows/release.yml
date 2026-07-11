@@ -18,12 +18,31 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13'
-      - run: python -m pip install --upgrade build twine
+      - run: python -m pip install --upgrade -r .github/release-requirements.txt
+      - name: Full source security gate
+        run: scripts/dev_gate.sh
+      - name: Dependency audit
+        run: |
+          python -m pip_audit
+          mkdir -p release-evidence
+          cyclonedx-py environment --output-file release-evidence/sclite-core.cdx.json
+      - name: Package smoke and reproducibility
+        run: |
+          scripts/package_smoke.sh
+          scripts/reproducible_build_gate.sh
       - run: python -m build
       - run: python -m twine check dist/*
+      - name: Bind tag to package version
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          test "${GITHUB_REF_NAME}" = "v${VERSION}"
       - name: Require approved external review for stable tags
         if: ${{ !contains(github.ref_name, 'rc') }}
-        run: python scripts/validate_external_review.py --stable
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          python scripts/validate_external_review.py --stable \
+            --source-commit "${GITHUB_SHA}" --release-line "${VERSION}" \
+            --artifact dist/*.whl --artifact dist/*.tar.gz
       - uses: actions/attest-build-provenance@43d14bc2b83dec42d39ecae14e916627a18bb661 # v3
         with:
           subject-path: 'dist/*'

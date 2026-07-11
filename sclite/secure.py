@@ -145,11 +145,9 @@ def _verify_secure_bundle(
         'ticket_id': str(artifacts_by_role.get('execution_ticket', {}).get('ticket_id') or ''),
         'fail_closed': True,
         'replay_status': result.get('replay_status') or 'not_checked',
-        'scope_authority_authenticated': (
-            'authenticated_channel'
-            if result.get('scope_status') == 'authority_artifact_bound'
-            else 'not_checked'
-        ),
+        'scope_authority_artifact_bound': result.get('scope_status') == 'authority_artifact_bound',
+        'guard_domain_authenticated': True,
+        'scope_authority_authenticated': 'not_checked',
         'verification_result': serialized_result,
     }
     if include_local_debug:

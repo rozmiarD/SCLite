@@ -115,7 +115,7 @@ def test_review_bundle_flags_evidence_receipt_link_drift(tmp_path: Path) -> None
     evidence['links']['execution_receipt']['descriptor']['digest'] = '0' * 64
     (bundle / '06_evidence_contract.json').write_text(json.dumps(evidence, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     _rewrite_manifest(bundle)
-    _assert_fail_detail(review_bundle(bundle), 'evidence-receipt digest mismatch')
+    _assert_fail_detail(review_bundle(bundle), 'digest mismatch')
 
 
 def test_review_bundle_flags_receipt_ticket_link_drift(tmp_path: Path) -> None:
@@ -124,7 +124,7 @@ def test_review_bundle_flags_receipt_ticket_link_drift(tmp_path: Path) -> None:
     receipt['links']['execution_ticket']['descriptor']['digest'] = '0' * 64
     (bundle / '05_execution_receipt.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     _rewrite_manifest(bundle)
-    _assert_fail_detail(review_bundle(bundle), 'receipt-ticket digest mismatch')
+    _assert_fail_detail(review_bundle(bundle), 'digest mismatch')
 
 
 def test_review_bundle_flags_ticket_execution_contract_binding_drift(tmp_path: Path) -> None:
@@ -133,7 +133,7 @@ def test_review_bundle_flags_ticket_execution_contract_binding_drift(tmp_path: P
     ticket['integrity']['ticket_binds_execution_contract_digest'] = '0' * 64
     (bundle / '04_execution_ticket.json').write_text(json.dumps(ticket, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     _rewrite_manifest(bundle)
-    _assert_fail_detail(review_bundle(bundle), 'ticket integrity execution_contract digest mismatch')
+    _assert_fail_detail(review_bundle(bundle), 'digest mismatch')
 
 
 def test_review_bundle_flags_ticket_use_evidence_overclaim(tmp_path: Path) -> None:

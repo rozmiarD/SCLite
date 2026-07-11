@@ -413,11 +413,15 @@ def verify_ticket_use(
 
     max_uses = _as_int(spend.get('max_uses'), 'ticket.spend_limits.max_uses')
     ticket_use = receipt.get('ticket_use') if isinstance(receipt.get('ticket_use'), Mapping) else {}
+    if strict_ticket_profile and not ticket_use:
+        raise TicketUseVerificationError('strict ticket profile requires receipt.ticket_use')
     if ticket_use:
         if str(ticket_use.get('ticket_id') or '') != str(ticket.get('ticket_id') or ''):
             raise TicketUseVerificationError('receipt ticket_use.ticket_id mismatch')
         consumed_by_runtime = str(ticket_use.get('consumed_by_runtime') or '')
         expected_runtime = str(_require_mapping(ticket.get('subject_binding'), 'ticket.subject_binding').get('usable_by_runtime') or '')
+        if strict_ticket_profile and not consumed_by_runtime:
+            raise TicketUseVerificationError('strict ticket profile requires receipt.ticket_use.consumed_by_runtime')
         if consumed_by_runtime and consumed_by_runtime != expected_runtime:
             raise TicketUseVerificationError('receipt ticket_use.consumed_by_runtime mismatch')
         use_count = _as_int(ticket_use.get('use_count'), 'receipt.ticket_use.use_count')
@@ -483,6 +487,10 @@ def verify_ticket_use(
                 bool(claim.get('requires_network_execution')) or bool(claim.get('requires_live_execution'))
             ):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] uses legacy network text markers in strict evidence profile')
+            if strict_evidence_claims and str(claim.get('claim_type') or '') not in {
+                'receipt_bounded_dry_run', 'receipt_bounded_execution', 'fixture_review_observation'
+            }:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] has unsupported strict claim_type')
             if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and receipt_status in BLOCKED_RECEIPT_STATUSES:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires completed execution beyond receipt status')
             if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and executed_count == 0:

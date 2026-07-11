@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import os
 from pathlib import Path
 
 import pytest
@@ -34,6 +35,25 @@ def test_strict_parser_rejects_duplicate_keys_at_every_depth(payload: str) -> No
 def test_strict_parser_rejects_non_standard_numbers(constant: str) -> None:
     with pytest.raises(InputError, match='non-standard number'):
         parse_json_object(f'{{"value":{constant}}}', source='inline', error_cls=InputError)
+
+
+def test_parser_rejects_finite_overflow_and_surrogate(tmp_path: Path) -> None:
+    overflow = tmp_path / 'overflow.json'
+    overflow.write_bytes(b'{"value":1e10000}')
+    with pytest.raises(InputError, match='not finite'):
+        load_json_object(overflow, error_cls=InputError)
+    surrogate = tmp_path / 'surrogate.json'
+    surrogate.write_bytes(b'{"value":"\\ud800"}')
+    with pytest.raises(InputError, match='invalid Unicode surrogate'):
+        load_json_object(surrogate, error_cls=InputError)
+
+
+@pytest.mark.skipif(not hasattr(os, 'mkfifo'), reason='FIFO unavailable')
+def test_loader_rejects_fifo_without_blocking(tmp_path: Path) -> None:
+    path = tmp_path / 'blocking.json'
+    os.mkfifo(path)
+    with pytest.raises(InputError, match='not a regular file'):
+        load_json_object(path, error_cls=InputError)
 
 
 def test_file_byte_limit_accepts_boundary_and_rejects_next_byte(tmp_path: Path) -> None:

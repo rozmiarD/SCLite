@@ -271,3 +271,15 @@ def test_export_cli_is_public_export_by_default_with_explicit_local_escape_hatch
     assert 'public export inventory is not closed-world' in public_result.stderr
     assert local_result.returncode == 0, local_result.stderr
     assert local_result.stdout.startswith('# SCLite Review Record')
+
+
+def test_public_export_failure_does_not_emit_absolute_path(tmp_path: Path) -> None:
+    bundle = _copy_public_bundle(tmp_path)
+    (bundle / '01_intent_contract.json').write_text('{"broken":', encoding='utf-8')
+    result = subprocess.run(
+        [sys.executable, '-m', 'sclite.kernel_cli', 'export-review-bundle', str(bundle)],
+        cwd=str(ROOT), text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0
+    assert str(bundle) not in result.stdout
+    assert 'artifact_json_invalid' in result.stdout

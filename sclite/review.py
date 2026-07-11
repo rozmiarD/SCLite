@@ -54,6 +54,18 @@ def _check(name: str, status: str, detail: str = '', count: int | None = None) -
     return result
 
 
+def _public_failure_detail(exc: Exception) -> str:
+    text = str(exc)
+    if 'invalid JSON' in text or 'cannot read JSON' in text:
+        return 'artifact_json_invalid'
+    if isinstance(exc, JsonSchemaValidationError) or 'schema validation failed' in text:
+        return 'artifact_schema_invalid'
+    for reason in ('descriptor mismatch', 'digest mismatch', 'role', 'approval', 'ticket', 'scope', 'lifecycle', 'manifest', 'evidence', 'receipt'):
+        if reason in text:
+            return reason
+    return 'artifact_verification_failed'
+
+
 def _assert_manifest_paths_within_root(manifest: Mapping[str, Any], root: Path) -> None:
     """Reject escaped paths before the snapshot loader opens any payload."""
 
@@ -138,9 +150,10 @@ def build_review_record_from_manifest(
         ))
         statuses.extend(['pass', lifecycle_check_status])
     except (ChainVerificationError, JsonSchemaValidationError) as exc:
-        checks.append(_check('schema_validation', 'fail', str(exc)))
-        checks.append(_check('chain_integrity', 'fail', str(exc)))
-        checks.append(_check('lifecycle_binding', 'fail', str(exc)))
+        detail = _public_failure_detail(exc)
+        checks.append(_check('schema_validation', 'fail', detail))
+        checks.append(_check('chain_integrity', 'fail', detail))
+        checks.append(_check('lifecycle_binding', 'fail', detail))
         statuses.extend(['fail', 'fail', 'fail'])
 
     try:

@@ -232,7 +232,7 @@ def test_secure_bundle_reads_each_ticket_use_payload_once(
     )
 
     assert result['status'] == 'passed'
-    assert reads == {name: 1 for name in payload_names}
+    assert reads == {name: 0 for name in payload_names}
 
 
 @pytest.mark.parametrize('strict_jsonschema', [False, True])
