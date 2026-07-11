@@ -4,9 +4,9 @@ Status: **audited and published 2.0.0 stable lifecycle/review and guarded verifi
 Current package is `sclite-core==2.0.0`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
-v0.5 review-bundle packaging, guarded-strict verification, and bounded
-truth-layer artifacts for reactions, trigger decisions, and watchdog
-decisions. The 1.0 stable release freezes that substrate as the root API and
+v0.5 review-bundle packaging, guarded-strict verification, typed verification
+results, and an explicit immutable schema resolver. The 2.0 stable release
+freezes that substrate as the root API and
 supports canonical review-bundle materialization for active consumers without
 adding runtime, scheduler, event catcher, adapter, PKI, recovery, or policy
 authority.
@@ -181,67 +181,12 @@ Schema: `schemas/artifact_chain_manifest.v0.2.schema.json`
 
 Captures the ordered tamper-evident digest chain over lifecycle artifacts. The manifest uses deterministic SCLite canonical JSON descriptors and hash-linked chain digests.
 
-## Reaction, Trigger, And Watchdog Truth Artifacts
+## Removed orchestration contracts
 
-SCLite also provides bounded artifacts for deterministic automation chains.
-They record what an external runtime and governance layer decided; they do not
-interpret rules, monitor infrastructure, schedule work, recover operations, or
-execute commands.
-
-### ObservationEnvelope v0.1
-
-Schema: `schemas/observation_envelope.v0.1.schema.json`
-
-Captures profile-owned facts observed by a runtime for one operation, intent,
-and target. Facts remain domain/profile data. SCLite only validates and hashes
-the envelope.
-
-### Finding v0.1
-
-Schema: `schemas/finding.v0.1.schema.json`
-
-Captures a profile-owned taxonomy result and summary linked to an observation
-descriptor. SCLite verifies the link shape and descriptor binding; it does not
-own the taxonomy or decide severity.
-
-### ReactionPlan v0.1
-
-Schema: `schemas/reaction_plan.v0.1.schema.json`
-
-Captures a deterministic reaction decision linked to the observation and
-finding descriptors. It records rule digest, bounded context, idempotency key,
-depth, visited-rule digests, and GovEngine admission status. RExecOp owns rule
-interpretation and child-operation planning; GovEngine owns admission; SCLite
-owns the digest-bound record.
-
-### EscalationProposal v0.1
-
-Schema: `schemas/escalation_proposal.v0.1.schema.json`
-
-Captures an explicitly untrusted advisory proposal for a human or external
-assistant lane. It must not carry executable commands, secrets, runtime
-authority, or policy bypass. Any later operation still needs profile validation
-and GovEngine admission.
-
-### TriggerDecision v0.1
-
-Schema: `schemas/trigger_decision.v0.1.schema.json`
-
-Captures a bounded event/trigger decision made by RExecOp after GovEngine
-admission. It records event, rule-set, rule, admission, and optional child
-operation references. Matching events, dedupe/cooldown state, scheduling and
-child-operation creation remain outside SCLite.
-
-### WatchdogDecision v0.1
-
-Schema: `schemas/watchdog_decision.v0.1.schema.json`
-
-Captures a bounded runner-watchdog decision made by RExecOp after GovEngine
-admission. It records watchdog observation, admission, affected
-operation/event/inbox references, and optional manual-recovery context for
-GovEngine-admitted recovery or break-glass records. Worker supervision,
-runtime recovery, infrastructure health interpretation and retry execution
-remain outside SCLite.
+Reaction, trigger, watchdog and automation modules and schemas were 1.x
+compatibility surfaces. SCLite 2.0 does not package them. RExecOp owns those
+contracts and may supply an explicit resolver for historical artifacts; see
+[`docs/MIGRATING_TO_2.md`](docs/MIGRATING_TO_2.md).
 
 ## v0.2 Integrity Chain
 
@@ -300,7 +245,7 @@ This is lightweight cryptographic integrity, not identity trust. It proves the v
 The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence surfaces:
 
 - `execution_ticket.v0.3` for runtime-consumable scoped-ticket artifacts;
-- `sclite validate-ticket` and `sclite explain-ticket` for ticket review;
+- `sclite validate-ticket` and `sclite-devtools explain-ticket` for ticket review;
 - `sclite verify-ticket-use` for static receipt/evidence checks against a scoped ticket, including explicit receipt-source binding and conservative completed-execution/network claim bounds.
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.

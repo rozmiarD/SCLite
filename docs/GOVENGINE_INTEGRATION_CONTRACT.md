@@ -1,16 +1,18 @@
 # GovEngine Integration Contract
 
 This document defines the SCLite lifecycle/review public import surface used by
-GovEngine. Published GovEngine `0.15.0` and the `0.16.0` source candidate both
-declare `sclite-core>=1.0.5,<1.1`. Raising consumer release floors remains a
-separate, coordinated GovEngine/RExecOp/Tecrax release decision.
+GovEngine. The packaged `contracts/consumer_imports.v1.json` file records the
+reviewed imports used by controlled stack consumers. Downstream dependency
+pins and publication remain a separate, coordinated GovEngine/RExecOp/Tecrax
+release decision; this document does not claim that those releases already
+consume SCLite 2.0.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following import paths in the current
-`sclite-core>=1.0.5,<1.1` supported range:
+GovEngine may rely on the following reviewed import paths, subject to its own
+declared dependency pin:
 
 ```python
 from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest
@@ -26,8 +28,7 @@ Anything not listed here is internal or not guaranteed as a stable GovEngine int
 
 ## Stable CLI surfaces for GovEngine/CI
 
-GovEngine and CI jobs may rely on these CLI commands in the current SCLite
-`1.0.x` supported range:
+GovEngine and CI jobs may rely on these kernel CLI commands in SCLite 2.0:
 
 ```bash
 sclite validate-chain PATH/TO/artifact_chain_manifest.json

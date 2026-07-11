@@ -1,6 +1,6 @@
 # SCLite Public API
 
-SCLite `1.x` keeps a deliberately small top-level Python API through
+SCLite `2.0` keeps a deliberately small top-level Python API through
 `import sclite`. These names are the stable convenience surface. Deeper module
 imports remain available for advanced users, but removal or rename of the
 top-level exports below is a compatibility change.
@@ -16,12 +16,13 @@ imports against that allowlist; a new deep import fails until the contract is
 reviewed. This inventory does not claim knowledge of private or external PyPI
 consumers.
 
-Installed `sclite` and `scl` entrypoints expose only kernel validation,
-verification, ticket, review and materialization workflows. Local inspection,
-snapshot, scope-report and heuristic-redaction commands use
-`sclite-devtools`. The removed `python -m sclite.cli` compatibility dispatcher
-is not available in 2.0; module invocation uses `sclite.kernel_cli` or
-`sclite.devtools` explicitly.
+Installed `sclite` and `scl` entrypoints accept kernel validation,
+verification, ticket and review workflows. Local inspection, snapshot,
+scope-report and redaction-helper commands use `sclite-devtools`; passing one
+of those commands to the kernel entrypoint fails with an instruction to use
+the devtools entrypoint. The removed `python -m sclite.cli` compatibility
+dispatcher is not available in 2.0; module invocation uses
+`sclite.kernel_cli` or `sclite.devtools` explicitly.
 
 ## Version
 
@@ -42,8 +43,8 @@ is not available in 2.0; module invocation uses `sclite.kernel_cli` or
 
 `verify_bundle()` requires an explicit `INTEGRITY`, `STRICT_LIFECYCLE`,
 `GUARDED_LIFECYCLE` or `PUBLIC_REVIEW` policy; it never infers posture from the
-input. Legacy wrappers delegate to the same verification paths and remain
-available through 1.x. Typed results are immutable self-described outcomes,
+input. Retained wrappers delegate to the same verification paths in 2.0.
+Typed results are immutable self-described outcomes,
 not authentication tokens or runtime capabilities.
 
 ## Explicit schema extensions

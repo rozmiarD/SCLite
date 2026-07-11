@@ -11,10 +11,13 @@ ships the former compatibility copies.
 
 - Current release version: `2.0.0`.
 - Release label: `2.0.0`.
-- Status: audited and published stable release.
+- Release status: audited and published non-prerelease release.
+- Project maturity classifier: `Development Status :: 4 - Beta`.
 - Runtime dependencies: none.
-- CLI: available as `sclite` and `scl`.
+- Kernel CLI: available as `sclite` and `scl`; inspection/fixture commands use
+  `sclite-devtools`.
 - CI: GitHub Actions validation exists.
+- Python requirement: `>=3.11`; release CI covers Python 3.11-3.13.
 - Latest published PyPI package: `sclite-core==2.0.0` (`2.0.0`).
 
 ## Current review path

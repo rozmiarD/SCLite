@@ -2,7 +2,7 @@
 
 This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
 
-SCLite is centered on the v0.2 contract lifecycle. The current 1.0 stable release
+SCLite is centered on the v0.2 contract lifecycle. The current 2.0 stable release
 freezes the 0.5 review-bundle contract as the integration front
 door, retains deterministic review-bundle materialization for active
 consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks,
@@ -100,32 +100,11 @@ A governed runtime can use SCLite like this:
 
 The superseded proof-trace product path (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, legacy receipt/evidence builders, and fixture validation CLI) is retired after consumer migration; it is not an installed/current surface claim.
 
-## Automation truth artifacts
+## Orchestration contract ownership
 
-Runtimes that implement deterministic automation can use SCLite to record the
-chain without moving ownership into SCLite:
-
-```text
-observation -> finding -> reaction_plan -> optional execution_receipt
-event -> trigger_decision -> optional child operation
-watchdog observation -> watchdog_decision -> optional affected operation/inbox item
-```
-
-Ownership stays split:
-
-- profiles own observation facts, finding taxonomy, thresholds, and domain
-  runbook semantics;
-- RExecOp owns trigger matching, reaction interpretation, scheduling/event
-  intake, watchdog supervision, child-operation planning, and execution;
-- GovEngine owns admission, policy decisions, obligations, constraints, and
-  recovery or break-glass approval;
-- SCLite owns schema validation, descriptor binding, reaction-chain
-  verification, trigger/watchdog decision records, and reviewable non-claims.
-
-An LLM or other advisory lane may produce an `escalation_proposal.v0.1`, but
-that proposal is untrusted. It must not contain executable commands or secrets,
-and it cannot bypass profile validation, GovEngine admission, or RExecOp
-execution mechanics.
+SCLite 2.0 does not package reaction, trigger, watchdog or automation modules
+or schemas. RExecOp owns those contracts and can provide an explicit resolver
+when historical artifacts must be read. See [`MIGRATING_TO_2.md`](MIGRATING_TO_2.md).
 
 ## Minimal Python integration
 
@@ -167,7 +146,11 @@ assert record["artifact_type"] == "review_record"
 assert record["verdict"] == "pass"
 ```
 
-For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md) as the stable import/CLI contract for `sclite-core>=1.0.5,<1.1`. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for CI thresholds.
+For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md)
+and the packaged `contracts/consumer_imports.v1.json` inventory as the reviewed
+import/CLI boundary. Downstream dependency pins and publication remain a
+separate coordinated release decision. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md)
+for CI thresholds.
 
 ## Carrier guidance
 

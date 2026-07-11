@@ -28,7 +28,7 @@ They are reviewer-facing evidence summaries over already-existing artifacts.
 ## CLI
 
 ```bash
-sclite review-lifecycle \
+sclite-devtools review-lifecycle \
   sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
   --format json
 ```
@@ -36,7 +36,7 @@ sclite review-lifecycle \
 Markdown output is also available:
 
 ```bash
-sclite review-lifecycle \
+sclite-devtools review-lifecycle \
   sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
   --format markdown
 ```

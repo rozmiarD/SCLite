@@ -36,7 +36,8 @@ automation-chain contract baseline: nodes, edges, GovEngine admission refs,
 edge idempotency, depth/reaction budgets, recovery policy and LLM
 proposal-only invariants, without making SCLite a traversal engine, scheduler,
 policy authority, runtime or raw-evidence store.
-The audited and published `2.0.0` stable release preserves those contracts while
+The audited and published `2.0.0` stable release preserves the lifecycle and
+review contracts while
 requiring verified snapshots, supported manifest identity/policy, explicit
 scope assertions, and receipt timestamps inside ticket validity windows before
 the relevant strict acceptance path can pass.
@@ -223,7 +224,7 @@ health, or execute operations.
 SCLite can emit a deterministic SHA-256 descriptor for any JSON-compatible artifact:
 
 ```bash
-sclite hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
+sclite-devtools hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
 ```
 
 The helper canonicalizes JSON with sorted keys, compact separators, preserved Unicode, and UTF-8 bytes, then hashes those bytes with SHA-256. The descriptor is useful for content addressing, fixture comparison, and lightweight reviewer references.
@@ -281,12 +282,12 @@ python -m sclite.kernel_cli export-review-bundle examples/review-bundle --format
 python -m sclite.devtools review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
 python -m sclite.kernel_cli validate-trust-profile sclite/examples/trust-carrier-profiles/trust_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 python -m sclite.kernel_cli validate-carrier-profile sclite/examples/trust-carrier-profiles/carrier_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.devtools validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.kernel_cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.devtools hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
-python -m sclite.devtools validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
-python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.kernel_cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.kernel_cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.kernel_cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.kernel_cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m sclite.devtools scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
 ```
 

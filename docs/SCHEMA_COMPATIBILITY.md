@@ -17,13 +17,6 @@ artifact contracts intentionally remain on earlier schema versions.
 | Execution ticket | `execution_ticket.v0.3` | current for scoped ticket use | `sclite/examples/scoped-ticket-v0.3/`, `examples/govengine-integration/` | Adds scoped ticket semantics consumed by `validate-ticket`, `explain-ticket`, and `verify-ticket-use`. |
 | Execution receipt | `execution_receipt.v0.2` | current | lifecycle, scoped-ticket, and GovEngine fixtures | Public-safe receipt summary; not raw evidence storage. |
 | Evidence contract | `evidence_contract.v0.2` | current with compatibility fallback | scoped-ticket and GovEngine fixtures | Structured claim booleans are authoritative; legacy text markers remain conservative fallback for v0.2 fixtures. |
-| Observation envelope | `observation_envelope.v0.1` | current | `tests/test_reactions.py` | Profile/runtime facts projection; SCLite does not own domain facts. |
-| Finding | `finding.v0.1` | current | `tests/test_reactions.py` | Profile-owned taxonomy/severity projection linked to an observation descriptor. |
-| Reaction plan | `reaction_plan.v0.1` | current | `tests/test_reactions.py` | Deterministic reaction decision record with depth, idempotency and admission fields; RExecOp/GovEngine own planning and policy. |
-| Escalation proposal | `escalation_proposal.v0.1` | current | `tests/test_reactions.py` | Explicitly untrusted advisory artifact; no execution authority or secrets. |
-| Trigger decision | `trigger_decision.v0.1` | current | `tests/test_trigger_decisions.py` | Bounded event/rule/GovEngine-admission truth projection; trigger planning remains outside SCLite. |
-| Watchdog decision | `watchdog_decision.v0.1` | current | `tests/test_watchdog_decisions.py` | Bounded RExecOp runtime-supervisor observation/admission truth projection with optional manual-recovery context; runtime supervision and recovery remain outside SCLite. |
-| Automation chain | `automation_chain.v0.1` | current contract-design baseline | `tests/test_automation_chain.py` | Bounded multi-step automation graph with depth/reaction budgets, edge idempotency, GovEngine admission refs, recovery policy and LLM proposal-only invariants; traversal/execution remains outside SCLite. |
 | Artifact chain manifest | `artifact_chain_manifest.v0.2` | current | lifecycle and review fixtures | Security binding comes from descriptors and `root_chain_digest`, not arbitrary IDs. |
 | Kernel Guard sidecar | `kernel_guard_hmac_v1.schema.json` | current guarded profile | `tests/golden/kernel_guard_hmac_v1/` | HMAC domain authenticity only; incompatible transcript changes require a new profile name. |
 | Verification result | `verification_result.v1` | current secure verifier result | `tests/test_secure_bundle.py`, `tests/test_internal_package.py` | Layer statuses keep replay, public identity, and runtime enforcement as non-claims. |
@@ -41,6 +34,7 @@ artifact contracts intentionally remain on earlier schema versions.
 | `kernel_guard_hmac_v2` | not implemented | Required only if transcript layout, canonicalization, HMAC fields, or metadata digest semantics become incompatible. |
 | `public_signed_export` | not implemented | Future optional public-root signature surface; current HMAC profile is not PKI or non-repudiation. |
 | Runtime replay store | not supported in SCLite | `guarded_domain_auth_fresh` belongs to GovEngine or another host runtime with state. |
+| Reaction, trigger, watchdog and automation contracts | removed from SCLite 2.0 | RExecOp owns the modules and schemas; use its resolver for historical artifacts. See [`MIGRATING_TO_2.md`](MIGRATING_TO_2.md). |
 
 ## Unknown Fields Policy
 

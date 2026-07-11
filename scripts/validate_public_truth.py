@@ -24,7 +24,6 @@ LATEST_PUBLISHED_VERSION = '2.0.0'
 LATEST_PUBLISHED_LABEL = '2.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.5,<1.1'
 PUBLIC_DOCS = (
     'README.md',
     'PUBLIC_STATUS.md',
@@ -162,7 +161,8 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'audited and published 2.0.0 stable release')
+    _require(errors, 'README.md', readme, 'audited and published non-prerelease 2.0.0')
+    _require(errors, 'README.md', readme, 'Development Status :: 4 - Beta')
     _require(errors, 'README.md', readme, '## Out of Scope')
     _require(errors, 'README.md', readme, 'Runtime execution: out of scope; owned by RExecOp or another host runtime')
     _require(errors, 'README.md', readme, 'GovEngine | governance, admission, policy decisions')
@@ -174,7 +174,7 @@ def _assert_current_claim_docs(
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
-    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 1.0 stable release')
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 2.0 stable release')
     if 'It is not an installed/current SCLite surface in the 0.8 beta release.' in readme:
         errors.append('README.md:stale_current_release_wording:0.8 beta release')
     if 'published 1.0 release candidate' in readme:
@@ -413,7 +413,7 @@ def collect_errors() -> list[str]:
     )
     _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'audited and published 2.0.0 stable release')
+    _require(errors, 'README.md', readme, 'audited and published non-prerelease 2.0.0')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
@@ -429,10 +429,10 @@ def collect_errors() -> list[str]:
     _require(errors, 'README.md', readme, 'verification_result')
     _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - ')
     _require(errors, 'CHANGELOG.md', changelog, f'Published the audited `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
-    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
-    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'GovEngine/RExecOp/Tecrax release decision')
+    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'contracts/consumer_imports.v1.json')
+    _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'coordinated GovEngine/RExecOp/Tecrax')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'domain profiles do not authorize execution')
-    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, EXPECTED_GOVENGINE_RANGE)
+    _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'contracts/consumer_imports.v1.json')
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'require_lifecycle=True')
     _require(errors, 'README.md', readme, 'Runtime dependencies are intentionally empty.')
     _require(errors, 'README.md', readme, f'Python import package remains `{EXPECTED_IMPORT_PACKAGE}`')

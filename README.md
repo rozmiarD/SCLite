@@ -18,13 +18,16 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 ## Status
 
 - Version: `2.0.0`
-- Status: **audited and published 2.0.0 stable release**
+- Release status: **audited and published non-prerelease 2.0.0**
+- Project maturity classifier: **Development Status :: 4 - Beta**
 - Latest published PyPI package: `sclite-core==2.0.0`
+- Python requirement: `>=3.11`; release CI covers Python 3.11, 3.12 and 3.13
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
 - Identity/PKI: out of scope for core; owned by the host/governance trust domain
-- Security-sensitive descriptor traversal and release tooling: tested on Linux/Unix; Windows behavior is not claimed
+- Security-sensitive descriptor traversal and release tooling: supported and
+  tested on Linux; Windows behavior is not claimed
 
 SCLite's core is a **contract/review lifecycle**, not an execution engine.
 Runtimes such as RExecOp can consume SCLite artifacts and enforce tickets, but
@@ -61,6 +64,10 @@ carrier references have neutral v0.2 forms with opaque namespaced identifiers;
 SCLite binds them but does not classify trust, transport, scope or publication
 safety.
 
+The packaged consumer-import inventory records reviewed boundaries for
+GovEngine, RExecOp and Tecrax; it does not claim that every downstream release
+has already updated its dependency pin to SCLite 2.0.
+
 ## What problem does SCLite solve?
 
 AI-assisted security workflows often blur separate authority boundaries:
@@ -72,7 +79,10 @@ AI-assisted security workflows often blur separate authority boundaries:
 5. a runtime executes or dry-runs under bounds;
 6. evidence is summarized for review.
 
-SCLite turns those steps into small schema-backed JSON artifacts and verifies their integrity locally. A reviewer can check the public-safe bundle without running live targets or reading private logs.
+SCLite turns those steps into small schema-backed JSON artifacts and verifies
+their integrity locally. A reviewer can check a deliberately prepared review
+bundle without running live targets or reading private logs. SCLite does not
+infer that arbitrary input is safe to publish.
 
 The canonical lifecycle keeps each authority boundary visible:
 
@@ -101,21 +111,8 @@ Current v0.2 artifacts:
 | `ExecutionContract` | Captures the exact bounded execution shape prepared for review. |
 | `ExecutionTicket` | Captures approval for one exact execution contract under explicit bounds and validity. |
 | `ExecutionReceipt` v0.2 | Captures what an external runtime reports as executed or dry-run. |
-| `EvidenceContract` | Captures public-safe claims, non-claims, replay, verification, and evidence links. |
+| `EvidenceContract` | Captures receipt-bounded claims, non-claims, replay, verification, and evidence links without storing raw evidence. |
 | `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. |
-
-SCLite also defines bounded decision-chain artifacts used by host runtimes:
-`observation_envelope.v0.1`, `finding.v0.1`, `reaction_plan.v0.1`,
-`trigger_decision.v0.1`, `watchdog_decision.v0.1` and
-`automation_chain.v0.1`. `automation_chain.v0.1` is the multi-step automation
-contract baseline: it records nodes, edges, GovEngine admission refs,
-idempotency keys, depth/reaction budgets, recovery policy and LLM
-proposal-only declarations. Verification reports `checked`, `not_checked`,
-`host_asserted` and `requires_external_verification`: SCLite checks artifact
-shape, references and declared budgets, but does not claim DAG, computed-depth,
-transition, recovery/checkpoint or admission-authenticity verification. Those
-semantics belong to RExecOp and GovEngine. SCLite does not traverse the graph,
-schedule work, authorize child operations or execute anything.
 
 Verify the lifecycle fixture:
 
@@ -201,13 +198,21 @@ It provides:
 - JSON schemas for current lifecycle, review, profile, and publication-hygiene artifacts;
 - deterministic artifact hashing helpers;
 - v0.2 lifecycle/chain verification;
-- scoped-ticket review helpers (`validate-ticket`, `explain-ticket`);
+- scoped-ticket review helpers (`validate-ticket`, plus the
+  `sclite-devtools explain-ticket` inspection command);
 - ticket-use / receipt-bounded-evidence checks (`verify-ticket-use`);
 - digest-bound trust/carrier profile reference checks (`validate-trust-profile`, `validate-carrier-profile`);
 - lifecycle review records and Scope Fidelity v0.2 checks (`review-lifecycle`);
 - canonical review-bundle validation and Markdown export (`review`, `export-review-bundle`);
 - redaction/public-snapshot helper artifacts;
-- a CLI for local validation and review fixtures.
+- kernel CLIs (`sclite` and `scl`) for validation/verification and a separate
+  `sclite-devtools` entrypoint for non-production inspection and fixture tools.
+
+The typed Python front door consists of `verify_artifact()` and
+`verify_bundle()`. `verify_bundle()` requires an explicit `VerificationPolicy`
+and never infers a security posture from its input. The returned frozen result
+types are structured verification outcomes, not authority or authentication
+tokens. See [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md).
 
 Review-bundle inspection and publication use separate modes. `review` keeps
 `local_review` compatibility and reports the complete recursive inventory.
@@ -221,9 +226,9 @@ The package stays centered on local validation, review, profile references, and 
 Disclosure/publication helpers use the monotonic status model `unknown →
 operator_asserted → checks_performed → externally_verified`. Unknown inputs and
 arbitrary CLI files default to `unknown`; heuristic redaction names its checks
-but does not claim credentials or private paths are absent. The legacy
-`public_safe` boolean is derived and true only for externally verified input.
-No status authorizes publication: that remains a separate host/operator step.
+but does not claim credentials or private paths are absent. SCLite 2.0 does not
+derive a `public_safe` boolean from this status. No status authorizes
+publication: that remains a separate host/operator step.
 
 Canonical results contain relative path labels. `verify-secure-bundle
 --local-debug --format json` is the explicit local-only escape hatch for an
@@ -301,7 +306,7 @@ and replay/non-claim boundaries for the 1.0 release line.
 - [`ROADMAP.md`](ROADMAP.md) — versioned accountability-layer evolution and post-0.5 direction.
 - [`SECURITY_MODEL.md`](SECURITY_MODEL.md) — security guarantees, non-claims, Kernel Guard transcript freeze, replay boundary, and key-rotation boundary.
 - [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) — stable profile matrix for `integrity_only`, `strict_lifecycle`, `guarded_domain_auth`, `guarded-strict`, and host-owned freshness.
-- [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) — frozen top-level Python API exports for the 1.0 line.
+- [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) — current top-level Python API exports and typed verification front door.
 - [`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md) — schema-version matrix, unknown-field policy, artifact ID guidance, and GovEngine compatibility notes.
 - [`docs/TRUST_PROFILES.md`](docs/TRUST_PROFILES.md) — digest-bound trust reference profiles without PKI/trust authority ownership.
 - [`docs/CARRIER_PROFILES.md`](docs/CARRIER_PROFILES.md) — digest-bound carrier reference profiles without adapter/transport ownership.
@@ -340,7 +345,8 @@ python -m venv .venv
 python -m pip install -e '.[dev]'
 ```
 
-Runtime dependencies are intentionally empty. The `dev` extra installs `pytest` for local tests.
+Runtime dependencies are intentionally empty. The `dev` extra installs the
+test, strict-schema, typing, coverage and lint tools used by local gates.
 Python import package remains `sclite`.
 
 Run the canonical local development gate:
@@ -452,7 +458,7 @@ Validate and explain the v0.3 scoped-ticket fixture:
 sclite validate-ticket \
   sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
   --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-sclite explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+sclite-devtools explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 sclite verify-ticket-use \
   sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
   --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json \
@@ -481,7 +487,7 @@ sclite validate-artifact \
 Hash one artifact with deterministic SCLite canonical JSON + SHA-256:
 
 ```bash
-sclite hash-artifact \
+sclite-devtools hash-artifact \
   --schema execution_contract.v0.2 \
   examples/review-bundle/03_execution_contract.json
 ```
@@ -489,11 +495,13 @@ sclite hash-artifact \
 Generate a standalone Scope Fidelity report from explicit dry-run shape facts:
 
 ```bash
-sclite scope-fidelity \
+sclite-devtools scope-fidelity \
   --target https://example.com/login \
-  --normalized-arg https://example.com/login \
-  --fail-on review
+  --normalized-arg https://example.com/login
 ```
+
+This explicit-fields example produces a static report whose verdict is
+`review`; use `--fail-on review` in CI when that verdict should return exit 2.
 
 Review and export the v0.5 review-bundle fixture:
 

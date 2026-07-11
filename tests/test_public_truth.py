@@ -66,7 +66,8 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         errors,
         version='1.0.0',
         readme=(
-            'audited and published 2.0.0 stable release\n'
+            'audited and published non-prerelease 2.0.0\n'
+            'Development Status :: 4 - Beta\n'
             '## Out of Scope\n'
             'Runtime execution: out of scope; owned by RExecOp or another host runtime\n'
             'GovEngine | governance, admission, policy decisions\n'
@@ -90,7 +91,7 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
             'The current integration front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw\n'
         ),
-        integration_guide='The current 1.0 stable release freezes the review-bundle contract.\n',
+        integration_guide='The current 2.0 stable release freezes the review-bundle contract.\n',
     )
 
     assert (

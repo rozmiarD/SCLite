@@ -1,8 +1,9 @@
 # SCLite 0.5 Freeze Notes
 
 These are historical 0.5 freeze notes. The frozen review-bundle behavior remains
-compatible, but the current GovEngine integration contract is
-`sclite-core>=1.0.5,<1.1`; see
+compatible. At the time, the GovEngine integration range was
+`sclite-core>=1.0.5,<1.1`; current consumers must use their own declared pin and
+the reviewed import inventory described in
 [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md).
 
 ## Stable for GovEngine consumption
