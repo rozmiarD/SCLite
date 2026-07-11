@@ -24,10 +24,10 @@ Tecrax     = future infrastructure-operations runtime/profile over GovEngine + S
 
 SCLite must stay deliberately small. The emergence of GovEngine as a broader governed-runtime kernel and Tecrax as a second domain profile is a reason to keep SCLite narrower, not broader.
 
-## Current baseline: 2.0.0 stable source awaiting publication
+## Current baseline: 2.0.0 published stable release
 
 Current package: `sclite-core==2.0.0`.
-Latest published public package: `sclite-core==1.0.9`.
+Latest published public package: `sclite-core==2.0.0`.
 
 Roadmap v2 hardening from the 2026-06-14 audit was implemented in `1.0.3`.
 The `1.0.4` patch extends only the truth-layer boundary with versioned reaction

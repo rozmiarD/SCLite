@@ -20,8 +20,8 @@ from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 EXPECTED_VERSION = '2.0.0'
 EXPECTED_RELEASE_LABEL = '2.0.0'
-LATEST_PUBLISHED_VERSION = '1.0.9'
-LATEST_PUBLISHED_LABEL = '1.0.9'
+LATEST_PUBLISHED_VERSION = '2.0.0'
+LATEST_PUBLISHED_LABEL = '2.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
 EXPECTED_GOVENGINE_RANGE = 'sclite-core>=1.0.5,<1.1'
@@ -162,7 +162,7 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'published 1.0 source and PyPI stable line')
+    _require(errors, 'README.md', readme, 'audited and published 2.0.0 stable release')
     _require(errors, 'README.md', readme, '## Out of Scope')
     _require(errors, 'README.md', readme, 'Runtime execution: out of scope; owned by RExecOp or another host runtime')
     _require(errors, 'README.md', readme, 'GovEngine | governance, admission, policy decisions')
@@ -413,7 +413,7 @@ def collect_errors() -> list[str]:
     )
     _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'published 1.0 source and PyPI stable line')
+    _require(errors, 'README.md', readme, 'audited and published 2.0.0 stable release')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
@@ -428,7 +428,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
     _require(errors, 'README.md', readme, 'verification_result')
     _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - ')
-    _require(errors, 'CHANGELOG.md', changelog, f'published `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
+    _require(errors, 'CHANGELOG.md', changelog, f'Published the audited `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, EXPECTED_GOVENGINE_RANGE)
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'GovEngine/RExecOp/Tecrax release decision')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'domain profiles do not authorize execution')

@@ -1,7 +1,7 @@
 # SCLite Schema Compatibility Matrix
 
 This matrix separates package release lines from artifact schema versions.
-`sclite-core==2.0.0` is the current stable source awaiting publication; most current
+`sclite-core==2.0.0` is the current published stable release; most current
 artifact contracts intentionally remain on earlier schema versions.
 
 ## Current Supported Combinations

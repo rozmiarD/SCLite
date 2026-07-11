@@ -2,7 +2,7 @@
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
 [![Stable source: sclite-core 2.0.0](https://img.shields.io/badge/stable%20source-sclite--core%202.0.0-blueviolet.svg)](pyproject.toml)
-[![PyPI stable: sclite-core 1.0.9](https://img.shields.io/badge/package-sclite--core%201.0.9-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.9/)
+[![PyPI stable: sclite-core 2.0.0](https://img.shields.io/badge/package-sclite--core%202.0.0-blueviolet.svg)](https://pypi.org/project/sclite-core/2.0.0/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
@@ -18,8 +18,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 ## Status
 
 - Version: `2.0.0`
-- Status: **audited 2.0.0 stable source awaiting publication; the published 1.0 source and PyPI stable line remains 1.0.9**
-- Latest published PyPI package: `sclite-core==1.0.9`
+- Status: **audited and published 2.0.0 stable release**
+- Latest published PyPI package: `sclite-core==2.0.0`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
@@ -323,7 +323,7 @@ and replay/non-claim boundaries for the 1.0 release line.
 Install the latest published package from PyPI with an exact version pin:
 
 ```bash
-python -m pip install sclite-core==1.0.9
+python -m pip install sclite-core==2.0.0
 ```
 
 Install directly from GitHub:

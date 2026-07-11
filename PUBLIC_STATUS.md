@@ -11,11 +11,11 @@ ships the former compatibility copies.
 
 - Current release version: `2.0.0`.
 - Release label: `2.0.0`.
-- Status: audited stable source awaiting publication; the published stable line remains `1.0.9`.
+- Status: audited and published stable release.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
-- Latest published PyPI package: `sclite-core==1.0.9` (`1.0.9`).
+- Latest published PyPI package: `sclite-core==2.0.0` (`2.0.0`).
 
 ## Current review path
 

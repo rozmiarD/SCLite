@@ -8,7 +8,7 @@ This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
 Current package: `sclite-core==2.0.0`;
-latest published public package: `sclite-core==1.0.9`.
+latest published public package: `sclite-core==2.0.0`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
 receipt-bounded-evidence checks, and v0.5 review-bundle packaging. Package
@@ -36,7 +36,7 @@ automation-chain contract baseline: nodes, edges, GovEngine admission refs,
 edge idempotency, depth/reaction budgets, recovery policy and LLM
 proposal-only invariants, without making SCLite a traversal engine, scheduler,
 policy authority, runtime or raw-evidence store.
-The audited `2.0.0` stable source awaiting publication preserves those contracts while
+The audited and published `2.0.0` stable release preserves those contracts while
 requiring verified snapshots, supported manifest identity/policy, explicit
 scope assertions, and receipt timestamps inside ticket validity windows before
 the relevant strict acceptance path can pass.

@@ -8,6 +8,9 @@
 
 ## 2.0.0 - Stable verifier hardening and neutral boundaries
 
+- Published the audited `sclite-core==2.0.0` package line through Trusted
+  Publishing with reviewed-source/final-build equality and recovery provenance.
+
 - Hardens untrusted JSON and bundle reads with bounded descriptor-based regular-file access, finite-number/Unicode checks, parser-depth error normalization and finite inventory budgets.
 - Makes public review failures non-reflective, strengthens strict receipt-use and evidence-claim semantics, and separates artifact binding from authority authentication.
 - Makes release rerun full gates and bind tag/version, source commit and exact artifacts to external review using pinned build tooling.

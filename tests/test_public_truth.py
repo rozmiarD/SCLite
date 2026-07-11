@@ -47,12 +47,12 @@ def test_public_truth_validator_accepts_published_stable_install_claim() -> None
     validator._assert_readme_package_truth(
         errors,
             '\n'.join([
-            'Version: `1.0.9`',
-            'package-sclite--core%201.0.9-blueviolet.svg',
-            'https://pypi.org/project/sclite-core/1.0.9/',
-            'python -m pip install sclite-core==1.0.9',
+            'Version: `2.0.0`',
+            'package-sclite--core%202.0.0-blueviolet.svg',
+            'https://pypi.org/project/sclite-core/2.0.0/',
+            'python -m pip install sclite-core==2.0.0',
         ]),
-        '1.0.9',
+        '2.0.0',
     )
 
     assert errors == []
@@ -66,7 +66,7 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         errors,
         version='1.0.0',
         readme=(
-            'published 1.0 source and PyPI stable line\n'
+            'audited and published 2.0.0 stable release\n'
             '## Out of Scope\n'
             'Runtime execution: out of scope; owned by RExecOp or another host runtime\n'
             'GovEngine | governance, admission, policy decisions\n'
