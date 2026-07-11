@@ -84,3 +84,5 @@ jobs:
           cyclonedx-py environment --output-file dist/sclite-core.cdx.json
       - name: Reproducible wheel gate
         run: scripts/reproducible_build_gate.sh
+      - name: Stable A/B build simulation
+        run: scripts/release_ab_repro_gate.sh

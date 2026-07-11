@@ -192,5 +192,7 @@ record commit `B`. It requires the wheel and normalized sdist names and bytes to
 match exactly, rejects a packaged external-review record, publishes the `B`
 build, and attests `B` as the actual build commit. Before creating `B`, confirm
 that `review_verdict`, all severity counts and `accepted_findings` agree.
+Accepted finding IDs must use `M-...` or `L-...` and match the corresponding
+counter; the review date must be a real ISO calendar date.
 `report_sha256` is release-owner-attested metadata: CI validates its format but
 does not retrieve or independently hash the retained report.

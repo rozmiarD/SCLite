@@ -181,3 +181,41 @@ def test_review_approved_with_findings_requires_matching_accepted_ids(
     result = _run(path, wheel, sdist)
     assert result.returncode == 1
     assert "external_review_accepted_findings_mismatch" in result.stdout
+
+
+@pytest.mark.parametrize(("medium", "low", "accepted"), [
+    (1, 0, ["H-99"]),
+    (1, 0, ["L-01"]),
+    (0, 1, ["M-01"]),
+    (1, 1, ["M-01", "C-01"]),
+])
+def test_review_rejects_accepted_finding_severity_mismatch(
+    tmp_path: Path,
+    medium: int,
+    low: int,
+    accepted: list[str],
+) -> None:
+    wheel, sdist = _artifacts(tmp_path)
+    record = _record(wheel, sdist)
+    record.update({
+        "unresolved_medium": medium,
+        "unresolved_low": low,
+        "accepted_findings": accepted,
+    })
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps(record), encoding="utf-8")
+    result = _run(path, wheel, sdist)
+    assert result.returncode == 1
+    assert "external_review_accepted_finding_severity_mismatch" in result.stdout
+
+
+@pytest.mark.parametrize("review_date", ["2026-99-99", "2026-02-30", "20260711", "not-a-date"])
+def test_review_rejects_invalid_calendar_date(tmp_path: Path, review_date: str) -> None:
+    wheel, sdist = _artifacts(tmp_path)
+    record = _record(wheel, sdist)
+    record["review_date"] = review_date
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps(record), encoding="utf-8")
+    result = _run(path, wheel, sdist)
+    assert result.returncode == 1
+    assert "external_review_date" in result.stdout

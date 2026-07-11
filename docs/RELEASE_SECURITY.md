@@ -43,6 +43,10 @@ Stable release uses two commits to avoid a self-referential record:
    build (`B`), while the equality gate binds those bytes to reviewed source
    commit `A`.
 
+The publish job exports `SOURCE_DATE_EPOCH=1704067200` for every package build.
+Regular CI also creates a real record-only child commit, waits across a clock
+tick, builds both commits and runs the same byte-comparison gate.
+
 The completion record is release-owner-attested metadata. CI verifies strict
 record shape and source/artifact binding, but does not authenticate reviewer
 identity, reviewer consent, or report authorship. `report_sha256` records the
@@ -50,6 +54,10 @@ release owner's claimed digest of the retained report. CI validates its format
 but does not retrieve or hash the report. Review date/verdict, all severity
 counts and accepted finding IDs preserve the handoff to that separately shared
 report.
+
+For `approved_with_low_or_medium_findings`, accepted IDs use `M-...` and
+`L-...` prefixes and their per-severity counts must match the unresolved Medium
+and Low counters. Review dates must be real ISO calendar dates.
 
 Security-sensitive descriptor traversal and release tooling are supported and
 tested on Linux/Unix. Windows secure-bundle and release-tooling behavior is not

@@ -11,6 +11,9 @@
   publication, after byte-for-byte comparison with the reviewed parent build;
   binds review verdicts to finding counts, narrows dry-run claim statuses, and
   reruns Ruff, mypy and Node conformance in the release matrix.
+- Exports a fixed epoch for real stable A/B builds, exercises that flow in CI,
+  validates accepted-finding severity prefixes and rejects impossible calendar
+  dates in external-review records.
 
 - Removes the deprecated reaction, trigger, watchdog and automation modules,
   built-in schemas and root exports for the 2.0 major line; RExecOp provides

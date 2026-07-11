@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -109,7 +110,12 @@ def main() -> int:
             errors.append("external_review_scope")
         if not _string_list(record, "accepted_findings", nonempty=False):
             errors.append("external_review_accepted_findings")
-        if not isinstance(record.get("review_date"), str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", record["review_date"]):
+        review_date = record.get("review_date")
+        try:
+            if not isinstance(review_date, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", review_date):
+                raise ValueError
+            date.fromisoformat(review_date)
+        except ValueError:
             errors.append("external_review_date")
         if record.get("review_verdict") not in VERDICTS:
             errors.append("external_review_verdict")
@@ -134,6 +140,17 @@ def main() -> int:
             )
         ):
             errors.append("external_review_accepted_findings_mismatch")
+        if (
+            record.get("review_verdict") == "approved_with_low_or_medium_findings"
+            and medium is not None
+            and low is not None
+            and isinstance(accepted_findings, list)
+            and all(isinstance(item, str) for item in accepted_findings)
+        ):
+            medium_ids = [item for item in accepted_findings if re.fullmatch(r"M-[A-Za-z0-9][A-Za-z0-9._-]*", item)]
+            low_ids = [item for item in accepted_findings if re.fullmatch(r"L-[A-Za-z0-9][A-Za-z0-9._-]*", item)]
+            if len(medium_ids) != medium or len(low_ids) != low or len(medium_ids) + len(low_ids) != len(accepted_findings):
+                errors.append("external_review_accepted_finding_severity_mismatch")
         report_hash = record.get("report_sha256")
         if not isinstance(report_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", report_hash):
             errors.append("external_review_report_sha256")
