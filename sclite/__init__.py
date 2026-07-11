@@ -136,8 +136,22 @@ from .tickets import (
     validate_ticket_semantics,
     verify_ticket_use,
 )
+from .frontdoor import (
+    ArtifactDescriptor,
+    VerificationPolicy,
+    VerifiedArtifact,
+    VerifiedBundle,
+    verify_artifact,
+    verify_bundle,
+)
 __all__ = (
     '__version__',
+    'ArtifactDescriptor',
+    'VerificationPolicy',
+    'VerifiedArtifact',
+    'VerifiedBundle',
+    'verify_artifact',
+    'verify_bundle',
     'VerificationLimits',
     'REVIEW_BUNDLE_MANIFEST_FILE',
     'REVIEW_BUNDLE_MARKDOWN_FILE',

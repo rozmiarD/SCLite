@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Adds the typed public front door: `ArtifactDescriptor`,
+  `VerificationPolicy`, `VerifiedArtifact`, `VerifiedBundle`,
+  `verify_artifact()` and `verify_bundle()`. Bundle verification requires an
+  explicit posture and delegates to the existing integrity, strict lifecycle,
+  guarded lifecycle or public-review verifier without auto-detection.
 - Ships and enforces a versioned consumer-import inventory for GovEngine,
   RExecOp and Tecrax. Every public export has a classification, owner and
   disposition; consumer AST gates reject unreviewed top-level or deep imports,

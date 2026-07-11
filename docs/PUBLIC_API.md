@@ -20,6 +20,25 @@ consumers.
 
 - `__version__`
 
+## Typed front door
+
+- `ArtifactDescriptor`
+- `VerificationPolicy`
+- `VerificationResult`
+- `VerifiedArtifact`
+- `VerifiedBundle`
+- `artifact_descriptor`
+- `verify_artifact`
+- `verify_bundle`
+- `verify_ticket_use`
+- `materialize_review_bundle`
+
+`verify_bundle()` requires an explicit `INTEGRITY`, `STRICT_LIFECYCLE`,
+`GUARDED_LIFECYCLE` or `PUBLIC_REVIEW` policy; it never infers posture from the
+input. Legacy wrappers delegate to the same verification paths and remain
+available through 1.x. Typed results are immutable self-described outcomes,
+not authentication tokens or runtime capabilities.
+
 ## Verification Policy
 
 - `VerificationLimits`

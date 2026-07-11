@@ -94,6 +94,11 @@
   },
   "external_consumers_are_not_covered": true,
   "public_exports": {
+    "ArtifactDescriptor": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
     "AUTOMATION_CHAIN_ARTIFACT_TYPE": {
       "classification": "bridge",
       "disposition": "migrate_to_owner_contract_1.3",
@@ -324,7 +329,22 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
+    "VerificationPolicy": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
     "VerificationResult": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VerifiedArtifact": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VerifiedBundle": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
@@ -589,10 +609,20 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
+    "verify_artifact": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
     "verify_automation_chain": {
       "classification": "bridge",
       "disposition": "migrate_to_owner_contract_1.3",
       "owner": "rexecop"
+    },
+    "verify_bundle": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
     },
     "verify_kernel_guard_manifest": {
       "classification": "stable",
