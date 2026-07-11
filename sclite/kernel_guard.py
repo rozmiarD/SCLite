@@ -348,8 +348,10 @@ def _verify_kernel_guard_manifest_with_snapshot(
         'key_entropy_status': 'not_checked',
         'key_warnings': _key_warnings(key_bytes),
         'security_posture': (
-            'guarded_domain_auth'
-            if key_policy == 'production'
+            'guard_hmac_only'
+            if key_policy == 'production' and not validate_chain
+            else 'guarded_domain_auth'
+            if key_policy == 'production' and validate_chain
             else 'legacy_read_only_guard'
         ),
     }

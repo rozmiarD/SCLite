@@ -7,6 +7,7 @@ This document freezes the public meaning of SCLite security profiles for the
 | --- | --- | --- | --- | --- |
 | `integrity_only` | SCLite | SHA-256 artifact-chain consistency for canonical JSON artifacts | fails when descriptors, chain links, or root digest mismatch | core/current |
 | `strict_lifecycle` | SCLite | `integrity_only` plus exact v0.2 lifecycle role sequence, role/schema identity, and semantic lifecycle bindings | fails on extra roles, duplicate roles, reorder, schema identity drift, or lifecycle digest mismatch | core/current |
+| `guard_hmac_only` | SCLite | HMAC verification of supplied manifest fields without chain verification | reports chain/lifecycle `not_checked`; never satisfies `guarded_domain_auth` or `guarded-strict` | low-level/partial |
 | `guarded_domain_auth` | SCLite | `strict_lifecycle` plus `kernel_guard_hmac_v1` sidecar authenticity inside a shared-secret domain | fails on missing/mismatched guard fields, tags, metadata digest, root tag, or wrong key | secure/current |
 | `guarded-strict` | SCLite | fail-closed secure bundle profile: artifact chain, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | fails closed when guard is missing or any layer fails | stable baseline |
 | `legacy_read_only_guard` | SCLite | historical HMAC verification with an explicitly selected sub-32-byte key policy | never satisfies `guarded_domain_auth` or `guarded-strict`; entropy remains not checked | compatibility/read-only |

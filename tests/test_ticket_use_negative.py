@@ -135,6 +135,32 @@ def test_strict_dry_run_claim_rejects_execution_flags() -> None:
         verify_ticket_use(_ticket(), _contract(), _receipt(), evidence, strict_evidence_claims=True)
 
 
+def test_strict_execution_claim_rejects_dry_run_receipt() -> None:
+    receipt = _receipt()
+    receipt['outcome']['status'] = 'dry_run'
+    receipt['execution']['executed_command_count'] = 1
+    evidence = _evidence()
+    evidence['links']['execution_receipt']['descriptor'] = artifact_descriptor(receipt)
+    evidence['claims'][0].update({
+        'claim_type': 'receipt_bounded_execution',
+        'requires_completed_execution': True,
+        'requires_network_execution': False,
+        'requires_live_execution': False,
+    })
+    with pytest.raises(TicketUseVerificationError, match='requires completed receipt status'):
+        verify_ticket_use(_ticket(), _contract(), receipt, evidence, strict_ticket_profile=True, strict_evidence_claims=True)
+
+
+def test_strict_dry_run_claim_requires_zero_executed_commands() -> None:
+    receipt = _receipt()
+    receipt['outcome']['status'] = 'dry_run'
+    receipt['execution']['executed_command_count'] = 1
+    evidence = _evidence()
+    evidence['links']['execution_receipt']['descriptor'] = artifact_descriptor(receipt)
+    with pytest.raises(TicketUseVerificationError, match='requires zero executed commands'):
+        verify_ticket_use(_ticket(), _contract(), receipt, evidence, strict_ticket_profile=True, strict_evidence_claims=True)
+
+
 def test_strict_one_shot_profile_requires_single_max_run() -> None:
     ticket = _ticket()
     ticket['execution_limits']['max_runs'] = 2

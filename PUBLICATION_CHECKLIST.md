@@ -180,3 +180,9 @@ Before any public push:
 - get explicit operator approval for any tag, TestPyPI upload, or PyPI upload.
 
 Validation receipts do not authorize publication. They only record checks.
+
+For stable 2.0, prepare the final source/version commit first and have the
+reviewer confirm that commit and reproducible artifacts. Then create one
+record-only child commit changing `security/EXTERNAL_REVIEW.json`, and tag that
+child. Never mix code, version, workflow, documentation, or fixture changes into
+the record commit; the release workflow rejects such a tag.

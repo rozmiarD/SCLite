@@ -121,6 +121,7 @@ def test_kernel_guard_production_policy_accepts_key_floor(length: int) -> None:
     assert result['key_length_bytes'] == length
     assert result['key_entropy_status'] == 'not_checked'
     assert result['key_warnings'] == []
+    assert result['security_posture'] == 'guard_hmac_only'
 
 
 @pytest.mark.parametrize('key', [None, 32, bytearray(b'x' * 32), object()])

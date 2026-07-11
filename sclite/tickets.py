@@ -14,6 +14,8 @@ SCOPED_TICKET_SCHEMA_REF = 'schemas/execution_ticket.v0.3.schema.json'
 TICKET_PROFILES = {'review_record', 'scoped_execution_ticket', 'external_capability_ref'}
 CONSUMABLE_APPROVAL_STATUSES = {'approved_for_dry_run', 'approved'}
 BLOCKED_RECEIPT_STATUSES = {'blocked', 'rejected', 'denied', 'failed', 'skipped', 'not_executed'}
+COMPLETED_RECEIPT_STATUSES = {'completed', 'succeeded'}
+DRY_RUN_RECEIPT_STATUSES = {'dry_run', 'skipped', 'not_executed'}
 EXECUTION_CLAIM_MARKERS = {
     'actual_execution',
     'command_executed',
@@ -404,7 +406,7 @@ def verify_ticket_use(
     receipt_mode = str(receipt_runtime.get('mode') or '')
     if _mode_level(receipt_mode) > _mode_level(ticket_mode):
         raise TicketUseVerificationError('receipt runtime mode exceeds ticket mode')
-    dry_run_receipt_statuses = {'dry_run', 'skipped', 'not_executed'} | BLOCKED_RECEIPT_STATUSES
+    dry_run_receipt_statuses = DRY_RUN_RECEIPT_STATUSES | BLOCKED_RECEIPT_STATUSES
     if ticket_mode == 'dry_run' and str(outcome.get('status') or '') not in dry_run_receipt_statuses:
         raise TicketUseVerificationError('dry-run ticket receipt must report a dry-run/non-executed outcome')
 
@@ -494,12 +496,16 @@ def verify_ticket_use(
             claim_type = str(claim.get('claim_type') or '')
             if strict_evidence_claims and claim_type == 'receipt_bounded_execution' and claim.get('requires_completed_execution') is not True:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] execution claim must require completed execution')
+            if strict_evidence_claims and claim_type == 'receipt_bounded_execution' and receipt_status not in COMPLETED_RECEIPT_STATUSES:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] execution claim requires completed receipt status')
             if strict_evidence_claims and claim_type in {'receipt_bounded_dry_run', 'fixture_review_observation'} and any(
                 bool(claim.get(field)) for field in ('requires_completed_execution', 'requires_network_execution', 'requires_live_execution')
             ):
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] non-execution claim cannot require execution')
             if strict_evidence_claims and claim_type == 'receipt_bounded_dry_run' and receipt_status not in dry_run_receipt_statuses:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] dry-run claim requires dry-run/non-executed receipt')
+            if strict_evidence_claims and claim_type == 'receipt_bounded_dry_run' and executed_count != 0:
+                raise TicketUseVerificationError(f'evidence_contract.claims[{index}] dry-run claim requires zero executed commands')
             if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and receipt_status in BLOCKED_RECEIPT_STATUSES:
                 raise TicketUseVerificationError(f'evidence_contract.claims[{index}] requires completed execution beyond receipt status')
             if _claim_requires_completed_execution(claim, allow_text_markers=not strict_evidence_claims) and executed_count == 0:

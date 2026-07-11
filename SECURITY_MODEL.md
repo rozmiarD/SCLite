@@ -16,6 +16,7 @@ freshness.
 | --- | --- | --- | --- |
 | `integrity_only` | `validate-chain`, artifact descriptors, `root_chain_digest` | local SHA-256 consistency for canonical JSON artifacts and ordered manifest links | no origin authenticity, no signer identity, no replay protection |
 | `strict_lifecycle` | `verify-lifecycle`, `require_lifecycle=True` | exact v0.2 lifecycle role sequence with no extra roles, duplicates, or reorder; semantic digest bindings across lifecycle artifacts | no runtime enforcement, no policy authorization, no legal authorization |
+| `guard_hmac_only` | `verify_kernel_guard_manifest(..., validate_chain=False)` | HMAC consistency for the supplied manifest fields only | chain and lifecycle are `not_checked`; never satisfies guarded lifecycle verification |
 | `guarded_domain_auth` | `kernel_guard_hmac_v1`, `verify-guarded-chain` | HMAC-SHA256 domain authenticity for a manifest and entries when the verifier knows the same domain secret | no public verification, no PKI, no non-repudiation, no replay freshness |
 | `guarded-strict` | `verify-secure-bundle` | fail-closed artifact-chain verification, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | no replay freshness, no public identity, no runtime execution proof |
 | `guarded_domain_auth_fresh` | GovEngine/host replay store | guarded-strict plus host-owned freshness/state decision | outside SCLite core |

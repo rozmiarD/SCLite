@@ -6,6 +6,12 @@
   "artifact_sha256": [],
   "reviewer": "",
   "scope": [],
+  "review_date": "",
+  "review_verdict": "pending",
+  "report_sha256": "",
   "unresolved_high": 0,
-  "unresolved_critical": 0
+  "unresolved_critical": 0,
+  "unresolved_medium": 0,
+  "unresolved_low": 0,
+  "accepted_findings": []
 }

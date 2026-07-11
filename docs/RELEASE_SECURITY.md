@@ -26,3 +26,23 @@ the record. Promotion from `2.0.0rc1` to `2.0.0` creates a new commit and new
 artifacts, so the reviewer must confirm the final stable diff and hashes. Stable
 record validation requires explicit source-commit, release-line and exactly two
 artifact arguments; shape-only inspection is not a stable release approval.
+
+Stable release uses two commits to avoid a self-referential record:
+
+1. source commit `A` contains the final stable code/version and is reviewed;
+2. record commit `B` has exactly one parent (`A`) and changes only
+   `security/EXTERNAL_REVIEW.json`;
+3. the stable tag points to `B`;
+4. the workflow proves the parent/diff relationship, preserves the record,
+   checks out `A`, runs Python 3.11-3.13 gates, and builds/publishes from `A`;
+5. source, artifact and report hashes are checked before publication.
+
+The completion record is release-owner-attested metadata. CI verifies strict
+record shape and source/artifact binding, but does not authenticate reviewer
+identity, reviewer consent, or report authorship. `report_sha256`, review
+date/verdict, all severity counts and accepted finding IDs preserve the handoff
+to the separately shared report.
+
+Security-sensitive descriptor traversal and release tooling are supported and
+tested on Linux/Unix. Windows secure-bundle and release-tooling behavior is not
+claimed unless separately implemented and tested.

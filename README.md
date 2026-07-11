@@ -24,6 +24,7 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
 - Integrity: canonical SHA-256 artifact descriptors + ordered hash-linked lifecycle manifest
 - Identity/PKI: out of scope for core; owned by the host/governance trust domain
+- Security-sensitive descriptor traversal and release tooling: tested on Linux/Unix; Windows behavior is not claimed
 
 SCLite's core is a **contract/review lifecycle**, not an execution engine.
 Runtimes such as RExecOp can consume SCLite artifacts and enforce tickets, but

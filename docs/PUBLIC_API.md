@@ -120,6 +120,9 @@ The explicit `key_policy="legacy_read_only"` verifier mode may authenticate
 historical short-key sidecars, but reports `legacy_read_only_guard` rather than
 production `guarded_domain_auth`. Secure-bundle verification never uses the
 legacy policy. SCLite does not estimate entropy or own key custody/rotation.
+Calling the low-level verifier with `validate_chain=False` reports
+`guard_hmac_only`; chain and lifecycle remain `not_checked`, and this posture
+cannot satisfy guarded lifecycle verification.
 - `SECURE_BUNDLE_POSTURE`
 - `SECURE_BUNDLE_PROFILE`
 - `SecureBundleError`

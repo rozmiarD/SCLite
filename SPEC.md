@@ -99,6 +99,7 @@ Security posture modes are explicit:
 
 - `integrity_only`: SHA-256 artifact-chain consistency.
 - `strict_lifecycle`: integrity plus exact lifecycle role semantics.
+- `guard_hmac_only`: HMAC verification with chain/lifecycle explicitly not checked.
 - `guarded_domain_auth`: strict lifecycle plus HMAC domain authenticity.
 - `guarded_domain_auth_fresh`: HMAC domain authenticity plus GovEngine replay
   freshness.
