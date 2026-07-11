@@ -11,6 +11,7 @@ from .artifacts import validate_artifact
 from .bundles import review_bundle
 from .integrity import artifact_descriptor, verify_artifact_chain_manifest, verify_lifecycle_manifest
 from .secure import _verify_secure_bundle
+from .schema_resolver import SchemaResolver
 from .verification_result import VerificationResult
 
 
@@ -73,8 +74,11 @@ def verify_artifact(
     schema_ref: str,
     root: Path | None = None,
     strict_jsonschema: bool = False,
+    resolver: SchemaResolver | None = None,
 ) -> VerifiedArtifact:
-    validate_artifact(dict(value), schema_ref, root=root, strict_jsonschema=strict_jsonschema)
+    validate_artifact(
+        dict(value), schema_ref, root=root, strict_jsonschema=strict_jsonschema, resolver=resolver
+    )
     descriptor = ArtifactDescriptor.from_mapping(artifact_descriptor(value))
     return VerifiedArtifact(
         descriptor=descriptor,

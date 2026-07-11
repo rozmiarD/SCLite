@@ -98,6 +98,26 @@
     "sclite.testing": "forgeable fixture builders"
   },
   "public_exports": {
+    "ImmutableSchemaResolver": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SchemaInventoryEntry": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SchemaResolutionError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SchemaResolver": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
     "ArtifactDescriptor": {
       "classification": "stable",
       "disposition": "retain_1.x",

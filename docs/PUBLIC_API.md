@@ -45,6 +45,19 @@ input. Legacy wrappers delegate to the same verification paths and remain
 available through 1.x. Typed results are immutable self-described outcomes,
 not authentication tokens or runtime capabilities.
 
+## Explicit schema extensions
+
+- `ImmutableSchemaResolver`
+- `SchemaInventoryEntry`
+- `SchemaResolutionError`
+- `SchemaResolver`
+
+Hosts may pass an immutable, namespaced contract set to `verify_artifact()`.
+Resolution uses canonical in-memory JSON bytes and a stable SHA-256 inventory;
+it performs no plugin discovery, imports, network access or global mutation.
+Identifiers use `namespace/name@vN`. Conflicting definitions of the same
+identifier are rejected before verification.
+
 ## Verification Policy
 
 - `VerificationLimits`

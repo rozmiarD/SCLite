@@ -144,6 +144,12 @@ from .frontdoor import (
     verify_artifact,
     verify_bundle,
 )
+from .schema_resolver import (
+    ImmutableSchemaResolver,
+    SchemaInventoryEntry,
+    SchemaResolutionError,
+    SchemaResolver,
+)
 __all__ = (
     '__version__',
     'ArtifactDescriptor',
@@ -152,6 +158,10 @@ __all__ = (
     'VerifiedBundle',
     'verify_artifact',
     'verify_bundle',
+    'ImmutableSchemaResolver',
+    'SchemaInventoryEntry',
+    'SchemaResolutionError',
+    'SchemaResolver',
     'VerificationLimits',
     'REVIEW_BUNDLE_MANIFEST_FILE',
     'REVIEW_BUNDLE_MARKDOWN_FILE',

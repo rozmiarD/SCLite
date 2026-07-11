@@ -9,6 +9,7 @@ from typing import Any, Dict, Mapping
 from ._json import load_json_object
 from .errors import SCLiteSchemaValidationError
 from .json_types import json_mapping
+from .schema_resolver import SchemaResolutionError, SchemaResolver
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
 ARTIFACT_HASH_ALGORITHM = 'sha256'
@@ -214,7 +215,13 @@ def load_json_schema(
     *,
     root: Path | None = None,
     allow_external_schema_refs: bool = False,
+    resolver: SchemaResolver | None = None,
 ) -> Dict[str, Any]:
+    if resolver is not None:
+        try:
+            return dict(resolver.resolve(schema_ref))
+        except SchemaResolutionError as exc:
+            raise JsonSchemaValidationError(str(exc)) from exc
     schema_path = _resolve_schema_ref(
         schema_ref,
         root=root,
@@ -231,11 +238,13 @@ def validate_schema_ref(
     path: str = '$',
     strict_jsonschema: bool = False,
     allow_external_schema_refs: bool = False,
+    resolver: SchemaResolver | None = None,
 ) -> None:
     schema = load_json_schema(
         schema_ref,
         root=root,
         allow_external_schema_refs=allow_external_schema_refs,
+        resolver=resolver,
     )
     if strict_jsonschema:
         try:
@@ -261,6 +270,7 @@ def validate_artifact(
     root: Path | None = None,
     strict_jsonschema: bool = False,
     allow_external_schema_refs: bool = False,
+    resolver: SchemaResolver | None = None,
 ) -> None:
     """Validate one artifact against a named SCL schema.
 
@@ -276,6 +286,7 @@ def validate_artifact(
         root=root,
         strict_jsonschema=strict_jsonschema,
         allow_external_schema_refs=allow_external_schema_refs,
+        resolver=resolver,
     )
 
 
