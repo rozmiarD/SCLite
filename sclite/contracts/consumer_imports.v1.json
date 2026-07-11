@@ -30,20 +30,8 @@
     "rexecop": {
       "imports": {
         "sclite": [
-          "automation_edge",
-          "automation_node",
-          "build_automation_chain",
-          "build_finding",
-          "build_reaction_chain_manifest",
-          "build_reaction_plan",
-          "build_trigger_decision",
-          "build_watchdog_decision",
-          "reaction_idempotency_key",
-          "trigger_decision_descriptor",
-          "trigger_decision_digest",
-          "validate_escalation_proposal",
-          "verify_automation_chain",
-          "verify_reaction_chain_manifest"
+          "ImmutableSchemaResolver",
+          "verify_artifact"
         ],
         "sclite.artifacts": [
           "artifact_sha256",
@@ -65,8 +53,28 @@
         "sclite.kernel_guard": [
           "build_kernel_guard_manifest"
         ],
+        "sclite.automation": [
+          "automation_edge",
+          "automation_node",
+          "build_automation_chain",
+          "verify_automation_chain"
+        ],
         "sclite.reactions": [
-          "validate_escalation_proposal"
+          "build_finding",
+          "build_observation_envelope",
+          "build_reaction_chain_manifest",
+          "build_reaction_plan",
+          "reaction_idempotency_key",
+          "validate_escalation_proposal",
+          "verify_reaction_chain_manifest"
+        ],
+        "sclite.triggers": [
+          "build_trigger_decision",
+          "trigger_decision_descriptor",
+          "trigger_decision_digest"
+        ],
+        "sclite.watchdog": [
+          "build_watchdog_decision"
         ],
         "sclite.tickets": [
           "normalized_args_digest",

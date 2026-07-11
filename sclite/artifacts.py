@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -49,6 +50,18 @@ SCHEMA_FILES = {
     'watchdog_decision.v0.1': 'watchdog_decision.v0.1.schema.json',
     'automation_chain.v0.1': 'automation_chain.v0.1.schema.json',
 }
+
+LEGACY_STACK_SCHEMA_NAMES = frozenset(
+    {
+        'observation_envelope.v0.1',
+        'finding.v0.1',
+        'reaction_plan.v0.1',
+        'escalation_proposal.v0.1',
+        'trigger_decision.v0.1',
+        'watchdog_decision.v0.1',
+        'automation_chain.v0.1',
+    }
+)
 
 
 class JsonSchemaValidationError(SCLiteSchemaValidationError):
@@ -172,9 +185,22 @@ def validate_json_schema_value(
 def _packaged_schema_path(schema_ref: str) -> Path | None:
     raw_ref = str(schema_ref or '')
     if raw_ref in SCHEMA_FILES:
+        if raw_ref in LEGACY_STACK_SCHEMA_NAMES:
+            warnings.warn(
+                f'{raw_ref} is a legacy stack-specific SCLite built-in; pass the owner contract resolver',
+                DeprecationWarning,
+                stacklevel=3,
+            )
         return schema_dir() / SCHEMA_FILES[raw_ref]
     for filename in set(SCHEMA_FILES.values()):
         if raw_ref in {filename, f'schemas/{filename}'}:
+            schema_name = filename.removesuffix('.schema.json')
+            if schema_name in LEGACY_STACK_SCHEMA_NAMES:
+                warnings.warn(
+                    f'{raw_ref} is a legacy stack-specific SCLite built-in; pass the owner contract resolver',
+                    DeprecationWarning,
+                    stacklevel=3,
+                )
             return schema_dir() / filename
     return None
 

@@ -58,6 +58,10 @@ it performs no plugin discovery, imports, network access or global mutation.
 Identifiers use `namespace/name@vN`. Conflicting definitions of the same
 identifier are rejected before verification.
 
+The reaction, trigger, watchdog and automation schemas bundled for 1.x
+compatibility emit `DeprecationWarning` when resolved directly. Their owner
+contract sets live in RExecOp; SCLite 2.0 removes these legacy built-ins.
+
 ## Verification Policy
 
 - `VerificationLimits`
