@@ -62,6 +62,7 @@ namespaces = false
 sclite = [
   "py.typed",
   "contracts/*.json",
+  "conformance/*.json",
   "schemas/*.json",
   "examples/scope-fidelity-report/*.json",
   "examples/scope-fidelity-report/*.md",
