@@ -18,8 +18,8 @@ from sclite.consumer_contracts import validate_public_export_inventory  # noqa: 
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '2.0.0rc1'
-EXPECTED_RELEASE_LABEL = '2.0.0rc1'
+EXPECTED_VERSION = '2.0.0'
+EXPECTED_RELEASE_LABEL = '2.0.0'
 LATEST_PUBLISHED_VERSION = '1.0.9'
 LATEST_PUBLISHED_LABEL = '1.0.9'
 EXPECTED_DISTRIBUTION = 'sclite-core'

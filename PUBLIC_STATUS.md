@@ -2,16 +2,16 @@
 
 SCLite is a lightweight Security Contract Layer lifecycle package.
 
-The current candidate exposes an immutable explicit schema resolver and neutral
+The current stable source exposes an immutable explicit schema resolver and neutral
 trust/carrier v0.2 bindings. RExecOp owns orchestration-specific reaction,
 trigger, watchdog and automation contract resources. SCLite 2.0 no longer
 ships the former compatibility copies.
 
 ## Current maturity
 
-- Current release version: `2.0.0rc1`.
-- Release label: `2.0.0rc1`.
-- Status: unpublished verifier-hardening candidate; the published stable line remains `1.0.9`.
+- Current release version: `2.0.0`.
+- Release label: `2.0.0`.
+- Status: audited stable source awaiting publication; the published stable line remains `1.0.9`.
 - Runtime dependencies: none.
 - CLI: available as `sclite` and `scl`.
 - CI: GitHub Actions validation exists.
@@ -91,7 +91,7 @@ without adding recovery authority or runtime supervision to SCLite.
 The `1.0.9` patch adds `automation_chain.v0.1` for bounded multi-step
 automation-chain truth artifacts without adding traversal, scheduling, policy,
 runtime or domain ownership to SCLite.
-The `2.0.0rc1` candidate retains the P0 acceptance corrections and adds one
+The `2.0.0` stable source retains the P0 acceptance corrections and adds one
 strict JSON input policy with duplicate-key rejection and finite resource
 budgets. It continues to use one
 immutable verified snapshot per verification, manifest identity/policy checks,

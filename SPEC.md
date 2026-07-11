@@ -1,7 +1,7 @@
 # SCLite Draft Specification
 
-Status: **unpublished 2.0.0rc1 verifier-hardening candidate over the published 1.0.9 stable lifecycle/review and guarded verification surface**.
-Current package is `sclite-core==2.0.0rc1`, and the Python import package remains
+Status: **audited 2.0.0 stable source awaiting publication over the published 1.0.9 lifecycle/review and guarded verification surface**.
+Current package is `sclite-core==2.0.0`, and the Python import package remains
 `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
 v0.5 review-bundle packaging, guarded-strict verification, and bounded

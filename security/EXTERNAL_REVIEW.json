@@ -1,6 +1,6 @@
 {
   "schema": "sclite.external_security_review.v1",
-  "release_line": "2.0.0rc1",
+  "release_line": "2.0.0",
   "status": "pending_external_reviewer",
   "source_commit": "",
   "artifact_sha256": [],

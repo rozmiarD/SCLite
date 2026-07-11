@@ -28,7 +28,7 @@ def test_public_truth_validator_passes() -> None:
         check=True,
     )
 
-    assert result.stdout.strip() == 'public_truth_ok:sclite-core==2.0.0rc1:import=sclite:runtime_deps=0'
+    assert result.stdout.strip() == 'public_truth_ok:sclite-core==2.0.0:import=sclite:runtime_deps=0'
 
 
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:

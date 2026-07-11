@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Source candidate: sclite-core 2.0.0rc1](https://img.shields.io/badge/source%20candidate-sclite--core%202.0.0rc1-blueviolet.svg)](pyproject.toml)
+[![Stable source: sclite-core 2.0.0](https://img.shields.io/badge/stable%20source-sclite--core%202.0.0-blueviolet.svg)](pyproject.toml)
 [![PyPI stable: sclite-core 1.0.9](https://img.shields.io/badge/package-sclite--core%201.0.9-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.9/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
@@ -17,8 +17,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `2.0.0rc1`
-- Status: **unpublished 2.0.0rc1 verifier-hardening candidate; the published 1.0 source and PyPI stable line remains 1.0.9**
+- Version: `2.0.0`
+- Status: **audited 2.0.0 stable source awaiting publication; the published 1.0 source and PyPI stable line remains 1.0.9**
 - Latest published PyPI package: `sclite-core==1.0.9`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
