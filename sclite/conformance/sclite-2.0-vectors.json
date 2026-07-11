@@ -1,0 +1,33 @@
+{
+  "schema": "sclite.conformance.v2",
+  "canonicalization": [
+    {
+      "id": "unicode",
+      "value": {"text": "Zażółć gęślą 🛡️", "nested": {"β": "é"}},
+      "canonical": "{\"nested\":{\"β\":\"é\"},\"text\":\"Zażółć gęślą 🛡️\"}",
+      "sha256": "0b2ab5dc01aa40bc0542ddd7bf005fb09a48ae27395c845c405c47984c9308eb"
+    },
+    {
+      "id": "numbers",
+      "value": {"zero": 0, "negative": -17, "fraction": 1.25},
+      "canonical": "{\"fraction\":1.25,\"negative\":-17,\"zero\":0}",
+      "sha256": "abe44cfee7fa44f3d138e868912b6572d561dd1422154b44d231da08e7feff92"
+    }
+  ],
+  "chain": {
+    "payload": {"previous_chain_digest": "", "role": "subject", "artifact_digest": "5525a6315dcc706a78a0143786cf4395229386bdac2409ec60feb9561564c5d3", "artifact_type": "example", "canonicalization": "sclite-json-v0.1", "algorithm": "sha256"},
+    "sha256": "b4e54121524fa0c8adc8ac4b23bc1c3ba3929fe8eecf2f6042f1380f556ca172"
+  },
+  "guard": {
+    "key_utf8": "0123456789abcdef0123456789abcdef",
+    "payload": {"profile": "kernel_guard_hmac_v1.vector", "root_chain_digest": "abc123", "manifest_metadata_digest": "def456"},
+    "hmac_sha256": "c429814a6d84917a450dbca71e3d6845e9bfc571a84a392c5a81910dae5c1d5d"
+  },
+  "negative": [
+    {"id": "duplicate", "input": "{\"a\":1,\"a\":2}", "classification": "duplicate_key"},
+    {"id": "nonfinite", "input": "{\"value\":NaN}", "classification": "non_standard_number"},
+    {"id": "path", "input": "../outside.json", "classification": "path_escape"},
+    {"id": "timestamp", "input": "not-a-timestamp", "classification": "invalid_timestamp"},
+    {"id": "ticket", "input": "not_before>not_after", "classification": "invalid_ticket_interval"}
+  ]
+}
