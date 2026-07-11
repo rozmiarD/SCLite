@@ -8,6 +8,14 @@ top-level exports below is a compatibility change.
 SCLite does not expose runtime execution, replay storage, PKI, KMS, policy
 authority, or carrier adapters through this API.
 
+The wheel ships `sclite/contracts/consumer_imports.v1.json`, a machine-readable
+inventory for the controlled GovEngine, RExecOp and Tecrax consumers. Every
+root export has an explicit `stable`, `bridge`, `testing` or `internal`
+classification, owner and disposition. Consumer CI scans production Python AST
+imports against that allowlist; a new deep import fails until the contract is
+reviewed. This inventory does not claim knowledge of private or external PyPI
+consumers.
+
 ## Version
 
 - `__version__`

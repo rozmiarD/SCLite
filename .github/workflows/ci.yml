@@ -63,3 +63,4 @@ jobs:
           /tmp/sclite-wheel-smoke/bin/python -m pip install dist/*.whl
           /tmp/sclite-wheel-smoke/bin/python -m pip check
           /tmp/sclite-wheel-smoke/bin/python -c "import importlib.metadata as md, sclite; assert md.version('sclite-core') == sclite.__version__"
+          /tmp/sclite-wheel-smoke/bin/python -m sclite.consumer_contracts --imports-only

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Ships and enforces a versioned consumer-import inventory for GovEngine,
+  RExecOp and Tecrax. Every public export has a classification, owner and
+  disposition; consumer AST gates reject unreviewed top-level or deep imports,
+  and wheel smoke imports every allowed symbol.
 - Makes `automation_chain.v0.1` verification claims explicit through
   `checked`, `not_checked`, `host_asserted` and external-owner fields. The
   frozen migration contract keeps graph/recovery semantics in RExecOp and

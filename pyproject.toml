@@ -59,6 +59,7 @@ namespaces = false
 [tool.setuptools.package-data]
 sclite = [
   "py.typed",
+  "contracts/*.json",
   "schemas/*.json",
   "examples/scope-fidelity-report/*.json",
   "examples/scope-fidelity-report/*.md",

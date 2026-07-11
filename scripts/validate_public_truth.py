@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 
 import sclite  # noqa: E402
 from sclite.bundles import review_bundle  # noqa: E402
+from sclite.consumer_contracts import validate_public_export_inventory  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
@@ -217,6 +218,7 @@ def _stable_import_errors() -> list[str]:
 
 def _curated_root_export_errors() -> list[str]:
     errors: list[str] = []
+    errors.extend(validate_public_export_inventory(sclite.__all__))
     required = (
         'materialize_review_bundle',
         'review_bundle',

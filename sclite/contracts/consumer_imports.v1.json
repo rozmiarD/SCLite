@@ -1,0 +1,645 @@
+{
+  "consumers": {
+    "govengine": {
+      "imports": {
+        "sclite.bundles": [
+          "ReviewBundleError",
+          "review_bundle"
+        ],
+        "sclite.integrity": [
+          "artifact_descriptor",
+          "verify_lifecycle_manifest"
+        ],
+        "sclite.integrity.chain": [
+          "ChainVerificationError"
+        ],
+        "sclite.secure": [
+          "verify_secure_bundle"
+        ],
+        "sclite.tickets": [
+          "TicketSemanticError",
+          "TicketUseVerificationError",
+          "validate_ticket_semantics",
+          "verify_ticket_use"
+        ]
+      },
+      "source_roots": [
+        "govengine"
+      ]
+    },
+    "rexecop": {
+      "imports": {
+        "sclite": [
+          "automation_edge",
+          "automation_node",
+          "build_automation_chain",
+          "build_finding",
+          "build_reaction_chain_manifest",
+          "build_reaction_plan",
+          "build_trigger_decision",
+          "build_watchdog_decision",
+          "reaction_idempotency_key",
+          "trigger_decision_descriptor",
+          "trigger_decision_digest",
+          "validate_escalation_proposal",
+          "verify_automation_chain",
+          "verify_reaction_chain_manifest"
+        ],
+        "sclite.artifacts": [
+          "artifact_sha256",
+          "canonical_artifact_bytes",
+          "validate_artifact"
+        ],
+        "sclite.bundles": [
+          "REVIEW_BUNDLE_REQUIRED_FILES",
+          "materialize_review_bundle",
+          "review_bundle",
+          "validate_review_bundle_shape"
+        ],
+        "sclite.hosts": [
+          "extract_host"
+        ],
+        "sclite.integrity": [
+          "artifact_descriptor"
+        ],
+        "sclite.kernel_guard": [
+          "build_kernel_guard_manifest"
+        ],
+        "sclite.reactions": [
+          "validate_escalation_proposal"
+        ],
+        "sclite.tickets": [
+          "normalized_args_digest",
+          "verify_ticket_use"
+        ]
+      },
+      "source_roots": [
+        "src/rexecop"
+      ]
+    },
+    "tecrax": {
+      "imports": {
+        "sclite": [
+          "build_observation_envelope",
+          "validate_escalation_proposal"
+        ],
+        "sclite.integrity": [
+          "artifact_descriptor"
+        ]
+      },
+      "source_roots": [
+        "src/tecrax"
+      ]
+    }
+  },
+  "external_consumers_are_not_covered": true,
+  "public_exports": {
+    "AUTOMATION_CHAIN_ARTIFACT_TYPE": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "AUTOMATION_CHAIN_NON_CLAIMS": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "AUTOMATION_CHAIN_SCHEMA": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "AUTOMATION_CHAIN_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "CHAIN_CANONICALIZATION_VERSION": {
+      "classification": "internal",
+      "disposition": "replace_with_typed_front_door_before_2.0",
+      "owner": "sclite"
+    },
+    "CHAIN_HASH_ALGORITHM": {
+      "classification": "internal",
+      "disposition": "replace_with_typed_front_door_before_2.0",
+      "owner": "sclite"
+    },
+    "ChainVerificationError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "DISCLOSURE_STATUS_ORDER": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "DisclosureStatus": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "DisclosureStatusError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "ESCALATION_PROPOSAL_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "FINDING_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "KERNEL_GUARD_MINIMUM_KEY_BYTES": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "KERNEL_GUARD_PROFILE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "KernelGuardError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "KernelGuardKeyPolicy": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "OBSERVATION_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "REACTION_PLAN_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "REVIEW_BUNDLE_MANIFEST_FILE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "REVIEW_BUNDLE_MARKDOWN_FILE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "REVIEW_BUNDLE_RECEIPT_FILE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "REVIEW_BUNDLE_REQUIRED_FILES": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "REVIEW_RECORD_SCHEMA": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "REVIEW_RECORD_SCHEMA_REF": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "ReviewBundleError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "ReviewRecordError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCLiteError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCLiteSchemaValidationError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCLiteValidationError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCOPED_TICKET_SCHEMA_REF": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCOPE_FIDELITY_ARTIFACT_TYPE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCOPE_FIDELITY_SCHEMA_REF": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SCOPE_FIDELITY_SCHEMA_VERSION": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SECURE_BUNDLE_POSTURE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SECURE_BUNDLE_PROFILE": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "SecureBundleError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "TICKET_PROFILES": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "TRIGGER_DECISION_SCHEMA": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "TRIGGER_DECISION_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "TicketSemanticError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "TicketUseVerificationError": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VERIFICATION_RESULT_SCHEMA_REF": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VERIFICATION_RESULT_SCHEMA_REF_V1_1": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VerificationLimits": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "VerificationResult": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "WATCHDOG_DECISION_SCHEMA": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "WATCHDOG_DECISION_SCHEMA_REF": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "__version__": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "artifact_descriptor": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "automation_chain_digest": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "automation_edge": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "automation_node": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "automation_owner_migration_contract": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_artifact_chain_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_automation_chain": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_disclosure_status": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_finding": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_guarded_strict_verification_result": {
+      "classification": "testing",
+      "disposition": "move_to_testing_namespace_1.3",
+      "owner": "sclite.testing"
+    },
+    "build_kernel_guard_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_lifecycle_scope_fidelity_report": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_observation_envelope": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_reaction_chain_manifest": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_reaction_plan": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_review_record_from_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_scope_fidelity_report": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_scope_fidelity_report_from_approved_spec": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "build_trigger_decision": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "build_watchdog_decision": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "explain_ticket": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "export_review_bundle_markdown": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "legacy_public_safe": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "manifest_metadata_digest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "materialize_review_bundle": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "normalized_args_digest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "reaction_idempotency_key": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "relative_public_path": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "resolve_guard_path": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "resolve_manifest_path": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "review_bundle": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "review_bundle_summary": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "review_record_markdown": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "serialize_verification_result": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "summarize_scope_fidelity": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "ticket_summary": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "trigger_decision_descriptor": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "trigger_decision_digest": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "validate_automation_chain": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "validate_disclosure_transition": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_escalation_proposal": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "validate_lifecycle_scope_fidelity_report": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_review_bundle_shape": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_scope_fidelity_report": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_ticket_schema": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_ticket_semantics": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "validate_trigger_decision": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "validate_watchdog_decision": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "verify_artifact_chain_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "verify_automation_chain": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "verify_kernel_guard_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "verify_lifecycle_manifest": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "verify_reaction_chain_manifest": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "verify_secure_bundle": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "verify_secure_bundle_result": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "verify_ticket_use": {
+      "classification": "stable",
+      "disposition": "retain_1.x",
+      "owner": "sclite"
+    },
+    "watchdog_decision_descriptor": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    },
+    "watchdog_decision_digest": {
+      "classification": "bridge",
+      "disposition": "migrate_to_owner_contract_1.3",
+      "owner": "rexecop"
+    }
+  },
+  "schema": "sclite.consumer_import_inventory.v1",
+  "sclite_version_line": "1.1.x",
+  "scope": [
+    "govengine",
+    "rexecop",
+    "tecrax"
+  ]
+}
