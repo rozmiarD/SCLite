@@ -1,9 +1,13 @@
 # SCL Artifact Guide
 
+> SCLite 2.0 note: reaction, trigger, watchdog and automation artifacts in the
+> historical sections below are owned and packaged by RExecOp. SCLite no longer
+> ships their modules or schemas; the history remains for migration context.
+
 This guide explains the implemented SCLite artifacts in practical reviewer
 language.
 
-Current package: `sclite-core==1.1.0rc1`;
+Current package: `sclite-core==2.0.0rc1`;
 latest published public package: `sclite-core==1.0.9`.
 The current integration front door is the review lifecycle
 substrate: v0.2 lifecycle artifacts, v0.3 scoped ticket /
@@ -32,7 +36,7 @@ automation-chain contract baseline: nodes, edges, GovEngine admission refs,
 edge idempotency, depth/reaction budgets, recovery policy and LLM
 proposal-only invariants, without making SCLite a traversal engine, scheduler,
 policy authority, runtime or raw-evidence store.
-The unpublished `1.1.0rc1` verifier-hardening candidate preserves those contracts while
+The unpublished `2.0.0rc1` verifier-hardening candidate preserves those contracts while
 requiring verified snapshots, supported manifest identity/policy, explicit
 scope assertions, and receipt timestamps inside ticket validity windows before
 the relevant strict acceptance path can pass.
@@ -60,9 +64,9 @@ it.
 The fixture at `examples/review-bundle/` demonstrates the base shape and can be reviewed with:
 
 ```bash
-python -m sclite.cli review examples/review-bundle --format json
-python -m sclite.cli review examples/review-bundle --format summary
-python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
+python -m sclite.kernel_cli review examples/review-bundle --format json
+python -m sclite.kernel_cli review examples/review-bundle --format summary
+python -m sclite.kernel_cli export-review-bundle examples/review-bundle --format markdown
 ```
 
 The bundled base fixture returns `review`, not `pass`, because it intentionally demonstrates the v0.2 lifecycle ticket rather than newer scoped `execution_ticket.v0.3` ticket-use semantics. That conservative verdict is part of the point: SCLite should make reviewer attention visible instead of overstating what a bundle proves.
@@ -70,9 +74,9 @@ The bundled base fixture returns `review`, not `pass`, because it intentionally 
 The GovEngine integration fixture is expected to pass because it uses the v0.3 scoped-ticket / receipt-bounded-evidence surface and digest-bound profile sidecars:
 
 ```bash
-python -m sclite.cli review examples/govengine-integration --format json --fail-on review
-python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.kernel_cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 ```
 
 `examples/bad-review-bundle-cross-host/` intentionally fails review due to cross-role target drift and is used for negative integration tests.
@@ -84,8 +88,8 @@ SCLite 0.3.5 publishes the first `ExecutionTicket` scoped-ticket surface while p
 The fixture at `sclite/examples/scoped-ticket-v0.3/` demonstrates the shape and can be reviewed with:
 
 ```bash
-python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-python -m sclite.cli explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.kernel_cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.devtools explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 ```
 
 This remains local/static validation. It does not prove legal authorization, signer identity, runtime enforcement, or live vulnerability evidence.
@@ -93,7 +97,7 @@ This remains local/static validation. It does not prove legal authorization, sig
 The 0.3.5 Receipt-Bounded Evidence slice adds `verify-ticket-use` for the same fixture:
 
 ```bash
-python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
+python -m sclite.kernel_cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
 ```
 
 That verifier checks only local accountability bindings: receipt-to-ticket, receipt-to-contract, runtime/mode/network/use limits, evidence-to-receipt, evidence-to-ticket, explicit `source_receipt_id`, receipt-bounded claim flags, completed-execution/network claim bounds, and replay limits.
@@ -103,10 +107,10 @@ That verifier checks only local accountability bindings: receipt-to-ticket, rece
 SCLite includes digest-bound trust and carrier reference sidecars:
 
 ```bash
-python -m sclite.cli validate-trust-profile \
+python -m sclite.kernel_cli validate-trust-profile \
   sclite/examples/trust-carrier-profiles/trust_profile_ref.json \
   --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.cli validate-carrier-profile \
+python -m sclite.kernel_cli validate-carrier-profile \
   sclite/examples/trust-carrier-profiles/carrier_profile_ref.json \
   --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 ```
@@ -116,7 +120,7 @@ These checks validate sidecar shape and subject digest binding only. They do not
 Lifecycle review records aggregate static lifecycle checks:
 
 ```bash
-python -m sclite.cli review-lifecycle \
+python -m sclite.devtools review-lifecycle \
   sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
   --format json
 ```
@@ -270,20 +274,20 @@ It is deliberately conservative. `review` is not a failure; it means a human/sys
 Run:
 
 ```bash
-python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli review examples/review-bundle --format json
-python -m sclite.cli export-review-bundle examples/review-bundle --format markdown
-python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
-python -m sclite.cli validate-trust-profile sclite/examples/trust-carrier-profiles/trust_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.cli validate-carrier-profile sclite/examples/trust-carrier-profiles/carrier_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
-python -m sclite.cli hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
-python -m sclite.cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
-python -m sclite.cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
-python -m sclite.cli scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
+python -m sclite.kernel_cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli review examples/review-bundle --format json
+python -m sclite.kernel_cli export-review-bundle examples/review-bundle --format markdown
+python -m sclite.devtools review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
+python -m sclite.kernel_cli validate-trust-profile sclite/examples/trust-carrier-profiles/trust_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.kernel_cli validate-carrier-profile sclite/examples/trust-carrier-profiles/carrier_profile_ref.json --subject sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.devtools validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.devtools hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
+python -m sclite.devtools validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.devtools scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
 ```
 
 A passing result means the local synthetic fixture matches the current schemas/invariants. It does not mean the project executed tools or found a vulnerability.

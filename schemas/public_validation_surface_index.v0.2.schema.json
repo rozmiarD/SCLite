@@ -86,9 +86,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "public_safe": {
-            "type": "boolean"
-          },
           "purpose": {
             "type": "string"
           },
@@ -110,8 +107,7 @@
           "purpose",
           "schemas",
           "commands",
-          "disclosure",
-          "public_safe"
+          "disclosure"
         ],
         "type": "object"
       },

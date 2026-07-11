@@ -107,27 +107,3 @@ def _verification_result_from_verified_guard(
             'ticket_use_profile',
         ),
     )
-
-
-def build_guarded_strict_verification_result(
-    guard_result: Mapping[str, Any],
-    *,
-    secure_profile: str,
-    security_posture: str,
-    ticket_use_result: Mapping[str, Any] | None = None,
-) -> Dict[str, Any]:
-    """Compatibility fixture builder retained through SCLite 2.0.
-
-    This function performs no verification. New fixtures should import
-    ``build_guarded_strict_verification_result_fixture`` from ``sclite.testing``.
-    Production callers should use ``verify_secure_bundle_result``.
-    """
-
-    from .devtools_fixtures import build_guarded_strict_verification_result_fixture
-
-    return build_guarded_strict_verification_result_fixture(
-        guard_result,
-        secure_profile=secure_profile,
-        security_posture=security_posture,
-        ticket_use_result=ticket_use_result,
-    )

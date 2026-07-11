@@ -119,7 +119,7 @@ def test_cli_explicit_schema_path_remains_operator_opt_in(tmp_path: Path) -> Non
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-artifact',
             '--schema',
             str(schema_path),

@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping
-import warnings
 
 from .json_types import json_array
 from .disclosure import build_disclosure_status
@@ -57,11 +56,6 @@ def sanitize_public_artifact(value: Any) -> Any:
     is intentionally conservative and does not claim to be a complete secret
     scanner.
     """
-    warnings.warn(
-        'sanitize_public_artifact is a devtools compatibility helper, not publication authority',
-        DeprecationWarning,
-        stacklevel=2,
-    )
     if isinstance(value, dict):
         if isinstance(value.get('name'), str) and ('value' in value or 'raw' in value):
             named_value = {k: sanitize_public_artifact(v) for k, v in value.items()}

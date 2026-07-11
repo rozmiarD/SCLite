@@ -11,7 +11,6 @@ def test_public_export_inventory_is_complete_and_classified() -> None:
     records = consumer_contracts.load_consumer_import_inventory()["public_exports"]
     assert {record["classification"] for record in records.values()} == {
         "stable",
-        "bridge",
         "internal",
     }
     assert all(record["classification"] != "testing" for record in records.values())

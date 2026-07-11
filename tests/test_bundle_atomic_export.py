@@ -245,7 +245,7 @@ def test_concurrent_creator_is_preserved(
 
 def test_export_cli_is_public_export_by_default_with_explicit_local_escape_hatch() -> None:
     public_result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'export-review-bundle', str(GOVENGINE_BUNDLE)],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'export-review-bundle', str(GOVENGINE_BUNDLE)],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -255,7 +255,7 @@ def test_export_cli_is_public_export_by_default_with_explicit_local_escape_hatch
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'export-review-bundle',
             str(GOVENGINE_BUNDLE),
             '--mode',

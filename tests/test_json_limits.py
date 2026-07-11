@@ -103,7 +103,7 @@ def test_cli_input_loader_rejects_duplicate_keys(tmp_path: Path) -> None:
     path = tmp_path / 'artifact.json'
     path.write_text('{"artifact_type":"one","artifact_type":"two"}', encoding='utf-8')
 
-    from sclite.cli import _load_json_object as cli_load_json_object
+    from sclite._cli_impl import _load_json_object as cli_load_json_object
 
     with pytest.raises(ValueError, match='duplicate object key'):
         cli_load_json_object(path)

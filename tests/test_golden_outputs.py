@@ -13,7 +13,7 @@ GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
 
 def _run_json(args: list[str]) -> dict:
     proc = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', *args],
+        [sys.executable, '-m', 'sclite.kernel_cli', *args],
         cwd=str(ROOT),
         text=True,
         capture_output=True,

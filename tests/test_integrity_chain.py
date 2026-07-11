@@ -403,7 +403,7 @@ def test_manifest_spoofing_cli_fails_closed(tmp_path: Path, strict_jsonschema: b
     args = [
         sys.executable,
         '-m',
-        'sclite.cli',
+        'sclite.kernel_cli',
         'validate-chain',
         str(manifest_path),
         '--root',
@@ -657,7 +657,7 @@ def test_v02_lifecycle_detects_symlink_manifest_path_escape(tmp_path: Path) -> N
 
 def test_validate_chain_cli() -> None:
     proc = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'validate-chain', str(FIXTURE / 'artifact_chain_manifest.json')],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'validate-chain', str(FIXTURE / 'artifact_chain_manifest.json')],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -673,7 +673,7 @@ def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--format',
@@ -694,7 +694,7 @@ def test_validate_chain_cli_json_keeps_lifecycle_semantics_loose() -> None:
 
 def test_verify_lifecycle_cli_alias() -> None:
     proc = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'verify-lifecycle', str(FIXTURE / 'artifact_chain_manifest.json')],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'verify-lifecycle', str(FIXTURE / 'artifact_chain_manifest.json')],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -710,7 +710,7 @@ def test_verify_lifecycle_cli_json_reports_semantic_checks() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-lifecycle',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--format',
@@ -733,7 +733,7 @@ def test_validate_chain_cli_optional_size_guard_fails_closed() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--max-artifact-bytes',

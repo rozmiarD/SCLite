@@ -20,8 +20,8 @@ jobs:
       matrix:
         python-version: ['3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Upgrade pip
@@ -34,29 +34,39 @@ jobs:
         run: scripts/strict_schema_gate.sh
       - name: Security regression gate
         run: scripts/security_regression_gate.sh
+      - name: Security-path branch coverage
+        run: >-
+          python -m pytest -q tests/test_schema_validation_modes.py
+          tests/test_json_limits.py tests/test_schema_resolution.py tests/test_kernel_guard.py
+          tests/test_secure_bundle.py tests/test_extension_resolver.py
+          --cov=sclite._json --cov=sclite.artifacts --cov=sclite.kernel_guard
+          --cov=sclite.secure --cov=sclite.schema_resolver --cov-branch
+          --cov-report=term-missing --cov-fail-under=75
       - name: Ruff
         run: python -m ruff check .
       - name: Mypy
         run: python -m mypy
       - name: Run tests
         run: python -m pytest -q
+      - name: Independent conformance vectors
+        run: node scripts/verify_vectors.mjs conformance/sclite-2.0-vectors.json
 
   package-dry-run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13'
       - name: Install build tooling
-        run: python -m pip install --upgrade pip build twine
+        run: python -m pip install --upgrade pip build twine pip-audit cyclonedx-bom
       - name: Clean build artifacts
         run: rm -rf dist build *.egg-info
       - name: Build package
         run: python -m build
       - name: Check package metadata
         run: python -m twine check dist/*
-      - name: Wheel install smoke
+      - name: Wheel and sdist install smoke
         run: |
           python -m venv /tmp/sclite-wheel-smoke
           /tmp/sclite-wheel-smoke/bin/python -m pip install --upgrade pip
@@ -64,3 +74,13 @@ jobs:
           /tmp/sclite-wheel-smoke/bin/python -m pip check
           /tmp/sclite-wheel-smoke/bin/python -c "import importlib.metadata as md, sclite; assert md.version('sclite-core') == sclite.__version__"
           /tmp/sclite-wheel-smoke/bin/python -m sclite.consumer_contracts --imports-only
+          python -m venv /tmp/sclite-sdist-smoke
+          /tmp/sclite-sdist-smoke/bin/python -m pip install --upgrade pip
+          /tmp/sclite-sdist-smoke/bin/python -m pip install dist/*.tar.gz
+          /tmp/sclite-sdist-smoke/bin/python -m pip check
+      - name: Dependency audit and SBOM
+        run: |
+          python -m pip_audit
+          cyclonedx-py environment --output-file dist/sclite-core.cdx.json
+      - name: Reproducible wheel gate
+        run: scripts/reproducible_build_gate.sh

@@ -31,7 +31,11 @@
       "imports": {
         "sclite": [
           "ImmutableSchemaResolver",
+          "SchemaInventoryEntry",
           "verify_artifact"
+        ],
+        "sclite._json": [
+          "VerificationLimits"
         ],
         "sclite.artifacts": [
           "artifact_sha256",
@@ -45,33 +49,15 @@
           "validate_review_bundle_shape"
         ],
         "sclite.integrity": [
-          "artifact_descriptor"
+          "ChainVerificationError",
+          "artifact_descriptor",
+          "build_artifact_chain_manifest"
+        ],
+        "sclite.integrity.chain": [
+          "_verify_artifact_chain_manifest_with_snapshot"
         ],
         "sclite.kernel_guard": [
           "build_kernel_guard_manifest"
-        ],
-        "sclite.automation": [
-          "automation_edge",
-          "automation_node",
-          "build_automation_chain",
-          "verify_automation_chain"
-        ],
-        "sclite.reactions": [
-          "build_finding",
-          "build_observation_envelope",
-          "build_reaction_chain_manifest",
-          "build_reaction_plan",
-          "reaction_idempotency_key",
-          "validate_escalation_proposal",
-          "verify_reaction_chain_manifest"
-        ],
-        "sclite.triggers": [
-          "build_trigger_decision",
-          "trigger_decision_descriptor",
-          "trigger_decision_digest"
-        ],
-        "sclite.watchdog": [
-          "build_watchdog_decision"
         ],
         "sclite.tickets": [
           "normalized_args_digest",
@@ -84,10 +70,6 @@
     },
     "tecrax": {
       "imports": {
-        "sclite": [
-          "build_observation_envelope",
-          "validate_escalation_proposal"
-        ],
         "sclite.integrity": [
           "artifact_descriptor"
         ]
@@ -128,26 +110,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "AUTOMATION_CHAIN_ARTIFACT_TYPE": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "AUTOMATION_CHAIN_NON_CLAIMS": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "AUTOMATION_CHAIN_SCHEMA": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "AUTOMATION_CHAIN_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "CHAIN_CANONICALIZATION_VERSION": {
       "classification": "internal",
       "disposition": "replace_with_typed_front_door_before_2.0",
@@ -178,16 +140,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "ESCALATION_PROPOSAL_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "FINDING_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "KERNEL_GUARD_MINIMUM_KEY_BYTES": {
       "classification": "stable",
       "disposition": "retain_1.x",
@@ -217,16 +169,6 @@
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "OBSERVATION_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "REACTION_PLAN_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "REVIEW_BUNDLE_MANIFEST_FILE": {
       "classification": "stable",
@@ -323,16 +265,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "TRIGGER_DECISION_SCHEMA": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "TRIGGER_DECISION_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "TicketSemanticError": {
       "classification": "stable",
       "disposition": "retain_1.x",
@@ -378,16 +310,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "WATCHDOG_DECISION_SCHEMA": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "WATCHDOG_DECISION_SCHEMA_REF": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "__version__": {
       "classification": "stable",
       "disposition": "retain_1.x",
@@ -398,45 +320,15 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "automation_chain_digest": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "automation_edge": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "automation_node": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "automation_owner_migration_contract": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "build_artifact_chain_manifest": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "build_automation_chain": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "build_disclosure_status": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "build_finding": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "build_kernel_guard_manifest": {
       "classification": "stable",
@@ -447,21 +339,6 @@
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "build_observation_envelope": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "build_reaction_chain_manifest": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "build_reaction_plan": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "build_review_record_from_manifest": {
       "classification": "stable",
@@ -478,27 +355,12 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "build_trigger_decision": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "build_watchdog_decision": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "explain_ticket": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
     "export_review_bundle_markdown": {
-      "classification": "stable",
-      "disposition": "retain_1.x",
-      "owner": "sclite"
-    },
-    "legacy_public_safe": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
@@ -517,11 +379,6 @@
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "reaction_idempotency_key": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "relative_public_path": {
       "classification": "stable",
@@ -568,30 +425,10 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "trigger_decision_descriptor": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "trigger_decision_digest": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "validate_automation_chain": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "validate_disclosure_transition": {
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "validate_escalation_proposal": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "validate_lifecycle_scope_fidelity_report": {
       "classification": "stable",
@@ -618,16 +455,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "validate_trigger_decision": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "validate_watchdog_decision": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "verify_artifact_chain_manifest": {
       "classification": "stable",
       "disposition": "retain_1.x",
@@ -637,11 +464,6 @@
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "verify_automation_chain": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     },
     "verify_bundle": {
       "classification": "stable",
@@ -658,11 +480,6 @@
       "disposition": "retain_1.x",
       "owner": "sclite"
     },
-    "verify_reaction_chain_manifest": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
     "verify_secure_bundle": {
       "classification": "stable",
       "disposition": "retain_1.x",
@@ -677,20 +494,10 @@
       "classification": "stable",
       "disposition": "retain_1.x",
       "owner": "sclite"
-    },
-    "watchdog_decision_descriptor": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
-    },
-    "watchdog_decision_digest": {
-      "classification": "bridge",
-      "disposition": "migrate_to_owner_contract_1.3",
-      "owner": "rexecop"
     }
   },
   "schema": "sclite.consumer_import_inventory.v1",
-  "sclite_version_line": "1.1.x",
+  "sclite_version_line": "2.0.x",
   "scope": [
     "govengine",
     "rexecop",

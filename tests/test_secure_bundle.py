@@ -72,7 +72,7 @@ def _run(args: list[str], *, env_key: bool = True) -> subprocess.CompletedProces
     else:
         env.pop('SCLITE_KERNEL_GUARD_KEY', None)
     return subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', *args],
+        [sys.executable, '-m', 'sclite.kernel_cli', *args],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -158,8 +158,8 @@ def test_secure_bundle_profile_verifies_guarded_strict_manifest(tmp_path: Path) 
     assert result['verification_result']['replay'] == 'not_checked'
     assert result['verification_result']['public_identity'] == 'not_claimed'
     assert result['verification_result']['runtime_enforcement'] == 'not_claimed'
-    validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT)
-    validate_artifact(result['verification_result'], 'verification_result.v1', root=ROOT, strict_jsonschema=True)
+    validate_artifact(result['verification_result'], 'verification_result.v1.1', root=ROOT)
+    validate_artifact(result['verification_result'], 'verification_result.v1.1', root=ROOT, strict_jsonschema=True)
 
 
 def test_secure_bundle_absolute_paths_require_explicit_local_debug(tmp_path: Path) -> None:
@@ -308,7 +308,7 @@ def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: 
     assert result['guard_status'] == 'passed'
     assert result['replay_status'] == 'not_checked'
     assert verification_result['artifact_type'] == 'verification_result'
-    assert verification_result['schema_ref'] == 'schemas/verification_result.v1.schema.json'
+    assert verification_result['schema_ref'] == 'schemas/verification_result.v1.1.schema.json'
     assert verification_result['artifact_chain'] == 'pass'
     assert verification_result['strict_lifecycle'] == 'pass'
     assert verification_result['kernel_guard'] == 'pass'
@@ -317,7 +317,7 @@ def test_secure_bundle_cli_json_includes_verification_result_contract(tmp_path: 
     assert verification_result['replay'] == 'not_checked'
     assert verification_result['public_identity'] == 'not_claimed'
     assert verification_result['runtime_enforcement'] == 'not_claimed'
-    validate_artifact(verification_result, 'verification_result.v1', root=ROOT)
+    validate_artifact(verification_result, 'verification_result.v1.1', root=ROOT)
 
 
 def test_secure_bundle_fails_on_ticket_use_evidence_overclaim(tmp_path: Path) -> None:

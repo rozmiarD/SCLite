@@ -66,7 +66,7 @@ def test_govengine_fixture_cli_contract_smoke() -> None:
 
     for command in commands:
         proc = subprocess.run(
-            [sys.executable, '-m', 'sclite.cli', *command],
+            [sys.executable, '-m', 'sclite.kernel_cli', *command],
             cwd=str(ROOT),
             text=True,
             capture_output=True,

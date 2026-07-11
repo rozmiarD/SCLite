@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Source candidate: sclite-core 1.1.0rc1](https://img.shields.io/badge/source%20candidate-sclite--core%201.1.0rc1-blueviolet.svg)](pyproject.toml)
+[![Source candidate: sclite-core 2.0.0rc1](https://img.shields.io/badge/source%20candidate-sclite--core%202.0.0rc1-blueviolet.svg)](pyproject.toml)
 [![PyPI stable: sclite-core 1.0.9](https://img.shields.io/badge/package-sclite--core%201.0.9-blueviolet.svg)](https://pypi.org/project/sclite-core/1.0.9/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
@@ -17,8 +17,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `1.1.0rc1`
-- Status: **unpublished 1.1.0rc1 verifier-hardening candidate; the published 1.0 source and PyPI stable line remains 1.0.9**
+- Version: `2.0.0rc1`
+- Status: **unpublished 2.0.0rc1 verifier-hardening candidate; the published 1.0 source and PyPI stable line remains 1.0.9**
 - Latest published PyPI package: `sclite-core==1.0.9`
 - Runtime execution: out of scope; owned by RExecOp or another host runtime
 - Protocol/carrier adapters: out of scope; owned by host/runtime integrations
@@ -55,8 +55,7 @@ and content-addressed; SCLite performs no plugin discovery, schema download or
 global registration. Identifiers use `namespace/name@vN`.
 
 Reaction, trigger, watchdog and automation contracts are owned by RExecOp.
-Their SCLite-packaged v0.1 schemas remain deprecated 1.x compatibility inputs,
-not core ownership, and are scheduled for removal in SCLite 2.0. Trust and
+Their former SCLite modules and schemas are absent from SCLite 2.0. Trust and
 carrier references have neutral v0.2 forms with opaque namespaced identifiers;
 SCLite binds them but does not classify trust, transport, scope or publication
 safety.

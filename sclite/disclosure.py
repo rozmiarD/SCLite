@@ -70,12 +70,6 @@ def build_disclosure_status(
     }
 
 
-def legacy_public_safe(status: DisclosureStatus) -> bool:
-    """Derive the deprecated boolean without promoting unknown/asserted input."""
-
-    return status == 'externally_verified'
-
-
 def relative_public_path(value: str | Path) -> str:
     """Return a normalized relative label without workstation topology."""
 

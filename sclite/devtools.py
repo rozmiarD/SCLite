@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Sequence
 
-from .cli import DEVTOOLS_COMMANDS, main as compatibility_main
+from ._cli_impl import DEVTOOLS_COMMANDS, main as compatibility_main
 from .devtools_fixtures import (
     build_guarded_strict_verification_result_fixture as build_guarded_strict_verification_result_fixture,
 )
@@ -22,3 +22,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f'devtools_cli_rejects_kernel_command:{command}:use sclite', file=sys.stderr)
         return 2
     return compatibility_main(args, emit_deprecation=False)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

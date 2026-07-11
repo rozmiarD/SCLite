@@ -7,5 +7,5 @@ It compares the approved-spec target host with hosts detected in normalized argu
 Validate it with:
 
 ```bash
-python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.devtools validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 ```

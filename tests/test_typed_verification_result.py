@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-import sclite.cli as cli_module
+import sclite._cli_impl as cli_module
 from sclite import __version__
 from sclite.artifacts import JsonSchemaValidationError, validate_artifact
 from sclite.bundles import ReviewBundleError
@@ -66,7 +66,7 @@ def test_schema_validation_cli_reports_stable_error_code(tmp_path: Path) -> None
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-artifact',
             '--schema',
             'verification_result.v1.1',

@@ -3,11 +3,12 @@
 SCLite validation is local and public-safe. It does not run live targets.
 
 Extension-boundary validation includes `tests/test_extension_resolver.py`,
-`tests/test_legacy_stack_schema_deprecation.py`,
 `tests/test_neutral_profile_refs.py`, and
-`tests/test_host_boundary_deprecations.py`. These prove deterministic offline
-resolution, collision and unknown-namespace handling, legacy warnings, opaque
-identifier round-trips and absence of implicit publication claims.
+`tests/test_2_0_removals.py`. These prove deterministic offline resolution,
+collision and unknown-namespace handling, completed removals, opaque identifier
+round-trips and absence of implicit publication claims. Cross-language behavior
+is checked by `tests/test_cross_language_vectors.py` and
+`scripts/verify_vectors.mjs`.
 
 The roadmap in `ROADMAP.md` preserves this boundary: scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
 
@@ -148,23 +149,23 @@ gate or the installed package. The equivalent current
 command set starts with:
 
 ```bash
-python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-python -m sclite.cli explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
-python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
-python -m sclite.cli review examples/review-bundle --format json
-python -m sclite.cli review examples/govengine-integration --format json --fail-on review
-python -m sclite.cli review examples/local-admin-change --format json --fail-on review
-python -m sclite.cli review examples/bad-review-bundle-cross-host --format json --fail-on none
-python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.cli export-review-bundle examples/govengine-integration --format markdown
-python -m sclite.cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
-python -m sclite.cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.kernel_cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.devtools explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.kernel_cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
+python -m sclite.devtools review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
+python -m sclite.kernel_cli review examples/review-bundle --format json
+python -m sclite.kernel_cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.kernel_cli review examples/local-admin-change --format json --fail-on review
+python -m sclite.kernel_cli review examples/bad-review-bundle-cross-host --format json --fail-on none
+python -m sclite.kernel_cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli export-review-bundle examples/govengine-integration --format markdown
+python -m sclite.devtools validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m pytest -q tests/test_reactions.py tests/test_trigger_decisions.py tests/test_watchdog_decisions.py
 python -m pytest -q
 ```
@@ -189,7 +190,7 @@ For runtime-consumable guarded bundles, prefer the fail-closed profile:
 
 ```bash
 SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
-python -m sclite.cli verify-secure-bundle examples/govengine-integration \
+python -m sclite.kernel_cli verify-secure-bundle examples/govengine-integration \
   --guard /path/to/kernel_guard_manifest.json
 ```
 

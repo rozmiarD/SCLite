@@ -103,7 +103,7 @@ def test_scope_fidelity_cli_fail_on_review_exit_code() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+                'sclite.devtools',
             'scope-fidelity',
             '--target',
             'https://example.com',
@@ -124,7 +124,7 @@ def test_scope_fidelity_cli_fails_for_explicit_false_scope() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+                'sclite.devtools',
             'scope-fidelity',
             '--target',
             'https://example.com',

@@ -32,7 +32,6 @@
         "digest": "35a0f49b424851ef7a2864705bfb9e5411b049641f5734456bf45068293d492f"
       },
       "path": "examples/review-bundle/01_intent_contract.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -55,7 +54,6 @@
         "digest": "fe997b9400b3dbac7f562a2f946734ca189b48253b0142f137e7e13b7b669e0b"
       },
       "path": "examples/review-bundle/02_policy_decision.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -78,7 +76,6 @@
         "digest": "573ea42c15c4cc82e422f0aef66f5303ad68bc9b77ba11df7d8a53f3edf3d6ca"
       },
       "path": "examples/review-bundle/03_execution_contract.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -101,7 +98,6 @@
         "digest": "f003b4820d73ef4bc0c1ed5badef40f132e6b2d84ad10e07ef3f30da1802c063"
       },
       "path": "examples/review-bundle/04_execution_ticket.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -124,7 +120,6 @@
         "digest": "dbc8ccd856928c3386f296795ffaa98f744cf005a5211aadde635d2c0fc0768a"
       },
       "path": "examples/review-bundle/05_execution_receipt.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -147,7 +142,6 @@
         "digest": "8137721432dbbdae324f419aec74a27610dce5f5f38101a02273e1a32a507b40"
       },
       "path": "examples/review-bundle/06_evidence_contract.json",
-      "public_safe": false,
       "schema": ""
     },
     {
@@ -170,7 +164,6 @@
         "digest": "1c3f7128534c34bb478b094380c78772d2ff209c4283d6f5342c7119147e4cea"
       },
       "path": "examples/review-bundle/artifact_chain_manifest.json",
-      "public_safe": false,
       "schema": ""
     }
   ],
@@ -191,7 +184,6 @@
   "snapshot_version": "current-lifecycle-review",
   "summary": {
     "file_count": 7,
-    "hashed_file_count": 7,
-    "public_safe_file_count": 0
+    "hashed_file_count": 7
   }
 }

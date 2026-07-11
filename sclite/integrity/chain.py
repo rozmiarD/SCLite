@@ -17,6 +17,7 @@ from sclite._json import (
 )
 from sclite.artifacts import build_artifact_hash, validate_artifact
 from sclite.errors import SCLiteValidationError
+from sclite.schema_resolver import SchemaResolver
 
 CHAIN_CANONICALIZATION_VERSION = 'sclite-artifact-chain-v0.2'
 CHAIN_HASH_ALGORITHM = 'sha256'
@@ -553,6 +554,8 @@ def _verify_artifact_chain_manifest_with_snapshot(
     max_artifact_bytes: int | None = None,
     max_manifest_entries: int | None = None,
     verification_limits: VerificationLimits | None = None,
+    schema_resolver: SchemaResolver | None = None,
+    schema_resolver_refs: frozenset[str] = frozenset(),
 ) -> tuple[Dict[str, Any], _VerifiedBundleSnapshot]:
     """Verify one bundle and retain the private snapshot for layered checks."""
     base = (root or Path.cwd()).resolve()
@@ -605,7 +608,13 @@ def _verify_artifact_chain_manifest_with_snapshot(
         if validate_schemas:
             schema_ref = _schema_ref(value)
             if schema_ref:
-                validate_artifact(value, schema_ref, root=base, strict_jsonschema=strict_jsonschema)
+                validate_artifact(
+                    value,
+                    schema_ref,
+                    root=base,
+                    strict_jsonschema=strict_jsonschema,
+                    resolver=schema_resolver if schema_ref in schema_resolver_refs else None,
+                )
         expected_descriptor = entry.get('descriptor')
         actual_descriptor = artifact.descriptor
         if expected_descriptor != actual_descriptor:

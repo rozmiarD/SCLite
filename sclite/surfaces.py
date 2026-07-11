@@ -9,7 +9,6 @@ from .artifacts import build_artifact_hash
 from .disclosure import (
     DisclosureStatus,
     build_disclosure_status,
-    legacy_public_safe,
     relative_public_path,
 )
 
@@ -39,7 +38,6 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'schemas': ['review_record.v0.1', 'scope_fidelity_report.v0.2'],
             'commands': ['sclite review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json'],
             'disclosure': build_disclosure_status(status='operator_asserted'),
-            'public_safe': False,
         },
         {
             'surface_id': 'review_bundle_fixture',
@@ -49,7 +47,6 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2'],
             'commands': ['sclite review examples/review-bundle --format json', 'sclite export-review-bundle examples/review-bundle --format markdown'],
             'disclosure': build_disclosure_status(status='operator_asserted'),
-            'public_safe': False,
         },
         {
             'surface_id': 'govengine_integration_fixture',
@@ -64,7 +61,6 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
                 'sclite validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json',
             ],
             'disclosure': build_disclosure_status(status='operator_asserted'),
-            'public_safe': False,
         },
         {
             'surface_id': 'local_admin_change_fixture',
@@ -74,7 +70,6 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
             'schemas': ['review_record.v0.1', 'artifact_chain_manifest.v0.2', 'execution_ticket.v0.3'],
             'commands': ['sclite review examples/local-admin-change --format json --fail-on review'],
             'disclosure': build_disclosure_status(status='operator_asserted'),
-            'public_safe': False,
         },
     ]
     return {
@@ -84,7 +79,6 @@ def build_public_validation_surface_index(*, generated_at: str | None = None) ->
         'surfaces': surfaces,
         'summary': {
             'surface_count': len(surfaces),
-            'public_safe_surface_count': sum(1 for item in surfaces if item.get('public_safe') is True),
         },
         'disclosure': build_disclosure_status(status='operator_asserted'),
         'public_safety': {
@@ -116,8 +110,6 @@ def build_public_snapshot_manifest(
     normalized = []
     for item in files:
         requested_status = str(item.get('disclosure_status') or '')
-        if not requested_status and item.get('public_safe') is True:
-            requested_status = 'operator_asserted'
         status: DisclosureStatus = (
             requested_status if requested_status else 'unknown'  # type: ignore[assignment]
         )
@@ -131,7 +123,6 @@ def build_public_snapshot_manifest(
             'artifact_type': str(item.get('artifact_type') or ''),
             'schema': str(item.get('schema') or ''),
             'disclosure': disclosure,
-            'public_safe': legacy_public_safe(status),
         }
         if 'value' in item:
             entry['hash'] = build_artifact_hash(item['value'])
@@ -146,7 +137,6 @@ def build_public_snapshot_manifest(
         'summary': {
             'file_count': len(normalized),
             'hashed_file_count': sum(1 for item in normalized if 'hash' in item),
-            'public_safe_file_count': sum(1 for item in normalized if item.get('public_safe') is True),
         },
         'disclosure': build_disclosure_status(status='unknown'),
         'public_safety': {

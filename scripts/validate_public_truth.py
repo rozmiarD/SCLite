@@ -18,8 +18,8 @@ from sclite.consumer_contracts import validate_public_export_inventory  # noqa: 
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '1.1.0rc1'
-EXPECTED_RELEASE_LABEL = '1.1.0rc1'
+EXPECTED_VERSION = '2.0.0rc1'
+EXPECTED_RELEASE_LABEL = '2.0.0rc1'
 LATEST_PUBLISHED_VERSION = '1.0.9'
 LATEST_PUBLISHED_LABEL = '1.0.9'
 EXPECTED_DISTRIBUTION = 'sclite-core'
@@ -57,7 +57,6 @@ STABLE_IMPORTS = (
     'sclite.scope_fidelity:build_lifecycle_scope_fidelity_report',
     'sclite.secure:verify_secure_bundle',
     'sclite.secure:verify_secure_bundle_result',
-    'sclite.verification_result:build_guarded_strict_verification_result',
     'sclite.verification_result:serialize_verification_result',
     'sclite.testing:build_guarded_strict_verification_result_fixture',
     'sclite.disclosure:build_disclosure_status',
@@ -310,7 +309,7 @@ def _retired_product_errors() -> list[str]:
     for schema in removed_schemas:
         if (ROOT / 'schemas' / schema).exists() or (ROOT / 'sclite' / 'schemas' / schema).exists():
             errors.append(f'retired_product_schema_present:{schema}')
-    cli_text = _read('sclite/cli.py')
+    cli_text = _read('sclite/_cli_impl.py')
     for marker in ("add_parser('validate'", "add_parser('validation-receipt'"):
         if marker in cli_text:
             errors.append(f'retired_product_cli_present:{marker}')
@@ -476,8 +475,8 @@ def collect_errors() -> list[str]:
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'An incompatible change must use a new profile name')
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'replay freshness inside SCLite')
     _require(errors, 'docs/SECURITY_PROFILES.md', security_profiles, 'sidecar schema validation remains enforced independently')
-    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@v6')
-    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@v6')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10')
+    _require(errors, '.github/workflows/ci.yml', workflow, 'actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1')
     _require(errors, '.github/workflows/ci.yml', workflow, "python-version: ['3.11', '3.12', '3.13']")
     _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/public_validation_gate.sh')
     _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/strict_schema_gate.sh')

@@ -139,7 +139,7 @@ def test_validate_ticket_cli_with_contract() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-ticket',
             str(FIXTURE / 'execution_ticket.json'),
             '--contract',
@@ -156,7 +156,7 @@ def test_validate_ticket_cli_with_contract() -> None:
 
 def test_explain_ticket_cli() -> None:
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'explain-ticket', str(FIXTURE / 'execution_ticket.json')],
+        [sys.executable, '-m', 'sclite.devtools', 'explain-ticket', str(FIXTURE / 'execution_ticket.json')],
         cwd=str(ROOT),
         check=False,
         text=True,
@@ -273,7 +273,7 @@ def test_verify_ticket_use_cli() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-ticket-use',
             str(FIXTURE / 'execution_ticket.json'),
             '--contract',

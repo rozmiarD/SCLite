@@ -94,7 +94,7 @@ def test_validate_trust_profile_cli() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-trust-profile',
             str(FIXTURE / 'trust_profile_ref.json'),
             '--subject',
@@ -114,7 +114,7 @@ def test_validate_carrier_profile_cli() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-carrier-profile',
             str(FIXTURE / 'carrier_profile_ref.json'),
             '--subject',

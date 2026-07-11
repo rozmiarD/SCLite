@@ -64,9 +64,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "public_safe": {
-            "type": "boolean"
-          },
           "schema": {
             "type": "string"
           }
@@ -75,8 +72,7 @@
           "path",
           "artifact_type",
           "schema",
-          "disclosure",
-          "public_safe"
+          "disclosure"
         ],
         "type": "object"
       },

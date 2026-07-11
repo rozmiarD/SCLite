@@ -1,0 +1,10 @@
+{
+  "sclite.automation": "rexecop.contracts.automation",
+  "sclite.reactions": "rexecop.contracts.reactions",
+  "sclite.triggers": "rexecop.contracts.triggers",
+  "sclite.watchdog": "rexecop.contracts.watchdog",
+  "sclite:build_observation_envelope": "rexecop.contracts.orchestration:build_observation_envelope",
+  "sclite:build_trigger_decision": "rexecop.contracts.orchestration:build_trigger_decision",
+  "sclite:build_watchdog_decision": "rexecop.contracts.orchestration:build_watchdog_decision",
+  "sclite:legacy_public_safe": null
+}

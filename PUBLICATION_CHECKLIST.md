@@ -82,25 +82,25 @@ lifecycle/review checks. The retired proof-trace fixture and its CLI commands
 must not reappear as installed/current surfaces:
 
 ```bash
-python -m sclite.cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-python -m sclite.cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
-python -m sclite.cli review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
-python -m sclite.cli review examples/review-bundle --format json
-python -m sclite.cli review examples/govengine-integration --format json --fail-on review
-python -m sclite.cli review examples/local-admin-change --format json --fail-on review
-python -m sclite.cli review examples/bad-review-bundle-cross-host --format json --fail-on none
-python -m sclite.cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.cli export-review-bundle examples/govengine-integration --format markdown
-python -m sclite.cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
-python -m sclite.cli hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
-python -m sclite.cli validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-python -m sclite.cli validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.cli validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.cli validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
-python -m sclite.cli scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
+python -m sclite.kernel_cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.kernel_cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
+python -m sclite.devtools review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
+python -m sclite.kernel_cli review examples/review-bundle --format json
+python -m sclite.kernel_cli review examples/govengine-integration --format json --fail-on review
+python -m sclite.kernel_cli review examples/local-admin-change --format json --fail-on review
+python -m sclite.kernel_cli review examples/bad-review-bundle-cross-host --format json --fail-on none
+python -m sclite.kernel_cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
+python -m sclite.kernel_cli export-review-bundle examples/govengine-integration --format markdown
+python -m sclite.devtools validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.devtools hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
+python -m sclite.devtools validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
+python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.devtools scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
 python -m pytest -q
 ```
 

@@ -357,7 +357,7 @@ def test_verify_guarded_chain_cli(tmp_path: Path) -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-guarded-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--guard',
@@ -385,7 +385,7 @@ def test_verify_guarded_chain_cli_json_reports_layer_statuses(tmp_path: Path) ->
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-guarded-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--guard',
@@ -421,7 +421,7 @@ def test_verify_guarded_chain_cli_legacy_policy_reports_weaker_posture(tmp_path:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-guarded-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--guard',
@@ -453,7 +453,7 @@ def test_verify_guarded_chain_cli_no_schema_still_validates_guard_sidecar_shape(
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'verify-guarded-chain',
             str(FIXTURE / 'artifact_chain_manifest.json'),
             '--guard',

@@ -91,7 +91,7 @@ def test_strict_jsonschema_cli_accepts_current_execution_contract() -> None:
         [
             sys.executable,
             '-m',
-            'sclite.cli',
+            'sclite.kernel_cli',
             'validate-artifact',
             '--strict-jsonschema',
             '--schema',
@@ -177,7 +177,7 @@ def test_surface_and_manifest_builders_accept_current_artifact() -> None:
 def test_hash_artifact_cli_emits_same_digest_as_helper() -> None:
     contract = json.loads(PACKAGE_EXECUTION_CONTRACT.read_text(encoding='utf-8'))
     proc = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'hash-artifact', '--schema', 'execution_contract.v0.2', '--format', 'digest', str(PACKAGE_EXECUTION_CONTRACT)],
+        [sys.executable, '-m', 'sclite.devtools', 'hash-artifact', '--schema', 'execution_contract.v0.2', '--format', 'digest', str(PACKAGE_EXECUTION_CONTRACT)],
         capture_output=True,
         text=True,
         check=True,
@@ -186,9 +186,9 @@ def test_hash_artifact_cli_emits_same_digest_as_helper() -> None:
 
 
 def test_public_surface_clis_emit_schema_valid_json() -> None:
-    policy_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'redaction-policy'], capture_output=True, text=True, check=True)
-    index_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'validation-surface-index', '--generated-at', '2026-05-05T21:30:00+00:00'], capture_output=True, text=True, check=True)
-    snapshot_proc = subprocess.run([sys.executable, '-m', 'sclite.cli', 'snapshot-manifest', '--file', str(PACKAGE_EXECUTION_CONTRACT)], capture_output=True, text=True, check=True)
+    policy_proc = subprocess.run([sys.executable, '-m', 'sclite.devtools', 'redaction-policy'], capture_output=True, text=True, check=True)
+    index_proc = subprocess.run([sys.executable, '-m', 'sclite.devtools', 'validation-surface-index', '--generated-at', '2026-05-05T21:30:00+00:00'], capture_output=True, text=True, check=True)
+    snapshot_proc = subprocess.run([sys.executable, '-m', 'sclite.devtools', 'snapshot-manifest', '--file', str(PACKAGE_EXECUTION_CONTRACT)], capture_output=True, text=True, check=True)
     artifacts.validate_artifact(json.loads(policy_proc.stdout), 'redaction_policy.v0.2')
     artifacts.validate_artifact(json.loads(index_proc.stdout), 'public_validation_surface_index.v0.2')
     artifacts.validate_artifact(json.loads(snapshot_proc.stdout), 'public_snapshot_manifest.v0.2')

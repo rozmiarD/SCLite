@@ -3,7 +3,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from sclite import cli, devtools, kernel_cli
+from sclite import devtools, kernel_cli
+from sclite import _cli_impl
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,8 +19,8 @@ EXPECTED_COMMANDS = {
 
 
 def test_cli_command_classification_is_complete() -> None:
-    assert cli.KERNEL_COMMANDS.isdisjoint(cli.DEVTOOLS_COMMANDS)
-    assert cli.KERNEL_COMMANDS | cli.DEVTOOLS_COMMANDS == EXPECTED_COMMANDS
+    assert _cli_impl.KERNEL_COMMANDS.isdisjoint(_cli_impl.DEVTOOLS_COMMANDS)
+    assert _cli_impl.KERNEL_COMMANDS | _cli_impl.DEVTOOLS_COMMANDS == EXPECTED_COMMANDS
 
 
 def test_kernel_entrypoint_rejects_devtools_command(capsys) -> None:
@@ -32,11 +33,8 @@ def test_devtools_entrypoint_rejects_kernel_command(capsys) -> None:
     assert 'use sclite' in capsys.readouterr().err
 
 
-def test_legacy_cli_alias_warns_but_remains_compatible(capsys) -> None:
-    assert cli.main(['redaction-policy']) == 0
-    captured = capsys.readouterr()
-    assert 'deprecated_cli_alias:redaction-policy' in captured.err
-    assert 'redaction_policy' in captured.out
+def test_legacy_cli_module_is_removed() -> None:
+    assert not (ROOT / 'sclite/cli.py').exists()
 
 
 def test_production_modules_do_not_import_testing_namespace() -> None:

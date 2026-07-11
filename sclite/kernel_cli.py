@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Sequence
 
-from .cli import DEVTOOLS_COMMANDS, main as compatibility_main
+from ._cli_impl import DEVTOOLS_COMMANDS, main as compatibility_main
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -12,3 +12,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f'kernel_cli_rejects_devtool:{args[0]}:use sclite-devtools', file=sys.stderr)
         return 2
     return compatibility_main(args)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -140,7 +140,7 @@ def test_review_record_markdown_contains_non_claims() -> None:
 
 def test_review_lifecycle_cli_emits_review_record_json() -> None:
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'review-lifecycle', str(MANIFEST), '--format', 'json'],
+        [sys.executable, '-m', 'sclite.devtools', 'review-lifecycle', str(MANIFEST), '--format', 'json'],
         cwd=str(ROOT),
         check=False,
         text=True,
@@ -154,7 +154,7 @@ def test_review_lifecycle_cli_emits_review_record_json() -> None:
 
 def test_review_lifecycle_cli_markdown() -> None:
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'review-lifecycle', str(MANIFEST), '--format', 'markdown'],
+        [sys.executable, '-m', 'sclite.devtools', 'review-lifecycle', str(MANIFEST), '--format', 'markdown'],
         cwd=str(ROOT),
         check=False,
         text=True,

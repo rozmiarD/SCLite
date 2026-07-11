@@ -10,7 +10,7 @@ from .tickets import verify_ticket_use_profile
 from .verification_result import (
     VerificationResult,
     _verification_result_from_verified_guard,
-    build_guarded_strict_verification_result,
+    serialize_verification_result,
 )
 
 SECURE_BUNDLE_PROFILE = 'guarded-strict'
@@ -131,12 +131,7 @@ def _verify_secure_bundle(
         security_posture=SECURE_BUNDLE_POSTURE,
         ticket_use_result=ticket_use_result,
     )
-    serialized_result = build_guarded_strict_verification_result(
-        result,
-        secure_profile=SECURE_BUNDLE_PROFILE,
-        security_posture=SECURE_BUNDLE_POSTURE,
-        ticket_use_result=ticket_use_result,
-    )
+    serialized_result = serialize_verification_result(verification_result)
     response = {
         **result,
         'secure_profile': SECURE_BUNDLE_PROFILE,

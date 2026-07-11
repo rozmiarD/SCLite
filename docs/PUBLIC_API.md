@@ -19,8 +19,9 @@ consumers.
 Installed `sclite` and `scl` entrypoints expose only kernel validation,
 verification, ticket, review and materialization workflows. Local inspection,
 snapshot, scope-report and heuristic-redaction commands use
-`sclite-devtools`. The historical `python -m sclite.cli` dispatcher remains a
-warning compatibility path through 2.0.
+`sclite-devtools`. The removed `python -m sclite.cli` compatibility dispatcher
+is not available in 2.0; module invocation uses `sclite.kernel_cli` or
+`sclite.devtools` explicitly.
 
 ## Version
 
@@ -102,73 +103,6 @@ unless the caller explicitly passes `overwrite=True`.
 - `verify_artifact_chain_manifest`
 - `verify_lifecycle_manifest`
 
-## Deterministic Reaction Artifacts
-
-- `OBSERVATION_SCHEMA_REF`
-- `FINDING_SCHEMA_REF`
-- `REACTION_PLAN_SCHEMA_REF`
-- `ESCALATION_PROPOSAL_SCHEMA_REF`
-- `build_observation_envelope`
-- `build_finding`
-- `build_reaction_plan`
-- `build_reaction_chain_manifest`
-- `reaction_idempotency_key`
-- `validate_escalation_proposal`
-- `verify_reaction_chain_manifest`
-
-These functions define and verify the canonical evidence boundary. They do not
-interpret profile rules, authorize a reaction, or execute an operation.
-
-## Trigger Decision Artifacts
-
-- `TRIGGER_DECISION_SCHEMA`
-- `TRIGGER_DECISION_SCHEMA_REF`
-- `build_trigger_decision`
-- `trigger_decision_descriptor`
-- `trigger_decision_digest`
-- `validate_trigger_decision`
-
-These functions define the bounded truth-layer projection for trigger/event
-decisions. They record event, rule, GovEngine admission and optional child
-operation references. They do not match trigger rules, authorize planning,
-schedule work, or execute an operation.
-
-## Watchdog Decision Artifacts
-
-- `WATCHDOG_DECISION_SCHEMA`
-- `WATCHDOG_DECISION_SCHEMA_REF`
-- `build_watchdog_decision`
-- `watchdog_decision_descriptor`
-- `watchdog_decision_digest`
-- `validate_watchdog_decision`
-
-These functions define the bounded truth-layer projection for runner watchdog
-decisions. They record RExecOp runtime-supervisor observations, GovEngine
-admission, affected operation/event/inbox references, and optional bounded
-manual-recovery context for GovEngine-admitted recovery or break-glass records.
-They do not supervise workers, run retries, authorize recovery, monitor
-infrastructure health, or interpret profile semantics.
-
-## Automation Chain Artifacts
-
-- `AUTOMATION_CHAIN_ARTIFACT_TYPE`
-- `AUTOMATION_CHAIN_NON_CLAIMS`
-- `AUTOMATION_CHAIN_SCHEMA`
-- `AUTOMATION_CHAIN_SCHEMA_REF`
-- `automation_chain_digest`
-- `automation_owner_migration_contract`
-- `automation_edge`
-- `automation_node`
-- `build_automation_chain`
-- `validate_automation_chain`
-- `verify_automation_chain`
-
-These functions define and verify the bounded multi-step automation-chain
-contract. The contract records nodes, edges, GovEngine admission refs,
-idempotency keys, recovery policy, depth/reaction budgets and LLM non-authority
-without executing operations, interpreting profile rules, or authorizing child
-operations.
-
 ## Kernel Guard And Secure Bundles
 
 - `KERNEL_GUARD_PROFILE`
@@ -222,9 +156,7 @@ compatibility through the same base hierarchy and expose stable `.code` values.
 - `sclite.testing.build_guarded_strict_verification_result_fixture`
 
 This helper intentionally creates forgeable v1 fixture JSON and performs no
-verification. The old root attribute
-`build_guarded_strict_verification_result` remains an unadvertised
-compatibility shim through 2.0, but is no longer in `sclite.__all__`.
+verification. It is available only from the testing namespace.
 
 ## Disclosure status
 
@@ -232,14 +164,13 @@ compatibility shim through 2.0, but is no longer in `sclite.__all__`.
 - `DisclosureStatus`
 - `DisclosureStatusError`
 - `build_disclosure_status`
-- `legacy_public_safe`
 - `relative_public_path`
 - `validate_disclosure_transition`
 
 The monotonic disclosure model is `unknown → operator_asserted →
-checks_performed → externally_verified`. `public_safe` is a deprecated derived
-boolean and becomes true only for `externally_verified`; publication
-authorization remains a separate host decision.
+checks_performed → externally_verified`. SCLite 2.0 has no derived
+`public_safe` boolean; publication authorization remains a separate host
+decision.
 
 ## Review Records
 

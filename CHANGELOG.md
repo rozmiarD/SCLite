@@ -2,6 +2,18 @@
 
 ## Unreleased — extension ownership and neutral boundaries
 
+- Removes the deprecated reaction, trigger, watchdog and automation modules,
+  built-in schemas and root exports for the 2.0 major line; RExecOp provides
+  the owner implementation and historical-artifact resolver.
+- Removes `legacy_public_safe`, per-item `public_safe` projections and the
+  forgeable root verification-result builder. Structured disclosure status and
+  typed verified results are the supported replacements.
+- Publishes a machine-readable import map, codemod and 2.0 migration guide.
+- Adds language-neutral canonicalization, chain, HMAC and negative vectors with
+  an independent JavaScript verifier.
+- Adds pinned release actions, wheel/sdist smoke, dependency audit, SBOM,
+  reproducible-wheel comparison, Trusted Publishing and provenance workflows.
+
 - Adds the immutable, offline `SchemaResolver` front door with namespaced
   identifiers, collision rejection and deterministic SHA-256 inventories.
 - Moves reaction, trigger, watchdog and automation ownership to RExecOp;
@@ -38,7 +50,7 @@
   admission authenticity/decision binding in GovEngine; SCLite remains the
   shape, reference and declared-budget verifier.
 
-## 1.1.0rc1 - Strict JSON input policy candidate
+## 2.0.0rc1 - Strict JSON input policy candidate
 
 - Adds evidence-based disclosure v0.2 statuses (`unknown`,
   `operator_asserted`, `checks_performed`, `externally_verified`) for redaction,

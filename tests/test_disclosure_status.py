@@ -29,19 +29,18 @@ def test_unknown_input_never_defaults_to_public_safe() -> None:
     item = manifest['files'][0]
     assert item['disclosure']['status'] == 'unknown'
     assert item['disclosure']['checks'] == []
-    assert item['public_safe'] is False
-    assert manifest['summary']['public_safe_file_count'] == 0
+    assert 'public_safe' not in item
     validate_artifact(manifest, 'public_snapshot_manifest.v0.2', root=ROOT)
 
 
-def test_legacy_positive_boolean_is_only_an_operator_assertion() -> None:
+def test_removed_legacy_positive_boolean_is_ignored() -> None:
     manifest = build_public_snapshot_manifest([
         {'path': 'asserted.json', 'public_safe': True, 'value': {}}
     ])
 
     item = manifest['files'][0]
-    assert item['disclosure']['status'] == 'operator_asserted'
-    assert item['public_safe'] is False
+    assert item['disclosure']['status'] == 'unknown'
+    assert 'public_safe' not in item
 
 
 def test_externally_verified_claim_requires_policy_and_checks() -> None:
@@ -56,7 +55,7 @@ def test_externally_verified_claim_requires_policy_and_checks() -> None:
     ])
 
     item = manifest['files'][0]
-    assert item['public_safe'] is True
+    assert 'public_safe' not in item
     assert item['disclosure']['checks'] == ['external_secret_scan', 'external_path_review']
     assert item['disclosure']['publication_authorized'] is False
 
@@ -86,7 +85,7 @@ def test_arbitrary_snapshot_cli_file_is_unknown_and_relative(tmp_path: Path) -> 
     artifact = tmp_path / 'opaque.json'
     artifact.write_text('{"unknown": "value"}\n', encoding='utf-8')
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'snapshot-manifest', '--file', str(artifact)],
+        [sys.executable, '-m', 'sclite.devtools', 'snapshot-manifest', '--file', str(artifact)],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -96,7 +95,7 @@ def test_arbitrary_snapshot_cli_file_is_unknown_and_relative(tmp_path: Path) -> 
 
     assert payload['files'][0]['path'] == 'opaque.json'
     assert payload['files'][0]['disclosure']['status'] == 'unknown'
-    assert payload['files'][0]['public_safe'] is False
+    assert 'public_safe' not in payload['files'][0]
     assert str(tmp_path) not in result.stdout
 
 
@@ -126,8 +125,7 @@ def test_heuristic_redaction_reports_coverage_without_negative_claims() -> None:
 def test_surface_index_contains_assertions_not_publication_claims() -> None:
     index = build_public_validation_surface_index()
     assert all(item['disclosure']['status'] == 'operator_asserted' for item in index['surfaces'])
-    assert all(item['public_safe'] is False for item in index['surfaces'])
-    assert index['summary']['public_safe_surface_count'] == 0
+    assert all('public_safe' not in item for item in index['surfaces'])
     assert index['disclosure']['publication_authorized'] is False
     validate_artifact(index, 'public_validation_surface_index.v0.2', root=ROOT)
 

@@ -21,7 +21,8 @@ def _run(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.Co
     run_env = dict(os.environ)
     if env:
         run_env.update(env)
-    return subprocess.run([sys.executable, '-m', 'sclite.cli', *args], cwd=str(ROOT), text=True, capture_output=True, check=False, env=run_env)
+    module = 'sclite.devtools' if args and args[0] == 'scope-fidelity' else 'sclite.kernel_cli'
+    return subprocess.run([sys.executable, '-m', module, *args], cwd=str(ROOT), text=True, capture_output=True, check=False, env=run_env)
 
 
 def _assert_clean_cli_failure(proc: subprocess.CompletedProcess[str], label: str) -> None:

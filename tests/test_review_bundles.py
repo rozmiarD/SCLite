@@ -112,7 +112,7 @@ def test_alpha_review_bundle_families_keep_review_record_and_cli_summary_aligned
     validate_artifact(record, 'review_record.v0.1', strict_jsonschema=True)
 
     summary = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'review', str(bundle), '--format', 'summary', '--fail-on', 'review'],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'review', str(bundle), '--format', 'summary', '--fail-on', 'review'],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -175,7 +175,7 @@ def test_generated_review_record_uses_relative_source_paths() -> None:
 
 def test_review_cli_json_and_summary() -> None:
     json_result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'review', str(BUNDLE), '--format', 'json'],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'review', str(BUNDLE), '--format', 'json'],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -185,7 +185,7 @@ def test_review_cli_json_and_summary() -> None:
     assert json.loads(json_result.stdout)['artifact_type'] == 'review_record'
 
     summary_result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'review', str(BUNDLE), '--format', 'summary'],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'review', str(BUNDLE), '--format', 'summary'],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -197,7 +197,7 @@ def test_review_cli_json_and_summary() -> None:
 
 def test_export_review_bundle_cli_markdown() -> None:
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'export-review-bundle', str(BUNDLE), '--format', 'markdown'],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'export-review-bundle', str(BUNDLE), '--format', 'markdown'],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
@@ -211,7 +211,7 @@ def test_export_review_bundle_cli_markdown() -> None:
 def test_export_review_bundle_cli_output_file(tmp_path: Path) -> None:
     output = tmp_path / 'REVIEW.generated.md'
     result = subprocess.run(
-        [sys.executable, '-m', 'sclite.cli', 'export-review-bundle', str(BUNDLE), '--output', str(output)],
+        [sys.executable, '-m', 'sclite.kernel_cli', 'export-review-bundle', str(BUNDLE), '--output', str(output)],
         cwd=str(ROOT),
         text=True,
         capture_output=True,
