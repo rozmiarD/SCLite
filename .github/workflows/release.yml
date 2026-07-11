@@ -67,6 +67,8 @@ jobs:
           cp .github/release-requirements.txt "${RUNNER_TEMP}/release-requirements.txt"
           echo "audit_requirements=${RUNNER_TEMP}/release-requirements.txt" >>"${GITHUB_OUTPUT}"
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            cp security/EXTERNAL_REVIEW_RECOVERY.json "${RUNNER_TEMP}/EXTERNAL_REVIEW.json"
+            echo "review_record=${RUNNER_TEMP}/EXTERNAL_REVIEW.json" >>"${GITHUB_OUTPUT}"
             REVIEW_COMMIT=$(git rev-list -n 1 "refs/tags/${RELEASE_TAG}")
           else
             REVIEW_COMMIT="${GITHUB_SHA}"
@@ -76,8 +78,10 @@ jobs:
           else
             SOURCE_COMMIT=$(python scripts/validate_release_record_commit.py --review-commit "${REVIEW_COMMIT}")
             git checkout --detach "${REVIEW_COMMIT}"
-            cp security/EXTERNAL_REVIEW.json "${RUNNER_TEMP}/EXTERNAL_REVIEW.json"
-            echo "review_record=${RUNNER_TEMP}/EXTERNAL_REVIEW.json" >>"${GITHUB_OUTPUT}"
+            if [[ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]]; then
+              cp security/EXTERNAL_REVIEW.json "${RUNNER_TEMP}/EXTERNAL_REVIEW.json"
+              echo "review_record=${RUNNER_TEMP}/EXTERNAL_REVIEW.json" >>"${GITHUB_OUTPUT}"
+            fi
           fi
           echo "source_commit=${SOURCE_COMMIT}" >>"${GITHUB_OUTPUT}"
           echo "review_commit=${REVIEW_COMMIT}" >>"${GITHUB_OUTPUT}"

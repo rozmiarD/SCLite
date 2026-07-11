@@ -53,6 +53,10 @@ workflow may be dispatched from corrected `main` with that existing tag. It
 revalidates the tagged record commit and reviewed parent, rebuilds both, checks
 artifact equality, and emits a signed recovery attestation naming the reviewed
 source, tagged record commit and recovery-workflow commit before publishing.
+When official-runner bytes differ from a previously approved local build, the
+reviewer must explicitly approve those exact hashes in
+`security/EXTERNAL_REVIEW_RECOVERY.json`; recovery never silently weakens or
+skips artifact binding.
 
 The completion record is release-owner-attested metadata. CI verifies strict
 record shape and source/artifact binding, but does not authenticate reviewer

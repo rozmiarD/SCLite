@@ -1,0 +1,25 @@
+{
+  "schema": "sclite.external_security_review.v1",
+  "release_line": "2.0.0",
+  "status": "approved",
+  "source_commit": "33671d3b7bdc6e61f74442cd86d538d08c4c0afa",
+  "artifact_sha256": [
+    "120ab596cb1d886847309f75df19a2b20e40fc5993fdcdc768908f5e10458dd6",
+    "32e5f2293ee98ffc04890c7a0154e5637cd76adf26a790b48ae850c72481b199"
+  ],
+  "reviewer": "ExatronOmega",
+  "scope": [
+    "source remediation review",
+    "official Python 3.13 release artifacts",
+    "wheel and sdist correspondence",
+    "immutable-tag recovery workflow"
+  ],
+  "review_date": "2026-07-11",
+  "review_verdict": "approved",
+  "report_sha256": "22e0049d203142869a0f057819fa351f0afa5cba632555f1f564cf805bdfd928",
+  "unresolved_high": 0,
+  "unresolved_critical": 0,
+  "unresolved_medium": 0,
+  "unresolved_low": 0,
+  "accepted_findings": []
+}

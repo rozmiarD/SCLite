@@ -202,3 +202,6 @@ public tag. Correct the tooling on `main`, validate the new pins, and invoke the
 Release workflow manually with the existing immutable tag. The recovery path
 must revalidate A/B, reproduce identical artifacts and emit its explicit signed
 recovery attestation.
+If the runner produces different hashes from a locally reviewed build, obtain
+new explicit human approval and bind the exact runner hashes in
+`security/EXTERNAL_REVIEW_RECOVERY.json` before dispatching again.
