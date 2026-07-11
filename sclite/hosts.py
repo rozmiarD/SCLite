@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, List
 from urllib.parse import urlparse
+import warnings
 
 
 def _safe_str(value: Any) -> str:
@@ -14,6 +15,11 @@ def extract_host(value: Any) -> str:
     This is intentionally small and dependency-free. It is a static review aid,
     not a full scope-authorization engine and not a DNS/redirect resolver.
     """
+    warnings.warn(
+        'sclite.hosts.extract_host is a legacy host adapter; normalize targets in the host',
+        DeprecationWarning,
+        stacklevel=2,
+    )
     text = _safe_str(value).strip()
     if not text:
         return ''

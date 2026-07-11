@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Mapping
 
 from .artifacts import JsonSchemaValidationError, validate_artifact
@@ -9,6 +10,8 @@ from .json_types import json_array, json_mapping
 
 TRUST_PROFILE_REF_SCHEMA = 'trust_profile_ref.v0.1'
 CARRIER_PROFILE_REF_SCHEMA = 'carrier_profile_ref.v0.1'
+TRUST_PROFILE_REF_SCHEMA_V0_2 = 'trust_profile_ref.v0.2'
+CARRIER_PROFILE_REF_SCHEMA_V0_2 = 'carrier_profile_ref.v0.2'
 TRUST_PROFILES = {
     'none',
     'digest_only',
@@ -28,6 +31,10 @@ CARRIER_PROFILES = {
     'mcp_message_ref',
     'a2a_message_ref',
 }
+
+OPAQUE_PROFILE_IDENTIFIER_PATTERN = re.compile(
+    r'^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*/[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*@v[0-9]+(?:\.[0-9]+)*$'
+)
 
 
 class ProfileReferenceError(SCLiteValidationError):
@@ -72,15 +79,20 @@ def validate_trust_profile_ref(
     accept the referenced signature/bundle.
     """
     try:
-        validate_artifact(dict(profile_ref), TRUST_PROFILE_REF_SCHEMA, strict_jsonschema=strict_jsonschema)
+        schema_version = str(profile_ref.get('schema_version') or '')
+        schema = TRUST_PROFILE_REF_SCHEMA_V0_2 if schema_version == 'v0.2' else TRUST_PROFILE_REF_SCHEMA
+        validate_artifact(dict(profile_ref), schema, strict_jsonschema=strict_jsonschema)
     except JsonSchemaValidationError:
         raise
     profile = str(profile_ref.get('trust_profile') or '')
-    if profile not in TRUST_PROFILES:
+    if schema_version == 'v0.2' and OPAQUE_PROFILE_IDENTIFIER_PATTERN.fullmatch(profile) is None:
+        raise ProfileReferenceError(f'invalid opaque trust_profile identifier: {profile}')
+    if schema_version != 'v0.2' and profile not in TRUST_PROFILES:
         raise ProfileReferenceError(f'unsupported trust_profile: {profile}')
     _validate_subject_binding(profile_ref, subject_artifact)
     return [
         'trust_profile_schema_valid',
+        'trust_profile_identifier_valid',
         'trust_profile_supported',
         'trust_profile_subject_descriptor_bound',
         'trust_profile_subject_digest_bound',
@@ -100,15 +112,20 @@ def validate_carrier_profile_ref(
     or prove delivery.
     """
     try:
-        validate_artifact(dict(profile_ref), CARRIER_PROFILE_REF_SCHEMA, strict_jsonschema=strict_jsonschema)
+        schema_version = str(profile_ref.get('schema_version') or '')
+        schema = CARRIER_PROFILE_REF_SCHEMA_V0_2 if schema_version == 'v0.2' else CARRIER_PROFILE_REF_SCHEMA
+        validate_artifact(dict(profile_ref), schema, strict_jsonschema=strict_jsonschema)
     except JsonSchemaValidationError:
         raise
     profile = str(profile_ref.get('carrier_profile') or '')
-    if profile not in CARRIER_PROFILES:
+    if schema_version == 'v0.2' and OPAQUE_PROFILE_IDENTIFIER_PATTERN.fullmatch(profile) is None:
+        raise ProfileReferenceError(f'invalid opaque carrier_profile identifier: {profile}')
+    if schema_version != 'v0.2' and profile not in CARRIER_PROFILES:
         raise ProfileReferenceError(f'unsupported carrier_profile: {profile}')
     _validate_subject_binding(profile_ref, subject_artifact)
     return [
         'carrier_profile_schema_valid',
+        'carrier_profile_identifier_valid',
         'carrier_profile_supported',
         'carrier_profile_subject_descriptor_bound',
         'carrier_profile_subject_digest_bound',
@@ -125,3 +142,29 @@ def profile_ref_summary(profile_ref: Mapping[str, Any]) -> Dict[str, Any]:
         'subject_artifact_digest': integrity.get('subject_artifact_digest'),
         'non_claims': json_array(profile_ref.get('non_claims')),
     }
+
+
+def translate_legacy_profile_ref(profile_ref: Mapping[str, Any]) -> Dict[str, Any]:
+    """Translate a v0.1 closed identifier to the neutral v0.2 bridge shape."""
+    translated = dict(profile_ref)
+    artifact_type = str(translated.get('artifact_type') or '')
+    if artifact_type == 'trust_profile_ref':
+        field = 'trust_profile'
+        schema_ref = 'schemas/trust_profile_ref.v0.2.schema.json'
+    elif artifact_type == 'carrier_profile_ref':
+        field = 'carrier_profile'
+        schema_ref = 'schemas/carrier_profile_ref.v0.2.schema.json'
+    else:
+        raise ProfileReferenceError(f'unsupported profile reference artifact_type: {artifact_type}')
+    legacy = str(translated.get(field) or '')
+    translated['schema_version'] = 'v0.2'
+    translated['schema_ref'] = schema_ref
+    translated[field] = f'legacy.sclite/{legacy}@v1'
+    return translated
+
+
+def normalized_profile_binding(profile_ref: Mapping[str, Any]) -> tuple[str, str]:
+    """Return an exact opaque binding; parsing and classification remain host-owned."""
+    artifact_type = str(profile_ref.get('artifact_type') or '')
+    field = 'trust_profile' if artifact_type == 'trust_profile_ref' else 'carrier_profile'
+    return artifact_type, str(profile_ref.get(field) or '')

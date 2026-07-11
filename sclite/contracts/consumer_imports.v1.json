@@ -44,9 +44,6 @@
           "review_bundle",
           "validate_review_bundle_shape"
         ],
-        "sclite.hosts": [
-          "extract_host"
-        ],
         "sclite.integrity": [
           "artifact_descriptor"
         ],
