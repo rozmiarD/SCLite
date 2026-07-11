@@ -47,6 +47,20 @@ Detailed package/surface history lives in [`ROADMAP.md`](ROADMAP.md) and
 [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md). Schema-version compatibility lives in
 [`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md).
 
+### Extension and ownership boundary
+
+Hosts can pass an explicit `ImmutableSchemaResolver` to `verify_artifact()` for
+offline, namespaced domain contracts. Resolver inventories are deterministic
+and content-addressed; SCLite performs no plugin discovery, schema download or
+global registration. Identifiers use `namespace/name@vN`.
+
+Reaction, trigger, watchdog and automation contracts are owned by RExecOp.
+Their SCLite-packaged v0.1 schemas remain deprecated 1.x compatibility inputs,
+not core ownership, and are scheduled for removal in SCLite 2.0. Trust and
+carrier references have neutral v0.2 forms with opaque namespaced identifiers;
+SCLite binds them but does not classify trust, transport, scope or publication
+safety.
+
 ## What problem does SCLite solve?
 
 AI-assisted security workflows often blur separate authority boundaries:

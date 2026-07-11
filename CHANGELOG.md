@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — extension ownership and neutral boundaries
+
+- Adds the immutable, offline `SchemaResolver` front door with namespaced
+  identifiers, collision rejection and deterministic SHA-256 inventories.
+- Moves reaction, trigger, watchdog and automation ownership to RExecOp;
+  SCLite's v0.1 built-ins now emit formal compatibility deprecations.
+- Adds trust/carrier reference schemas v0.2 with opaque namespaced identifiers
+  and a legacy translator without trust or publication claims.
+- Marks host parsing and heuristic sanitizing as host/devtools compatibility
+  helpers rather than SCLite scope or publication authority.
+
 ## Unreleased
 
 - Splits the installed CLI entrypoints: `sclite`/`scl` accept kernel

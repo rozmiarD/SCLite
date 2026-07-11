@@ -2,6 +2,13 @@
 
 SCLite validation is local and public-safe. It does not run live targets.
 
+Extension-boundary validation includes `tests/test_extension_resolver.py`,
+`tests/test_legacy_stack_schema_deprecation.py`,
+`tests/test_neutral_profile_refs.py`, and
+`tests/test_host_boundary_deprecations.py`. These prove deterministic offline
+resolution, collision and unknown-namespace handling, legacy warnings, opaque
+identifier round-trips and absence of implicit publication claims.
+
 The roadmap in `ROADMAP.md` preserves this boundary: scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
 
 ## Fast local gate

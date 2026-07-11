@@ -2,6 +2,11 @@
 
 SCLite is a lightweight Security Contract Layer lifecycle package.
 
+The current candidate exposes an immutable explicit schema resolver and neutral
+trust/carrier v0.2 bindings. RExecOp owns orchestration-specific reaction,
+trigger, watchdog and automation contract resources. Copies shipped by SCLite
+1.x are deprecated migration shims, not core ownership.
+
 ## Current maturity
 
 - Current release version: `1.1.0rc1`.
