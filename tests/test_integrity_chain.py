@@ -85,6 +85,39 @@ def _rebind_lifecycle_artifacts(artifacts: dict[str, dict]) -> None:
     evidence['links']['execution_receipt']['descriptor'] = receipt_descriptor
 
 
+def _upgrade_scope_v03(artifacts: dict[str, dict]) -> None:
+    policy = artifacts['policy_decision']
+    contract = artifacts['execution_contract']
+    policy['schema_version'] = 'v0.3'
+    policy['schema_ref'] = 'schemas/policy_decision.v0.3.schema.json'
+    contract['schema_version'] = 'v0.3'
+    contract['schema_ref'] = 'schemas/execution_contract.v0.3.schema.json'
+    target = {
+        'target': contract['target_binding']['target'],
+        'target_host': contract['target_binding']['target_host'],
+    }
+    decision = {
+        'artifact_type': 'govengine_scope_decision',
+        'schema_version': 'v0.1',
+        'decision_ref': 'govengine-scope:fixture',
+        'status': 'in_scope',
+        'authority': 'govengine',
+        'subject': {'operation_id': 'fixture-operation'},
+        'target': target,
+    }
+    assertion = {
+        'status': decision['status'],
+        'authority': decision['authority'],
+        'decision_ref': decision['decision_ref'],
+        'decision_digest': 'sha256:' + artifact_descriptor(decision)['digest'],
+        'subject': decision['subject'],
+        'target': decision['target'],
+    }
+    policy['authority_decision'] = decision
+    policy['scope_assertion'] = assertion
+    contract['scope_assertion'] = copy.deepcopy(assertion)
+
+
 def _write_lifecycle_files(tmp_path: Path, artifacts: dict[str, dict]) -> None:
     for role, path in LIFECYCLE_FILES:
         (tmp_path / path).write_text(json.dumps(artifacts[role], indent=2, sort_keys=True) + '\n', encoding='utf-8')
@@ -173,6 +206,40 @@ def test_verify_lifecycle_manifest_wrapper_is_fail_safe() -> None:
     assert result['chain_status'] == 'passed'
     assert result['lifecycle_status'] == 'passed'
     assert 'ticket_binds_execution_contract' in result['semantic_checks']
+
+
+def test_v03_scope_assertion_is_bound_without_authentication_claim(tmp_path: Path) -> None:
+    artifacts = _artifacts()
+    _upgrade_scope_v03(artifacts)
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    result = verify_lifecycle_manifest(json.loads(manifest_path.read_text()), root=tmp_path)
+
+    assert result['lifecycle_status'] == 'passed'
+    assert result['scope_status'] == 'authority_artifact_bound'
+    assert result['scope_authority_authenticated'] == 'not_checked'
+    assert 'scope_authority_artifact_binding' in result['semantic_checks']
+
+
+@pytest.mark.parametrize('drift', ['digest', 'policy_target', 'execution_target', 'assertion'])
+def test_v03_scope_assertion_rejects_binding_drift(tmp_path: Path, drift: str) -> None:
+    artifacts = _artifacts()
+    _upgrade_scope_v03(artifacts)
+    if drift == 'digest':
+        artifacts['policy_decision']['scope_assertion']['decision_digest'] = 'sha256:' + '0' * 64
+        artifacts['execution_contract']['scope_assertion']['decision_digest'] = 'sha256:' + '0' * 64
+    elif drift == 'policy_target':
+        artifacts['policy_decision']['scope']['target_host'] = 'other.example'
+    elif drift == 'execution_target':
+        artifacts['execution_contract']['target_binding']['target'] = 'other/target'
+    else:
+        artifacts['execution_contract']['scope_assertion']['decision_ref'] = 'govengine-scope:other'
+    _rebind_lifecycle_artifacts(artifacts)
+    manifest_path = _write_mutated_bundle(tmp_path, artifacts)
+
+    with pytest.raises(ChainVerificationError, match='scope assertion'):
+        verify_lifecycle_manifest(json.loads(manifest_path.read_text()), root=tmp_path)
 
 
 @pytest.mark.parametrize('strict_jsonschema', [False, True])

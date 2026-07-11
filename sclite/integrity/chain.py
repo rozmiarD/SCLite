@@ -40,8 +40,14 @@ V02_LIFECYCLE_ROLES = (
 )
 V02_LIFECYCLE_ROLE_SCHEMAS = {
     'intent_contract': (('v0.2', 'schemas/intent_contract.v0.2.schema.json'),),
-    'policy_decision': (('v0.2', 'schemas/policy_decision.v0.2.schema.json'),),
-    'execution_contract': (('v0.2', 'schemas/execution_contract.v0.2.schema.json'),),
+    'policy_decision': (
+        ('v0.2', 'schemas/policy_decision.v0.2.schema.json'),
+        ('v0.3', 'schemas/policy_decision.v0.3.schema.json'),
+    ),
+    'execution_contract': (
+        ('v0.2', 'schemas/execution_contract.v0.2.schema.json'),
+        ('v0.3', 'schemas/execution_contract.v0.3.schema.json'),
+    ),
     'execution_ticket': (
         ('v0.2', 'schemas/execution_ticket.v0.2.schema.json'),
         ('v0.3', 'schemas/execution_ticket.v0.3.schema.json'),
@@ -473,6 +479,44 @@ def _legacy_lifecycle_scope_status(
     )
 
 
+def _lifecycle_scope_status(
+    artifacts_by_role: Mapping[str, Mapping[str, Any]],
+) -> tuple[str, str]:
+    policy = artifacts_by_role['policy_decision']
+    contract = artifacts_by_role['execution_contract']
+    if _schema_version(policy) != 'v0.3' or _schema_version(contract) != 'v0.3':
+        return _legacy_lifecycle_scope_status(artifacts_by_role)
+    policy_assertion = _mapping_field(policy, 'scope_assertion', 'policy_decision')
+    contract_assertion = _mapping_field(contract, 'scope_assertion', 'execution_contract')
+    authority_decision = _mapping_field(policy, 'authority_decision', 'policy_decision')
+    if dict(policy_assertion) != dict(contract_assertion):
+        raise ChainVerificationError('scope assertion differs between policy and execution contract')
+    expected_digest = 'sha256:' + str(artifact_descriptor(authority_decision)['digest'])
+    if str(policy_assertion.get('decision_digest') or '') != expected_digest:
+        raise ChainVerificationError('scope assertion authority decision digest mismatch')
+    for field in ('status', 'authority', 'decision_ref', 'subject', 'target'):
+        if policy_assertion.get(field) != authority_decision.get(field):
+            raise ChainVerificationError(f'scope assertion authority decision {field} mismatch')
+    target = _mapping_field(policy_assertion, 'target', 'scope_assertion')
+    policy_scope = _mapping_field(policy, 'scope', 'policy_decision')
+    target_binding = _mapping_field(contract, 'target_binding', 'execution_contract')
+    if target.get('target_host') != policy_scope.get('target_host'):
+        raise ChainVerificationError('scope assertion policy target mismatch')
+    if target.get('target_host') != target_binding.get('target_host'):
+        raise ChainVerificationError('scope assertion execution target_host mismatch')
+    if target.get('target') != target_binding.get('target'):
+        raise ChainVerificationError('scope assertion execution target mismatch')
+    status = str(policy_assertion.get('status') or '')
+    if status == 'out_of_scope':
+        raise ChainVerificationError('scope assertion is explicitly out_of_scope')
+    if status != 'in_scope':
+        return 'not_checked', 'scope assertion is unknown'
+    return (
+        'authority_artifact_bound',
+        'scope assertion is digest-bound; authority authentication is not checked',
+    )
+
+
 def _lifecycle_ticket_validity_status(
     artifacts_by_role: Mapping[str, Mapping[str, Any]],
 ) -> tuple[str, str]:
@@ -595,19 +639,21 @@ def _verify_artifact_chain_manifest_with_snapshot(
         }
         semantic_checks = _assert_strict_lifecycle_artifact_shapes(semantic_artifacts)
         semantic_checks.extend(verify_lifecycle_semantics(semantic_artifacts))
-        scope_status, scope_detail = _legacy_lifecycle_scope_status(semantic_artifacts)
+        scope_status, scope_detail = _lifecycle_scope_status(semantic_artifacts)
         ticket_validity_status, ticket_validity_detail = _lifecycle_ticket_validity_status(
             semantic_artifacts,
         )
         if scope_status == 'operator_asserted':
             semantic_checks.append('target_in_scope_legacy_assertion')
+        if scope_status == 'authority_artifact_bound':
+            semantic_checks.append('scope_authority_artifact_binding')
         if ticket_validity_status == 'passed':
             semantic_checks.append('receipt_within_ticket_validity')
     lifecycle_status = (
         'passed'
         if (
             require_lifecycle
-            and scope_status == 'operator_asserted'
+            and scope_status in {'operator_asserted', 'authority_artifact_bound'}
             and ticket_validity_status == 'passed'
         )
         else 'review'
@@ -627,6 +673,7 @@ def _verify_artifact_chain_manifest_with_snapshot(
         'lifecycle_role_summary': role_summary,
         'scope_status': scope_status,
         'scope_detail': scope_detail,
+        'scope_authority_authenticated': 'not_checked',
         'ticket_validity_status': ticket_validity_status,
         'ticket_validity_detail': ticket_validity_detail,
         'canonicalization': CHAIN_CANONICALIZATION_VERSION,

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PolicyDecision v0.3",
+  "type": "object",
+  "required": ["artifact_type", "schema_version", "schema_ref", "decision_id", "created_at", "decision", "links", "scope", "scope_assertion", "authority_decision", "capability", "risk", "constraints"],
+  "properties": {
+    "artifact_type": {"const": "policy_decision"},
+    "schema_version": {"const": "v0.3"},
+    "schema_ref": {"const": "schemas/policy_decision.v0.3.schema.json"},
+    "decision_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "decision": {"enum": ["allow_prepare", "owner_approval_required", "deny"]},
+    "links": {"type": "object"},
+    "scope": {"type": "object"},
+    "scope_assertion": {"$ref": "#/$defs/scopeAssertion"},
+    "authority_decision": {"$ref": "#/$defs/authorityDecision"},
+    "capability": {"type": "object"},
+    "risk": {"type": "object"},
+    "constraints": {"type": "array", "items": {"type": "string"}},
+    "reason_codes": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "subject": {"type": "object", "required": ["operation_id"], "properties": {"operation_id": {"type": "string", "minLength": 1}}, "additionalProperties": true},
+    "target": {"type": "object", "required": ["target", "target_host"], "properties": {"target": {"type": "string", "minLength": 1}, "target_host": {"type": "string", "minLength": 1}}, "additionalProperties": true},
+    "scopeAssertion": {"type": "object", "required": ["status", "authority", "decision_ref", "decision_digest", "subject", "target"], "properties": {"status": {"enum": ["in_scope", "out_of_scope", "unknown"]}, "authority": {"type": "string", "minLength": 1}, "decision_ref": {"type": "string", "minLength": 1}, "decision_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "subject": {"$ref": "#/$defs/subject"}, "target": {"$ref": "#/$defs/target"}}, "additionalProperties": false},
+    "authorityDecision": {"type": "object", "required": ["artifact_type", "schema_version", "decision_ref", "status", "authority", "subject", "target"], "properties": {"artifact_type": {"const": "govengine_scope_decision"}, "schema_version": {"const": "v0.1"}, "decision_ref": {"type": "string", "minLength": 1}, "status": {"enum": ["in_scope", "out_of_scope", "unknown"]}, "authority": {"type": "string", "minLength": 1}, "subject": {"$ref": "#/$defs/subject"}, "target": {"$ref": "#/$defs/target"}}, "additionalProperties": false}
+  },
+  "additionalProperties": true
+}

@@ -9,8 +9,10 @@ artifact contracts intentionally remain on earlier schema versions.
 | Surface | Current schema | Status | Demonstrated by | Notes |
 | --- | --- | --- | --- | --- |
 | Intent contract | `intent_contract.v0.2` | current | `sclite/examples/contract-lifecycle-v0.2/`, `examples/govengine-integration/` | Describes requested work only. |
-| Policy decision | `policy_decision.v0.2` | current | same lifecycle fixtures | Policy result artifact, not a policy engine. |
-| Execution contract | `execution_contract.v0.2` | current | lifecycle and GovEngine fixtures | `execution_shape.plan` is an opaque normalized execution-shape field, not planner ownership or runtime permission. Rename only in a vNext schema. |
+| Policy decision | `policy_decision.v0.2` | supported legacy | same lifecycle fixtures | Legacy boolean scope assertion; no authority provenance. |
+| Policy decision | `policy_decision.v0.3` | current additive | RExecOp/GovEngine provenance vectors | Embeds a digest-bound GovEngine scope-decision artifact without authenticating the authority string. |
+| Execution contract | `execution_contract.v0.2` | supported legacy | lifecycle and GovEngine fixtures | Legacy `target_in_scope` compatibility field. |
+| Execution contract | `execution_contract.v0.3` | current additive | lifecycle and GovEngine fixtures | Copies the exact scope assertion and binds it to execution target identity. |
 | Execution ticket | `execution_ticket.v0.2` | legacy-current for canonical lifecycle | `sclite/examples/contract-lifecycle-v0.2/` | Still validates and remains useful for lifecycle compatibility. |
 | Execution ticket | `execution_ticket.v0.3` | current for scoped ticket use | `sclite/examples/scoped-ticket-v0.3/`, `examples/govengine-integration/` | Adds scoped ticket semantics consumed by `validate-ticket`, `explain-ticket`, and `verify-ticket-use`. |
 | Execution receipt | `execution_receipt.v0.2` | current | lifecycle, scoped-ticket, and GovEngine fixtures | Public-safe receipt summary; not raw evidence storage. |

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ExecutionContract v0.3",
+  "type": "object",
+  "required": ["artifact_type", "schema_version", "schema_ref", "contract_id", "created_at", "links", "target_binding", "scope_assertion", "execution_shape", "execution_bounds", "expected_receipt"],
+  "properties": {
+    "artifact_type": {"const": "execution_contract"},
+    "schema_version": {"const": "v0.3"},
+    "schema_ref": {"const": "schemas/execution_contract.v0.3.schema.json"},
+    "contract_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "links": {"type": "object", "required": ["intent", "policy_decision"], "properties": {"intent": {"type": "object"}, "policy_decision": {"type": "object"}}, "additionalProperties": true},
+    "target_binding": {"type": "object", "required": ["target", "target_host", "target_in_scope"], "properties": {"target": {"type": "string", "minLength": 1}, "target_host": {"type": "string", "minLength": 1}, "target_in_scope": {"type": "boolean"}}, "additionalProperties": true},
+    "scope_assertion": {"type": "object", "required": ["status", "authority", "decision_ref", "decision_digest", "subject", "target"], "properties": {"status": {"enum": ["in_scope", "out_of_scope", "unknown"]}, "authority": {"type": "string", "minLength": 1}, "decision_ref": {"type": "string", "minLength": 1}, "decision_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "subject": {"type": "object", "required": ["operation_id"]}, "target": {"type": "object", "required": ["target", "target_host"]}}, "additionalProperties": false},
+    "execution_shape": {"type": "object", "required": ["tool", "normalized_args"], "properties": {"tool": {"type": "string", "minLength": 1}, "normalized_args": {"type": "array"}, "plan": {"type": "array", "items": {"type": "object"}}}, "additionalProperties": true},
+    "execution_bounds": {"type": "object", "required": ["mode"], "properties": {"mode": {"enum": ["dry_run", "live"]}, "network_execution_allowed": {"type": "boolean"}, "max_commands": {"type": "integer", "minimum": 0}, "timeout_seconds": {"type": "integer", "minimum": 0}}, "additionalProperties": true},
+    "expected_receipt": {"type": "object"},
+    "non_claims": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

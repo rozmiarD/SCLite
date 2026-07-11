@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Adds immutable `policy_decision.v0.3` and `execution_contract.v0.3` schema
+  identities for scope provenance. Strict lifecycle verification binds the
+  embedded GovEngine decision digest, assertion equality and exact target;
+  authority authentication remains a separate `not_checked`/authenticated-
+  channel status.
 - Adds the typed public front door: `ArtifactDescriptor`,
   `VerificationPolicy`, `VerifiedArtifact`, `VerifiedBundle`,
   `verify_artifact()` and `verify_bundle()`. Bundle verification requires an
