@@ -97,13 +97,13 @@ python -m sclite.kernel_cli review examples/local-admin-change --format json --f
 python -m sclite.kernel_cli review examples/bad-review-bundle-cross-host --format json --fail-on none
 python -m sclite.kernel_cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
 python -m sclite.kernel_cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.kernel_cli export-review-bundle examples/govengine-integration --format markdown
-python -m sclite.devtools validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
+python -m sclite.kernel_cli export-review-bundle examples/govengine-integration --mode local_review --format markdown
+python -m sclite.kernel_cli validate-artifact --schema scope_fidelity_report.v0.1 examples/scope-fidelity-report/scope_fidelity_report.json
 python -m sclite.devtools hash-artifact --schema execution_contract.v0.2 examples/review-bundle/03_execution_contract.json
-python -m sclite.devtools validate-artifact --schema redaction_policy.v0.1 examples/redaction-policy/redaction_policy.json
-python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.1 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.1 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.1 examples/public-snapshot-manifest/public_snapshot_manifest.json
+python -m sclite.kernel_cli validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
+python -m sclite.kernel_cli validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
+python -m sclite.kernel_cli validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
+python -m sclite.kernel_cli validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
 python -m sclite.devtools scope-fidelity --target https://example.com/login --normalized-arg https://example.com/login --fail-on review
 python -m pytest -q
 ```
@@ -134,7 +134,7 @@ Before public push/package publication, review for:
 - virtual environments;
 - package build artifacts;
 - private runtime logs;
-- Ravenclaw workspace-only files;
+- downstream workspace-only files;
 - live target evidence.
 
 This repository should contain only synthetic examples and public-safe docs/code.

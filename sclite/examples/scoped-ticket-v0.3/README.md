@@ -6,7 +6,7 @@ Review it with:
 
 ```bash
 sclite validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-sclite explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+sclite-devtools explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
 sclite verify-ticket-use \
   sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
   --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json \

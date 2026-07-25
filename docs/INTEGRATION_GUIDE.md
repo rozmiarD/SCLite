@@ -1,217 +1,176 @@
-# Integration Guide
+# SCLite Integration Guide
 
-This guide is for runtimes, CLIs, CI jobs, or carrier adapters that want to use SCL artifacts.
+The current 2.0 stable release is an offline contract, integrity, review and
+verification kernel. Integrate it as a library or CLI verifier; do not use it
+as a runtime, policy engine, trust authority or evidence store.
 
-SCLite is centered on the v0.2 contract lifecycle. The current 2.0 stable release
-freezes the 0.5 review-bundle contract as the integration front
-door, retains deterministic review-bundle materialization for active
-consumers, and retains scoped-ticket checks, receipt-bounded-evidence checks,
-trust/carrier references, lifecycle review records, public truth validation,
-and public-safe fixtures on top of that lifecycle:
+## Stack boundary
 
 ```text
-intent_contract -> policy_decision -> execution_contract -> execution_ticket -> execution_receipt -> evidence_contract -> artifact_chain_manifest
+Profile intent/workflow
+        |
+        v
+RExecOp lifecycle -----> GovEngine governance/admission
+        |
+        v
+RExecOp execution and runtime facts
+        |
+        v
+SCLite canonical artifacts, integrity, review and verification
 ```
 
-SCL core is intentionally small. It provides schemas, validation helpers, redaction helpers, Scope Fidelity review, lifecycle integrity verification, review-bundle packaging, public-safe fixtures, and a CLI. It does not provide a policy gateway, approval system, executor, sandbox, trust authority, or carrier adapter.
+- A profile owns domain vocabulary, intent catalogs, workflow definitions and
+  domain validation.
+- GovEngine evaluates policy, approval, scope, capability and admission.
+- RExecOp owns lifecycle state, scheduling, retries, connectors and execution.
+- SCLite owns canonical artifact contracts, digest binding, lifecycle/evidence
+  integrity, review bundles and verification records.
 
-## Runtime boundary
+No component acquires another component's authority by serializing its output
+into an SCLite artifact.
 
-```mermaid
-flowchart LR
-    Runtime[RExecOp or another host runtime] --> Produce[produce lifecycle artifacts]
-    Runtime --> Governance[GovEngine policy and admission]
-    Governance --> Runtime
-    Produce --> SCLite[SCLite validate hash bind review]
-    SCLite --> Bundle[review bundle or review record]
-    Bundle --> Runtime
+## Choose the front door
 
-    Runtime --> Runner[tool execution or dry run]
-    Runtime --> RawEvidence[raw evidence storage]
-    Runtime --> Trust[PKI or signer trust]
-
-    SCLite -. does not decide .-> Governance
-    SCLite -. does not execute .-> Runner
-    SCLite -. does not store .-> RawEvidence
-    SCLite -. does not verify .-> Trust
-```
-
-## Recommended boundary
-
-Keep these responsibilities outside SCL core:
-
-- user/operator identity;
-- scope program loading;
-- policy evaluation;
-- tool allowlists;
-- approval authority;
-- execution isolation;
-- evidence storage;
-- carrier transport;
-- public publication flow.
-
-Use SCL for the artifact boundary between those responsibilities.
-
-## Reference flow
-
-A governed runtime can use SCLite like this:
-
-1. **Receive intent**
-   - Runtime receives a target/objective/task.
-   - Runtime emits or maps that request into `IntentContract`.
-   - Intent is not authority.
-
-2. **Evaluate policy**
-   - Runtime policy code decides whether preparing execution is allowed.
-   - Runtime emits `PolicyDecision` v0.2 bound to the intent descriptor.
-
-3. **Prepare execution contract**
-   - Runtime compiles a concrete bounded execution shape.
-   - Runtime emits `ExecutionContract` with target binding, tool, normalized args, and execution bounds.
-
-4. **Approve execution ticket**
-   - Reviewer/auditor/owner policy approves or rejects the execution contract.
-   - Runtime emits `ExecutionTicket` bound to the exact execution contract digest, with approval status, validity, and execution limits.
-
-5. **Execute or dry-run**
-   - Runtime executor consumes its own approved/ticketed shape.
-   - SCLite does not execute it.
-   - Runtime emits `ExecutionReceipt` v0.2 bound to the ticket.
-
-6. **Verify ticket use / evidence bounds**
-   - For the published v0.3 scoped-ticket fixture, reviewers can run `sclite verify-ticket-use`.
-   - The check verifies local bindings only: ticket/contract/receipt/evidence descriptors, runtime identity, mode, network flag, use count, explicit `source_receipt_id`, completed-execution claim bounds, and network/live claim bounds.
-   - The check does not prove runtime enforcement, legal authorization, signer identity, or live vulnerability evidence.
-
-7. **Emit evidence contract**
-   - Runtime emits `EvidenceContract` with claims, non-claims, replay mode, verification commands, and a link to the receipt.
-   - Claims that depend on a receipt should declare `bounded_by_receipt: true` and `source_receipt_id`.
-   - Public outputs should keep raw private evidence elsewhere.
-
-8. **Build and verify lifecycle chain**
-   - Runtime builds `ArtifactChainManifest`.
-   - CI/reviewer runs `sclite validate-chain` or `sclite verify-lifecycle`.
-   - The verifier checks path containment, artifact digests, hash-chain links, role order, and the key lifecycle bindings, including receipt-to-contract and evidence-to-ticket links.
-
-9. **Package a review bundle**
-   - Runtime or CI places the six lifecycle artifacts, manifest, reviewer Markdown, and verification receipt in the canonical review-bundle shape.
-   - Reviewer runs `sclite review examples/review-bundle --format json` or exports Markdown with `sclite export-review-bundle`.
-   - Bundle review remains local/static: it does not execute tools, authorize work, prove signer identity, or verify carrier delivery.
-
-The superseded proof-trace product path (`PreparedExecutionSpec`, `ApprovedExecutionSpec`, legacy receipt/evidence builders, and fixture validation CLI) is retired after consumer migration; it is not an installed/current surface claim.
-
-## Orchestration contract ownership
-
-SCLite 2.0 does not package reaction, trigger, watchdog or automation modules
-or schemas. RExecOp owns those contracts and can provide an explicit resolver
-when historical artifacts must be read. See [`MIGRATING_TO_2.md`](MIGRATING_TO_2.md).
-
-## Minimal Python integration
-
-Verify a v0.2 lifecycle bundle:
+For new Python integrations prefer:
 
 ```python
-from pathlib import Path
-
-from sclite.integrity import verify_artifact_chain_manifest
-
-# manifest is artifact_chain_manifest.json loaded as a dict.
-result = verify_artifact_chain_manifest(
-    manifest,
-    root=Path("bundle-root"),
-    require_lifecycle=True,
-)
-assert result["status"] == "passed"
-assert "ticket_binds_execution_contract" in result["semantic_checks"]
+from sclite import VerificationPolicy, verify_artifact, verify_bundle
 ```
 
-Verify published scoped-ticket use against receipt/evidence artifacts:
+`verify_artifact()` validates one artifact through a packaged or explicitly
+provided immutable resolver. `verify_bundle()` requires an explicit
+`VerificationPolicy`; it never infers a security posture from input.
 
-```python
-from sclite.tickets import validate_ticket_semantics, verify_ticket_use
+Use lower-level modules only when the packaged
+`contracts/consumer_imports.v1.json` inventory records the controlled consumer
+or when the caller accepts that the import is not a reviewed compatibility
+surface.
 
-validate_ticket_semantics(ticket, execution_contract)
-result = verify_ticket_use(ticket, execution_contract, execution_receipt, evidence_contract)
-assert result["status"] == "passed"
-assert "evidence_claims_bounded_by_receipt" in result["checks"]
+## Artifact lifecycle
+
+A host may project its already-owned decisions and runtime facts into the
+canonical lifecycle:
+
+```text
+intent -> policy decision -> execution contract -> ticket
+       -> receipt -> evidence contract -> chain manifest
 ```
 
-Review a canonical v0.5 bundle:
+The host must retain the original ownership:
 
-```python
-from sclite.bundles import review_bundle
+- GovEngine produces or authenticates the governance/admission decision;
+- RExecOp produces execution/runtime facts and receipts;
+- SCLite validates artifact shape, digest links and the selected verification
+  profile.
 
-record = review_bundle("examples/govengine-integration")
-assert record["artifact_type"] == "review_record"
-assert record["verdict"] == "pass"
+SCLite does not independently establish policy authority, human approval,
+runtime identity, execution freshness or raw-evidence truth.
+
+## CLI integration
+
+Kernel commands:
+
+```bash
+sclite validate-artifact --schema intent_contract.v0.2 artifact.json
+sclite validate-chain artifact_chain_manifest.json
+sclite verify-lifecycle artifact_chain_manifest.json
+sclite verify-secure-bundle review_bundle --guard kernel_guard_manifest.json
+sclite validate-ticket execution_ticket.json --contract execution_contract.json
+sclite verify-ticket-use execution_ticket.json \
+  --contract execution_contract.json \
+  --receipt execution_receipt.json \
+  --evidence-contract evidence_contract.json
+sclite review review_bundle --format json --fail-on review
+sclite export-review-bundle review_bundle --format markdown
 ```
 
-For GovEngine, treat [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md)
-and the packaged `contracts/consumer_imports.v1.json` inventory as the reviewed
-import/CLI boundary. Downstream dependency pins and publication remain a
-separate coordinated release decision. Use [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md)
-for CI thresholds.
+Devtools commands:
 
-## Carrier guidance
+```bash
+sclite-devtools hash-artifact artifact.json
+sclite-devtools explain-ticket execution_ticket.json
+sclite-devtools scope-fidelity --approved-spec approved.json
+sclite-devtools review-lifecycle artifact_chain_manifest.json --format json
+```
 
-A carrier is anything that transports or triggers the workflow: a chat bot, OpenClaw plugin, MCP server, API endpoint, CI job, queue worker, or custom UI.
+Kernel entrypoints are `sclite` and `scl`. Inspection, fixture and heuristic
+redaction commands belong to `sclite-devtools`; the entrypoints intentionally
+reject commands owned by the other surface.
 
-Good carrier behavior:
+See [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md) for stable exit semantics.
 
-- preserve SCL artifacts as structured JSON;
-- avoid flattening approvals into chat text only;
-- keep non-claims visible;
-- keep public-safe and private artifacts separated;
-- require explicit approval before execution or publication;
-- treat validation receipts as evidence of checks, not authorization.
+## Verification posture
 
-Bad carrier behavior:
+Choose posture explicitly:
 
-- treating a model message as executable authority;
-- dropping target/scope facts;
-- hiding approval source or constraints;
-- publishing raw private evidence by default;
-- Do not claim Scope Fidelity proves legal authorization.
-- Do not claim a validation receipt authorizes public push.
+| Posture | Checks |
+| --- | --- |
+| `integrity_only` | canonical descriptors and artifact-chain links |
+| `strict_lifecycle` | integrity plus exact lifecycle order and semantic bindings |
+| `guarded_domain_auth` | manifest integrity plus Kernel Guard shared-secret authentication |
+| `guarded-strict` | strict lifecycle plus required Kernel Guard authentication |
+| host-owned freshness | an external atomic replay claim layered on a passed guarded result |
 
-## Endpoint shape for a future engine
+For Python callers, lifecycle semantics are enabled by an explicit policy or
+`require_lifecycle=True` on the relevant lower-level verifier. Generic chain
+verification intentionally remains integrity-only.
 
-A carrier-agnostic engine that consumes SCLite could expose endpoints such as:
+Kernel Guard does not provide public identity, non-repudiation, replay
+prevention or proof of runtime behavior. A host must atomically claim freshness
+and bind the accepted result to its own admission/execution attempt.
 
-- `POST /intent` -> `IntentContract`
-- `POST /policy/decide` -> `PolicyDecision` v0.2
-- `POST /execution/contract` -> `ExecutionContract`
-- `POST /execution/ticket` -> `ExecutionTicket`
-- `POST /execution/receipt` -> `ExecutionReceipt` v0.2
-- `POST /evidence/contract` -> `EvidenceContract`
-- `POST /artifacts/chain` -> `ArtifactChainManifest`
-- `POST /review/bundle` -> review-bundle package/review result
-- `POST /artifacts/hash` -> canonical SHA-256 descriptor
-- `POST /redaction/policy` -> `RedactionPolicy`
-- `POST /redaction/receipt` -> `RedactionReceipt`
-- `POST /public/validation-surface-index` -> `PublicValidationSurfaceIndex`
-- `POST /public/snapshot-manifest` -> `PublicSnapshotManifest`
-- `POST /automation/observation` -> `ObservationEnvelope`
-- `POST /automation/finding` -> `Finding`
-- `POST /automation/reaction-plan` -> `ReactionPlan`
-- `POST /automation/escalation-proposal` -> `EscalationProposal`
-- `POST /automation/trigger-decision` -> `TriggerDecision`
-- `POST /automation/watchdog-decision` -> `WatchdogDecision`
+## Immutable extension schemas
 
-Those endpoints are not implemented in this repository. They are an integration direction for a separate engine package or runtime.
+Domain contracts can be supplied through `ImmutableSchemaResolver`.
 
-## Security notes
+Requirements:
 
-SCL validation is not enough for safe execution. A production system still needs real controls around:
+- identifiers use `namespace/name@vN`;
+- schemas are loaded offline from a reviewed inventory;
+- duplicate identifiers and digest collisions fail closed;
+- no plugin discovery, network download or process-global registration occurs;
+- canonical SCLite schemas keep their packaged identities.
 
-- authentication and authorization;
-- target/scope ownership;
-- command construction;
-- sandboxing;
-- secrets management;
-- output redaction;
-- audit logging;
-- rollback/kill switches;
-- human approval gates.
+This permits profile-owned payloads without turning SCLite into a domain schema
+registry.
 
-SCL makes those controls easier to review because it gives them structured artifacts to produce and consume.
+## Review bundles
+
+Use a canonical review bundle when a reviewer needs a portable local view of
+the lifecycle. The source bundle is not assumed publishable.
+
+```bash
+sclite review examples/govengine-integration --format json --fail-on review
+sclite export-review-bundle examples/govengine-integration \
+  --mode local_review --output /tmp/review-export.md
+```
+
+`public_export` rejects unrecognized files, nested directories, symlinks, hard
+links and special files. Redaction/disclosure records describe checks performed;
+they do not authorize publication or prove absence of secrets.
+
+## Compatibility
+
+- The Python import package is `sclite`; the distribution is `sclite-core`.
+- Current controlled-consumer imports are recorded in
+  `sclite/contracts/consumer_imports.v1.json`.
+- Reaction, trigger, watchdog and automation modules are absent from SCLite
+  2.0; use RExecOp for those mechanics and historical resolution.
+- Unknown major schema versions fail closed.
+- Artifact schema versions do not track the package version.
+
+See [`SCHEMA_COMPATIBILITY.md`](SCHEMA_COMPATIBILITY.md),
+[`PUBLIC_API.md`](PUBLIC_API.md) and
+[`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md).
+
+## Non-claims
+
+An integration with SCLite does not by itself prove:
+
+- that an operation was authorized or approved;
+- that a signer has a real-world identity;
+- that a permit or ticket is fresh;
+- that a runtime enforced the verified constraints;
+- that referenced raw evidence exists or is truthful;
+- that a bundle is safe to publish;
+- that network targets, redirects or DNS resolution are within policy.

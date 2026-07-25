@@ -4,7 +4,7 @@ These are historical 0.5 freeze notes. The frozen review-bundle behavior remains
 compatible. At the time, the GovEngine integration range was
 `sclite-core>=1.0.5,<1.1`; current consumers must use their own declared pin and
 the reviewed import inventory described in
-[`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md).
+[`GOVENGINE_INTEGRATION_CONTRACT.md`](../GOVENGINE_INTEGRATION_CONTRACT.md).
 
 ## Stable for GovEngine consumption
 
@@ -29,13 +29,14 @@ GovEngine may rely on:
 - `review_record.v0.1` result shape with `verdict`, `summary`, `checks`, and `non_claims`;
 - `trust_profile_ref.v0.1` digest-binding semantics;
 - `carrier_profile_ref.v0.1` digest-binding semantics;
-- CLI exit-code semantics documented in [`CLI_EXIT_CODES.md`](CLI_EXIT_CODES.md).
+- CLI exit-code semantics documented in [`CLI_EXIT_CODES.md`](../CLI_EXIT_CODES.md).
 
 ## Not guaranteed stable
 
 The following are not part of the GovEngine freeze contract:
 
-- helper functions not listed in [`GOVENGINE_INTEGRATION_CONTRACT.md`](GOVENGINE_INTEGRATION_CONTRACT.md);
+- helper functions not listed in
+  [`GOVENGINE_INTEGRATION_CONTRACT.md`](../GOVENGINE_INTEGRATION_CONTRACT.md);
 - Markdown formatting of `REVIEW.md` or exported review text;
 - example prose and fixture wording;
 - retired proof-trace internals;

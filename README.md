@@ -47,8 +47,11 @@ carrier adapters stay outside this package.
 | RExecOp | domain-neutral lifecycle runner, execution mechanics, connectors, reactions, scheduling, event intake |
 | Tecrax and other profiles | domain semantics, intent catalogs, workflow definitions, finding taxonomy, runbooks |
 
-Detailed package/surface history lives in [`ROADMAP.md`](ROADMAP.md) and
-[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md). Schema-version compatibility lives in
+Active maintenance work lives in [`ROADMAP.md`](ROADMAP.md). Package history
+lives in [`CHANGELOG.md`](CHANGELOG.md) and the archived
+[`docs/archive/ROADMAP_VERSION_HISTORY.md`](docs/archive/ROADMAP_VERSION_HISTORY.md).
+Current artifact and schema compatibility references live in
+[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md) and
 [`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md).
 
 ### Extension and ownership boundary
@@ -257,53 +260,46 @@ SCLite intentionally does not own:
 | --- | --- |
 | Execution, subprocess handling, connectors, scheduler/event intake, reaction loop | RExecOp or another host runtime |
 | Governance, admission, policy decisions, obligations, constraints, human sign-off gates | GovEngine |
-| Infrastructure/security/business semantics, findings, runbooks, target taxonomy | Tecrax, Ravenclaw, or another domain profile |
+| Infrastructure/security/business semantics, findings, runbooks, target taxonomy | Tecrax or another domain profile |
 | Raw evidence storage, secret storage, replay store, operational logs | Host/operator infrastructure |
 | Signer identity, PKI trust, KMS, transparency log guarantees | Host/governance trust domain |
 | Legal authorization or proof of live vulnerability evidence | Operator/governance process |
 
-Execution, raw evidence storage, and concrete trust verification belong to the
-host runtime. Governance and admission belong to GovEngine:
+Execution and runtime lifecycle belong to RExecOp. Governance and admission
+belong to GovEngine. Raw evidence, replay persistence and concrete trust
+verification remain host/operator responsibilities:
 
-```mermaid
-flowchart LR
-    Runtime[RExecOp or another host runtime] --> Governance[GovEngine governance]
-    Governance --> Runtime
-    Runtime --> Artifacts[SCLite artifacts]
-    Artifacts --> SCLite[SCLite validate hash bind review]
-    SCLite --> Record[review record or receipt]
-    Record --> Runtime
-
-    Runtime --> Execute[execute tools]
-    Runtime --> Authorize[decide authorization]
-    Runtime --> Evidence[store raw evidence]
-    Runtime --> Trust[verify PKI or signer trust]
-
-    SCLite -. does not .-> Execute
-    SCLite -. does not .-> Authorize
-    SCLite -. does not .-> Evidence
-    SCLite -. does not .-> Trust
+```text
+profile intent/workflow
+        |
+        v
+RExecOp lifecycle -----> GovEngine governance/admission
+        |
+        v
+RExecOp execution and runtime facts
+        |
+        v
+SCLite artifacts -> validation -> review/verification result
 ```
 
 ## Retired proof-trace path
 
 The older public-safe proof trace was a migration source during alpha
 development. It is out of scope for the installed/current SCLite surface.
-Ravenclaw moved its public proof projection to the current
-lifecycle/review-bundle model; retained schema identifiers such as
-`review_record.v0.1` identify current formats and are not compatibility product
-lines.
+Retained schema identifiers such as `review_record.v0.1` identify current
+formats and are not compatibility product lines.
 
 See [`SPEC.md`](SPEC.md) for the canonical model, artifact definitions,
 integrity chain, compatibility notes, and explicit security boundaries. See
 [`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
 [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) for the frozen
 security profile meanings, Kernel Guard transcript/canonicalization freeze,
-and replay/non-claim boundaries for the 1.0 release line.
+and replay/non-claim boundaries for the 2.0 release line.
 
 ## Project docs
 
-- [`ROADMAP.md`](ROADMAP.md) — versioned accountability-layer evolution and post-0.5 direction.
+- [`ROADMAP.md`](ROADMAP.md) — active 2.0 maintenance and freeze policy.
+- [`docs/archive/ROADMAP_VERSION_HISTORY.md`](docs/archive/ROADMAP_VERSION_HISTORY.md) — historical pre-2.0 roadmap.
 - [`SECURITY_MODEL.md`](SECURITY_MODEL.md) — security guarantees, non-claims, Kernel Guard transcript freeze, replay boundary, and key-rotation boundary.
 - [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md) — stable profile matrix for `integrity_only`, `strict_lifecycle`, `guarded_domain_auth`, `guarded-strict`, and host-owned freshness.
 - [`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) — current top-level Python API exports and typed verification front door.
@@ -313,7 +309,6 @@ and replay/non-claim boundaries for the 1.0 release line.
 - [`docs/REVIEW_RECORDS.md`](docs/REVIEW_RECORDS.md) — static lifecycle review records and Scope Fidelity v0.2.
 - [`docs/REVIEW_BUNDLES.md`](docs/REVIEW_BUNDLES.md) — canonical v0.5 review-bundle shape and CLI.
 - [`docs/GOVENGINE_INTEGRATION_CONTRACT.md`](docs/GOVENGINE_INTEGRATION_CONTRACT.md) — current SCLite imports, CLI surfaces, and fixtures for GovEngine.
-- [`docs/SCLITE_0_5_FREEZE.md`](docs/SCLITE_0_5_FREEZE.md) — 0.5.x freeze notes and non-goals.
 - [`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md) — CLI exit-code contract for CI/downstream callers.
 - [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) — concrete tampering, boundary, and non-goal model.
 - [`PUBLIC_STATUS.md`](PUBLIC_STATUS.md) — current maturity and non-claims.
@@ -405,8 +400,11 @@ SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
 `verify-secure-bundle` is the `guarded-strict` profile. It always verifies the
 artifact chain, requires the exact lifecycle role sequence, requires
 `kernel_guard_hmac_v1`, binds manifest metadata, and fails when the guard is
-missing. It still does not check replay freshness; GovEngine owns
-`guarded_domain_auth_fresh` by recording `root_tag` reuse.
+missing. It still does not check replay freshness. GovEngine defines the
+deterministic replay decision and claim-once port; a production host adapter
+must provide atomic, durable replay state. Current GovEngine decisions prefer
+the semantic binding `(root_chain_digest, ticket_id|chain_id, key_id)` and use
+guard-root-tag matching only as a compatibility fallback.
 
 JSON output includes a stable `verification_result` object with explicit layer
 statuses:
@@ -447,8 +445,8 @@ Security posture modes:
   duplicates, or reorder.
 - `guarded_domain_auth`: strict lifecycle plus HMAC authenticity inside the
   domain that knows the secret.
-- `guarded_domain_auth_fresh`: HMAC authenticity plus GovEngine replay-store
-  freshness.
+- `guarded_domain_auth_fresh`: HMAC authenticity plus GovEngine replay-decision
+  semantics over host-owned atomic replay state.
 - `public_signed_export`: future public signature/export mode, not implemented
   in this release.
 

@@ -33,7 +33,7 @@ artifact contracts intentionally remain on earlier schema versions.
 | `evidence_contract.vNext` | planned only | Should preserve public-safe review output and structured receipt binding without adding raw evidence storage to SCLite. |
 | `kernel_guard_hmac_v2` | not implemented | Required only if transcript layout, canonicalization, HMAC fields, or metadata digest semantics become incompatible. |
 | `public_signed_export` | not implemented | Future optional public-root signature surface; current HMAC profile is not PKI or non-repudiation. |
-| Runtime replay store | not supported in SCLite | `guarded_domain_auth_fresh` belongs to GovEngine or another host runtime with state. |
+| Runtime replay store | not supported in SCLite | GovEngine defines `guarded_domain_auth_fresh` decision semantics and a claim-once port; production host adapters own atomic durable state. |
 | Reaction, trigger, watchdog and automation contracts | removed from SCLite 2.0 | RExecOp owns the modules and schemas; use its resolver for historical artifacts. See [`MIGRATING_TO_2.md`](MIGRATING_TO_2.md). |
 
 ## Unknown Fields Policy

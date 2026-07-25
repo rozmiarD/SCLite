@@ -1,6 +1,7 @@
 # CLI Exit Codes
 
-SCLite CLI commands use predictable exit codes for CI, GovEngine, and Ravenclaw integration scripts.
+SCLite CLI commands use predictable exit codes for CI and controlled consumer
+integrations.
 
 ## Contract
 
@@ -26,7 +27,7 @@ Use `--format json` when a caller needs machine-readable detail.
 
 ## Integration guidance
 
-GovEngine and Ravenclaw CI should use:
+Controlled consumer CI can use:
 
 ```bash
 sclite review examples/govengine-integration --format json --fail-on review

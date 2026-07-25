@@ -4,27 +4,33 @@ This document defines the SCLite lifecycle/review public import surface used by
 GovEngine. The packaged `contracts/consumer_imports.v1.json` file records the
 reviewed imports used by controlled stack consumers. Downstream dependency
 pins and publication remain a separate, coordinated GovEngine/RExecOp/Tecrax
-release decision; this document does not claim that those releases already
-consume SCLite 2.0.
+release decision. The inventory records live imports; it does not widen or
+rewrite an already published consumer dependency pin.
 
 SCLite remains the artifact/schema/review layer. GovEngine may consume these functions, but SCLite does not become a policy authority, executor, trust authority, carrier adapter, or runtime orchestrator.
 
 ## Stable public imports for GovEngine
 
-GovEngine may rely on the following reviewed import paths, subject to its own
-declared dependency pin:
+The current controlled GovEngine source uses these reviewed imports, subject to
+its own declared dependency pin:
 
 ```python
-from sclite.integrity import artifact_descriptor, verify_artifact_chain_manifest
-from sclite.tickets import validate_ticket_semantics, verify_ticket_use
-from sclite.review import build_review_record_from_manifest
-from sclite.bundles import materialize_review_bundle, review_bundle, validate_review_bundle_shape
-from sclite.profiles import validate_trust_profile_ref, validate_carrier_profile_ref
-from sclite.scope_fidelity import build_lifecycle_scope_fidelity_report
+from sclite.bundles import ReviewBundleError, review_bundle
+from sclite.integrity import artifact_descriptor, verify_lifecycle_manifest
+from sclite.integrity.chain import ChainVerificationError
 from sclite.secure import verify_secure_bundle
+from sclite.tickets import (
+    TicketSemanticError,
+    TicketUseVerificationError,
+    validate_ticket_semantics,
+    verify_ticket_use,
+)
 ```
 
-Anything not listed here is internal or not guaranteed as a stable GovEngine integration surface. `sclite.artifacts` remains importable for schema validation and canonical hashes; the superseded proof-trace helpers and validators have been removed.
+The canonical top-level API remains documented in
+[`PUBLIC_API.md`](PUBLIC_API.md). Any new GovEngine deep import requires review
+and an update to the machine-readable inventory; the superseded proof-trace
+helpers and validators are absent.
 
 ## Stable CLI surfaces for GovEngine/CI
 
@@ -112,9 +118,12 @@ inputs shaped like:
 }
 ```
 
-Replay persistence, TTL, concurrency, cleanup, and rejection policy remain
-host-owned. SCLite does not import GovEngine, keep replay state, or decide
-runtime admission.
+Current GovEngine replay decisions prefer the semantic key
+`(root_chain_digest, ticket_id|chain_id, key_id)` and retain guard-root-tag
+matching only as a compatibility fallback. GovEngine defines the decision
+semantics and claim-once port. Replay persistence, TTL, locking, concurrency,
+and cleanup remain host-adapter responsibilities. SCLite does not import
+GovEngine, keep replay state, or decide runtime admission.
 
 ## Optional downstream smoke
 

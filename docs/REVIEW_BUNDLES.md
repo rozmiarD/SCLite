@@ -2,7 +2,9 @@
 
 SCLite review bundles are the v0.5 packaging surface for lifecycle artifacts and their local verification result.
 
-They make SCLite understandable and demoable without Ravenclaw, GovEngine, OpenClaw, MCP, A2A, or any live runtime. The `examples/govengine-integration/` bundle is the current downstream integration-readiness fixture.
+They make SCLite understandable and demoable without GovEngine, RExecOp,
+protocol adapters or any live runtime. The `examples/govengine-integration/`
+bundle is the current downstream integration-readiness fixture.
 
 ## Review flow
 
@@ -122,6 +124,6 @@ SCLite review bundles do **not**:
 - prove signer identity;
 - verify carrier delivery;
 - make runtime policy decisions;
-- replace GovEngine, Ravenclaw, Tecrax, or another runtime.
+- replace GovEngine, RExecOp, Tecrax or another profile/runtime.
 
 They package public-safe proof artifacts and local review output.

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import re
 import sys
 import tomllib
 from pathlib import Path
@@ -13,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import sclite  # noqa: E402
+from sclite._cli_impl import DEVTOOLS_COMMANDS, KERNEL_COMMANDS  # noqa: E402
 from sclite.bundles import review_bundle  # noqa: E402
 from sclite.consumer_contracts import validate_public_export_inventory  # noqa: E402
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
@@ -24,23 +26,6 @@ LATEST_PUBLISHED_VERSION = '2.0.0'
 LATEST_PUBLISHED_LABEL = '2.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
-PUBLIC_DOCS = (
-    'README.md',
-    'PUBLIC_STATUS.md',
-    'SECURITY.md',
-    'SECURITY_MODEL.md',
-    'CONTRIBUTING.md',
-    'ROADMAP.md',
-    'VALIDATION.md',
-    'PUBLICATION_CHECKLIST.md',
-    'SPEC.md',
-    'docs/ARTIFACTS.md',
-    'docs/SECURITY_PROFILES.md',
-    'docs/PUBLIC_API.md',
-    'docs/GOVENGINE_INTEGRATION_CONTRACT.md',
-    'docs/INTEGRATION_GUIDE.md',
-    'docs/SCLITE_0_5_FREEZE.md',
-)
 STABLE_IMPORTS = (
     'sclite.integrity:artifact_descriptor',
     'sclite.integrity:verify_artifact_chain_manifest',
@@ -159,7 +144,7 @@ def _assert_current_claim_docs(
     _require(errors, 'SPEC.md', spec, f'Current package is `sclite-core=={version}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
-    _require(errors, 'SPEC.md', spec, 'after Ravenclaw migrated to the')
+    _require(errors, 'SPEC.md', spec, 'after controlled consumers')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
     _require(errors, 'README.md', readme, 'audited and published non-prerelease 2.0.0')
     _require(errors, 'README.md', readme, 'Development Status :: 4 - Beta')
@@ -168,12 +153,14 @@ def _assert_current_claim_docs(
     _require(errors, 'README.md', readme, 'GovEngine | governance, admission, policy decisions')
     _require(errors, 'README.md', readme, 'RExecOp | domain-neutral lifecycle runner')
     _require(errors, 'README.md', readme, 'When `--guard` is provided explicitly, SCLite resolves it relative to the')
-    _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are resolved relative to the caller')
-    _require(errors, 'ROADMAP.md', roadmap, '## 0.5.1 — GovEngine integration readiness\n\nStatus: published predecessor patch line.')
+    _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are')
+    _require(errors, 'ROADMAP.md', roadmap, 'SCLite 2.0 is the frozen truth')
+    _require(errors, 'ROADMAP.md', roadmap, '## 2.0 maintenance policy')
+    _require(errors, 'ROADMAP.md', roadmap, 'SCLite `2.0.1` is not planned solely')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current package: `sclite-core=={version}`')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'latest published public package: `sclite-core=={LATEST_PUBLISHED_VERSION}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'latest published public package:')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is retired')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is also retired')
     _require(errors, 'docs/INTEGRATION_GUIDE.md', integration_guide, 'The current 2.0 stable release')
     if 'It is not an installed/current SCLite surface in the 0.8 beta release.' in readme:
         errors.append('README.md:stale_current_release_wording:0.8 beta release')
@@ -184,25 +171,17 @@ def _assert_current_claim_docs(
 
 
 def _assert_roadmap_release_truth(errors: list[str], roadmap: str) -> None:
-    stale_markers = (
-        'Status: current alpha line implemented for validation and downstream migration.',
+    forbidden = (
+        'Status: current alpha',
+        'Status: published current stable release.',
         'Delivered in the current candidate:',
-        'Status: current alpha candidate implemented after Ravenclaw consumer migration.',
-        'gates pass against the 0.8 candidate.',
+        'Candidate post-0.5 examples:',
     )
-    for marker in stale_markers:
+    for marker in forbidden:
         if marker in roadmap:
-            errors.append(f'ROADMAP.md:stale_published_candidate_claim:{marker}')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor migration line.')
-    _require(errors, 'ROADMAP.md', roadmap, 'Delivered in `0.7.0-alpha`:')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current alpha line after Ravenclaw consumer migration.')
-    _require(errors, 'ROADMAP.md', roadmap, 'gates passed for the published `0.8.0-alpha` line.')
-    _require(errors, 'ROADMAP.md', roadmap, '## 0.8.0-beta — Freeze lifecycle/review public responsibility')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor beta line.')
-    _require(errors, 'ROADMAP.md', roadmap, '## 1.0.0-rc.1 — Freeze guarded verification contracts')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published predecessor release candidate.')
-    _require(errors, 'ROADMAP.md', roadmap, '## 1.0.0 — Stable lifecycle/review and guarded verification surface')
-    _require(errors, 'ROADMAP.md', roadmap, 'Status: published current stable release.')
+            errors.append(f'ROADMAP.md:historical_line_in_active_roadmap:{marker}')
+    _require(errors, 'ROADMAP.md', roadmap, 'docs/archive/ROADMAP_VERSION_HISTORY.md')
+    _require(errors, 'ROADMAP.md', roadmap, 'Documentation changes on `main` do not require a package release.')
 
 
 def _stable_import_errors() -> list[str]:
@@ -343,6 +322,216 @@ def _documentation_drift_errors(text_by_path: Mapping[str, str]) -> list[str]:
     return errors
 
 
+def _markdown_paths(*, include_archive: bool) -> tuple[str, ...]:
+    paths: set[str] = set()
+    ignored_parts = {'.git', '.venv', '.pytest_cache', 'build', 'dist'}
+    for path in ROOT.rglob('*.md'):
+        if not path.is_file():
+            continue
+        relative_path = path.relative_to(ROOT)
+        if any(
+            part in ignored_parts or part.endswith('.egg-info')
+            for part in relative_path.parts
+        ):
+            continue
+        relative = relative_path.as_posix()
+        if relative == 'CHANGELOG.md':
+            continue
+        if not include_archive and relative.startswith('docs/archive/'):
+            continue
+        paths.add(relative)
+    return tuple(sorted(paths))
+
+
+def _documentation_command_errors(paths: Iterable[str]) -> list[str]:
+    errors: list[str] = []
+    direct = re.compile(r'(?<![\w.-])(sclite-devtools|sclite|scl)\s+([a-z][a-z0-9-]*)')
+    module = re.compile(
+        r'python(?:3)?\s+-m\s+sclite\.(devtools|kernel_cli)\s+([a-z][a-z0-9-]*)'
+    )
+    all_commands = KERNEL_COMMANDS | DEVTOOLS_COMMANDS
+
+    def check(
+        path: str,
+        line_number: int,
+        line: str,
+        command_start: int,
+        entrypoint: str,
+        command: str,
+    ) -> None:
+        if command not in all_commands:
+            if command in {'validate', 'validation-receipt'}:
+                errors.append(
+                    f'{path}:{line_number}:documentation_retired_cli_command:{command}'
+                )
+            elif not line[:command_start].strip():
+                errors.append(
+                    f'{path}:{line_number}:documentation_unknown_cli_command:{command}'
+                )
+            return
+        expected = 'sclite-devtools' if command in DEVTOOLS_COMMANDS else 'sclite'
+        actual = 'sclite-devtools' if entrypoint == 'devtools' else entrypoint
+        if actual in {'scl', 'kernel_cli'}:
+            actual = 'sclite'
+        if actual != expected:
+            errors.append(
+                f'{path}:{line_number}:documentation_cli_owner_mismatch:'
+                f'{command}:{actual}!={expected}'
+            )
+
+    for path in paths:
+        for line_number, line in enumerate(_read(path).splitlines(), 1):
+            module_spans: list[tuple[int, int]] = []
+            for match in module.finditer(line):
+                module_spans.append(match.span())
+                check(
+                    path,
+                    line_number,
+                    line,
+                    match.start(),
+                    match.group(1),
+                    match.group(2),
+                )
+            for match in direct.finditer(line):
+                if any(start <= match.start() < end for start, end in module_spans):
+                    continue
+                check(
+                    path,
+                    line_number,
+                    line,
+                    match.start(),
+                    match.group(1),
+                    match.group(2),
+                )
+    return errors
+
+
+def _documentation_fixture_command_errors(paths: Iterable[str]) -> list[str]:
+    errors: list[str] = []
+    validate_artifact = re.compile(
+        r'validate-artifact\s+--schema\s+([A-Za-z0-9_.-]+)\s+([A-Za-z0-9_./-]+\.json)'
+    )
+    for path in paths:
+        normalized = _read(path).replace('\\\n', ' ')
+        for schema_name, artifact_path in validate_artifact.findall(normalized):
+            candidate = ROOT / artifact_path
+            if not candidate.is_file():
+                continue
+            try:
+                artifact = json.loads(candidate.read_text(encoding='utf-8'))
+            except (OSError, json.JSONDecodeError):
+                errors.append(
+                    f'{path}:documentation_example_artifact_unreadable:{artifact_path}'
+                )
+                continue
+            if not isinstance(artifact, Mapping):
+                continue
+            schema_ref = str(artifact.get('schema_ref') or '')
+            if schema_ref:
+                expected = schema_ref.removeprefix('schemas/').removesuffix('.schema.json')
+            else:
+                artifact_type = str(artifact.get('artifact_type') or '')
+                schema_version = str(artifact.get('schema_version') or '')
+                expected = f'{artifact_type}.{schema_version}' if artifact_type and schema_version else ''
+            if expected and schema_name != expected:
+                errors.append(
+                    f'{path}:documentation_example_schema_mismatch:'
+                    f'{artifact_path}:{schema_name}!={expected}'
+                )
+    return errors
+
+
+def _documentation_invocation_errors(paths: Iterable[str]) -> list[str]:
+    errors: list[str] = []
+    legacy_consumer_flags = ('--govengine', '--rexecop', '--tecrax')
+    for path in paths:
+        normalized = _read(path).replace('\\\n', ' ')
+        for line_number, line in enumerate(normalized.splitlines(), 1):
+            if 'validate_forbidden_consumer_imports.py' in line:
+                for flag in legacy_consumer_flags:
+                    if re.search(rf'(?<!\S){re.escape(flag)}(?:\s|$)', line):
+                        errors.append(
+                            f'{path}:{line_number}:'
+                            f'documentation_consumer_validator_unsupported_flag:{flag}'
+                        )
+            if (
+                'export-review-bundle' in line
+                and 'examples/govengine-integration' in line
+                and not re.search(r'--mode(?:\s+|=)local_review(?:\s|$)', line)
+            ):
+                errors.append(
+                    f'{path}:{line_number}:'
+                    'documentation_govengine_export_requires_local_review'
+                )
+    return errors
+
+
+def _documentation_reference_errors(paths: Iterable[str]) -> list[str]:
+    errors: list[str] = []
+    test_ref = re.compile(r'(?<![\w/])(tests/[A-Za-z0-9_./-]+\.py)')
+    link = re.compile(r'!?\[[^\]]*\]\(([^)]+)\)')
+    root = ROOT.resolve()
+
+    for path in paths:
+        text = _read(path)
+        for reference in sorted(set(test_ref.findall(text))):
+            if not (ROOT / reference).is_file():
+                errors.append(f'{path}:documentation_missing_test_reference:{reference}')
+        for line_number, line_text in enumerate(text.splitlines(), 1):
+            for raw_target in link.findall(line_text):
+                target = raw_target.strip().strip('<>')
+                if (
+                    not target
+                    or target.startswith(('#', 'http://', 'https://', 'mailto:'))
+                ):
+                    continue
+                target = target.split('#', 1)[0].strip()
+                if not target:
+                    continue
+                candidate = ((ROOT / path).parent / target).resolve()
+                if not candidate.is_relative_to(root) or not candidate.exists():
+                    errors.append(
+                        f'{path}:{line_number}:documentation_broken_local_link:{target}'
+                    )
+    return errors
+
+
+def _current_document_wording_errors(text_by_path: Mapping[str, str]) -> list[str]:
+    errors: list[str] = []
+    stale_markers = (
+        'for the 1.0 line',
+        'for the 1.0 release line',
+        'on the 1.0 stable line',
+        'published `1.0.4` stable package line',
+        '`1.0.0` installed/current surface',
+    )
+    removed_schema_names = (
+        'observation_envelope.v0.1',
+        'finding.v0.1',
+        'reaction_plan.v0.1',
+        'escalation_proposal.v0.1',
+        'trigger_decision.v0.1',
+        'watchdog_decision.v0.1',
+        'automation_chain.v0.1',
+    )
+    removed_schema_allowed = {
+        'docs/MIGRATING_TO_2.md',
+        'docs/SCHEMA_COMPATIBILITY.md',
+    }
+    for path, text in text_by_path.items():
+        for marker in stale_markers:
+            if marker in text:
+                errors.append(f'{path}:stale_current_release_wording:{marker}')
+        if path in removed_schema_allowed:
+            continue
+        for schema_name in removed_schema_names:
+            if schema_name in text:
+                errors.append(
+                    f'{path}:removed_schema_advertised_in_current_docs:{schema_name}'
+                )
+    return errors
+
+
 def _forbidden_claim_errors(paths: Iterable[str]) -> list[str]:
     errors: list[str] = []
     negation_markers = (
@@ -391,6 +580,8 @@ def collect_errors() -> list[str]:
     integration_contract = _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md')
     integration_guide = _read('docs/INTEGRATION_GUIDE.md')
     workflow = _read('.github/workflows/ci.yml')
+    active_markdown = _markdown_paths(include_archive=False)
+    all_markdown = _markdown_paths(include_archive=True)
 
     if project['name'] != EXPECTED_DISTRIBUTION:
         errors.append(f'distribution_name_mismatch:{project["name"]}')
@@ -450,9 +641,8 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY_MODEL.md', security_model, 'SCLite reports replay as `not_checked`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`validate-chain` returns `chain_status: passed`')
     _require(errors, 'SECURITY_MODEL.md', security_model, '`verify-guarded-chain` adds `guard_status: passed`')
-    _require(errors, 'VALIDATION.md', validation, 'Python callers can use `verify_lifecycle_manifest()`')
+    _require(errors, 'VALIDATION.md', validation, 'verify_lifecycle_manifest()')
     _require(errors, 'VALIDATION.md', validation, 'docs/SCHEMA_COMPATIBILITY.md')
-    _require(errors, 'VALIDATION.md', validation, 'authoritative and keeps legacy text markers')
     _require(errors, 'SPEC.md', spec, '`execution_shape.plan` remains an opaque normalized execution-shape field')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Any incompatible change requires a new profile name')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'HMAC gives authenticity only to parties that already share the secret')
@@ -465,7 +655,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'SECURITY_MODEL.md', security_model, 'does not silently disable the guard sidecar shape check')
     _require(errors, 'SECURITY_MODEL.md', security_model, 'Host freshness handoff data')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md'), 'Replay persistence, TTL')
-    _require(errors, 'VALIDATION.md', validation, 'rejects manifest and Kernel Guard sidecar paths')
+    _require(errors, 'VALIDATION.md', validation, 'Path validation rejects')
     schema_compat = _read('docs/SCHEMA_COMPATIBILITY.md')
     _require(errors, 'docs/SCHEMA_COMPATIBILITY.md', schema_compat, 'Unknown fields are metadata')
     _require(errors, 'docs/SCHEMA_COMPATIBILITY.md', schema_compat, 'Artifact IDs are labels unless')
@@ -502,7 +692,14 @@ def collect_errors() -> list[str]:
         'sclite/examples/trust-carrier-profiles/README.md':
             _read('sclite/examples/trust-carrier-profiles/README.md'),
     }))
-    errors.extend(_forbidden_claim_errors(PUBLIC_DOCS))
+    errors.extend(_documentation_command_errors(active_markdown))
+    errors.extend(_documentation_fixture_command_errors(active_markdown))
+    errors.extend(_documentation_invocation_errors(active_markdown))
+    errors.extend(_documentation_reference_errors(all_markdown))
+    errors.extend(_current_document_wording_errors({
+        path: _read(path) for path in active_markdown
+    }))
+    errors.extend(_forbidden_claim_errors(active_markdown))
 
     return errors
 

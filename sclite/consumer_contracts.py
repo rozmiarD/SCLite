@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 INVENTORY_SCHEMA = "sclite.consumer_import_inventory.v1"
+INVENTORY_VERSION_LINE = "2.0.x"
+EXPORT_DISPOSITIONS = frozenset({"retain_2.x", "internal_compatibility_2.x"})
 
 
 def load_consumer_import_inventory() -> dict[str, Any]:
@@ -21,10 +23,16 @@ def load_consumer_import_inventory() -> dict[str, Any]:
 
 
 def validate_public_export_inventory(exports: Sequence[str]) -> list[str]:
-    records = load_consumer_import_inventory().get("public_exports")
+    inventory = load_consumer_import_inventory()
+    records = inventory.get("public_exports")
     if not isinstance(records, Mapping):
         return ["consumer_inventory_missing_public_exports"]
     errors: list[str] = []
+    if inventory.get("sclite_version_line") != INVENTORY_VERSION_LINE:
+        errors.append(
+            "consumer_inventory_version_line_mismatch:"
+            f"{inventory.get('sclite_version_line')}!={INVENTORY_VERSION_LINE}"
+        )
     expected = set(exports)
     recorded = {str(name) for name in records}
     for name in sorted(expected - recorded):
@@ -39,8 +47,11 @@ def validate_public_export_inventory(exports: Sequence[str]) -> list[str]:
             errors.append(f"consumer_inventory_invalid_classification:{name}")
         if not str(record.get("owner") or ""):
             errors.append(f"consumer_inventory_missing_owner:{name}")
-        if not str(record.get("disposition") or ""):
+        disposition = str(record.get("disposition") or "")
+        if not disposition:
             errors.append(f"consumer_inventory_missing_disposition:{name}")
+        elif disposition not in EXPORT_DISPOSITIONS:
+            errors.append(f"consumer_inventory_invalid_disposition:{name}:{disposition}")
     return errors
 
 

@@ -1,8 +1,8 @@
 # SCLite Security Model
 
 SCLite is a local artifact validation and review substrate. It defines,
-validates, hashes, binds, redacts, verifies, and reviews public-safe contract
-artifacts.
+validates, hashes, binds, redacts, verifies, and reviews contract artifacts.
+It does not infer that arbitrary input is safe to publish.
 
 SCLite is not a runtime, policy authority, PKI, key store, replay store,
 transparency log, carrier adapter, scanner, or executor.
@@ -19,7 +19,7 @@ freshness.
 | `guard_hmac_only` | `verify_kernel_guard_manifest(..., validate_chain=False)` | HMAC consistency for the supplied manifest fields only | chain and lifecycle are `not_checked`; never satisfies guarded lifecycle verification |
 | `guarded_domain_auth` | `kernel_guard_hmac_v1`, `verify-guarded-chain` | HMAC-SHA256 domain authenticity for a manifest and entries when the verifier knows the same domain secret | no public verification, no PKI, no non-repudiation, no replay freshness |
 | `guarded-strict` | `verify-secure-bundle` | fail-closed artifact-chain verification, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | no replay freshness, no public identity, no runtime execution proof |
-| `guarded_domain_auth_fresh` | GovEngine/host replay store | guarded-strict plus host-owned freshness/state decision | outside SCLite core |
+| `guarded_domain_auth_fresh` | GovEngine decision semantics plus host state adapter | guarded-strict plus an atomic freshness/state decision | outside SCLite core |
 
 Verifier JSON surfaces expose layer-specific status fields so callers cannot
 mistake one layer for another:
@@ -124,8 +124,9 @@ local guard check and does not turn an external sidecar into a bundle member.
 SCLite reports replay as `not_checked`.
 
 Replay freshness requires state. State does not belong in SCLite's pure local
-verifier. GovEngine or another host runtime must own replay storage and
-freshness decisions for runtime-consumable bundles.
+verifier. GovEngine defines deterministic replay-decision semantics and a
+claim-once port. Production host adapters own atomic persistence, locking,
+retention, and concurrency for runtime-consumable bundles.
 
 Production replay stores should provide atomic check-and-set behavior for the
 freshness key, such as a database transaction, unique index, Redis `SETNX`, or
@@ -138,6 +139,10 @@ use atomically without asking SCLite to keep state. Typical inputs are
 `root_chain_digest`, `guard_root_tag`, `chain_id`, `key_id`, ticket/run id, the
 host's observed time, and the host admission context. TTL, concurrency,
 cleanup, replay persistence, and collision policy are host-owned.
+
+The current GovEngine decision prefers the semantic replay key
+`(root_chain_digest, ticket_id|chain_id, key_id)`. Matching the guard root tag
+is retained only as a compatibility fallback for older records.
 
 A minimal handoff record should look like this shape:
 
@@ -156,7 +161,8 @@ A minimal handoff record should look like this shape:
 ```
 
 SCLite may define, emit, or document this handoff shape, but the atomic
-freshness decision and storage remain GovEngine/host responsibilities.
+claim and durable storage remain host-adapter responsibilities; GovEngine owns
+the deterministic decision semantics and port contract.
 
 ## Key IDs And Rotation
 
@@ -191,9 +197,9 @@ guards without an external trust, revocation, or publication mechanism.
 HMAC gives authenticity only to parties that already share the secret. It is
 not public verification and it is not non-repudiation.
 
-Future public export may add a separate profile such as an Ed25519 root
-signature. That is intentionally out of scope for the current SCLite 1.0
-release line.
+A future major line could define a separate public-signature profile. Public
+signature verification is intentionally out of scope for the current SCLite
+2.0 release line.
 
 ## Runtime And Policy Boundary
 
@@ -201,9 +207,10 @@ SCLite artifacts can describe intent, policy decisions, execution contracts,
 tickets, receipts, and evidence. They do not execute those artifacts.
 
 SCLite does not decide whether an action is authorized, safe to run, legally
-permitted, or actually enforced by a runtime. A host such as GovEngine or
-Ravenclaw must own runtime admission, replay freshness, approval UX, execution
-control, raw evidence storage, and operational policy.
+permitted, or actually enforced by a runtime. GovEngine owns governance,
+admission, approval requirements and replay-decision semantics. RExecOp owns
+runtime lifecycle and execution enforcement. Host/operator adapters own replay
+storage, raw evidence, secrets and concrete trust verification.
 
 ## Threat Classes Covered
 

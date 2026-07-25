@@ -1,7 +1,7 @@
 # SCLite Security Profiles
 
 This document freezes the public meaning of SCLite security profiles for the
-1.0 release line.
+2.0 release line.
 
 | Profile | Owner | Meaning | Failure Mode | Status |
 | --- | --- | --- | --- | --- |
@@ -11,7 +11,7 @@ This document freezes the public meaning of SCLite security profiles for the
 | `guarded_domain_auth` | SCLite | `strict_lifecycle` plus `kernel_guard_hmac_v1` sidecar authenticity inside a shared-secret domain | fails on missing/mismatched guard fields, tags, metadata digest, root tag, or wrong key | secure/current |
 | `guarded-strict` | SCLite | fail-closed secure bundle profile: artifact chain, strict lifecycle, Kernel Guard HMAC, and manifest metadata binding | fails closed when guard is missing or any layer fails | stable baseline |
 | `legacy_read_only_guard` | SCLite | historical HMAC verification with an explicitly selected sub-32-byte key policy | never satisfies `guarded_domain_auth` or `guarded-strict`; entropy remains not checked | compatibility/read-only |
-| `guarded_domain_auth_fresh` | GovEngine or host runtime | `guarded-strict` plus replay freshness/state | outside SCLite; host must reject replayed roots or payloads | host-owned |
+| `guarded_domain_auth_fresh` | GovEngine decision semantics plus host state adapter | `guarded-strict` plus replay freshness/state | outside SCLite; host must atomically reject replayed payload bindings | host-enforced |
 | `public_signed_export` | future optional profile | public root signature or public anchor for third-party verification | not implemented | out of scope |
 
 ## Profile Rules
@@ -28,8 +28,9 @@ This document freezes the public meaning of SCLite security profiles for the
 - `guarded-strict` also reports static ticket-use status for v0.3
   receipt-bounded evidence and fails on bounded-evidence violations when those
   artifacts are present.
-- `guarded_domain_auth_fresh` belongs to GovEngine or another host layer that
-  can keep replay state and make runtime admission decisions.
+- For `guarded_domain_auth_fresh`, GovEngine defines deterministic
+  replay-decision semantics and a claim-once port. The production host adapter
+  owns atomic persistence, locking, retention, and concurrency.
 
 ## Compatibility Rules
 

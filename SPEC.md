@@ -13,8 +13,8 @@ authority.
 
 Artifact schema versions and package release lines are different concepts. New
 integrations should treat the lifecycle/review-bundle path as current. The
-superseded proof-trace product path is retired after Ravenclaw migrated to the
-current lifecycle/review-bundle front door.
+superseded proof-trace product path is retired after controlled consumers
+migrated to the current lifecycle/review-bundle front door.
 SCLite is a schema-backed contract lifecycle and integrity/review layer. It is
 not a scanner, executor, sandbox, policy engine, carrier protocol, or compliance
 framework.
@@ -57,15 +57,17 @@ changed order.
 an artifact-chain manifest. The guard is HMAC-SHA256 over canonical JSON
 transcripts for each manifest entry plus a root transcript that binds
 `root_chain_digest` and manifest metadata. It provides authenticity only inside
-the GovEngine/KERNEL domain that knows the secret; replay freshness remains a
-GovEngine replay-store responsibility.
+the GovEngine/KERNEL domain that knows the secret. Replay freshness remains
+outside SCLite: GovEngine defines deterministic decision semantics and a
+claim-once port, while the production host adapter owns atomic durable state.
 
 `verify-secure-bundle` is the official guarded-strict verification profile for
 runtime-consumable bundles. It is fail-closed and always performs artifact
 chain verification, exact strict lifecycle verification, Kernel Guard HMAC
 verification, and manifest metadata binding. Missing guard material is a
 failure, not a warning. SCLite still reports replay freshness as not checked;
-GovEngine records freshness for the `guarded_domain_auth_fresh` posture.
+GovEngine evaluates freshness over host-provided claim-once state for the
+`guarded_domain_auth_fresh` posture.
 
 The stable verifier-result contract is `verification_result.v1`. Secure-bundle
 JSON output nests it under `verification_result` and keeps the layer statuses
@@ -87,9 +89,9 @@ non-claims machine-readable and does not add replay state, public identity,
 policy authorization, or runtime enforcement to SCLite.
 
 The stable top-level Python import surface is documented in
-[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md). Patch releases may add new names,
-but removal or rename of those exports is a compatibility change for the 1.0
-line.
+[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md). Patch releases preserve this
+surface. Removal or rename of those exports is a compatibility change for the
+2.0 line.
 
 Supported schema-version combinations, unknown-field policy, artifact ID
 guidance, and GovEngine consumer compatibility are frozen in
@@ -101,12 +103,12 @@ Security posture modes are explicit:
 - `strict_lifecycle`: integrity plus exact lifecycle role semantics.
 - `guard_hmac_only`: HMAC verification with chain/lifecycle explicitly not checked.
 - `guarded_domain_auth`: strict lifecycle plus HMAC domain authenticity.
-- `guarded_domain_auth_fresh`: HMAC domain authenticity plus GovEngine replay
-  freshness.
+- `guarded_domain_auth_fresh`: HMAC domain authenticity plus GovEngine
+  replay-decision semantics over host-owned atomic state.
 - `public_signed_export`: future Ed25519/root-anchor export mode, not
   implemented here.
 
-The security model is frozen for the 1.0 release line in
+The security model is frozen for the 2.0 release line in
 [`SECURITY_MODEL.md`](SECURITY_MODEL.md) and
 [`docs/SECURITY_PROFILES.md`](docs/SECURITY_PROFILES.md). For
 `kernel_guard_hmac_v1`, SCLite canonical JSON settings, per-entry transcript
@@ -276,7 +278,9 @@ The `0.5.x` package line includes the v0.4-oriented trust/carrier and lifecycle-
 
 - `trust_profile_ref.v0.1` and `sclite validate-trust-profile` validate digest-bound trust sidecars without proving signer identity, revocation, or PKI trust.
 - `carrier_profile_ref.v0.1` and `sclite validate-carrier-profile` validate digest-bound carrier sidecars without proving delivery or adapter correctness.
-- `scope_fidelity_report.v0.2`, `review_record.v0.1`, and `sclite review-lifecycle` summarize lifecycle review checks with conservative `pass` / `review` / `fail` verdicts.
+- `scope_fidelity_report.v0.2`, `review_record.v0.1`, and
+  `sclite-devtools review-lifecycle` summarize lifecycle review checks with
+  conservative `pass` / `review` / `fail` verdicts.
 
 These surfaces reserve stable vocabulary for external runtimes and verifiers. SCLite validates reference shape and local digest binding only.
 
@@ -318,7 +322,7 @@ scope/input -> policy decision -> prepared execution spec -> approved execution 
 ```
 
 The legacy builders, fixture validators, schemas owned only by this trace, and
-its fixture directories are not part of the `1.0.0` installed/current
+its fixture directories are not part of the `2.0.0` installed/current
 surface. Current work uses the lifecycle/review-bundle model above. Generic
 redaction, snapshot-manifest, Scope Fidelity, and review-record schemas remain
 because the current lifecycle still uses them; their schema suffixes are
@@ -345,8 +349,13 @@ SCLite core capabilities are intentionally limited to:
 define / validate / hash / bind / redact / review / verify
 ```
 
-Runtimes such as Ravenclaw may consume SCLite artifacts, enforce tickets, execute or dry-run tools, store raw evidence, and expose carrier adapters. Those responsibilities stay outside SCLite.
+RExecOp or another host runtime may consume SCLite artifacts, enforce accepted
+governance decisions, execute or dry-run tools, store raw evidence, and expose
+carrier adapters. Those responsibilities stay outside SCLite.
 
 ## Roadmap Boundary
 
-Future SCLite work is expected to keep this split intact. Post-0.5 work should improve examples, failure drills, optional verifier integrations, and runtime handoff clarity while keeping policy decisions, trust decisions, live execution, revocation, raw evidence storage, and carrier adapter implementation outside SCLite core. See [`ROADMAP.md`](ROADMAP.md) for the versioned roadmap.
+SCLite 2.0 is feature-frozen. Maintenance may correct implementation,
+documentation, tests, packaging and validation while keeping governance, trust
+decisions, live execution, revocation, raw evidence storage, replay state and
+carrier adapters outside SCLite core. See [`ROADMAP.md`](ROADMAP.md).

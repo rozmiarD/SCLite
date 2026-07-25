@@ -1,276 +1,217 @@
 # SCLite Validation
 
-SCLite validation is local and public-safe. It does not run live targets.
+This document describes the gates for the current `sclite-core==2.0.0` source.
+Repository code, packaged schemas, tests and executable validators are
+authoritative. Historical release prose is not a current compatibility source.
 
-Extension-boundary validation includes `tests/test_extension_resolver.py`,
-`tests/test_neutral_profile_refs.py`, and
-`tests/test_2_0_removals.py`. These prove deterministic offline resolution,
-collision and unknown-namespace handling, completed removals, opaque identifier
-round-trips and absence of implicit publication claims. Cross-language behavior
-is checked by `tests/test_cross_language_vectors.py` and
-`scripts/verify_vectors.mjs`.
+## Canonical development gate
 
-The roadmap in `ROADMAP.md` preserves this boundary: scoped-ticket, receipt-bounded-evidence, trust-profile, carrier-profile, and review-bundle checks remain artifact validation/review surfaces unless explicitly implemented in an external runtime.
-
-## Fast local gate
+From an editable development install:
 
 ```bash
 python -m pip install -e '.[dev]'
 scripts/dev_gate.sh
 ```
 
-For Make users, `make validate` delegates to the same gate. The gate runs the
-public validation checklist, strict schema gate, guarded-strict security
-regression gate, public-truth validator, and full pytest.
+`scripts/dev_gate.sh` runs:
 
-## Publication validation gate
+1. `scripts/public_validation_gate.sh`;
+2. `scripts/strict_schema_gate.sh`;
+3. `scripts/security_regression_gate.sh`;
+4. `python scripts/validate_public_truth.py`;
+5. the complete pytest suite.
 
-Run the full public-safe checklist from the repository root:
+Run static checks separately:
 
 ```bash
-scripts/public_validation_gate.sh
-scripts/strict_schema_gate.sh
-scripts/security_regression_gate.sh
+python -m ruff check .
+python -m mypy
+node scripts/verify_vectors.mjs conformance/sclite-2.0-vectors.json
+```
+
+## Public truth and documentation anti-drift
+
+```bash
 python scripts/validate_public_truth.py
-python -m pytest -q
+python -m pytest -q tests/test_public_truth.py tests/test_consumer_contracts.py \
+  tests/test_cli_surface_split.py tests/test_packaged_fixture_sync.py
 ```
 
-The `kernel_guard_hmac_v1` compatibility golden vector is under
-`tests/golden/kernel_guard_hmac_v1/` and is enforced by
-`tests/test_kernel_guard.py`. It rebuilds the sidecar from fixed manifest,
-nonce, key, and key_id inputs, then compares the whole sidecar plus
-hard-coded entry tags and root tag. If canonical JSON, transcript fields, or
-HMAC inputs change without a new profile name, this test must fail.
+Together, the validator and targeted tests above check:
 
-Security regressions that define the guarded-strict threat boundary are
-grouped in:
+- distribution/import/version and published install truth;
+- frozen top-level exports and the controlled-consumer import inventory;
+- current artifact fixtures and retired 1.x surface absence;
+- active Markdown links and referenced test paths;
+- documented CLI command lines against the actual kernel/devtools registry;
+- current 2.0 wording and removed-surface context;
+- 2.0 consumer-inventory disposition semantics;
+- source/package fixture parity and non-authority claims.
+
+Changelog and `docs/archive/` are historical records and are excluded from
+current-wording checks.
+
+## CLI surface
+
+Kernel commands use `sclite`, `scl` or `python -m sclite.kernel_cli`:
 
 ```bash
-scripts/security_regression_gate.sh
+python -m sclite.kernel_cli validate-chain \
+  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli verify-lifecycle \
+  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+python -m sclite.kernel_cli validate-ticket \
+  sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
+  --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
+python -m sclite.kernel_cli verify-ticket-use \
+  sclite/examples/scoped-ticket-v0.3/execution_ticket.json \
+  --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json \
+  --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json \
+  --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
+python -m sclite.kernel_cli review \
+  examples/govengine-integration --format json --fail-on review
+python -m sclite.kernel_cli export-review-bundle \
+  examples/govengine-integration --mode local_review --format markdown
+python -m sclite.kernel_cli validate-artifact \
+  --schema redaction_policy.v0.2 \
+  examples/redaction-policy/redaction_policy.json
 ```
 
-The gate uses only synthetic fixtures and test-local HMAC keys. It covers
-extra/duplicate lifecycle roles, artifact-body tampering, manifest metadata
-spoofing, root-chain-digest tampering, previous-tag tampering, nonce/key_id
-tampering, old guard reuse with changed manifest metadata, missing guard, and
-wrong guard key failures.
+Inspection and fixture commands use `sclite-devtools` or
+`python -m sclite.devtools`:
 
-`verification_result.v1` is validated in secure-bundle tests and strict schema
-validation. Its required layer statuses are `artifact_chain`,
-`strict_lifecycle`, `kernel_guard`, `ticket_use`, `replay`,
-`public_identity`, and `runtime_enforcement`; replay remains `not_checked`
-inside SCLite and identity/runtime authority remain `not_claimed`.
-The typed production API additionally serializes
-`verification_result.v1.1`, including bundle digest, policy, verifier version
-and performed checks. Tests explicitly demonstrate that neither the frozen
-Python type nor schema-valid JSON is unforgeable.
+```bash
+python -m sclite.devtools explain-ticket \
+  sclite/examples/scoped-ticket-v0.3/execution_ticket.json
+python -m sclite.devtools hash-artifact \
+  --schema execution_contract.v0.2 \
+  examples/review-bundle/03_execution_contract.json
+python -m sclite.devtools review-lifecycle \
+  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
+  --format json
+python -m sclite.devtools scope-fidelity \
+  --target https://example.com/login \
+  --normalized-arg https://example.com/login \
+  --fail-on review
+```
 
-Verifier JSON output also exposes explicit layer status fields before the
-stable verification-result envelope is built:
+Each entrypoint rejects commands owned by the other surface. See
+[`docs/CLI_EXIT_CODES.md`](docs/CLI_EXIT_CODES.md).
 
-- `validate-chain`: `chain_status=passed`,
-  `verification_posture=integrity_only`, `lifecycle_status=not_checked`;
-- `verify-lifecycle`: `chain_status=passed`,
-  `verification_posture=strict_lifecycle`, `lifecycle_status=passed`;
-- `verify-guarded-chain`: adds `guard_status=passed`,
-  `replay_status=not_checked`;
-- `verify-secure-bundle`: reports all local verifier layers while preserving
-  replay, public identity, and runtime enforcement as non-claims.
+## Schema validation
 
-Strict lifecycle verification is the executable-chain safety path. It rejects
-policy `deny`, owner-approval-required chains without a consumable approved
-ticket, and terminal ticket approval states such as `rejected`, `expired`, and
-`revoked`. Python callers can use `verify_lifecycle_manifest()` for that
-fail-safe path.
-
-Schema-version compatibility is documented in
-`docs/SCHEMA_COMPATIBILITY.md`. That matrix keeps v0.2 lifecycle, v0.3 scoped
-ticket, receipt/evidence compatibility fallback, reaction, trigger, watchdog,
-review-bundle, and `verification_result.v1` support explicit without turning
-unknown fields or artifact IDs into authority.
-
-Receipt-bounded evidence validation treats structured claim fields as
-authoritative and keeps legacy text markers as a conservative compatibility
-fallback. Strict evidence profiles reject legacy marker inference and require
-structured claim fields. Tests cover benign-looking claims with
-`requires_network_execution=true`, legacy `completed_execution` marker text,
-receipt/evidence descriptor drift, replay live-execution requirements, and
-public-safe review output that must not disclose raw private fixture values.
-
-Review records and `verify-secure-bundle` run the ticket-use verifier when a
-complete v0.3 ticket/contract/receipt/evidence lifecycle is present. v0.2-only
-chains remain review/not-applicable for ticket-use rather than failing
-compatibility by accident.
-
-Security-model and profile-freeze claims are guarded by
-`python scripts/validate_public_truth.py`. The validator checks that
-`SECURITY_MODEL.md`, `docs/SECURITY_PROFILES.md`, `SPEC.md`, and README keep
-the current boundaries explicit:
-
-- `kernel_guard_hmac_v1` is sidecar/domain-auth HMAC, not PKI;
-- `guarded-strict` is fail-closed secure-bundle verification;
-- replay freshness is `not_checked` in SCLite and belongs to GovEngine/host
-  state;
-- transcript/canonicalization changes require a new profile name.
-
-The dependency-free validator is intentionally a subset validator. It exists so SCLite can keep zero runtime dependencies and still validate the repository's simple schema shapes in offline/minimal environments. It is not a full JSON Schema Draft 2020-12 implementation.
-
-| JSON Schema keyword | Dependency-free subset | Strict `jsonschema` mode |
-| --- | --- | --- |
-| `const` | supported | supported |
-| `enum` | supported | supported |
-| `type` | supported, including simple type arrays | supported |
-| `required` | supported | supported |
-| `properties` | supported recursively | supported |
-| `additionalProperties: false` | supported | supported |
-| `items` with one schema | supported recursively | supported |
-| `minLength` | supported | supported |
-| `minimum` | supported | supported |
-| local `$ref` into packaged schema `$defs` | supported | supported |
-| `pattern` | supported for Python `re` patterns used by packaged schemas | supported |
-| `maxLength` | supported | supported |
-| `maximum` | supported | supported |
-| `minItems` / `maxItems` | supported | supported |
-| `format`, `oneOf`, `anyOf`, `allOf`, `not`, `if/then/else`, `dependentRequired`, `uniqueItems` | not implemented by the subset validator | supported according to `jsonschema` behavior |
-
-For CI and release validation, run both:
+The default dependency-free validator implements the documented packaged-schema
+subset. The strict release gate uses `jsonschema.Draft202012Validator`:
 
 ```bash
 scripts/public_validation_gate.sh
 scripts/strict_schema_gate.sh
 ```
 
-If strict mode and subset mode disagree, treat strict mode as authoritative for release readiness and either simplify the schema or add explicit implementation/tests for the missing subset keyword.
+Supported keywords and version combinations are documented in
+[`docs/SCHEMA_COMPATIBILITY.md`](docs/SCHEMA_COMPATIBILITY.md). Unknown major
+versions fail closed. Artifact `schema_ref` values resolve to packaged schemas
+unless external resolution is explicitly enabled.
 
-The scripts expand to the current lifecycle, ticket, profile, review-bundle,
-negative-bundle, and strict-schema checks. The superseded proof-trace fixture
-and its validation commands are retired; they are not part of this release
-gate or the installed package. The equivalent current
-command set starts with:
+Untrusted artifact and review-bundle JSON input paths use bounded loaders that
+reject duplicate keys, invalid UTF-8, `NaN`/`Infinity`, excessive depth/node
+counts and configured byte/inventory limits.
 
-```bash
-python -m sclite.kernel_cli validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.kernel_cli verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-python -m sclite.kernel_cli validate-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json
-python -m sclite.devtools explain-ticket sclite/examples/scoped-ticket-v0.3/execution_ticket.json
-python -m sclite.kernel_cli verify-ticket-use sclite/examples/scoped-ticket-v0.3/execution_ticket.json --contract sclite/examples/scoped-ticket-v0.3/execution_contract.json --receipt sclite/examples/scoped-ticket-v0.3/execution_receipt.json --evidence-contract sclite/examples/scoped-ticket-v0.3/evidence_contract.json
-python -m sclite.devtools review-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json --format json
-python -m sclite.kernel_cli review examples/review-bundle --format json
-python -m sclite.kernel_cli review examples/govengine-integration --format json --fail-on review
-python -m sclite.kernel_cli review examples/local-admin-change --format json --fail-on review
-python -m sclite.kernel_cli review examples/bad-review-bundle-cross-host --format json --fail-on none
-python -m sclite.kernel_cli validate-trust-profile examples/govengine-integration/trust_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.kernel_cli validate-carrier-profile examples/govengine-integration/carrier_profile_ref.json --subject examples/govengine-integration/04_execution_ticket.json
-python -m sclite.kernel_cli export-review-bundle examples/govengine-integration --format markdown
-python -m sclite.devtools validate-artifact --schema redaction_policy.v0.2 examples/redaction-policy/redaction_policy.json
-python -m sclite.devtools validate-artifact --schema redaction_receipt.v0.2 examples/redaction-receipt/redaction_receipt.json
-python -m sclite.devtools validate-artifact --schema public_validation_surface_index.v0.2 examples/public-validation-surface-index/public_validation_surface_index.json
-python -m sclite.devtools validate-artifact --schema public_snapshot_manifest.v0.2 examples/public-snapshot-manifest/public_snapshot_manifest.json
-python -m pytest -q tests/test_reactions.py tests/test_trigger_decisions.py tests/test_watchdog_decisions.py
-python -m pytest -q
-```
-
-`verify-lifecycle` is stricter than generic chain validation. It requires the
-canonical v0.2 lifecycle role sequence exactly, with no extra roles, duplicate
-roles, or changed order. `validate-chain` remains available for generic
-hash-chain verification; pass `--strict-lifecycle` when that command should
-also enforce lifecycle role strictness.
-
-`verify-guarded-chain` is optional. It verifies a `kernel_guard_hmac_v1`
-sidecar when a GovEngine/KERNEL-domain HMAC secret is available through
-`--guard-key-env` (default: `SCLITE_KERNEL_GUARD_KEY`). This command does not
-check replay freshness; GovEngine or another runtime must keep the replay
-store for `root_tag`, `chain_id`, ticket/run id, and `key_id`.
-Production Guard verification requires at least 32 key bytes after UTF-8
-encoding and reports entropy as `not_checked`. Historical short-key inspection
-is limited to `verify-guarded-chain --legacy-read-only-key-policy`; its posture
-is `legacy_read_only_guard` and cannot satisfy the secure production profile.
-
-For runtime-consumable guarded bundles, prefer the fail-closed profile:
+## Security regression
 
 ```bash
-SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
-python -m sclite.kernel_cli verify-secure-bundle examples/govengine-integration \
-  --guard /path/to/kernel_guard_manifest.json
+scripts/security_regression_gate.sh
 ```
 
-`verify-secure-bundle` is `guarded-strict`: artifact-chain verification,
-strict lifecycle, `kernel_guard_hmac_v1`, manifest metadata binding,
-ticket-use status for v0.3 bounded evidence, and fail-on-missing-guard.
-`validate-chain`, `verify-lifecycle`,
-`review-lifecycle`, and `review` also expose `--require-guard` /
-`--fail-on-unguarded` for callers that intentionally want guard preflight on
-those older commands.
+The gate covers descriptor/path boundaries, strict lifecycle semantics, Kernel
+Guard transcript binding, guarded bundle verification, JSON limits, schema
+resolution and extension resolver behavior.
 
-Explicit `--guard` paths are resolved relative to the caller's current working
-directory. If `--guard` is omitted, SCLite looks for
-`kernel_guard_manifest.json` next to the manifest or review-bundle target. The
-public `examples/govengine-integration` fixture is intentionally unguarded;
-guard sidecars are produced by the host/GovEngine domain or by tests using
-synthetic local keys.
+Security posture is layered:
 
-## Public Python API
+- `validate-chain` reports integrity only;
+- `verify-lifecycle` adds exact lifecycle semantics;
+- `verify-guarded-chain` adds shared-secret guard authentication;
+- `verify-secure-bundle` requires guarded-strict verification.
 
-The frozen top-level Python import surface for the 1.0 line is documented in
-[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md) and guarded by
-`tests/test_public_api.py`.
+SCLite reports replay as `not_checked`. Production replay stores should provide
+atomic check-and-set behavior outside SCLite. Explicit `--guard` paths are
+resolved relative to the caller's current working directory; omitted guard
+paths resolve next to the selected manifest/bundle. Path validation rejects
+manifest and Kernel Guard sidecar paths that escape the selected root.
 
-## Review-bundle compatibility
+Kernel Guard transcript/canonicalization changes require a new profile name.
 
-The stable `0.5` review-bundle shape remains the downstream compatibility
-boundary for GovEngine and Ravenclaw on the 1.0 stable line. Consumers may
-rely on the canonical `review_bundle` directory shape, the
-`review_record.v0.1` output contract, the `sclite-review-bundle-v0.1` review
-profile, and `review_bundle:<verdict>:<artifact_count>:<root_chain_digest>`
-summary output. They must not assume a security fixture story, private fixture
-paths, runtime execution, trust authority, or adapter behavior from the bundle.
+## Python verification
 
-`tests/test_review_bundles.py` keeps the public-safe GovEngine integration and
-local-admin-change fixture families aligned at that contract level while their
-domain narratives remain different.
+Preferred typed front door:
 
-Expected result:
+```python
+from sclite import VerificationPolicy, verify_artifact, verify_bundle
+```
 
-- current lifecycle/review fixture validation passes;
-- v0.2 lifecycle chain validation and strict semantic lifecycle verification
-  pass;
-- v0.3 scoped-ticket schema, binding, explanation, and static ticket-use checks pass;
-- lifecycle review records and lifecycle-aware Scope Fidelity checks are generated conservatively;
-- canonical review bundles validate and export to Markdown;
-- GovEngine integration fixture passes with `--fail-on review`;
-- local-admin-change fixture passes with `--fail-on review` and demonstrates the same lifecycle outside the security-domain fixture path;
-- the intentional cross-host negative fixture fails when `--fail-on review` is enforced;
-- public truth validation confirms the published `1.0.4` stable package line;
-- optional `kernel_guard_hmac_v1` sidecar verification detects guard, metadata,
-  sequence, previous-tag, and root-tag drift when a guard key is supplied;
-- secure-bundle verification fails closed on missing guard, loose lifecycle,
-  metadata spoofing, and full-chain forgery attempts using an old guard;
-- `guarded-strict` rejects manifest and Kernel Guard sidecar paths that escape
-  the verification root after symlink resolution;
-- artifact schema validation passes in default dependency-free mode and optional strict Draft 2020-12 mode;
-- hash and Scope Fidelity commands complete;
-- pytest passes.
+`verify_bundle()` requires an explicit policy. Python callers using lower-level
+chain APIs can use `verify_lifecycle_manifest()` or pass
+`require_lifecycle=True` where supported; generic chain verification does not
+silently imply lifecycle verification.
 
-## Package build gate
+Machine-readable secure outcomes use the frozen `verification_result.v1`
+contract with the additive `verification_result.v1.1` serializer.
 
-Before any future PyPI/TestPyPI release:
+The frozen top-level Python import surface for the 2.0 line is documented in
+[`docs/PUBLIC_API.md`](docs/PUBLIC_API.md).
+
+## Consumer compatibility
+
+The machine-readable controlled-consumer contract is
+`sclite/contracts/consumer_imports.v1.json`.
+
+```bash
+python -m sclite.consumer_contracts --imports-only
+python scripts/validate_forbidden_consumer_imports.py \
+  ../govengine ../rexecop ../tecrax
+```
+
+Each consumer keeps its own exact dependency pin. SCLite source compatibility
+does not claim that an already published consumer artifact has adopted a newer
+pin. The second command scans the live sibling checkouts for retired SCLite
+imports; it is intentionally separate from the repo-local public-truth
+validator.
+
+## Package and release gates
+
+Package smoke is opt-in release-readiness evidence only:
 
 ```bash
 scripts/package_smoke.sh
+scripts/reproducible_build_gate.sh
+scripts/release_ab_repro_gate.sh
 ```
 
-The package smoke builds wheel/sdist artifacts in a temporary directory, runs
-`twine check`, installs the generated wheel into a clean environment, runs
-`pip check`, and confirms that the distribution name `sclite-core` still
-imports as `sclite`. It is release-readiness evidence only; it does not publish
-or tag.
+These gates build wheel/sdist artifacts, run `twine check`, install into clean
+environments, run `pip check`, validate entrypoints/import inventory and compare
+reproducible outputs. The source tree must not contain stale `build/`, `dist/`
+or egg-info artifacts when the package smoke starts.
 
-## Non-claims
+Before publication also run:
 
-Passing validation does not prove:
+```bash
+python scripts/validate_external_review.py --help
+python scripts/validate_release_record_commit.py --help
+```
 
-- legal authorization;
-- live vulnerability evidence;
-- execution safety;
-- production deployment readiness;
-- adapter/protocol correctness.
+Release workflows bind tag/version, reviewed source commit and built artifacts.
+The profile freeze docs must remain aligned, and any incompatible security
+profile change requires a new profile identity.
+
+## Expected result
+
+A release candidate is acceptable only when all of the following agree:
+
+- source version, package metadata and public truth;
+- kernel/devtools CLI registry and examples;
+- packaged schemas, source schemas and conformance vectors;
+- consumer import inventory and live controlled-consumer imports;
+- wheel/sdist contents and clean-install behavior;
+- external review and release evidence;
+- documentation claims and non-claims.

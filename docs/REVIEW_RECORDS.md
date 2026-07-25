@@ -68,4 +68,8 @@ Scope Fidelity v0.2 compares explicit lifecycle target references across:
 
 Execution receipts and evidence contracts are treated as digest-linked lifecycle artifacts rather than independent target authorities unless they expose explicit targets. This keeps the check static and conservative.
 
-Scope Fidelity is a drift check, not a scope authority. It does not resolve DNS, redirects, wildcard scope, CIDR/IP ranges, IPv6, IDN/punycode, port boundaries, subdomain policy, eTLD+1, localhost/private-network policy, or URL canonicalization edge cases. Runtime policy layers such as GovEngine or Ravenclaw must decide whether work is authorized.
+Scope Fidelity is a drift check, not a scope authority. It does not resolve
+DNS, redirects, wildcard scope, CIDR/IP ranges, IPv6, IDN/punycode, port
+boundaries, subdomain policy, eTLD+1, localhost/private-network policy, or URL
+canonicalization edge cases. GovEngine must decide whether work is admitted;
+RExecOp must enforce that decision at runtime.

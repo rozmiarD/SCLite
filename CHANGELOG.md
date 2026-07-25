@@ -1,6 +1,6 @@
 # Changelog
 
-## Post-tag release tooling
+## Unreleased
 
 - Updates SBOM/audit tooling to versions compatible with fixed `lxml` after the
   original `v2.0.0` run failed closed before publication, and adds an immutable-
@@ -8,6 +8,9 @@
 - Corrects the post-release README and current documentation to match the 2.0
   ownership removals, CLI split, typed front door, maturity metadata and
   downstream-pin boundary.
+- Corrects kernel/devtools command examples, current 2.0 ownership and
+  maintenance documentation, archives pre-2.0 roadmap/freeze history, and adds
+  fail-closed documentation anti-drift checks.
 
 ## 2.0.0 - Stable verifier hardening and neutral boundaries
 
@@ -41,8 +44,8 @@
 
 - Adds the immutable, offline `SchemaResolver` front door with namespaced
   identifiers, collision rejection and deterministic SHA-256 inventories.
-- Moves reaction, trigger, watchdog and automation ownership to RExecOp;
-  SCLite's v0.1 built-ins now emit formal compatibility deprecations.
+- Moves reaction, trigger, watchdog and automation ownership to RExecOp and
+  removes their former SCLite built-ins from the 2.0 package.
 - Adds trust/carrier reference schemas v0.2 with opaque namespaced identifiers
   and a legacy translator without trust or publication claims.
 - Marks host parsing and heuristic sanitizing as host/devtools compatibility
@@ -50,9 +53,9 @@
 
 - Splits the installed CLI entrypoints: `sclite`/`scl` accept kernel
   verification/materialization workflows, while `sclite-devtools` owns local
-  inspection, fixture and heuristic-redaction commands. `python -m sclite.cli`
-  remains a warning compatibility path. The forgeable fixture verdict builder
-  is removed from `sclite.__all__` but remains an importable shim through 2.0.
+  inspection, fixture and heuristic-redaction commands. The forgeable fixture
+  verdict builder is absent from `sclite.__all__`; the explicit
+  `sclite.testing` fixture builder remains non-production.
 - Adds immutable `policy_decision.v0.3` and `execution_contract.v0.3` schema
   identities for scope provenance. Strict lifecycle verification binds the
   embedded GovEngine decision digest, assertion equality and exact target;
@@ -67,11 +70,6 @@
   RExecOp and Tecrax. Every public export has a classification, owner and
   disposition; consumer AST gates reject unreviewed top-level or deep imports,
   and wheel smoke imports every allowed symbol.
-- Makes `automation_chain.v0.1` verification claims explicit through
-  `checked`, `not_checked`, `host_asserted` and external-owner fields. The
-  frozen migration contract keeps graph/recovery semantics in RExecOp and
-  admission authenticity/decision binding in GovEngine; SCLite remains the
-  shape, reference and declared-budget verifier.
 
 ## 2.0.0rc1 - Strict JSON input policy candidate
 

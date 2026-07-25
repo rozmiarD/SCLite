@@ -87,412 +87,412 @@
   "public_exports": {
     "ImmutableSchemaResolver": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SchemaInventoryEntry": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SchemaResolutionError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SchemaResolver": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "ArtifactDescriptor": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "CHAIN_CANONICALIZATION_VERSION": {
       "classification": "internal",
-      "disposition": "replace_with_typed_front_door_before_2.0",
+      "disposition": "internal_compatibility_2.x",
       "owner": "sclite"
     },
     "CHAIN_HASH_ALGORITHM": {
       "classification": "internal",
-      "disposition": "replace_with_typed_front_door_before_2.0",
+      "disposition": "internal_compatibility_2.x",
       "owner": "sclite"
     },
     "ChainVerificationError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "DISCLOSURE_STATUS_ORDER": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "DisclosureStatus": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "DisclosureStatusError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "KERNEL_GUARD_MINIMUM_KEY_BYTES": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "KERNEL_GUARD_PROFILE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "KernelGuardError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "KernelGuardKeyPolicy": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "LIFECYCLE_SCOPE_FIDELITY_SCHEMA_REF": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "LIFECYCLE_SCOPE_FIDELITY_SCHEMA_VERSION": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_BUNDLE_MANIFEST_FILE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_BUNDLE_MARKDOWN_FILE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_BUNDLE_RECEIPT_FILE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_BUNDLE_REQUIRED_FILES": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_RECORD_SCHEMA": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "REVIEW_RECORD_SCHEMA_REF": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "ReviewBundleError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "ReviewRecordError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCLiteError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCLiteSchemaValidationError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCLiteValidationError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCOPED_TICKET_SCHEMA_REF": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCOPE_FIDELITY_ARTIFACT_TYPE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCOPE_FIDELITY_SCHEMA_REF": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SCOPE_FIDELITY_SCHEMA_VERSION": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SECURE_BUNDLE_POSTURE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SECURE_BUNDLE_PROFILE": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "SecureBundleError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "TICKET_PROFILES": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "TicketSemanticError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "TicketUseVerificationError": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VERIFICATION_RESULT_SCHEMA_REF": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VERIFICATION_RESULT_SCHEMA_REF_V1_1": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VerificationLimits": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VerificationPolicy": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VerificationResult": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VerifiedArtifact": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "VerifiedBundle": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "__version__": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "artifact_descriptor": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_artifact_chain_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_disclosure_status": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_kernel_guard_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_lifecycle_scope_fidelity_report": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_review_record_from_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_scope_fidelity_report": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "build_scope_fidelity_report_from_approved_spec": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "explain_ticket": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "export_review_bundle_markdown": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "manifest_metadata_digest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "materialize_review_bundle": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "normalized_args_digest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "relative_public_path": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "resolve_guard_path": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "resolve_manifest_path": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "review_bundle": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "review_bundle_summary": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "review_record_markdown": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "serialize_verification_result": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "summarize_scope_fidelity": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "ticket_summary": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_disclosure_transition": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_lifecycle_scope_fidelity_report": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_review_bundle_shape": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_scope_fidelity_report": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_ticket_schema": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "validate_ticket_semantics": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_artifact_chain_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_artifact": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_bundle": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_kernel_guard_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_lifecycle_manifest": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_secure_bundle": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_secure_bundle_result": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     },
     "verify_ticket_use": {
       "classification": "stable",
-      "disposition": "retain_1.x",
+      "disposition": "retain_2.x",
       "owner": "sclite"
     }
   },
