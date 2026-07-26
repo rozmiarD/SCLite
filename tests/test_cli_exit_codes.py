@@ -98,6 +98,16 @@ def test_tampered_chain_exit_code(tmp_path: Path) -> None:
     assert 'artifact_chain_failed' in proc.stderr
 
 
+def test_packaged_lifecycle_example_selector() -> None:
+    chain = _run(['validate-chain', '--example', 'contract-lifecycle-v0.2'])
+    lifecycle = _run(['verify-lifecycle', '--example', 'contract-lifecycle-v0.2'])
+
+    assert chain.returncode == 0, chain.stderr
+    assert 'artifact_chain_ok:' in chain.stdout
+    assert lifecycle.returncode == 0, lifecycle.stderr
+    assert 'lifecycle_ok:' in lifecycle.stdout
+
+
 def test_invalid_review_bundle_exit_code(tmp_path: Path) -> None:
     bundle = tmp_path / 'bundle'
     shutil.copytree(GOVENGINE_BUNDLE, bundle)

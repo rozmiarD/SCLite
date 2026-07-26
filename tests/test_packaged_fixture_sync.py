@@ -29,3 +29,8 @@ def test_packaged_public_review_fixtures_match_source_fixtures() -> None:
         assert _relative_files(source) == _relative_files(packaged), fixture
         for rel_path in sorted(_relative_files(source)):
             assert (packaged / rel_path).read_bytes() == (source / rel_path).read_bytes(), f'{fixture}/{rel_path}'
+
+
+def test_packaged_lifecycle_fixture_includes_its_manifest() -> None:
+    fixture = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2'
+    assert (fixture / 'artifact_chain_manifest.json').is_file()

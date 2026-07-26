@@ -120,9 +120,14 @@ Current v0.2 artifacts:
 Verify the lifecycle fixture:
 
 ```bash
-sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite validate-chain --example contract-lifecycle-v0.2
+sclite verify-lifecycle --example contract-lifecycle-v0.2
 ```
+
+`--example contract-lifecycle-v0.2` resolves the fixture packaged in the
+installed distribution, so these commands work from an empty directory after
+installation. Filesystem manifest paths remain supported for your own
+artifacts.
 
 `validate-chain` verifies the ordered hash-chain. `verify-lifecycle` applies
 the lifecycle gate on top and requires the exact canonical v0.2 role sequence
@@ -355,8 +360,8 @@ scripts/dev_gate.sh
 Validate the v0.2 lifecycle chain:
 
 ```bash
-sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
-sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite validate-chain --example contract-lifecycle-v0.2
+sclite verify-lifecycle --example contract-lifecycle-v0.2
 ```
 
 Use `sclite validate-chain --strict-lifecycle ...` when a generic chain check
@@ -367,7 +372,7 @@ Optionally verify a GovEngine/KERNEL-domain guard sidecar:
 ```bash
 SCLITE_KERNEL_GUARD_KEY='local-test-secret-at-least-32-bytes' \
   sclite verify-guarded-chain \
-  sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json \
+  /path/to/artifact_chain_manifest.json \
   --guard /path/to/kernel_guard_manifest.json \
   --strict-lifecycle
 ```
