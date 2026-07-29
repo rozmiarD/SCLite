@@ -1,6 +1,7 @@
 # SCLite Validation
 
-This document describes the gates for the current `sclite-core==2.0.0` source.
+This document describes the gates for the current `sclite-core==2.0.1` source:
+the unpublished non-prerelease 2.0.1 release source; publication pending.
 Repository code, packaged schemas, tests and executable validators are
 authoritative. Historical release prose is not a current compatibility source.
 

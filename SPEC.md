@@ -1,8 +1,9 @@
 # SCLite Draft Specification
 
-Status: **audited and published 2.0.0 stable lifecycle/review and guarded verification surface**.
-Current package is `sclite-core==2.0.0`, and the Python import package remains
-`sclite`. The current front door is the review lifecycle substrate:
+Status: **unpublished non-prerelease 2.0.1 release source; publication pending**.
+Current source package is `sclite-core==2.0.1`, over the frozen 2.0
+lifecycle/review and guarded verification surface. The Python import package
+remains `sclite`. The current front door is the review lifecycle substrate:
 v0.2 lifecycle artifacts, v0.3 scoped ticket / receipt-bounded evidence checks,
 v0.5 review-bundle packaging, guarded-strict verification, typed verification
 results, and an explicit immutable schema resolver. The 2.0 stable release
@@ -322,8 +323,8 @@ scope/input -> policy decision -> prepared execution spec -> approved execution 
 ```
 
 The legacy builders, fixture validators, schemas owned only by this trace, and
-its fixture directories are not part of the `2.0.0` installed/current
-surface. Current work uses the lifecycle/review-bundle model above. Generic
+its fixture directories are not part of the current 2.0 maintenance surface.
+Current work uses the lifecycle/review-bundle model above. Generic
 redaction, snapshot-manifest, Scope Fidelity, and review-record schemas remain
 because the current lifecycle still uses them; their schema suffixes are
 format identifiers, not legacy product support.

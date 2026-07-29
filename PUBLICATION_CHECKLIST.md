@@ -77,8 +77,28 @@ The security regression gate must pass and must remain synthetic-key-only.
 `verification_result.v1` must keep replay as host-owned state and
 public-identity/runtime-enforcement as explicit non-claims.
 
-For each stable release, current documentation and validation must state the
-exact latest published PyPI release tracked by `scripts/validate_public_truth.py`.
+## Source-versus-published truth
+
+Source and publication identities are separate durable facts. When the current
+source version differs from the latest published package, active release-truth
+documents must state both values and must describe publication as pending. The
+README source badge and current-source wording must use the source version;
+the PyPI badge, PyPI link and exact PyPI install command must use only the
+latest published version.
+
+For the current maintenance source, expected truth is:
+
+- current source version and source release label: `2.0.1`;
+- source status: unpublished non-prerelease 2.0.1 release source; publication
+  pending;
+- latest published PyPI package, badge, link and install pin:
+  `sclite-core==2.0.0`.
+
+The `2.0.1` source must not be described as published or installable from PyPI
+unless publication has completed and every source-versus-published truth check
+is updated in the same reviewed change. For each stable release, current
+documentation and validation must state the exact latest published PyPI release
+tracked by `scripts/validate_public_truth.py`.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current
@@ -116,7 +136,7 @@ Expected state:
 - scoped-ticket validation and ticket-use/evidence-bound checks pass;
 - lifecycle review records, review bundles, GovEngine integration fixture, and negative drift fixture validate as expected;
 - local-admin-change review bundle validates as a second public-safe non-security fixture;
-- public truth validator passes for the current published stable package truth;
+- public truth validator passes for the current-source/latest-published split;
 - Scope Fidelity fixture validates;
 - generated Scope Fidelity report exits cleanly;
 - pytest passes.

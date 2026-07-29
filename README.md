@@ -1,7 +1,7 @@
 # SCLite
 
 [![CI: pytest](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml/badge.svg)](https://github.com/rozmiarD/SCLite/actions/workflows/ci.yml)
-[![Stable source: sclite-core 2.0.0](https://img.shields.io/badge/stable%20source-sclite--core%202.0.0-blueviolet.svg)](pyproject.toml)
+[![Current source: sclite-core 2.0.1](https://img.shields.io/badge/current%20source-sclite--core%202.0.1-blueviolet.svg)](pyproject.toml)
 [![PyPI stable: sclite-core 2.0.0](https://img.shields.io/badge/package-sclite--core%202.0.0-blueviolet.svg)](https://pypi.org/project/sclite-core/2.0.0/)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 [![Contracts: JSON Schema](https://img.shields.io/badge/contracts-JSON%20Schema-informational.svg)](schemas/)
@@ -17,8 +17,8 @@ governance authority, domain profile, PKI authority, or raw-evidence store.
 
 ## Status
 
-- Version: `2.0.0`
-- Release status: **audited and published non-prerelease 2.0.0**
+- Version: `2.0.1`
+- Release status: **unpublished non-prerelease 2.0.1 release source; publication pending**
 - Project maturity classifier: **Development Status :: 4 - Beta**
 - Latest published PyPI package: `sclite-core==2.0.0`
 - Python requirement: `>=3.11`; release CI covers Python 3.11, 3.12 and 3.13

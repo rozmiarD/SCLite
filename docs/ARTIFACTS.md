@@ -1,7 +1,8 @@
 # SCLite Artifacts
 
-Current package: `sclite-core==2.0.0`; latest published public package:
+Current source package: `sclite-core==2.0.1`; latest published public package:
 `sclite-core==2.0.0`.
+Status: unpublished non-prerelease 2.0.1 release source; publication pending.
 
 The current integration front door is the review lifecycle: canonical artifact
 descriptors, lifecycle manifests, scoped tickets, receipt-bounded evidence,

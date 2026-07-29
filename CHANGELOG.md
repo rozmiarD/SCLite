@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.0.1 - Maintenance source (unpublished; publication pending)
+
 - Updates SBOM/audit tooling to versions compatible with fixed `lxml` after the
   original `v2.0.0` run failed closed before publication, and adds an immutable-
   tag recovery dispatch with explicit signed recovery provenance.
@@ -11,6 +13,11 @@
 - Corrects kernel/devtools command examples, current 2.0 ownership and
   maintenance documentation, archives pre-2.0 roadmap/freeze history, and adds
   fail-closed documentation anti-drift checks.
+- Corrects the installed-package quickstart to locate the already-packaged
+  lifecycle fixture with standard-library `importlib.resources` and invoke the
+  frozen existing path-based `sclite` CLI. The correction removes the additive
+  post-2.0 `--example` selector; no new contracts or runtime behavior are
+  introduced.
 
 ## 2.0.0 - Stable verifier hardening and neutral boundaries
 

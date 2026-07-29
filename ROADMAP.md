@@ -1,8 +1,10 @@
 # SCLite Roadmap
 
-Current package: `sclite-core==2.0.0`.
+Current source package: `sclite-core==2.0.1`.
 
 Latest published public package: `sclite-core==2.0.0`.
+
+Source status: unpublished non-prerelease 2.0.1 release source; publication pending.
 
 SCLite 2.0 is the frozen truth, contract, evidence-integrity and verification
 layer used by the current stack. This roadmap describes maintenance work only.
@@ -89,5 +91,6 @@ Before any tag or upload:
 5. obtain explicit release approval;
 6. verify the published artifact through a clean PyPI install.
 
-SCLite `2.0.1` is not planned solely to replace the immutable long description
-of the already published `2.0.0` artifact.
+SCLite `2.0.1` is the feature-freeze-compatible maintenance source for the
+corrections above. It is broader than metadata repair, remains unpublished, and
+publication is pending an explicit release decision.

@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'scripts' / 'validate_public_truth.py'
@@ -28,7 +30,7 @@ def test_public_truth_validator_passes() -> None:
         check=True,
     )
 
-    assert result.stdout.strip() == 'public_truth_ok:sclite-core==2.0.0:import=sclite:runtime_deps=0'
+    assert result.stdout.strip() == 'public_truth_ok:sclite-core==2.0.1:import=sclite:runtime_deps=0'
 
 
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
@@ -40,22 +42,201 @@ def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
     assert 'README.md:prerelease_unsafe_package_claim:img.shields.io/pypi/v/sclite-core' in errors
 
 
-def test_public_truth_validator_accepts_published_stable_install_claim() -> None:
+def test_public_truth_validator_accepts_source_and_published_install_split() -> None:
     validator = _load_validator()
     errors: list[str] = []
 
     validator._assert_readme_package_truth(
         errors,
-            '\n'.join([
-            'Version: `2.0.0`',
+        '\n'.join([
+            'Version: `2.0.1`',
+            '[![Current source: sclite-core 2.0.1]'
+            '(https://img.shields.io/badge/current%20source-sclite--core%202.0.1-blueviolet.svg)',
+            'Release status: **unpublished non-prerelease 2.0.1 release source; '
+            'publication pending**',
             'package-sclite--core%202.0.0-blueviolet.svg',
             'https://pypi.org/project/sclite-core/2.0.0/',
             'python -m pip install sclite-core==2.0.0',
         ]),
-        '2.0.0',
+        '2.0.1',
     )
 
     assert errors == []
+
+
+def test_public_truth_validator_accepts_unpublished_candidate_truth() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_unpublished_candidate_truth(
+        errors,
+        {
+            'README.md': (
+                'unpublished non-prerelease 2.0.1 release source; publication pending\n'
+                'Latest published PyPI package: `sclite-core==2.0.0`.\n'
+            ),
+            'PUBLICATION_CHECKLIST.md': (
+                'The `2.0.1` source must not be described as published or installable '
+                'from PyPI.\n'
+            ),
+        },
+        '2.0.1',
+    )
+
+    assert errors == []
+
+
+@pytest.mark.parametrize(
+    ('path', 'claim', 'error_kind'),
+    (
+        (
+            'README.md',
+            'https://pypi.org/project/sclite-core/2.0.1/',
+            'unpublished_candidate_distribution_claim',
+        ),
+        (
+            'VALIDATION.md',
+            'python -m pip install sclite-core==2.0.1',
+            'unpublished_candidate_distribution_claim',
+        ),
+        (
+            'PUBLIC_STATUS.md',
+            'Latest published PyPI package: `sclite-core==2.0.1`.',
+            'unpublished_candidate_claimed_published',
+        ),
+        (
+            'ROADMAP.md',
+            'The 2.0.1 release source is published.',
+            'unpublished_candidate_claimed_published',
+        ),
+    ),
+)
+def test_public_truth_validator_rejects_unpublished_candidate_distribution_claims(
+    path: str,
+    claim: str,
+    error_kind: str,
+) -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_unpublished_candidate_truth(errors, {path: claim}, '2.0.1')
+
+    assert any(error.startswith(f'{path}:') and error_kind in error for error in errors)
+
+
+def test_public_truth_validator_requires_readme_project_metadata(monkeypatch) -> None:
+    validator = _load_validator()
+    project = validator._pyproject()
+    project['readme'] = 'docs/OTHER.md'
+    monkeypatch.setattr(validator, '_pyproject', lambda: project)
+
+    assert 'project_readme_mismatch:docs/OTHER.md!=README.md' in validator.collect_errors()
+
+
+@pytest.mark.parametrize(
+    ('path', 'injected'),
+    (
+        (
+            'README.md',
+            '[![PyPI stable: sclite-core 2.0.1]'
+            '(https://img.shields.io/badge/package-sclite--core%202.0.1-blueviolet.svg)]'
+            '(pyproject.toml)',
+        ),
+        ('README.md', 'https://pypi.org/project/sclite-core/2.0.1/'),
+        ('VALIDATION.md', 'python -m pip install sclite-core==2.0.1'),
+        (
+            'PUBLIC_STATUS.md',
+            'Latest published PyPI package: `sclite-core==2.0.1`.',
+        ),
+        ('ROADMAP.md', 'The 2.0.1 release source is published.'),
+        (
+            'PUBLIC_STATUS.md',
+            'Published SCLite 2.0.1 to PyPI.',
+        ),
+        (
+            'ROADMAP.md',
+            'Previously unpublished, SCLite 2.0.1 is published on PyPI.',
+        ),
+        ('PUBLIC_STATUS.md', 'SCLite 2.0.1 is available from PyPI.'),
+        (
+            'VALIDATION.md',
+            'Install from PyPI: python -m pip install --no-deps '
+            'sclite-core==2.0.1',
+        ),
+        (
+            'VALIDATION.md',
+            "Install from PyPI: python -m pip install --no-deps "
+            "'sclite-core==2.0.1'",
+        ),
+        ('CHANGELOG.md', 'Released sclite-core 2.0.1 on PyPI.'),
+        ('PUBLIC_STATUS.md', 'sclite-core==2.0.1 is now on PyPI.'),
+        ('PUBLIC_STATUS.md', 'PyPI now hosts sclite-core 2.0.1.'),
+        ('README.md', 'Install sclite-core==2.0.1 from PyPI.'),
+        (
+            'PUBLIC_STATUS.md',
+            'SCLite 2.0.1 is published to PyPI; publication pending.',
+        ),
+        (
+            'PUBLIC_STATUS.md',
+            'SCLite 2.0.1 is available from PyPI; publication pending.',
+        ),
+        (
+            'PUBLIC_STATUS.md',
+            'SCLite 2.0.1 is unpublished, but SCLite 2.0.1 is published on PyPI.',
+        ),
+    ),
+)
+def test_collect_errors_rejects_candidate_publication_matrix(
+    monkeypatch,
+    path: str,
+    injected: str,
+) -> None:
+    validator = _load_validator()
+    original_read = validator._read
+
+    def read_with_candidate_claim(requested: str) -> str:
+        text = original_read(requested)
+        if requested == path:
+            return f'{text}\n{injected}\n'
+        return text
+
+    monkeypatch.setattr(validator, '_read', read_with_candidate_claim)
+
+    assert any(
+        error.startswith(f'{path}:') and 'unpublished_candidate_' in error
+        for error in validator.collect_errors()
+    )
+
+
+@pytest.mark.parametrize(
+    'injected',
+    (
+        'Current source 2.0.1 and latest published PyPI package is '
+        'sclite-core==2.0.0.',
+        'Latest published PyPI package: sclite-core==2.0.0; '
+        'current source: 2.0.1.',
+        'SCLite 2.0.1 has not been published to PyPI; publication pending.',
+        'The 2.0.1 source must not be described as published or installable '
+        'from PyPI.',
+        'The latest published audit documents source 2.0.1.',
+    ),
+)
+def test_collect_errors_accepts_candidate_publication_matrix(
+    monkeypatch,
+    injected: str,
+) -> None:
+    validator = _load_validator()
+    original_read = validator._read
+
+    def read_with_candidate_truth(requested: str) -> str:
+        text = original_read(requested)
+        if requested == 'PUBLIC_STATUS.md':
+            return f'{text}\n{injected}\n'
+        return text
+
+    monkeypatch.setattr(validator, '_read', read_with_candidate_truth)
+
+    assert validator.collect_errors() == []
 
 
 def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
@@ -64,9 +245,9 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
 
     validator._assert_current_claim_docs(
         errors,
-        version='1.0.0',
+        version='2.0.1',
         readme=(
-            'audited and published non-prerelease 2.0.0\n'
+            'unpublished non-prerelease 2.0.1 release source; publication pending\n'
             'Development Status :: 4 - Beta\n'
             '## Out of Scope\n'
             'Runtime execution: out of scope; owned by RExecOp or another host runtime\n'
@@ -77,18 +258,18 @@ def test_public_truth_validator_rejects_stale_spec_current_package() -> None:
         roadmap=(
             'SCLite 2.0 is the frozen truth\n'
             '## 2.0 maintenance policy\n'
-            'SCLite `2.0.1` is not planned solely\n'
+            'feature-freeze-compatible maintenance source\n'
         ),
         spec=(
             'Current package release is `sclite-core==0.5.1`\n'
-            'Current package is `sclite-core==1.0.0`\n'
+            'Current source package is `sclite-core==2.0.1`\n'
             'The current front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after controlled consumers\n'
             'current lifecycle/review-bundle front door.\n'
         ),
         artifact_docs=(
-            'Current package: `sclite-core==1.0.0`\n'
-            'latest published public package: `sclite-core==1.0.0`\n'
+            'Current source package: `sclite-core==2.0.1`\n'
+            'latest published public package: `sclite-core==2.0.0`\n'
             'The current integration front door is the review lifecycle substrate\n'
             'The superseded proof-trace product path is retired after Ravenclaw\n'
         ),

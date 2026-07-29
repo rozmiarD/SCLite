@@ -20,12 +20,15 @@ from sclite.consumer_contracts import validate_public_export_inventory  # noqa: 
 from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 
-EXPECTED_VERSION = '2.0.0'
-EXPECTED_RELEASE_LABEL = '2.0.0'
+EXPECTED_VERSION = '2.0.1'
+EXPECTED_RELEASE_LABEL = '2.0.1'
 LATEST_PUBLISHED_VERSION = '2.0.0'
 LATEST_PUBLISHED_LABEL = '2.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
+EXPECTED_SOURCE_STATUS = (
+    'unpublished non-prerelease 2.0.1 release source; publication pending'
+)
 STABLE_IMPORTS = (
     'sclite.integrity:artifact_descriptor',
     'sclite.integrity:verify_artifact_chain_manifest',
@@ -102,6 +105,14 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
             if marker in readme:
                 errors.append(f'README.md:unpublished_candidate_install_claim:{marker}')
     _require(errors, 'README.md', readme, f'Version: `{version}`')
+    _require(
+        errors,
+        'README.md',
+        readme,
+        f'[![Current source: sclite-core {version}]'
+        f'(https://img.shields.io/badge/current%20source-sclite--core%20{version}-blueviolet.svg)',
+    )
+    _require(errors, 'README.md', readme, f'Release status: **{EXPECTED_SOURCE_STATUS}**')
     _require(errors, 'README.md', readme, f'package-sclite--core%20{LATEST_PUBLISHED_VERSION}-blueviolet.svg')
     _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{LATEST_PUBLISHED_VERSION}/')
     _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={LATEST_PUBLISHED_VERSION}')
@@ -110,15 +121,117 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
 def _assert_unpublished_candidate_truth(errors: list[str], paths: Mapping[str, str], version: str) -> None:
     if version == LATEST_PUBLISHED_VERSION:
         return
-    forbidden_claims = (
-        f'PyPI package: `{EXPECTED_DISTRIBUTION}=={version}`',
-        f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={version}`',
-        f'Published the beta package as `{EXPECTED_DISTRIBUTION}=={version}`',
+    candidate_pin = f'{EXPECTED_DISTRIBUTION}=={version}'
+    candidate_url = f'https://pypi.org/project/{EXPECTED_DISTRIBUTION}/{version}/'
+    candidate_badge_patterns = (
+        re.compile(
+            rf'!\[[^\]]*\b(?:PyPI|package)\b[^\]]*\b{re.escape(version)}\b[^\]]*\]'
+            r'\([^)]*img\.shields\.io/',
+            re.I,
+        ),
+        re.compile(
+            rf'img\.shields\.io/badge/[^\s)]*(?:pypi|package)[^\s)]*{re.escape(version)}',
+            re.I,
+        ),
     )
+    candidate_install = re.compile(
+        rf'\bpip\s+install\b[^\n]{{0,120}}?[\'"`]?{re.escape(candidate_pin)}[\'"`]?',
+        re.I,
+    )
+    candidate_version_text = rf'(?<![\d.]){re.escape(version)}(?![\d.])'
+    candidate_version = re.compile(candidate_version_text, re.I)
+    publication_context = re.compile(r'\b(?:sclite(?:-core)?|package|pypi|release)\b', re.I)
+    explicit_candidate_negative = (
+        re.compile(
+            rf'{candidate_version_text}[^.;!?]{{0,80}}\b(?:has|have|is|was)\s+not\s+'
+            r'(?:yet\s+)?(?:been\s+)?(?:published|released|available|installable)\b',
+            re.I,
+        ),
+        re.compile(
+            rf'{candidate_version_text}[^.;!?]{{0,80}}\bmust\s+not\b[^.;!?]{{0,80}}'
+            r'\b(?:published|released|available|installable)\b',
+            re.I,
+        ),
+        re.compile(
+            rf'{candidate_version_text}[^.;!?]{{0,80}}\b(?:is|remains)\s+unpublished\b',
+            re.I,
+        ),
+        re.compile(
+            rf'{candidate_version_text}[^\n]{{0,120}}\bpublication\s+(?:is\s+)?pending\b',
+            re.I,
+        ),
+    )
+    current_source_candidate = re.compile(
+        rf'\b(?:current\s+)?source(?:\s+(?:package|version))?\b'
+        rf'[^\n]{{0,60}}(?:{re.escape(EXPECTED_DISTRIBUTION)}==)?'
+        rf'{re.escape(version)}',
+        re.I,
+    )
+    latest_published_other = re.compile(
+        rf'\blatest\s+published\s+(?:(?:PyPI|public)\s+)?package\b'
+        rf'[^\n]{{0,60}}(?:{re.escape(EXPECTED_DISTRIBUTION)}==)?'
+        rf'{re.escape(LATEST_PUBLISHED_VERSION)}',
+        re.I,
+    )
+    positive_before_candidate = re.compile(
+        rf'\b(?:published|released|available)\b'
+        rf'(?:(?!(?<![\d.])\d+\.\d+\.\d+(?![\d.]))[^;.!?]){{0,100}}'
+        rf'{candidate_version_text}',
+        re.I,
+    )
+    positive_after_candidate = re.compile(
+        rf'{candidate_version_text}[^;.!?]{{0,60}}\b'
+        r'(?:(?:is|was|became|has\s+been)\s+(?:now\s+)?|now\s+)'
+        r'(?:published|released|available)\b',
+        re.I,
+    )
+
     for path, text in paths.items():
-        for claim in forbidden_claims:
-            if claim in text:
-                errors.append(f'{path}:unpublished_candidate_claimed_published:{claim}')
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            if not candidate_version.search(line) and version not in line:
+                continue
+            candidate_positive_claim = bool(
+                publication_context.search(line)
+                and (
+                    positive_before_candidate.search(line)
+                    or positive_after_candidate.search(line)
+                )
+            )
+            if candidate_positive_claim:
+                errors.append(
+                    f'{path}:{line_number}:unpublished_candidate_claimed_published:'
+                    f'{line.strip()}'
+                )
+                continue
+            direct_distribution_claim = (
+                candidate_url in line
+                or candidate_install.search(line)
+                or any(pattern.search(line) for pattern in candidate_badge_patterns)
+            )
+            if direct_distribution_claim:
+                errors.append(
+                    f'{path}:{line_number}:unpublished_candidate_distribution_claim:'
+                    f'{line.strip()}'
+                )
+                continue
+            explicitly_negative = any(
+                pattern.search(line) for pattern in explicit_candidate_negative
+            )
+            proven_source_published_split = bool(
+                current_source_candidate.search(line)
+                and latest_published_other.search(line)
+            )
+            if re.search(r'\bPyPI\b', line, re.I):
+                claimed_published = not (
+                    explicitly_negative or proven_source_published_split
+                )
+            else:
+                claimed_published = False
+            if claimed_published:
+                errors.append(
+                    f'{path}:{line_number}:unpublished_candidate_claimed_published:'
+                    f'{line.strip()}'
+                )
 
 
 def _assert_current_claim_docs(
@@ -141,12 +254,12 @@ def _assert_current_claim_docs(
             errors.append(f'SPEC.md:stale_current_package_claim:{marker}')
         if marker in artifact_docs:
             errors.append(f'docs/ARTIFACTS.md:stale_current_package_claim:{marker}')
-    _require(errors, 'SPEC.md', spec, f'Current package is `sclite-core=={version}`')
+    _require(errors, 'SPEC.md', spec, f'Current source package is `sclite-core=={version}`')
     _require(errors, 'SPEC.md', spec, 'The current front door is the review lifecycle substrate')
     _require(errors, 'SPEC.md', spec, 'superseded proof-trace product path is retired')
     _require(errors, 'SPEC.md', spec, 'after controlled consumers')
     _require(errors, 'SPEC.md', spec, 'current lifecycle/review-bundle front door')
-    _require(errors, 'README.md', readme, 'audited and published non-prerelease 2.0.0')
+    _require(errors, 'README.md', readme, EXPECTED_SOURCE_STATUS)
     _require(errors, 'README.md', readme, 'Development Status :: 4 - Beta')
     _require(errors, 'README.md', readme, '## Out of Scope')
     _require(errors, 'README.md', readme, 'Runtime execution: out of scope; owned by RExecOp or another host runtime')
@@ -156,8 +269,8 @@ def _assert_current_claim_docs(
     _require(errors, 'VALIDATION.md', _read('VALIDATION.md'), 'Explicit `--guard` paths are')
     _require(errors, 'ROADMAP.md', roadmap, 'SCLite 2.0 is the frozen truth')
     _require(errors, 'ROADMAP.md', roadmap, '## 2.0 maintenance policy')
-    _require(errors, 'ROADMAP.md', roadmap, 'SCLite `2.0.1` is not planned solely')
-    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current package: `sclite-core=={version}`')
+    _require(errors, 'ROADMAP.md', roadmap, 'feature-freeze-compatible maintenance source')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current source package: `sclite-core=={version}`')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'latest published public package:')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'current integration front door is the review lifecycle')
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, 'superseded proof-trace product path is also retired')
@@ -585,6 +698,8 @@ def collect_errors() -> list[str]:
 
     if project['name'] != EXPECTED_DISTRIBUTION:
         errors.append(f'distribution_name_mismatch:{project["name"]}')
+    if project.get('readme') != 'README.md':
+        errors.append(f'project_readme_mismatch:{project.get("readme")}!=README.md')
     if version != EXPECTED_VERSION:
         errors.append(f'pyproject_version_mismatch:{version}!={EXPECTED_VERSION}')
     if sclite.__version__ != version:
@@ -593,6 +708,14 @@ def collect_errors() -> list[str]:
         errors.append(f'runtime_dependencies_not_empty:{project.get("dependencies")}')
 
     _assert_readme_package_truth(errors, readme, version)
+    _assert_unpublished_candidate_truth(
+        errors,
+        {
+            **{path: _read(path) for path in active_markdown},
+            'CHANGELOG.md': changelog,
+        },
+        version,
+    )
     _assert_current_claim_docs(
         errors,
         version=version,
@@ -604,12 +727,23 @@ def collect_errors() -> list[str]:
     )
     _assert_roadmap_release_truth(errors, roadmap)
     _require(errors, 'README.md', readme, f'Version: `{version}`')
-    _require(errors, 'README.md', readme, 'audited and published non-prerelease 2.0.0')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current release version: `{version}`.')
-    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Release label: `{EXPECTED_RELEASE_LABEL}`.')
+    _require(errors, 'README.md', readme, EXPECTED_SOURCE_STATUS)
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Current source version: `{version}`.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Source release label: `{EXPECTED_RELEASE_LABEL}`.')
+    _require(errors, 'PUBLIC_STATUS.md', public_status, f'Publication status: **{EXPECTED_SOURCE_STATUS}**.')
     _require(errors, 'PUBLIC_STATUS.md', public_status, f'Latest published PyPI package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` (`{LATEST_PUBLISHED_LABEL}`).')
-    _require(errors, 'ROADMAP.md', roadmap, f'Current package: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'ROADMAP.md', roadmap, f'Current source package: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'ROADMAP.md', roadmap, EXPECTED_SOURCE_STATUS)
     _require(errors, 'ROADMAP.md', roadmap, f'Latest published public package: `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}`')
+    _require(errors, 'VALIDATION.md', validation, f'current `{EXPECTED_DISTRIBUTION}=={version}` source')
+    _require(errors, 'VALIDATION.md', validation, EXPECTED_SOURCE_STATUS)
+    _require(errors, 'SPEC.md', spec, f'Current source package is `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'SPEC.md', spec, EXPECTED_SOURCE_STATUS)
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, f'Current source package: `{EXPECTED_DISTRIBUTION}=={version}`')
+    _require(errors, 'docs/ARTIFACTS.md', artifact_docs, EXPECTED_SOURCE_STATUS)
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'Source-versus-published truth')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'current source version and source release label: `2.0.1`')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, '`sclite-core==2.0.0`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
     _require(errors, 'VALIDATION.md', validation, 'scripts/security_regression_gate.sh')
@@ -619,6 +753,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
     _require(errors, 'README.md', readme, 'verification_result')
     _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - ')
+    _require(errors, 'CHANGELOG.md', changelog, 'unpublished; publication pending')
     _require(errors, 'CHANGELOG.md', changelog, f'Published the audited `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'contracts/consumer_imports.v1.json')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'coordinated GovEngine/RExecOp/Tecrax')
