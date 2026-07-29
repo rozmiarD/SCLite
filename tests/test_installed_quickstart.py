@@ -55,10 +55,25 @@ def test_packaged_lifecycle_quickstart_runs_from_an_empty_directory(tmp_path: Pa
     assert install.returncode == 0, install.stderr
 
     cli = environment / 'bin' / 'sclite'
+    resource = _run(
+        [
+            str(python),
+            '-c',
+            'from importlib.resources import files; '
+            'print(files("sclite.examples").joinpath('
+            '"contract-lifecycle-v0.2", "artifact_chain_manifest.json"))',
+        ],
+        cwd=empty_directory,
+        env=installed_env,
+    )
+    assert resource.returncode == 0, resource.stderr
+    manifest = Path(resource.stdout.strip())
+    assert manifest.is_file()
+
     for command, expected in (
-        (['validate-chain', '--example', 'contract-lifecycle-v0.2'], 'artifact_chain_ok:'),
-        (['verify-lifecycle', '--example', 'contract-lifecycle-v0.2'], 'lifecycle_ok:'),
+        ('validate-chain', 'artifact_chain_ok:'),
+        ('verify-lifecycle', 'lifecycle_ok:'),
     ):
-        result = _run([str(cli), *command], cwd=empty_directory, env=installed_env)
+        result = _run([str(cli), command, str(manifest)], cwd=empty_directory, env=installed_env)
         assert result.returncode == 0, result.stderr
         assert expected in result.stdout

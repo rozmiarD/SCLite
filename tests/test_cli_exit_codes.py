@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GOVENGINE_BUNDLE = ROOT / 'examples' / 'govengine-integration'
 BAD_CROSS_HOST = ROOT / 'examples' / 'bad-review-bundle-cross-host'
 SCOPED = ROOT / 'sclite' / 'examples' / 'scoped-ticket-v0.3'
+LIFECYCLE = ROOT / 'sclite' / 'examples' / 'contract-lifecycle-v0.2' / 'artifact_chain_manifest.json'
 
 
 def _run(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -98,14 +99,23 @@ def test_tampered_chain_exit_code(tmp_path: Path) -> None:
     assert 'artifact_chain_failed' in proc.stderr
 
 
-def test_packaged_lifecycle_example_selector() -> None:
-    chain = _run(['validate-chain', '--example', 'contract-lifecycle-v0.2'])
-    lifecycle = _run(['verify-lifecycle', '--example', 'contract-lifecycle-v0.2'])
+@pytest.mark.parametrize('command', ['validate-chain', 'verify-lifecycle'])
+def test_packaged_lifecycle_example_selector_is_rejected(command: str) -> None:
+    proc = _run([command, '--example', 'contract-lifecycle-v0.2'])
 
-    assert chain.returncode == 0, chain.stderr
-    assert 'artifact_chain_ok:' in chain.stdout
-    assert lifecycle.returncode == 0, lifecycle.stderr
-    assert 'lifecycle_ok:' in lifecycle.stdout
+    assert proc.returncode == 2
+    assert '--example' in proc.stderr
+
+
+@pytest.mark.parametrize(
+    ('command', 'expected'),
+    [('validate-chain', 'artifact_chain_ok:'), ('verify-lifecycle', 'lifecycle_ok:')],
+)
+def test_lifecycle_path_commands_remain_supported(command: str, expected: str) -> None:
+    proc = _run([command, str(LIFECYCLE)])
+
+    assert proc.returncode == 0, proc.stderr
+    assert expected in proc.stdout
 
 
 def test_invalid_review_bundle_exit_code(tmp_path: Path) -> None:

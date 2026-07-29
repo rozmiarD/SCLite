@@ -4,12 +4,8 @@ import argparse
 import json
 import os
 import sys
-from contextlib import contextmanager
-from importlib.resources import files
-from importlib.resources.abc import Traversable
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Any, Dict, Iterator, Mapping, Sequence, cast
+from typing import Any, Dict, Mapping, Sequence, cast
 
 from ._json import load_json_object, load_json_value, parse_json_object
 from .artifacts import build_artifact_hash, validate_artifact
@@ -42,7 +38,6 @@ DEVTOOLS_COMMANDS = frozenset({
     'redaction-receipt', 'validation-surface-index', 'snapshot-manifest',
     'scope-fidelity', 'review-lifecycle',
 })
-PACKAGED_CHAIN_EXAMPLES = frozenset({'contract-lifecycle-v0.2'})
 from .review import ReviewRecordError, build_review_record_from_manifest, review_record_markdown
 from .scope_fidelity import build_scope_fidelity_report, build_scope_fidelity_report_from_approved_spec, validate_scope_fidelity_report
 from .secure import SecureBundleError, resolve_guard_path, verify_secure_bundle
@@ -70,37 +65,6 @@ def _load_json_object(path: Path) -> Dict[str, Any]:
 
 def _load_json_value(path: Path) -> Any:
     return load_json_value(path, error_cls=CliInputError)
-
-
-def _materialize_resource_tree(source: Traversable, destination: Path) -> None:
-    if source.is_file():
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(source.read_bytes())
-        return
-    if source.is_dir():
-        destination.mkdir(parents=True, exist_ok=True)
-        for child in source.iterdir():
-            _materialize_resource_tree(child, destination / child.name)
-        return
-    raise CliInputError(f'packaged example resource is unavailable: {source.name}')
-
-
-@contextmanager
-def _chain_input(args: Any) -> Iterator[tuple[Path, Path]]:
-    if args.example is None:
-        manifest_path = Path(str(args.manifest)).resolve()
-        root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
-        yield manifest_path, root
-        return
-
-    with TemporaryDirectory(prefix='sclite-example-') as temporary_directory:
-        root = Path(temporary_directory) / str(args.example)
-        resource = files('sclite.examples').joinpath(str(args.example))
-        _materialize_resource_tree(resource, root)
-        manifest_path = root / 'artifact_chain_manifest.json'
-        if not manifest_path.is_file():
-            raise CliInputError(f'packaged example is missing artifact_chain_manifest.json: {args.example}')
-        yield manifest_path, root
 
 
 def _parse_json_object(text: str, *, source: str) -> Dict[str, Any]:
@@ -251,8 +215,7 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
     hash_cmd.add_argument('--format', choices=['json', 'digest'], default='json')
 
     chain_cmd = sub.add_parser('validate-chain', help='verify a v0.2 lifecycle artifact-chain manifest')
-    chain_cmd.add_argument('manifest', nargs='?', help='path to artifact_chain_manifest.json')
-    chain_cmd.add_argument('--example', choices=sorted(PACKAGED_CHAIN_EXAMPLES), help='packaged example name; mutually exclusive with manifest')
+    chain_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     chain_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     chain_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     chain_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
@@ -266,8 +229,7 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
     chain_cmd.add_argument('--format', choices=['json', 'summary'], default='summary')
 
     lifecycle_cmd = sub.add_parser('verify-lifecycle', help='verify a v0.2 contract lifecycle manifest')
-    lifecycle_cmd.add_argument('manifest', nargs='?', help='path to artifact_chain_manifest.json')
-    lifecycle_cmd.add_argument('--example', choices=sorted(PACKAGED_CHAIN_EXAMPLES), help='packaged example name; mutually exclusive with manifest')
+    lifecycle_cmd.add_argument('manifest', help='path to artifact_chain_manifest.json')
     lifecycle_cmd.add_argument('--root', help='artifact root directory; defaults to the manifest directory')
     lifecycle_cmd.add_argument('--no-schema', action='store_true', help='skip artifact schema validation while checking hashes/links')
     lifecycle_cmd.add_argument('--strict-jsonschema', action='store_true', help="use Draft 2020-12 validation via the optional 'jsonschema' extra")
@@ -392,11 +354,6 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
     export_review_cmd.add_argument('--output', help='write output to this path instead of stdout')
 
     args = parser.parse_args(argv)
-    if args.command in {'validate-chain', 'verify-lifecycle'}:
-        if bool(args.manifest) == bool(args.example):
-            parser.error(f'{args.command} requires exactly one of manifest or --example')
-        if args.example and args.root:
-            parser.error(f'{args.command} does not allow --root with --example')
     if emit_deprecation and args.command in DEVTOOLS_COMMANDS:
         print(
             f'deprecated_cli_alias:{args.command}:use sclite-devtools {args.command}',
@@ -433,26 +390,27 @@ def main(argv: Sequence[str] | None = None, *, emit_deprecation: bool = True) ->
         return 0
 
     if args.command in {'validate-chain', 'verify-lifecycle'}:
+        manifest_path = Path(str(args.manifest)).resolve()
+        root = Path(str(args.root)).resolve() if args.root else manifest_path.parent
         require_lifecycle = args.command == 'verify-lifecycle' or bool(getattr(args, 'strict_lifecycle', False))
         try:
-            with _chain_input(args) as (manifest_path, root):
-                manifest = _load_json_object(manifest_path)
-                result = verify_artifact_chain_manifest(
-                    manifest,
-                    root=root,
-                    validate_schemas=not args.no_schema,
-                    strict_jsonschema=bool(args.strict_jsonschema),
+            manifest = _load_json_object(manifest_path)
+            result = verify_artifact_chain_manifest(
+                manifest,
+                root=root,
+                validate_schemas=not args.no_schema,
+                strict_jsonschema=bool(args.strict_jsonschema),
+                require_lifecycle=require_lifecycle,
+                max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
+                max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
+            )
+            guard_result = None
+            if _require_guard_requested(args):
+                guard_result = _verify_required_guard_for_manifest(
+                    args,
+                    manifest_path,
                     require_lifecycle=require_lifecycle,
-                    max_artifact_bytes=_optional_positive_int(args.max_artifact_bytes),
-                    max_manifest_entries=_optional_positive_int(args.max_manifest_entries),
                 )
-                guard_result = None
-                if _require_guard_requested(args):
-                    guard_result = _verify_required_guard_for_manifest(
-                        args,
-                        manifest_path,
-                        require_lifecycle=require_lifecycle,
-                    )
         except ChainVerificationError as exc:
             print(f'artifact_chain_failed:{exc}', file=sys.stderr)
             return 1

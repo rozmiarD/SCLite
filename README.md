@@ -117,17 +117,16 @@ Current v0.2 artifacts:
 | `EvidenceContract` | Captures receipt-bounded claims, non-claims, replay, verification, and evidence links without storing raw evidence. |
 | `ArtifactChainManifest` | Ordered tamper-evident hash chain over lifecycle artifacts. |
 
-Verify the lifecycle fixture:
+From a source checkout, verify the lifecycle fixture:
 
 ```bash
-sclite validate-chain --example contract-lifecycle-v0.2
-sclite verify-lifecycle --example contract-lifecycle-v0.2
+sclite validate-chain sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
+sclite verify-lifecycle sclite/examples/contract-lifecycle-v0.2/artifact_chain_manifest.json
 ```
 
-`--example contract-lifecycle-v0.2` resolves the fixture packaged in the
-installed distribution, so these commands work from an empty directory after
-installation. Filesystem manifest paths remain supported for your own
-artifacts.
+Installed or wheel-only users should use the install-safe
+[CLI quickstart](#cli-quickstart), which locates the packaged fixture with
+`importlib.resources`.
 
 `validate-chain` verifies the ordered hash-chain. `verify-lifecycle` applies
 the lifecycle gate on top and requires the exact canonical v0.2 role sequence
@@ -360,9 +359,21 @@ scripts/dev_gate.sh
 Validate the v0.2 lifecycle chain:
 
 ```bash
-sclite validate-chain --example contract-lifecycle-v0.2
-sclite verify-lifecycle --example contract-lifecycle-v0.2
+MANIFEST="$(python - <<'PY'
+from importlib.resources import files
+
+print(files("sclite.examples").joinpath(
+    "contract-lifecycle-v0.2", "artifact_chain_manifest.json"
+))
+PY
+)"
+sclite validate-chain "$MANIFEST"
+sclite verify-lifecycle "$MANIFEST"
 ```
+
+This standard-library lookup locates the fixture in the installed distribution,
+so the existing path-based commands work even when the current directory is
+empty.
 
 Use `sclite validate-chain --strict-lifecycle ...` when a generic chain check
 should also fail closed on the canonical lifecycle role sequence.
