@@ -676,6 +676,71 @@ def _forbidden_claim_errors(paths: Iterable[str]) -> list[str]:
     return errors
 
 
+def _workflow_executable_lines(workflow: str) -> list[str]:
+    lines: list[str] = []
+    for line in workflow.splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        normalized = re.sub(r'\s+#.*$', '', ' '.join(line.strip().split()))
+        if normalized.startswith('run: '):
+            normalized = normalized.removeprefix('run: ')
+        lines.append(normalized)
+    return lines
+
+
+def _assert_product_sbom_workflow(errors: list[str], *, path: str, workflow: str, output: str) -> None:
+    lines = _workflow_executable_lines(workflow)
+    target_venv = '"${TARGET_VENV}"'
+    target_python = '"${TARGET_VENV}/bin/python"'
+    target_creation = (
+        'TARGET_VENV="$(mktemp -d "${RUNNER_TEMP}/sclite-product-sbom.XXXXXX")"'
+    )
+    install = (
+        f'python -m pip --python {target_python} install --no-index --no-deps dist/*.whl'
+    )
+    generate = (
+        f'cyclonedx-py environment {target_python} --pyproject pyproject.toml '
+        f'--mc-type library --output-reproducible --output-file {output}'
+    )
+    validate = (
+        f'python scripts/validate_product_sbom.py --wheel dist/*.whl --sbom {output}'
+    )
+    required_lines = (
+        target_creation,
+        f'python -m venv --without-pip {target_venv}',
+        install,
+        validate,
+    )
+    for required in required_lines:
+        if required not in lines:
+            errors.append(f'{path}:missing_product_sbom_command:{required}')
+
+    product_step_count = lines.count('- name: Product SBOM')
+    if product_step_count != 1:
+        errors.append(f'{path}:product_sbom_step_count:{product_step_count}')
+    cyclonedx_lines = [line for line in lines if line.startswith('cyclonedx-py ')]
+    if cyclonedx_lines != [generate]:
+        errors.append(f'{path}:product_sbom_cyclonedx_invocation_invalid')
+    if any('Dependency audit and SBOM' in line for line in lines):
+        errors.append(f'{path}:dependency_audit_and_product_sbom_must_be_distinct')
+    if any(line.startswith('cyclonedx-py environment --output-file') for line in lines):
+        errors.append(f'{path}:tool_environment_sbom_forbidden')
+
+    def position(line: str) -> int:
+        return lines.index(line) if line in lines else -1
+
+    build_positions = [index for index, line in enumerate(lines) if line == 'python -m build']
+    target_position = position(target_creation)
+    venv_position = position(f'python -m venv --without-pip {target_venv}')
+    install_position = position(install)
+    generate_position = position(generate)
+    validate_position = position(validate)
+    if not build_positions or max(build_positions) >= generate_position:
+        errors.append(f'{path}:product_sbom_must_follow_wheel_build')
+    if not (target_position < venv_position < install_position < generate_position < validate_position):
+        errors.append(f'{path}:product_sbom_validation_must_follow_generation')
+
+
 def collect_errors() -> list[str]:
     errors: list[str] = []
     project = _pyproject()
@@ -693,6 +758,7 @@ def collect_errors() -> list[str]:
     integration_contract = _read('docs/GOVENGINE_INTEGRATION_CONTRACT.md')
     integration_guide = _read('docs/INTEGRATION_GUIDE.md')
     workflow = _read('.github/workflows/ci.yml')
+    release_workflow = _read('.github/workflows/release.yml')
     active_markdown = _markdown_paths(include_archive=False)
     all_markdown = _markdown_paths(include_archive=True)
 
@@ -809,8 +875,22 @@ def collect_errors() -> list[str]:
     _require(errors, '.github/workflows/ci.yml', workflow, 'rm -rf dist build *.egg-info')
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m twine check dist/*')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'scripts/package_smoke.sh')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'product SBOM is generated after the exact wheel exists')
+    _require(errors, 'docs/RELEASE_SECURITY.md', _read('docs/RELEASE_SECURITY.md'), 'product SBOM')
     _require(errors, 'VALIDATION.md', validation, 'release-readiness evidence only')
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m pip check')
+    _assert_product_sbom_workflow(
+        errors,
+        path='.github/workflows/ci.yml',
+        workflow=workflow,
+        output='dist/sclite-core.cdx.json',
+    )
+    _assert_product_sbom_workflow(
+        errors,
+        path='.github/workflows/release.yml',
+        workflow=release_workflow,
+        output='release-evidence/sclite-core.cdx.json',
+    )
 
     errors.extend(_stable_import_errors())
     errors.extend(_curated_root_export_errors())

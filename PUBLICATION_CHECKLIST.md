@@ -56,7 +56,12 @@ the Python package `sclite`.
 
 The smoke environment installs `.github/release-build-requirements.txt`; it does
 not resolve floating build or upload-tool versions. The release workflow uses
-separate exact audit/SBOM and test requirement sets before running `dev_gate.sh`.
+separate exact audit and test requirement sets before running `dev_gate.sh`.
+Its product SBOM is generated after the exact wheel exists from a clean target
+environment containing only that wheel, then validated against the wheel
+metadata while emitting the wheel SHA-256 alongside the identity result. The
+CycloneDX document is not intrinsically byte-bound and does not replace release
+provenance or checksums; this evidence does not replace the dependency audit.
 
 Before a release-candidate or stable release, confirm the security model and
 profile freeze docs remain aligned:

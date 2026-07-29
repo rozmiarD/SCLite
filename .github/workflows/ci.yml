@@ -78,10 +78,16 @@ jobs:
           /tmp/sclite-sdist-smoke/bin/python -m pip install --upgrade pip
           /tmp/sclite-sdist-smoke/bin/python -m pip install dist/*.tar.gz
           /tmp/sclite-sdist-smoke/bin/python -m pip check
-      - name: Dependency audit and SBOM
+      - name: Dependency audit
         run: |
           python -m pip_audit
-          cyclonedx-py environment --output-file dist/sclite-core.cdx.json
+      - name: Product SBOM
+        run: |
+          TARGET_VENV="$(mktemp -d "${RUNNER_TEMP}/sclite-product-sbom.XXXXXX")"
+          python -m venv --without-pip "${TARGET_VENV}"
+          python -m pip --python "${TARGET_VENV}/bin/python" install --no-index --no-deps dist/*.whl
+          cyclonedx-py environment "${TARGET_VENV}/bin/python" --pyproject pyproject.toml --mc-type library --output-reproducible --output-file dist/sclite-core.cdx.json
+          python scripts/validate_product_sbom.py --wheel dist/*.whl --sbom dist/sclite-core.cdx.json
       - name: Reproducible wheel gate
         run: scripts/reproducible_build_gate.sh
       - name: Stable A/B build simulation

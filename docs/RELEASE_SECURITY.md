@@ -2,8 +2,19 @@
 
 SCLite release tags use a fail-closed GitHub workflow with commit-SHA-pinned
 actions, PyPI Trusted Publishing, GitHub artifact provenance, wheel and sdist
-installation smoke tests, dependency auditing, an SBOM and reproducible-wheel
+installation smoke tests, dependency auditing, a product SBOM and reproducible-wheel
 comparison under a fixed `SOURCE_DATE_EPOCH`.
+
+Dependency auditing runs in its dedicated release-tool environment. The product
+SBOM is generated only after the exact release wheel exists: that wheel is
+installed without dependencies into a clean target environment, CycloneDX
+inspects that target with project metadata and reproducible output enabled.
+Validation checks SBOM component identity, library type, reproducibility and
+zero runtime dependencies, and emits the exact wheel SHA-256 alongside that
+identity result. The CycloneDX document is not intrinsically byte-bound to the
+wheel and does not replace provenance or release checksums; no custom SBOM
+field or schema is introduced. Generator tooling may appear only in CycloneDX
+metadata tooling, never as a product runtime component.
 
 The supported Python matrix, adversarial regression gate, property tests and
 the language-neutral conformance corpus must pass before a tag is created.

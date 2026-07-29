@@ -33,6 +33,68 @@ def test_public_truth_validator_passes() -> None:
     assert result.stdout.strip() == 'public_truth_ok:sclite-core==2.0.1:import=sclite:runtime_deps=0'
 
 
+def test_public_truth_validator_rejects_tool_environment_sbom_before_wheel() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+    workflow = '\n'.join((
+        'name: Dependency audit and SBOM',
+        'cyclonedx-py environment --output-file dist/sclite-core.cdx.json',
+        'python -m build',
+    ))
+
+    validator._assert_product_sbom_workflow(
+        errors,
+        path='.github/workflows/ci.yml',
+        workflow=workflow,
+        output='dist/sclite-core.cdx.json',
+    )
+
+    assert '.github/workflows/ci.yml:tool_environment_sbom_forbidden' in errors
+    assert '.github/workflows/ci.yml:product_sbom_must_follow_wheel_build' in errors
+    assert '.github/workflows/ci.yml:dependency_audit_and_product_sbom_must_be_distinct' in errors
+
+
+@pytest.mark.parametrize(
+    ('workflow', 'expected_error'),
+    (
+        (
+            '\n'.join((
+                'python -m build',
+                '# - name: Product SBOM',
+                '# cyclonedx-py environment "${TARGET_VENV}/bin/python" --pyproject pyproject.toml --mc-type library --output-reproducible --output-file dist/sclite-core.cdx.json',
+            )),
+            '.github/workflows/ci.yml:product_sbom_step_count:0',
+        ),
+        (
+            '\n'.join((
+                '- name: Product SBOM',
+                'TARGET_VENV="$(mktemp -d "${RUNNER_TEMP}/sclite-product-sbom.XXXXXX")"',
+                'python -m venv --without-pip "${TARGET_VENV}"',
+                'python -m pip --python "${TARGET_VENV}/bin/python" install --no-index --no-deps dist/*.whl',
+                'cyclonedx-py environment "${TARGET_VENV}/bin/python" --pyproject pyproject.toml --mc-type library --output-reproducible --output-file dist/sclite-core.cdx.json',
+                'python -m build',
+                'python scripts/validate_product_sbom.py --wheel dist/*.whl --sbom dist/sclite-core.cdx.json',
+            )),
+            '.github/workflows/ci.yml:product_sbom_must_follow_wheel_build',
+        ),
+    ),
+)
+def test_public_truth_validator_rejects_comment_only_and_reordered_product_sbom(
+    workflow: str, expected_error: str
+) -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_product_sbom_workflow(
+        errors,
+        path='.github/workflows/ci.yml',
+        workflow=workflow,
+        output='dist/sclite-core.cdx.json',
+    )
+
+    assert expected_error in errors
+
+
 def test_public_truth_validator_rejects_dynamic_prerelease_badge() -> None:
     validator = _load_validator()
     errors: list[str] = []
