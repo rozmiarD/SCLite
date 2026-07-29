@@ -1,5 +1,5 @@
 {
-  "schema": "sclite_external_security_review.v1",
+  "schema": "sclite.external_security_review.v1",
   "release_line": "2.0.1",
   "status": "approved",
   "source_commit": "eff64d9956a895a3f658d3bed2a2314ddb44c210",
