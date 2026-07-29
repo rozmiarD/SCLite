@@ -1,11 +1,11 @@
 {
-  "schema": "sclite_external_security_review_v1",
+  "schema": "sclite_external_security_review.v1",
   "release_line": "2.0.1",
   "status": "approved",
   "source_commit": "eff64d9956a895a3f658d3bed2a2314ddb44c210",
   "artifact_sha256": [
     "540a6b80cd9f9601eea1d87197d29713fb3c9b83db57b556973c92e940460c9e",
-    "ba8d5c9b890abe49f8e2205e28cadaadfd7eb0edec189d74034a73d059e247889"
+    "ba8d5c9b890abe49f8e2205e28cadadfd7eb0edec189d74034a73d059e247889"
   ],
   "reviewer": "ExatronOmega",
   "scope": [
