@@ -2,22 +2,23 @@
   "schema": "sclite.external_security_review.v1",
   "release_line": "2.0.1",
   "status": "approved",
-  "source_commit": "eff64d9956a895a3f658d3bed2a2314ddb44c210",
+  "source_commit": "367a7cd7056debf5189f8ff13e006035e08389c8",
   "artifact_sha256": [
-    "540a6b80cd9f9601eea1d87197d29713fb3c9b83db57b556973c92e940460c9e",
-    "ba8d5c9b890abe49f8e2205e28cadadfd7eb0edec189d74034a73d059e247889"
+    "cccddb3cdd0ee18f9452adb276e5c9583995d6830ce8f7743ba3e5615678bb92",
+    "0c93621ba3b153dec756a2e68e75f7a88d21354986a13fd8b23f3336d3d62d45"
   ],
   "reviewer": "ExatronOmega",
   "scope": [
-    "complete SCLite 2.0.1 source review at eff64d9956a895a3f658d3bed2a2314ddb44c210",
+    "complete SCLite 2.0.1 source review at 367a7cd7056debf5189f8ff13e006035e08389c8",
     "v2.0.0 to 2.0.1 maintenance delta and frozen API CLI schema contracts",
+    "F-002 immutable distribution description and exact metadata binding",
     "wheel and normalized sdist correspondence",
     "integrity verification security regression and product SBOM evidence",
     "stable release workflow and record-only commit protocol"
   ],
-  "review_date": "2026-07-29",
+  "review_date": "2026-07-30",
   "review_verdict": "approved",
-  "report_sha256": "c9f1d22b8a681c852d842b299ba43d1d88c2ce233815c189d1d41991527bc274",
+  "report_sha256": "3c942611fc7d9d26095ad6f9dd20ba56afb99b0e671745f51fbf6fca69a181b1",
   "unresolved_critical": 0,
   "unresolved_high": 0,
   "unresolved_medium": 0,
