@@ -114,11 +114,10 @@ def test_public_truth_validator_accepts_source_and_published_install_split() -> 
             'Version: `2.0.1`',
             '[![Current source: sclite-core 2.0.1]'
             '(https://img.shields.io/badge/current%20source-sclite--core%202.0.1-blueviolet.svg)',
-            'Release status: **unpublished non-prerelease 2.0.1 release source; '
-            'publication pending**',
-            'package-sclite--core%202.0.0-blueviolet.svg',
-            'https://pypi.org/project/sclite-core/2.0.0/',
-            'python -m pip install sclite-core==2.0.0',
+            'Release status: **published stable non-prerelease 2.0.1 release**',
+            'package-sclite--core%202.0.1-blueviolet.svg',
+            'https://pypi.org/project/sclite-core/2.0.1/',
+            'python -m pip install sclite-core==2.0.1',
         ]),
         '2.0.1',
     )
@@ -126,24 +125,56 @@ def test_public_truth_validator_accepts_source_and_published_install_split() -> 
     assert errors == []
 
 
-def test_public_truth_validator_accepts_unpublished_candidate_truth() -> None:
+@pytest.mark.parametrize(
+    ('version', 'paths', 'check_current_truth'),
+    (
+        (
+            '2.0.2',
+            {
+                'README.md': (
+                    'unpublished non-prerelease 2.0.2 release source; publication pending\n'
+                    'Latest published PyPI package: `sclite-core==2.0.1`.\n'
+                ),
+                'PUBLICATION_CHECKLIST.md': (
+                    'The `2.0.2` source must not be described as published or installable '
+                    'from PyPI.\n'
+                ),
+            },
+            False,
+        ),
+        (
+            '2.0.2',
+            {
+                'PUBLICATION_CHECKLIST.md': (
+                    'For future 2.0.2 release work, publication remains pending until '
+                    'the release gate.\n'
+                ),
+            },
+            True,
+        ),
+        (
+            '2.0.3',
+            {
+                'PUBLICATION_CHECKLIST.md': (
+                    'For future 2.0.3 release work, record publication as pending until '
+                    'the release gate.\n'
+                ),
+            },
+            True,
+        ),
+    ),
+)
+def test_public_truth_validator_accepts_unpublished_candidate_truth(
+    version: str,
+    paths: dict[str, str],
+    check_current_truth: bool,
+) -> None:
     validator = _load_validator()
     errors: list[str] = []
 
-    validator._assert_unpublished_candidate_truth(
-        errors,
-        {
-            'README.md': (
-                'unpublished non-prerelease 2.0.1 release source; publication pending\n'
-                'Latest published PyPI package: `sclite-core==2.0.0`.\n'
-            ),
-            'PUBLICATION_CHECKLIST.md': (
-                'The `2.0.1` source must not be described as published or installable '
-                'from PyPI.\n'
-            ),
-        },
-        '2.0.1',
-    )
+    validator._assert_unpublished_candidate_truth(errors, paths, version)
+    if check_current_truth:
+        validator._assert_current_publication_truth(errors, paths)
 
     assert errors == []
 
@@ -153,22 +184,22 @@ def test_public_truth_validator_accepts_unpublished_candidate_truth() -> None:
     (
         (
             'README.md',
-            'https://pypi.org/project/sclite-core/2.0.1/',
+            'https://pypi.org/project/sclite-core/2.0.2/',
             'unpublished_candidate_distribution_claim',
         ),
         (
             'VALIDATION.md',
-            'python -m pip install sclite-core==2.0.1',
+            'python -m pip install sclite-core==2.0.2',
             'unpublished_candidate_distribution_claim',
         ),
         (
             'PUBLIC_STATUS.md',
-            'Latest published PyPI package: `sclite-core==2.0.1`.',
+            'Latest published PyPI package: `sclite-core==2.0.2`.',
             'unpublished_candidate_claimed_published',
         ),
         (
             'ROADMAP.md',
-            'The 2.0.1 release source is published.',
+            'The 2.0.2 release source is published.',
             'unpublished_candidate_claimed_published',
         ),
     ),
@@ -181,7 +212,7 @@ def test_public_truth_validator_rejects_unpublished_candidate_distribution_claim
     validator = _load_validator()
     errors: list[str] = []
 
-    validator._assert_unpublished_candidate_truth(errors, {path: claim}, '2.0.1')
+    validator._assert_unpublished_candidate_truth(errors, {path: claim}, '2.0.2')
 
     assert any(error.startswith(f'{path}:') and error_kind in error for error in errors)
 
@@ -199,107 +230,101 @@ def test_public_truth_validator_requires_readme_project_metadata(monkeypatch) ->
 
 
 @pytest.mark.parametrize(
-    ('path', 'injected'),
+    ('path', 'claim', 'marker'),
     (
-        (
-            'README.md',
-            '[![PyPI stable: sclite-core 2.0.1]'
-            '(https://img.shields.io/badge/package-sclite--core%202.0.1-blueviolet.svg)]'
-            '(pyproject.toml)',
-        ),
-        ('README.md', 'https://pypi.org/project/sclite-core/2.0.1/'),
-        ('VALIDATION.md', 'python -m pip install sclite-core==2.0.1'),
-        (
-            'PUBLIC_STATUS.md',
-            'Latest published PyPI package: `sclite-core==2.0.1`.',
-        ),
-        ('ROADMAP.md', 'The 2.0.1 release source is published.'),
+        ('README.md', 'The current 2.0.1 release is UnPuBlIsHeD!', 'current_2_0_1_unpublished'),
+        ('PUBLIC_STATUS.md', 'SCLite 2.0.1 has not yet been published.', 'current_2_0_1_unpublished'),
+        ('ROADMAP.md', 'SCLite 2.0.1 is not published.', 'current_2_0_1_unpublished'),
+        ('SECURITY.md', 'SCLite 2.0.1 is not yet published.', 'current_2_0_1_unpublished'),
+        ('VALIDATION.md', 'SCLite 2.0.1 is not available!', 'current_2_0_1_unpublished'),
+        ('SPEC.md', 'Current 2.0.1 is not yet installable.', 'current_2_0_1_unpublished'),
+        ('SECURITY.md', 'SCLite 2.0.1 is not released.', 'current_2_0_1_unpublished'),
+        ('PUBLICATION_CHECKLIST.md', 'Publication pending.', 'publication_pending'),
+        ('PUBLIC_STATUS.md', 'Publication is pending!', 'publication_pending'),
+        ('VALIDATION.md', 'Publication remains pending.', 'publication_pending'),
         (
             'PUBLIC_STATUS.md',
-            'Published SCLite 2.0.1 to PyPI.',
+            'Latest published PyPI package: `sclite-core==2.0.0`.',
+            'stale_published_2_0_0',
         ),
         (
             'ROADMAP.md',
-            'Previously unpublished, SCLite 2.0.1 is published on PyPI.',
-        ),
-        ('PUBLIC_STATUS.md', 'SCLite 2.0.1 is available from PyPI.'),
-        (
-            'VALIDATION.md',
-            'Install from PyPI: python -m pip install --no-deps '
-            'sclite-core==2.0.1',
+            'Latest published public package remains `sclite-core==2.0.0`.',
+            'stale_published_2_0_0',
         ),
         (
-            'VALIDATION.md',
-            "Install from PyPI: python -m pip install --no-deps "
-            "'sclite-core==2.0.1'",
-        ),
-        ('CHANGELOG.md', 'Released sclite-core 2.0.1 on PyPI.'),
-        ('PUBLIC_STATUS.md', 'sclite-core==2.0.1 is now on PyPI.'),
-        ('PUBLIC_STATUS.md', 'PyPI now hosts sclite-core 2.0.1.'),
-        ('README.md', 'Install sclite-core==2.0.1 from PyPI.'),
-        (
-            'PUBLIC_STATUS.md',
-            'SCLite 2.0.1 is published to PyPI; publication pending.',
+            'SPEC.md',
+            'Current published stable package is sclite-core==2.0.0.',
+            'stale_published_2_0_0',
         ),
         (
-            'PUBLIC_STATUS.md',
-            'SCLite 2.0.1 is available from PyPI; publication pending.',
+            'docs/SCHEMA_COMPATIBILITY.md',
+            '`sclite-core==2.0.0` is the current published stable release.',
+            'stale_published_2_0_0',
         ),
         (
-            'PUBLIC_STATUS.md',
-            'SCLite 2.0.1 is unpublished, but SCLite 2.0.1 is published on PyPI.',
+            'docs/ARTIFACTS.md',
+            'SCLITE 2.0.0 remains the latest published stable release!',
+            'stale_published_2_0_0',
         ),
     ),
 )
-def test_collect_errors_rejects_candidate_publication_matrix(
+def test_current_publication_truth_rejects_contradictions_end_to_end(
     monkeypatch,
     path: str,
-    injected: str,
+    claim: str,
+    marker: str,
 ) -> None:
     validator = _load_validator()
     original_read = validator._read
 
-    def read_with_candidate_claim(requested: str) -> str:
+    def read_with_contradiction(requested: str) -> str:
         text = original_read(requested)
         if requested == path:
-            return f'{text}\n{injected}\n'
+            return f'{text}\n{claim}\n'
         return text
 
-    monkeypatch.setattr(validator, '_read', read_with_candidate_claim)
+    monkeypatch.setattr(validator, '_read', read_with_contradiction)
+
+    errors = validator.collect_errors()
 
     assert any(
-        error.startswith(f'{path}:') and 'unpublished_candidate_' in error
-        for error in validator.collect_errors()
+        error.startswith(f'{path}:')
+        and f'contradictory_current_publication_truth:{marker}' in error
+        for error in errors
     )
 
 
 @pytest.mark.parametrize(
-    'injected',
+    ('path', 'claim'),
     (
-        'Current source 2.0.1 and latest published PyPI package is '
-        'sclite-core==2.0.0.',
-        'Latest published PyPI package: sclite-core==2.0.0; '
-        'current source: 2.0.1.',
-        'SCLite 2.0.1 has not been published to PyPI; publication pending.',
-        'The 2.0.1 source must not be described as published or installable '
-        'from PyPI.',
-        'The latest published audit documents source 2.0.1.',
+        (
+            'PUBLIC_STATUS.md',
+            'Current source 2.0.2; latest published PyPI package is '
+            'sclite-core==2.0.1; publication is pending.',
+        ),
+        (
+            'ROADMAP.md',
+            'Current source 2.0.3; latest published PyPI package is '
+            'sclite-core==2.0.1; publication remains pending.',
+        ),
     ),
 )
-def test_collect_errors_accepts_candidate_publication_matrix(
+def test_current_publication_truth_accepts_future_source_published_split_end_to_end(
     monkeypatch,
-    injected: str,
+    path: str,
+    claim: str,
 ) -> None:
     validator = _load_validator()
     original_read = validator._read
 
-    def read_with_candidate_truth(requested: str) -> str:
+    def read_with_future_split(requested: str) -> str:
         text = original_read(requested)
-        if requested == 'PUBLIC_STATUS.md':
-            return f'{text}\n{injected}\n'
+        if requested == path:
+            return f'{text}\n{claim}\n'
         return text
 
-    monkeypatch.setattr(validator, '_read', read_with_candidate_truth)
+    monkeypatch.setattr(validator, '_read', read_with_future_split)
 
     assert validator.collect_errors() == []
 

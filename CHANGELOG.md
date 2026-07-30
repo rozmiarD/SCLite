@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-## 2.0.1 - Maintenance source (unpublished; publication pending)
+## 2.0.1 - 2026-07-30
+
+- Published the audited `sclite-core==2.0.1` package line as the stable
+  non-prerelease release.
 
 - Updates SBOM/audit tooling to versions compatible with fixed `lxml` after the
   original `v2.0.0` run failed closed before publication, and adds an immutable-

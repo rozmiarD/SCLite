@@ -2,8 +2,8 @@
 
 - Current source version: `2.0.1`.
 - Source release label: `2.0.1`.
-- Publication status: **unpublished non-prerelease 2.0.1 release source; publication pending**.
-- Latest published PyPI package: `sclite-core==2.0.0` (`2.0.0`).
+- Publication status: **published stable non-prerelease 2.0.1 release**.
+- Latest published PyPI package: `sclite-core==2.0.1` (`2.0.1`).
 - Python package: `sclite`.
 - Python requirement: `>=3.11`.
 - Runtime dependencies: none.
@@ -72,8 +72,5 @@ change frozen contract meanings. New schemas or public contracts require
 demonstrated consumer need, an ownership review and an explicit release
 decision.
 
-The README embedded in the immutable PyPI `2.0.0` metadata predates some
-post-release documentation corrections. The current `2.0.1` maintenance source
-is broader than metadata repair: it includes release-tooling, documentation,
-validation and test corrections while preserving the frozen 2.0 surface. It
-remains unpublished, and publication is pending an explicit release decision.
+The current `2.0.1` stable package includes release-tooling, documentation,
+validation and test corrections while preserving the frozen 2.0 surface.

@@ -26,15 +26,13 @@ from sclite.surfaces import build_public_validation_surface_index  # noqa: E402
 
 EXPECTED_VERSION = '2.0.1'
 EXPECTED_RELEASE_LABEL = '2.0.1'
-LATEST_PUBLISHED_VERSION = '2.0.0'
-LATEST_PUBLISHED_LABEL = '2.0.0'
+LATEST_PUBLISHED_VERSION = '2.0.1'
+LATEST_PUBLISHED_LABEL = '2.0.1'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
 PYPI_LONG_DESCRIPTION_PATH = 'PYPI_LONG_DESCRIPTION.md'
 PYPI_LONG_DESCRIPTION_SHA256 = '737ac8a33c8563136818bd14f2e13ac4dea7aa64fa351a508f95f632e61c3656'
-EXPECTED_SOURCE_STATUS = (
-    'unpublished non-prerelease 2.0.1 release source; publication pending'
-)
+EXPECTED_SOURCE_STATUS = 'published stable non-prerelease 2.0.1 release'
 STABLE_IMPORTS = (
     'sclite.integrity:artifact_descriptor',
     'sclite.integrity:verify_artifact_chain_manifest',
@@ -122,6 +120,64 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
     _require(errors, 'README.md', readme, f'package-sclite--core%20{LATEST_PUBLISHED_VERSION}-blueviolet.svg')
     _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{LATEST_PUBLISHED_VERSION}/')
     _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={LATEST_PUBLISHED_VERSION}')
+
+
+def _assert_current_publication_truth(errors: list[str], paths: Mapping[str, str]) -> None:
+    current_version = rf'(?<![\d.]){re.escape(EXPECTED_VERSION)}(?![\d.])'
+    current_unpublished = re.compile(
+        rf'(?:{current_version}[^\n]{{0,100}}\b(?:unpublished|has not(?: yet)? been '
+        r'published|is not(?: yet)? (?:published|available|installable|released))\b|'
+        rf'\b(?:unpublished|has not(?: yet)? been published|is not(?: yet)? '
+        rf'(?:published|available|installable|released))\b[^\n]{{0,100}}{current_version})',
+        re.I,
+    )
+    publication_pending = re.compile(r'\bpublication(?: is| remains)? pending\b', re.I)
+    explicit_semver = re.compile(r'(?<![\d.])\d+\.\d+\.\d+(?![\d.])')
+    source_semver = re.compile(
+        r'\b(?:current\s+)?source(?:\s+(?:package|version))?\b[^\n]{0,60}?'
+        r'(?P<version>(?<![\d.])\d+\.\d+\.\d+(?![\d.]))',
+        re.I,
+    )
+    latest_published_expected = re.compile(
+        rf'\blatest\s+published\s+(?:(?:PyPI|public)\s+)?package\b[^\n]{{0,60}}'
+        rf'`?{re.escape(EXPECTED_DISTRIBUTION)}=={re.escape(EXPECTED_VERSION)}`?',
+        re.I,
+    )
+    stale_published_package = re.compile(
+        r'\b(?:latest published (?:(?:PyPI|public) )?package|'
+        r'current published stable package)\b\s*(?::|is|remains)?\s*'
+        r'`?sclite-core==2\.0\.0`?',
+        re.I,
+    )
+    stale_published_release = re.compile(
+        r'(?:`?sclite-core==2\.0\.0`?|\bSCLite\s+2\.0\.0\b|\b2\.0\.0\b)'
+        r'\s+(?:is|remains)\s+(?:the\s+)?(?:latest|current) published stable '
+        r'(?:package|release)\b',
+        re.I,
+    )
+    for path, text in paths.items():
+        for line_number, line in enumerate(text.splitlines(), start=1):
+            line_versions = set(explicit_semver.findall(line))
+            future_version_guidance = bool(
+                re.search(r'\bfuture\b', line, re.I)
+                and line_versions - {EXPECTED_VERSION}
+                and EXPECTED_VERSION not in line_versions
+            )
+            future_source_split = bool(latest_published_expected.search(line)) and any(
+                match.group('version') != EXPECTED_VERSION
+                for match in source_semver.finditer(line)
+            )
+            if current_unpublished.search(line):
+                marker = 'current_2_0_1_unpublished'
+            elif publication_pending.search(line) and not (
+                future_version_guidance or future_source_split
+            ):
+                marker = 'publication_pending'
+            elif stale_published_package.search(line) or stale_published_release.search(line):
+                marker = 'stale_published_2_0_0'
+            else:
+                continue
+            errors.append(f'{path}:{line_number}:contradictory_current_publication_truth:{marker}')
 
 
 def _assert_distribution_long_description_truth(
@@ -850,6 +906,17 @@ def collect_errors() -> list[str]:
         },
         version,
     )
+    _assert_current_publication_truth(errors, {
+        'README.md': readme,
+        'PUBLIC_STATUS.md': public_status,
+        'ROADMAP.md': roadmap,
+        'SPEC.md': spec,
+        'SECURITY.md': _read('SECURITY.md'),
+        'VALIDATION.md': validation,
+        'PUBLICATION_CHECKLIST.md': publication,
+        'docs/ARTIFACTS.md': artifact_docs,
+        'docs/SCHEMA_COMPATIBILITY.md': _read('docs/SCHEMA_COMPATIBILITY.md'),
+    })
     _assert_current_claim_docs(
         errors,
         version=version,
@@ -877,7 +944,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'docs/ARTIFACTS.md', artifact_docs, EXPECTED_SOURCE_STATUS)
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'Source-versus-published truth')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'current source version and source release label: `2.0.1`')
-    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, '`sclite-core==2.0.0`')
+    _require(errors, 'PUBLICATION_CHECKLIST.md', publication, '`sclite-core==2.0.1`')
     _require(errors, 'VALIDATION.md', validation, 'python scripts/validate_public_truth.py')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'python scripts/validate_public_truth.py')
     _require(errors, 'VALIDATION.md', validation, 'scripts/security_regression_gate.sh')
@@ -886,8 +953,7 @@ def collect_errors() -> list[str]:
     _require(errors, 'SPEC.md', spec, 'verification_result.v1')
     _require(errors, 'VALIDATION.md', validation, 'verification_result.v1')
     _require(errors, 'README.md', readme, 'verification_result')
-    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - ')
-    _require(errors, 'CHANGELOG.md', changelog, 'unpublished; publication pending')
+    _require(errors, 'CHANGELOG.md', changelog, f'## {EXPECTED_RELEASE_LABEL} - 2026-07-30')
     _require(errors, 'CHANGELOG.md', changelog, f'Published the audited `{EXPECTED_DISTRIBUTION}=={LATEST_PUBLISHED_VERSION}` package line')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'contracts/consumer_imports.v1.json')
     _require(errors, 'docs/GOVENGINE_INTEGRATION_CONTRACT.md', integration_contract, 'coordinated GovEngine/RExecOp/Tecrax')

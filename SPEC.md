@@ -1,6 +1,6 @@
 # SCLite Draft Specification
 
-Status: **unpublished non-prerelease 2.0.1 release source; publication pending**.
+Status: **published stable non-prerelease 2.0.1 release**.
 Current source package is `sclite-core==2.0.1`, over the frozen 2.0
 lifecycle/review and guarded verification surface. The Python import package
 remains `sclite`. The current front door is the review lifecycle substrate:

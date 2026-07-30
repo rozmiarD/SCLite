@@ -92,19 +92,17 @@ README source badge and current-source wording must use the source version;
 the PyPI badge, PyPI link and exact PyPI install command must use only the
 latest published version.
 
-For the current maintenance source, expected truth is:
+For the current published release, expected truth is:
 
 - current source version and source release label: `2.0.1`;
-- source status: unpublished non-prerelease 2.0.1 release source; publication
-  pending;
+- source status: published stable non-prerelease 2.0.1 release;
 - latest published PyPI package, badge, link and install pin:
-  `sclite-core==2.0.0`.
+  `sclite-core==2.0.1`.
 
-The `2.0.1` source must not be described as published or installable from PyPI
-unless publication has completed and every source-versus-published truth check
-is updated in the same reviewed change. For each stable release, current
-documentation and validation must state the exact latest published PyPI release
-tracked by `scripts/validate_public_truth.py`.
+The `2.0.1` release is published and installable from PyPI. For a future source
+version that differs from the latest published package, current documentation
+and validation must state the exact source-versus-published split tracked by
+`scripts/validate_public_truth.py`.
 
 The immutable package long description is
 [`PYPI_LONG_DESCRIPTION.md`](PYPI_LONG_DESCRIPTION.md), not the mutable
