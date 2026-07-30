@@ -5,6 +5,20 @@ actions, PyPI Trusted Publishing, GitHub artifact provenance, wheel and sdist
 installation smoke tests, dependency auditing, a product SBOM and reproducible-wheel
 comparison under a fixed `SOURCE_DATE_EPOCH`.
 
+The release publish path invokes the canonical
+`scripts/build_release_artifacts.sh` helper for both the normalized
+reviewed-source build and normalized record-commit build. It binds the immutable
+[`PYPI_LONG_DESCRIPTION.md`](../PYPI_LONG_DESCRIPTION.md) source bytes to the
+exact wheel `METADATA` and root sdist `PKG-INFO`, with project name/version and
+Markdown content type checked fail closed. Standard nested setuptools egg-info
+`PKG-INFO` is tolerated. Public truth binds the description's approved SHA-256.
+Mutable README and public-status text retain live release-state truth and are
+not distribution metadata.
+
+These checks do not parse natural language, impose a general shell or GitHub
+Actions YAML policy, sanitize arbitrary archives, or prove package-index
+availability, provenance, authorization, or authentic human approval.
+
 Dependency auditing runs in its dedicated release-tool environment. The product
 SBOM is generated only after the exact release wheel exists: that wheel is
 installed without dependencies into a clean target environment, CycloneDX

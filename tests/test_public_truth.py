@@ -39,7 +39,7 @@ def test_public_truth_validator_rejects_tool_environment_sbom_before_wheel() -> 
     workflow = '\n'.join((
         'name: Dependency audit and SBOM',
         'cyclonedx-py environment --output-file dist/sclite-core.cdx.json',
-        'python -m build',
+        'PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist',
     ))
 
     validator._assert_product_sbom_workflow(
@@ -59,7 +59,7 @@ def test_public_truth_validator_rejects_tool_environment_sbom_before_wheel() -> 
     (
         (
             '\n'.join((
-                'python -m build',
+                'PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist',
                 '# - name: Product SBOM',
                 '# cyclonedx-py environment "${TARGET_VENV}/bin/python" --pyproject pyproject.toml --mc-type library --output-reproducible --output-file dist/sclite-core.cdx.json',
             )),
@@ -72,7 +72,7 @@ def test_public_truth_validator_rejects_tool_environment_sbom_before_wheel() -> 
                 'python -m venv --without-pip "${TARGET_VENV}"',
                 'python -m pip --python "${TARGET_VENV}/bin/python" install --no-index --no-deps dist/*.whl',
                 'cyclonedx-py environment "${TARGET_VENV}/bin/python" --pyproject pyproject.toml --mc-type library --output-reproducible --output-file dist/sclite-core.cdx.json',
-                'python -m build',
+                'PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist',
                 'python scripts/validate_product_sbom.py --wheel dist/*.whl --sbom dist/sclite-core.cdx.json',
             )),
             '.github/workflows/ci.yml:product_sbom_must_follow_wheel_build',
@@ -192,7 +192,10 @@ def test_public_truth_validator_requires_readme_project_metadata(monkeypatch) ->
     project['readme'] = 'docs/OTHER.md'
     monkeypatch.setattr(validator, '_pyproject', lambda: project)
 
-    assert 'project_readme_mismatch:docs/OTHER.md!=README.md' in validator.collect_errors()
+    assert (
+        'project_readme_mismatch:docs/OTHER.md!=PYPI_LONG_DESCRIPTION.md'
+        in validator.collect_errors()
+    )
 
 
 @pytest.mark.parametrize(
@@ -626,4 +629,119 @@ def test_current_fixture_docs_reject_retired_or_maturity_ambiguous_wording() -> 
         'prepared execution/ticket target',
         'examples/trust-carrier-profiles/README.md:stale_current_wording:'
         'published v0.3 scoped-ticket artifact',
+    ]
+
+def test_public_truth_binds_exact_distribution_description_digest() -> None:
+    import hashlib
+
+    validator = _load_validator()
+    description = (ROOT / 'PYPI_LONG_DESCRIPTION.md').read_bytes()
+    errors: list[str] = []
+
+    validator._assert_distribution_long_description_truth(errors, description, '2.0.1')
+
+    assert errors == []
+    assert validator.PYPI_LONG_DESCRIPTION_SHA256 == hashlib.sha256(
+        description
+    ).hexdigest()
+
+
+def test_public_truth_rejects_distribution_description_byte_drift() -> None:
+    import hashlib
+
+    validator = _load_validator()
+    errors: list[str] = []
+    actual = hashlib.sha256(b'changed\n').hexdigest()
+
+    validator._assert_distribution_long_description_truth(errors, b'changed\n', '2.0.1')
+
+    assert errors == [
+        'PYPI_LONG_DESCRIPTION.md:sha256:'
+        f'{actual}!={validator.PYPI_LONG_DESCRIPTION_SHA256}'
+    ]
+
+
+def test_public_truth_rejects_crlf_distribution_description_bytes() -> None:
+    import hashlib
+
+    validator = _load_validator()
+    lf = (ROOT / 'PYPI_LONG_DESCRIPTION.md').read_bytes()
+    crlf = lf.replace(b'\n', b'\r\n')
+    errors: list[str] = []
+
+    validator._assert_distribution_long_description_truth(errors, crlf, '2.0.1')
+
+    assert crlf != lf
+    assert errors == [
+        'PYPI_LONG_DESCRIPTION.md:sha256:'
+        f'{hashlib.sha256(crlf).hexdigest()}!={validator.PYPI_LONG_DESCRIPTION_SHA256}'
+    ]
+
+
+def test_public_truth_requires_canonical_helper_boundaries() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_canonical_release_artifact_boundaries(
+        errors,
+        workflow='run: PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist\n',
+        release_workflow=(
+            'PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist\n' * 2
+        ),
+        package_smoke=(
+            'PYTHON="${BUILD_PY}" bash scripts/build_release_artifacts.sh '
+            '--outdir "${TMPDIR_ROOT}/dist"\n'
+        ),
+        manifest=(
+            'include scripts/build_release_artifacts.sh\n'
+            'include scripts/validate_distribution_metadata.py\n'
+        ),
+    )
+
+    assert errors == []
+
+
+def test_public_truth_rejects_missing_canonical_helper_boundary() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_canonical_release_artifact_boundaries(
+        errors, workflow='', release_workflow='', package_smoke='', manifest=''
+    )
+
+    assert errors == [
+        '.github/workflows/ci.yml:canonical_release_helper_count:0',
+        '.github/workflows/release.yml:canonical_release_helper_count:0',
+        'scripts/package_smoke.sh:canonical_release_helper_count:0',
+        'MANIFEST.in:missing:include scripts/build_release_artifacts.sh',
+        'MANIFEST.in:missing:include scripts/validate_distribution_metadata.py',
+    ]
+
+
+def test_public_truth_rejects_comment_only_canonical_helper_boundaries() -> None:
+    validator = _load_validator()
+    errors: list[str] = []
+
+    validator._assert_canonical_release_artifact_boundaries(
+        errors,
+        workflow='# run: PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist\n',
+        release_workflow=(
+            '# PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist\n' * 2
+        ),
+        package_smoke=(
+            '# PYTHON="${BUILD_PY}" bash scripts/build_release_artifacts.sh '
+            '--outdir "${TMPDIR_ROOT}/dist"\n'
+        ),
+        manifest=(
+            '# include scripts/build_release_artifacts.sh\n'
+            '# include scripts/validate_distribution_metadata.py\n'
+        ),
+    )
+
+    assert errors == [
+        '.github/workflows/ci.yml:canonical_release_helper_count:0',
+        '.github/workflows/release.yml:canonical_release_helper_count:0',
+        'scripts/package_smoke.sh:canonical_release_helper_count:0',
+        'MANIFEST.in:missing:include scripts/build_release_artifacts.sh',
+        'MANIFEST.in:missing:include scripts/validate_distribution_metadata.py',
     ]

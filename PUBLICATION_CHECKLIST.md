@@ -49,10 +49,11 @@ For release readiness, also run the opt-in package smoke:
 scripts/package_smoke.sh
 ```
 
-It builds wheel/sdist artifacts in a temporary directory, runs `twine check`,
-installs the generated wheel into a clean virtual environment, runs
-`pip check`, and confirms the PyPI distribution name `sclite-core` imports as
-the Python package `sclite`.
+`scripts/build_release_artifacts.sh` builds wheel/sdist artifacts, normalizes
+the sdist, runs `twine check`, and runs exact distribution-metadata validation.
+After that helper succeeds, `scripts/package_smoke.sh` separately installs the
+generated wheel and sdist into clean virtual environments, runs `pip check` for
+both, and confirms `sclite-core` imports as `sclite` with the expected version.
 
 The smoke environment installs `.github/release-build-requirements.txt`; it does
 not resolve floating build or upload-tool versions. The release workflow uses
@@ -104,6 +105,16 @@ unless publication has completed and every source-versus-published truth check
 is updated in the same reviewed change. For each stable release, current
 documentation and validation must state the exact latest published PyPI release
 tracked by `scripts/validate_public_truth.py`.
+
+The immutable package long description is
+[`PYPI_LONG_DESCRIPTION.md`](PYPI_LONG_DESCRIPTION.md), not the mutable
+README. Public truth binds its approved SHA-256. The canonical metadata gate
+compares its exact source bytes with the built wheel `METADATA` and exact root
+sdist `PKG-INFO`, including project identity, version, and Markdown content
+type. It tolerates the standard nested setuptools egg-info `PKG-INFO`; it is
+not a natural-language classifier, a shell/YAML policy engine, a general
+archive sanitizer, or proof of publication, provenance, authorization, or
+human approval.
 
 The current release-gate command expansion is defined by
 `scripts/public_validation_gate.sh`. The inventory below includes its current
