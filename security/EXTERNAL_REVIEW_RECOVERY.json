@@ -1,24 +1,26 @@
 {
   "schema": "sclite.external_security_review.v1",
-  "release_line": "2.0.0",
+  "release_line": "2.0.1",
   "status": "approved",
-  "source_commit": "33671d3b7bdc6e61f74442cd86d538d08c4c0afa",
+  "source_commit": "367a7cd7056debf5189f8ff13e006035e08389c8",
   "artifact_sha256": [
-    "120ab596cb1d886847309f75df19a2b20e40fc5993fdcdc768908f5e10458dd6",
-    "32e5f2293ee98ffc04890c7a0154e5637cd76adf26a790b48ae850c72481b199"
+    "f86fe0cab700c96e63323f3e620d35047b5f4f5c7f578596788a3dac8ba128cc",
+    "5d6d347e055ad7fb1410eb60448ad5b68486f716d5bef999fdb3140f28a291c0"
   ],
   "reviewer": "ExatronOmega",
   "scope": [
-    "source remediation review",
-    "official Python 3.13 release artifacts",
-    "wheel and sdist correspondence",
-    "immutable-tag recovery workflow"
+    "complete SCLite 2.0.1 source review at 367a7cd7056debf5189f8ff13e006035e08389c8",
+    "v2.0.0 to 2.0.1 maintenance delta and frozen API CLI schema contracts",
+    "F-022 immutable distribution description and exact metadata binding",
+    "F-023 official runner artifact rebind and immutable-tag recovery",
+    "official GitHub runner wheel and normalized sdist correspondence",
+    "stable recovery workflow and signed recovery provenance"
   ],
-  "review_date": "2026-07-11",
+  "review_date": "2026-07-30",
   "review_verdict": "approved",
-  "report_sha256": "22e0049d203142869a0f057819fa351f0afa5cba632555f1f564cf805bdfd928",
-  "unresolved_high": 0,
+  "report_sha256": "8ee6205f006b3849458850db7a92cb2e6842d3bb10e4ad17103bd78db5b23f5a",
   "unresolved_critical": 0,
+  "unresolved_high": 0,
   "unresolved_medium": 0,
   "unresolved_low": 0,
   "accepted_findings": []
