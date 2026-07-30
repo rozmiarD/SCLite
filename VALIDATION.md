@@ -189,10 +189,19 @@ scripts/reproducible_build_gate.sh
 scripts/release_ab_repro_gate.sh
 ```
 
-These gates build wheel/sdist artifacts, run `twine check`, install into clean
-environments, run `pip check`, validate entrypoints/import inventory and compare
-reproducible outputs. The source tree must not contain stale `build/`, `dist/`
-or egg-info artifacts when the package smoke starts.
+`scripts/build_release_artifacts.sh --outdir <directory>` is the canonical
+package-proof boundary. It builds one wheel and one sdist, normalizes the sdist,
+runs `twine check`, and validates the exact wheel `METADATA` and root sdist
+`PKG-INFO` against the immutable
+[`PYPI_LONG_DESCRIPTION.md`](PYPI_LONG_DESCRIPTION.md). `package_smoke.sh`
+uses that helper in a temporary source copy, then installs each artifact into a
+clean environment and runs `pip check`.
+
+The metadata check binds the project identity, version, Markdown content type,
+and exact description bytes. It intentionally accepts setuptools' nested
+egg-info `PKG-INFO`. It is not a publication, provenance, authorization, human
+approval, general archive-sanitization, natural-language, or shell-policy
+proof.
 
 Before publication also run:
 

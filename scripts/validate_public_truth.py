@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib
+import hashlib
 import json
 import re
 import sys
@@ -12,6 +13,9 @@ from typing import Iterable, Mapping
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+SCRIPTS = ROOT / 'scripts'
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
 
 import sclite  # noqa: E402
 from sclite._cli_impl import DEVTOOLS_COMMANDS, KERNEL_COMMANDS  # noqa: E402
@@ -26,6 +30,8 @@ LATEST_PUBLISHED_VERSION = '2.0.0'
 LATEST_PUBLISHED_LABEL = '2.0.0'
 EXPECTED_DISTRIBUTION = 'sclite-core'
 EXPECTED_IMPORT_PACKAGE = 'sclite'
+PYPI_LONG_DESCRIPTION_PATH = 'PYPI_LONG_DESCRIPTION.md'
+PYPI_LONG_DESCRIPTION_SHA256 = '737ac8a33c8563136818bd14f2e13ac4dea7aa64fa351a508f95f632e61c3656'
 EXPECTED_SOURCE_STATUS = (
     'unpublished non-prerelease 2.0.1 release source; publication pending'
 )
@@ -116,6 +122,54 @@ def _assert_readme_package_truth(errors: list[str], readme: str, version: str) -
     _require(errors, 'README.md', readme, f'package-sclite--core%20{LATEST_PUBLISHED_VERSION}-blueviolet.svg')
     _require(errors, 'README.md', readme, f'https://pypi.org/project/sclite-core/{LATEST_PUBLISHED_VERSION}/')
     _require(errors, 'README.md', readme, f'python -m pip install sclite-core=={LATEST_PUBLISHED_VERSION}')
+
+
+def _assert_distribution_long_description_truth(
+    errors: list[str], description: bytes, version: str
+) -> None:
+    del version
+    actual = hashlib.sha256(description).hexdigest()
+    if actual != PYPI_LONG_DESCRIPTION_SHA256:
+        errors.append(
+            f'{PYPI_LONG_DESCRIPTION_PATH}:sha256:{actual}!={PYPI_LONG_DESCRIPTION_SHA256}'
+        )
+
+
+def _assert_canonical_release_artifact_boundaries(
+    errors: list[str], *, workflow: str, release_workflow: str, package_smoke: str, manifest: str
+) -> None:
+    def noncomment_lines(text: str) -> list[str]:
+        return [line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith('#')]
+
+    for path, text, expected, expected_count in (
+        (
+            '.github/workflows/ci.yml',
+            workflow,
+            'run: PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist',
+            1,
+        ),
+        (
+            '.github/workflows/release.yml',
+            release_workflow,
+            'PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist',
+            2,
+        ),
+        (
+            'scripts/package_smoke.sh',
+            package_smoke,
+            'PYTHON="${BUILD_PY}" bash scripts/build_release_artifacts.sh --outdir "${TMPDIR_ROOT}/dist"',
+            1,
+        ),
+    ):
+        actual_count = noncomment_lines(text).count(expected)
+        if actual_count != expected_count:
+            errors.append(f'{path}:canonical_release_helper_count:{actual_count}')
+    for required in (
+        'include scripts/build_release_artifacts.sh',
+        'include scripts/validate_distribution_metadata.py',
+    ):
+        if noncomment_lines(manifest).count(required) != 1:
+            errors.append(f'MANIFEST.in:missing:{required}')
 
 
 def _assert_unpublished_candidate_truth(errors: list[str], paths: Mapping[str, str], version: str) -> None:
@@ -677,6 +731,7 @@ def _forbidden_claim_errors(paths: Iterable[str]) -> list[str]:
 
 
 def _workflow_executable_lines(workflow: str) -> list[str]:
+    workflow = re.sub(r'\\\s*\n\s*', ' ', workflow)
     lines: list[str] = []
     for line in workflow.splitlines():
         if not line.strip() or line.lstrip().startswith('#'):
@@ -729,7 +784,10 @@ def _assert_product_sbom_workflow(errors: list[str], *, path: str, workflow: str
     def position(line: str) -> int:
         return lines.index(line) if line in lines else -1
 
-    build_positions = [index for index, line in enumerate(lines) if line == 'python -m build']
+    build_positions = [
+        index for index, line in enumerate(lines)
+        if 'scripts/build_release_artifacts.sh' in line
+    ]
     target_position = position(target_creation)
     venv_position = position(f'python -m venv --without-pip {target_venv}')
     install_position = position(install)
@@ -746,6 +804,7 @@ def collect_errors() -> list[str]:
     project = _pyproject()
     version = str(project['version'])
     readme = _read('README.md')
+    distribution_description = (ROOT / PYPI_LONG_DESCRIPTION_PATH).read_bytes()
     public_status = _read('PUBLIC_STATUS.md')
     roadmap = _read('ROADMAP.md')
     validation = _read('VALIDATION.md')
@@ -759,13 +818,17 @@ def collect_errors() -> list[str]:
     integration_guide = _read('docs/INTEGRATION_GUIDE.md')
     workflow = _read('.github/workflows/ci.yml')
     release_workflow = _read('.github/workflows/release.yml')
+    package_smoke = _read('scripts/package_smoke.sh')
+    manifest = _read('MANIFEST.in')
     active_markdown = _markdown_paths(include_archive=False)
     all_markdown = _markdown_paths(include_archive=True)
 
     if project['name'] != EXPECTED_DISTRIBUTION:
         errors.append(f'distribution_name_mismatch:{project["name"]}')
-    if project.get('readme') != 'README.md':
-        errors.append(f'project_readme_mismatch:{project.get("readme")}!=README.md')
+    if project.get('readme') != PYPI_LONG_DESCRIPTION_PATH:
+        errors.append(
+            f'project_readme_mismatch:{project.get("readme")}!={PYPI_LONG_DESCRIPTION_PATH}'
+        )
     if version != EXPECTED_VERSION:
         errors.append(f'pyproject_version_mismatch:{version}!={EXPECTED_VERSION}')
     if sclite.__version__ != version:
@@ -774,10 +837,15 @@ def collect_errors() -> list[str]:
         errors.append(f'runtime_dependencies_not_empty:{project.get("dependencies")}')
 
     _assert_readme_package_truth(errors, readme, version)
+    _assert_distribution_long_description_truth(errors, distribution_description, version)
     _assert_unpublished_candidate_truth(
         errors,
         {
-            **{path: _read(path) for path in active_markdown},
+            **{
+                path: _read(path)
+                for path in active_markdown
+                if path != PYPI_LONG_DESCRIPTION_PATH
+            },
             'CHANGELOG.md': changelog,
         },
         version,
@@ -873,12 +941,18 @@ def collect_errors() -> list[str]:
     _require(errors, '.github/workflows/ci.yml', workflow, 'scripts/strict_schema_gate.sh')
     _require(errors, '.github/workflows/ci.yml', workflow, 'package-dry-run:')
     _require(errors, '.github/workflows/ci.yml', workflow, 'rm -rf dist build *.egg-info')
-    _require(errors, '.github/workflows/ci.yml', workflow, 'python -m twine check dist/*')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'scripts/package_smoke.sh')
     _require(errors, 'PUBLICATION_CHECKLIST.md', publication, 'product SBOM is generated after the exact wheel exists')
     _require(errors, 'docs/RELEASE_SECURITY.md', _read('docs/RELEASE_SECURITY.md'), 'product SBOM')
     _require(errors, 'VALIDATION.md', validation, 'release-readiness evidence only')
     _require(errors, '.github/workflows/ci.yml', workflow, 'python -m pip check')
+    _assert_canonical_release_artifact_boundaries(
+        errors,
+        workflow=workflow,
+        release_workflow=release_workflow,
+        package_smoke=package_smoke,
+        manifest=manifest,
+    )
     _assert_product_sbom_workflow(
         errors,
         path='.github/workflows/ci.yml',

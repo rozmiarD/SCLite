@@ -101,9 +101,7 @@ jobs:
       - name: Build reviewed source artifacts
         run: |
           rm -rf dist build *.egg-info
-          python -m build
-          scripts/normalize_sdist.sh dist/*.tar.gz
-          python -m twine check dist/*
+          PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist
           mkdir -p "${RUNNER_TEMP}/reviewed-dist"
           cp dist/*.whl dist/*.tar.gz "${RUNNER_TEMP}/reviewed-dist/"
       - name: Build tagged record commit and prove artifact equality
@@ -111,9 +109,7 @@ jobs:
         run: |
           git checkout --detach "${{ steps.source.outputs.review_commit }}"
           rm -rf dist build *.egg-info
-          python -m build
-          scripts/normalize_sdist.sh dist/*.tar.gz
-          python -m twine check dist/*
+          PYTHON=python bash scripts/build_release_artifacts.sh --outdir dist
           python scripts/compare_release_builds.py \
             --reviewed "${RUNNER_TEMP}/reviewed-dist" \
             --published dist

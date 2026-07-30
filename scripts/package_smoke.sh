@@ -18,28 +18,25 @@ else
 fi
 
 TMPDIR_ROOT="$(mktemp -d)"
-GENERATED_REPO_PATHS=(build dist sclite_core.egg-info)
-for path in "${GENERATED_REPO_PATHS[@]}"; do
-  if [ -e "${path}" ]; then
-    echo "refusing to run package smoke with existing build artifact: ${path}" >&2
-    exit 1
-  fi
-done
 
 cleanup() {
   rm -rf "${TMPDIR_ROOT}"
-  for path in "${GENERATED_REPO_PATHS[@]}"; do
-    rm -rf "${REPO_ROOT}/${path}"
-  done
 }
 trap cleanup EXIT
 
 "${PYTHON_BIN}" -m venv "${TMPDIR_ROOT}/build-venv"
 BUILD_PY="${TMPDIR_ROOT}/build-venv/bin/python"
 "${BUILD_PY}" -m pip install -r "${REPO_ROOT}/.github/release-build-requirements.txt" >/dev/null
-"${BUILD_PY}" -m build --outdir "${TMPDIR_ROOT}/dist"
-scripts/normalize_sdist.sh "${TMPDIR_ROOT}"/dist/*.tar.gz
-"${BUILD_PY}" -m twine check "${TMPDIR_ROOT}"/dist/*
+mkdir "${TMPDIR_ROOT}/source"
+tar --exclude-vcs --exclude=build --exclude=dist --exclude='*.egg-info' \
+  --exclude=.venv \
+  -C "${REPO_ROOT}" -cf - . | tar -C "${TMPDIR_ROOT}/source" -xf -
+(
+  cd "${TMPDIR_ROOT}/source"
+  PYTHON="${BUILD_PY}" bash scripts/build_release_artifacts.sh --outdir "${TMPDIR_ROOT}/dist"
+)
+echo "sdist_pkg_info_members:"
+tar -tzf "${TMPDIR_ROOT}"/dist/*.tar.gz | grep '/PKG-INFO$'
 
 "${PYTHON_BIN}" -m venv "${TMPDIR_ROOT}/install-venv"
 INSTALL_PY="${TMPDIR_ROOT}/install-venv/bin/python"

@@ -1,0 +1,2 @@
+include scripts/validate_distribution_metadata.py
+include scripts/build_release_artifacts.sh
