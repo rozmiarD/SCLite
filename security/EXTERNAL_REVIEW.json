@@ -11,7 +11,7 @@
   "scope": [
     "complete SCLite 2.0.1 source review at 367a7cd7056debf5189f8ff13e006035e08389c8",
     "v2.0.0 to 2.0.1 maintenance delta and frozen API CLI schema contracts",
-    "F-002 immutable distribution description and exact metadata binding",
+    "F-022 immutable distribution description and exact metadata binding",
     "wheel and normalized sdist correspondence",
     "integrity verification security regression and product SBOM evidence",
     "stable release workflow and record-only commit protocol"
