@@ -152,10 +152,9 @@ def validate_ticket_semantics(
     if ticket_network and not contract_network:
         raise TicketSemanticError('ticket network execution exceeds execution_contract bounds')
 
+    _execution_max_commands(execution_bounds)
     max_runs = int(execution_limits.get('max_runs') or 0)
     max_uses = int(spend_limits.get('max_uses') or 0)
-    if max_uses > max_runs:
-        raise TicketSemanticError('ticket spend_limits.max_uses exceeds execution_limits.max_runs')
     if bool(spend_limits.get('one_shot')) and max_uses != 1:
         raise TicketSemanticError('one_shot ticket must have max_uses=1')
     if strict_ticket_profile and bool(spend_limits.get('one_shot')) and max_runs != 1:
@@ -180,7 +179,7 @@ def validate_ticket_semantics(
         'ticket_mode_within_execution_bounds',
         'ticket_tool_matches_execution_contract',
         'ticket_args_digest_matches_execution_contract',
-        'ticket_spend_limits_within_execution_limits',
+        'ticket_spend_limits_valid',
         'ticket_receipt_and_evidence_obligations',
         'ticket_validity_window_well_formed',
     ]
@@ -269,6 +268,21 @@ def _as_int(value: Any, label: str) -> int:
         return int(value)
     except (TypeError, ValueError) as exc:
         raise TicketUseVerificationError(f'{label} must be an integer') from exc
+
+
+def _execution_max_commands(execution_bounds: Mapping[str, Any]) -> int:
+    """Return the per-receipt command bound from an execution contract.
+
+    ``bool`` is an ``int`` subclass in Python, but it is never a meaningful
+    command bound. Keep this typed contract check local to the SCLite artifact
+    verifier rather than inferring runtime attempts or ticket consumption.
+    """
+    value = execution_bounds.get('max_commands')
+    if type(value) is not int:
+        raise TicketSemanticError('execution_contract.execution_bounds.max_commands must be a non-boolean integer')
+    if value < 0:
+        raise TicketSemanticError('execution_contract.execution_bounds.max_commands must be non-negative')
+    return value
 
 
 def _parse_offset_aware_rfc3339(value: Any, label: str) -> datetime:
@@ -436,10 +450,13 @@ def verify_ticket_use(
         receipt_execution.get('executed_command_count', 0),
         'receipt.execution.executed_command_count',
     )
-    if bool(spend.get('one_shot')) and executed_count > _as_int(limits.get('max_runs'), 'ticket.execution_limits.max_runs'):
-        raise TicketUseVerificationError('receipt executed command count exceeds ticket execution limit')
-    if strict_ticket_profile and bool(spend.get('one_shot')) and executed_count > 1:
-        raise TicketUseVerificationError('strict one_shot receipt executed more than one command')
+    execution_bounds = _require_mapping(
+        execution_contract.get('execution_bounds'),
+        'execution_contract.execution_bounds',
+    )
+    max_commands = _execution_max_commands(execution_bounds)
+    if executed_count > max_commands:
+        raise TicketUseVerificationError('receipt executed command count exceeds execution_contract max_commands')
 
     checks = [
         'ticket_semantics_valid',

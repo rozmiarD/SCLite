@@ -101,6 +101,16 @@ def test_scoped_ticket_rejects_network_escalation() -> None:
         validate_ticket_semantics(ticket, _contract())
 
 
+def test_scoped_ticket_keeps_ticket_uses_distinct_from_lifecycle_runs() -> None:
+    ticket = _ticket()
+    ticket['execution_limits'].update(max_runs=1, one_shot=False)
+    ticket['spend_limits'].update(max_uses=2, one_shot=False)
+
+    checks = validate_ticket_semantics(ticket, _contract())
+
+    assert 'ticket_spend_limits_valid' in checks
+
+
 def test_scoped_ticket_rejects_missing_receipt_obligation() -> None:
     ticket = _ticket()
     ticket['spend_limits']['requires_receipt'] = False

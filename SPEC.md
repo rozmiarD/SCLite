@@ -253,6 +253,16 @@ The `0.3.5` line includes the first scoped-ticket and receipt-bounded-evidence s
 
 These checks remain local artifact verification. They do not execute tools, decide authorization, prove signer identity, or attest that a runtime enforced a ticket.
 
+Ticket-use accounting keeps three distinct units. `execution_limits.max_runs`
+limits lifecycle runs; `spend_limits.max_uses` is compared only with the
+current receipt's declared `ticket_use.use_count`; and
+`execution_bounds.max_commands` limits that receipt's
+`execution.executed_command_count`. `verify-ticket-use` requires a raw,
+non-boolean integer `max_commands` and never compares a command count to
+`max_runs`; strict one-shot ticket semantics still require the lifecycle
+`max_runs` value to be one. It evaluates one supplied receipt only: it neither
+aggregates independent receipts nor maintains a ticket-use or replay ledger.
+
 Receipt/evidence compatibility decision:
 
 - structured claim booleans such as `requires_completed_execution`,

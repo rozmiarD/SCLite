@@ -123,6 +123,15 @@ local guard check and does not turn an external sidecar into a bundle member.
 
 SCLite reports replay as `not_checked`.
 
+Scoped ticket-use verification is also stateless. For one supplied receipt it
+compares `execution.executed_command_count` with the bound execution
+contract's `execution_bounds.max_commands`; it does not treat lifecycle
+`max_runs` as a command bound. The bound is a raw, non-boolean integer;
+strict one-shot ticket semantics retain their separate lifecycle
+`max_runs=1` requirement. It checks a receipt-declared `use_count` only against
+the ticket's `max_uses`, and does not aggregate separate receipts into a use
+counter or replay ledger.
+
 Replay freshness requires state. State does not belong in SCLite's pure local
 verifier. GovEngine defines deterministic replay-decision semantics and a
 claim-once port. Production host adapters own atomic persistence, locking,

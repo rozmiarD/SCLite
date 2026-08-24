@@ -11,6 +11,14 @@ from sclite.tickets import TicketSemanticError, TicketUseVerificationError, vali
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / 'sclite' / 'examples' / 'scoped-ticket-v0.3'
+# A static capture of the SCLite-facing RExecOp projection. It records two
+# connector attempts and the scalar RExecOp projects into the receipt; this
+# test deliberately does not recreate retry or receipt-accounting semantics.
+REXECOP_TWO_ATTEMPT_CAPTURE = (
+    {'attempt_id': 'rexecop-attempt-001', 'connector_io_started': True},
+    {'attempt_id': 'rexecop-attempt-002', 'connector_io_started': True},
+)
+REXECOP_TWO_ATTEMPT_RECEIPT_PROJECTION = {'executed_command_count': 2}
 
 
 def _load(name: str) -> dict:
@@ -182,8 +190,111 @@ def test_strict_dry_run_claim_rejects_blocked_or_failed_receipt(status: str) -> 
 def test_strict_one_shot_profile_requires_single_max_run() -> None:
     ticket = _ticket()
     ticket['execution_limits']['max_runs'] = 2
+
     with pytest.raises(TicketSemanticError, match='strict one_shot ticket'):
         validate_ticket_semantics(ticket, _contract(), strict_ticket_profile=True)
+
+
+def test_ticket_use_rejects_one_shot_receipt_over_contract_command_bound() -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['execution_bounds']['max_commands'] = 0
+    artifacts['execution_receipt']['execution']['executed_command_count'] = 1
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketUseVerificationError, match='exceeds execution_contract max_commands'):
+        verify_ticket_use(
+            artifacts['execution_ticket'],
+            artifacts['execution_contract'],
+            artifacts['execution_receipt'],
+            artifacts['evidence_contract'],
+        )
+
+
+def test_ticket_use_rejects_multi_run_receipt_over_contract_command_bound() -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['execution_bounds']['max_commands'] = 1
+    artifacts['execution_ticket']['execution_limits'].update(max_runs=2, one_shot=False)
+    artifacts['execution_ticket']['spend_limits'].update(max_uses=2, one_shot=False)
+    artifacts['execution_receipt']['execution']['executed_command_count'] = 100
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketUseVerificationError, match='exceeds execution_contract max_commands'):
+        verify_ticket_use(
+            artifacts['execution_ticket'],
+            artifacts['execution_contract'],
+            artifacts['execution_receipt'],
+            artifacts['evidence_contract'],
+        )
+
+
+def _captured_rexecop_two_attempt_receipt_projection() -> dict[str, int]:
+    """Return the captured SCLite projection for two RExecOp connector attempts.
+
+    This fixture is deliberately a static projection, not an implementation of
+    RExecOp retry or receipt accounting. Its two captured attempt records and
+    canonical receipt scalar are fixed above as cross-component test evidence.
+    """
+    assert len(REXECOP_TWO_ATTEMPT_CAPTURE) == 2
+    return dict(REXECOP_TWO_ATTEMPT_RECEIPT_PROJECTION)
+
+
+def test_ticket_use_rejects_captured_rexecop_two_attempt_projection_over_single_command_bound() -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['execution_bounds']['max_commands'] = 1
+    artifacts['execution_ticket']['execution_limits'].update(max_runs=2, one_shot=False)
+    artifacts['execution_ticket']['spend_limits'].update(max_uses=2, one_shot=False)
+    projection = _captured_rexecop_two_attempt_receipt_projection()
+    assert projection == {'executed_command_count': 2}
+    artifacts['execution_receipt']['execution'].update(projection)
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketUseVerificationError, match='exceeds execution_contract max_commands'):
+        verify_ticket_use(
+            artifacts['execution_ticket'],
+            artifacts['execution_contract'],
+            artifacts['execution_receipt'],
+            artifacts['evidence_contract'],
+        )
+
+
+def test_ticket_use_accepts_two_commands_within_per_receipt_contract_bound() -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['execution_bounds']['max_commands'] = 2
+    artifacts['execution_ticket']['execution_limits'].update(max_runs=2, one_shot=False)
+    artifacts['execution_ticket']['spend_limits'].update(max_uses=2, one_shot=False)
+    projection = _captured_rexecop_two_attempt_receipt_projection()
+    assert projection == {'executed_command_count': 2}
+    artifacts['execution_receipt']['execution'].update(projection)
+    artifacts['execution_receipt']['ticket_use']['use_count'] = 2
+    _rebind_scoped_artifacts(artifacts)
+
+    result = verify_ticket_use(
+        artifacts['execution_ticket'],
+        artifacts['execution_contract'],
+        artifacts['execution_receipt'],
+        artifacts['evidence_contract'],
+    )
+
+    assert result['status'] == 'passed'
+
+
+@pytest.mark.parametrize(
+    ('bound', 'message'),
+    [
+        (True, 'must be a non-boolean integer'),
+        ('2', 'must be a non-boolean integer'),
+        (2.0, 'must be a non-boolean integer'),
+        (None, 'must be a non-boolean integer'),
+        (-1, 'must be non-negative'),
+    ],
+)
+def test_ticket_semantics_rejects_malformed_contract_command_bound(bound: object, message: str) -> None:
+    artifacts = _scoped_artifacts()
+    artifacts['execution_contract']['execution_bounds']['max_commands'] = bound
+    _rebind_scoped_artifacts(artifacts)
+
+    with pytest.raises(TicketSemanticError, match=message):
+        validate_ticket_semantics(artifacts['execution_ticket'], artifacts['execution_contract'])
 
 
 def test_ticket_use_rejects_evidence_replay_live_execution_requirement() -> None:
