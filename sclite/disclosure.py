@@ -76,7 +76,9 @@ def relative_public_path(value: str | Path) -> str:
     text = str(value).replace('\\', '/')
     windows = PureWindowsPath(str(value))
     path = Path(text)
-    if path.is_absolute() or windows.is_absolute() or '..' in path.parts:
+    if path.is_absolute() or windows.is_absolute() or windows.drive or '..' in path.parts:
         return windows.name or path.name or 'artifact.json'
     normalized = path.as_posix()
-    return normalized.lstrip('./') or path.name or 'artifact.json'
+    if normalized.startswith('./'):
+        normalized = normalized.removeprefix('./')
+    return normalized or path.name or 'artifact.json'

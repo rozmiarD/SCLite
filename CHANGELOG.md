@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Corrects disclosure path labels to remove only an explicit `./` prefix while
+  preserving dot-prefixed relative labels. Absolute, parent-traversal and
+  Windows-drive inputs continue to be reduced to topology-safe labels; this
+  local normalization does not authorize publication.
+
 ## 2.0.1 - 2026-07-30
 
 - Published the audited `sclite-core==2.0.1` package line as the stable

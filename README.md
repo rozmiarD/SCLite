@@ -237,9 +237,12 @@ but does not claim credentials or private paths are absent. SCLite 2.0 does not
 derive a `public_safe` boolean from this status. No status authorizes
 publication: that remains a separate host/operator step.
 
-Canonical results contain relative path labels. `verify-secure-bundle
---local-debug --format json` is the explicit local-only escape hatch for an
-absolute-path debug envelope.
+Canonical results contain relative path labels. The disclosure helper removes
+only an explicit `./` prefix: `.foo` and `..foo` remain labels, while absolute,
+parent-traversal and Windows-drive inputs are reduced to a topology-safe final
+name. Labels describe local inputs only and do not authorize publication.
+`verify-secure-bundle --local-debug --format json` is the explicit local-only
+escape hatch for an absolute-path debug envelope.
 
 ```mermaid
 flowchart TB

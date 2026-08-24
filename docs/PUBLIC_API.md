@@ -174,7 +174,11 @@ verification. It is available only from the testing namespace.
 The monotonic disclosure model is `unknown → operator_asserted →
 checks_performed → externally_verified`. SCLite 2.0 has no derived
 `public_safe` boolean; publication authorization remains a separate host
-decision.
+decision. `relative_public_path()` returns a topology-safe relative label: it
+removes only an explicit `./` prefix and preserves dot-prefixed labels such as
+`.foo` and `..foo`. Absolute, parent-traversal and Windows-drive inputs reduce
+to their final name. The helper is local normalization only; it does not
+authorize publication or attest that a label is safe to disclose.
 
 ## Review Records
 

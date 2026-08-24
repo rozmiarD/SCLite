@@ -210,6 +210,15 @@ If a Kernel Guard secret is compromised, an attacker may create valid-looking
 guards for that key domain. SCLite cannot distinguish those from legitimate
 guards without an external trust, revocation, or publication mechanism.
 
+## Disclosure Path Labels
+
+`relative_public_path()` removes only an explicit `./` prefix from a local
+relative label and preserves labels beginning with `.` or `..`. It reduces
+absolute, parent-traversal and Windows-drive paths to their final name so a
+canonical disclosure result does not expose workstation topology. This is
+local label normalization, not redaction assurance, disclosure approval or
+publication authority; those decisions remain external to SCLite.
+
 ## Public Identity And Signatures
 
 HMAC gives authenticity only to parties that already share the secret. It is

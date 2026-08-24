@@ -73,7 +73,13 @@ def test_disclosure_status_transitions_are_monotonic() -> None:
     [
         ('/home/alice/private/artifact.json', 'artifact.json'),
         (r'C:\\Users\\Alice\\private\\artifact.json', 'artifact.json'),
+        (r'C:private\\artifact.json', 'artifact.json'),
         ('../private/artifact.json', 'artifact.json'),
+        ('.foo', '.foo'),
+        ('..foo', '..foo'),
+        ('./foo', 'foo'),
+        ('../foo', 'foo'),
+        ('/foo', 'foo'),
         ('nested/artifact.json', 'nested/artifact.json'),
     ],
 )
