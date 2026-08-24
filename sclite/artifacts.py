@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any, Dict, Mapping
@@ -12,7 +13,9 @@ from .json_types import json_mapping
 from .schema_resolver import SchemaResolutionError, SchemaResolver
 
 ARTIFACT_CANONICALIZATION_VERSION = 'sclite-json-v0.1'
+ARTIFACT_CANONICALIZATION_V2 = 'sclite-json-v0.2'
 ARTIFACT_HASH_ALGORITHM = 'sha256'
+_MAX_SAFE_JSON_INTEGER = (1 << 53) - 1
 
 SCHEMA_FILES = {
     'scope_fidelity_report.v0.1': 'scope_fidelity_report.v0.1.schema.json',
@@ -293,6 +296,102 @@ def canonicalize_artifact(value: Any) -> str:
     It is a content-addressing helper, not a signature or tamper-proof proof.
     """
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+
+
+class CanonicalizationError(ValueError):
+    """A stable rejection from a versioned artifact canonicalization profile."""
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(reason_code)
+
+
+def _canonical_number_v2(value: int | float) -> str:
+    """Render the portable v0.2 JSON number subset using ECMAScript layout."""
+    if isinstance(value, int):
+        if abs(value) > _MAX_SAFE_JSON_INTEGER:
+            raise CanonicalizationError('unsafe_integer')
+        return str(value)
+
+    if not math.isfinite(value):
+        raise CanonicalizationError('non_finite_number')
+    if value == 0:
+        return '0'
+    if value.is_integer() and abs(value) > _MAX_SAFE_JSON_INTEGER:
+        raise CanonicalizationError('unsafe_integer')
+
+    rendered = repr(value).lower()
+    sign = ''
+    if rendered.startswith('-'):
+        sign, rendered = '-', rendered[1:]
+    if 'e' in rendered:
+        mantissa, exponent_text = rendered.split('e', 1)
+        exponent = int(exponent_text)
+    else:
+        mantissa, exponent = rendered, 0
+    whole, separator, fraction = mantissa.partition('.')
+    raw_digits = whole + fraction
+    leading_zeroes = len(raw_digits) - len(raw_digits.lstrip('0'))
+    digits = raw_digits.lstrip('0').rstrip('0')
+    if not digits:
+        return '0'
+    decimal_position = len(whole) + exponent - leading_zeroes
+
+    if 0 < decimal_position <= 21:
+        if len(digits) <= decimal_position:
+            return sign + digits + ('0' * (decimal_position - len(digits)))
+        return sign + digits[:decimal_position] + '.' + digits[decimal_position:]
+    if -6 < decimal_position <= 0:
+        return sign + '0.' + ('0' * -decimal_position) + digits
+
+    coefficient = digits if len(digits) == 1 else digits[0] + '.' + digits[1:]
+    scientific_exponent = decimal_position - 1
+    exponent_sign = '+' if scientific_exponent >= 0 else ''
+    return sign + coefficient + 'e' + exponent_sign + str(scientific_exponent)
+
+
+def _canonicalize_v2(value: Any) -> str:
+    if value is None:
+        return 'null'
+    if value is True:
+        return 'true'
+    if value is False:
+        return 'false'
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+    if isinstance(value, (int, float)):
+        return _canonical_number_v2(value)
+    if isinstance(value, (list, tuple)):
+        return '[' + ','.join(_canonicalize_v2(item) for item in value) + ']'
+    if isinstance(value, Mapping):
+        if any(not isinstance(key, str) for key in value):
+            raise CanonicalizationError('non_string_object_key')
+        return '{' + ','.join(
+            json.dumps(key, ensure_ascii=False, separators=(',', ':')) + ':' + _canonicalize_v2(value[key])
+            for key in sorted(value, key=lambda item: item.encode('utf-16be', 'surrogatepass'))
+        ) + '}'
+    raise CanonicalizationError('non_json_value')
+
+
+def canonicalize_artifact_v2(value: Any) -> str:
+    """Return v0.2 canonical JSON without changing frozen v0.1 bytes.
+
+    v0.2 accepts finite IEEE-754 values but rejects integral values outside the
+    JSON/ECMAScript safe-integer range, so Python ``int`` values cannot silently
+    acquire a different JavaScript value.  It normalizes signed zero and uses
+    ECMAScript's plain/scientific decimal thresholds.
+    """
+    return _canonicalize_v2(value)
+
+
+def canonical_artifact_bytes_v2(value: Any) -> bytes:
+    """Return UTF-8 bytes for the additive v0.2 canonical JSON profile."""
+    return canonicalize_artifact_v2(value).encode('utf-8')
+
+
+def artifact_sha256_v2(value: Any) -> str:
+    """Return SHA-256 hex digest over v0.2 canonical artifact bytes."""
+    return hashlib.sha256(canonical_artifact_bytes_v2(value)).hexdigest()
 
 
 def canonical_artifact_bytes(value: Any) -> bytes:

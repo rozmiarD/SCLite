@@ -36,6 +36,33 @@ artifact contracts intentionally remain on earlier schema versions.
 | Runtime replay store | not supported in SCLite | GovEngine defines `guarded_domain_auth_fresh` decision semantics and a claim-once port; production host adapters own atomic durable state. |
 | Reaction, trigger, watchdog and automation contracts | removed from SCLite 2.0 | RExecOp owns the modules and schemas; use its resolver for historical artifacts. See [`MIGRATING_TO_2.md`](MIGRATING_TO_2.md). |
 
+## ADR: Additive Numeric Canonicalization Profile (`sclite-json-v0.2`)
+
+**Decision.** `sclite-json-v0.1` remains the frozen historical profile.  Its
+existing canonical bytes and SHA-256 digests are not rewritten, and existing
+`canonicalize_artifact`, `canonical_artifact_bytes`, and `artifact_sha256`
+continue to use v0.1.  SCLite adds the opt-in `sclite-json-v0.2` helpers for
+new artifacts that need cross-language numeric conformance.
+
+**v0.2 numeric contract.** The profile accepts finite JSON numbers only.  It
+normalizes `-0.0` to `0`, renders `1.0` as `1`, uses ECMAScript plain versus
+scientific decimal thresholds, and rejects an integral value whose magnitude
+exceeds `2^53 - 1`.  The latter prevents a Python integer from acquiring a
+different JavaScript value after JSON parsing.  Rejections use stable reason
+codes: `unsafe_integer` and `non_finite_number`.
+
+**Compatibility and migration.** v0.2 is additive: a descriptor for a new
+artifact must name `sclite-json-v0.2`, while a descriptor naming v0.1 keeps
+the exact historical verifier and bytes.  Consumers must select the named
+profile; they must not silently reinterpret a v0.1 artifact as v0.2.  The
+versioned corpus is executed independently by Python and JavaScript, requiring
+identical canonical bytes and digests for accepted values or the same stable
+reason code for rejected values.
+
+This is a canonical-byte contract only.  It does not create an authorization
+decision, policy engine, replay ledger, signature service, or a new source of
+canonical evidence outside SCLite.
+
 ## Unknown Fields Policy
 
 Many current schemas preserve forward compatibility by allowing additional

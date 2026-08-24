@@ -14,6 +14,100 @@
       "sha256": "abe44cfee7fa44f3d138e868912b6572d561dd1422154b44d231da08e7feff92"
     }
   ],
+  "numeric_canonicalization_v0_2": [
+    {
+      "id": "max_safe_integer",
+      "value": 9007199254740991,
+      "status": "accepted",
+      "canonical": "9007199254740991",
+      "sha256": "f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26"
+    },
+    {
+      "id": "first_unsafe_integer",
+      "value": 9007199254740992,
+      "status": "rejected",
+      "reason_code": "unsafe_integer"
+    },
+    {
+      "id": "one_point_zero",
+      "value": 1.0,
+      "status": "accepted",
+      "canonical": "1",
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "id": "negative_zero",
+      "value": -0.0,
+      "status": "accepted",
+      "canonical": "0",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "id": "fractional_decimal",
+      "value": 0.1,
+      "status": "accepted",
+      "canonical": "0.1",
+      "sha256": "14be4b45f18e0d8c67b4f719b5144eee88497e413709d11d85b096d8e2346310"
+    },
+    {
+      "id": "one_e_minus_7",
+      "value": 1e-7,
+      "status": "accepted",
+      "canonical": "1e-7",
+      "sha256": "5b33e02f2c5103a05d32f6ba9cb058294452bfbf393967f68bb30c1bdcbbab22"
+    },
+    {
+      "id": "one_e_20",
+      "value": 1e20,
+      "status": "rejected",
+      "reason_code": "unsafe_integer"
+    },
+    {
+      "id": "one_e_21",
+      "value": 1e21,
+      "status": "rejected",
+      "reason_code": "unsafe_integer"
+    },
+    {
+      "id": "minimum_subnormal",
+      "value": 5e-324,
+      "status": "accepted",
+      "canonical": "5e-324",
+      "sha256": "c46e7ca1be4c8734f373a56530787288fa2058d73d07855e9247e949f811a42a"
+    },
+    {
+      "id": "minimum_normal",
+      "value": 2.2250738585072014e-308,
+      "status": "accepted",
+      "canonical": "2.2250738585072014e-308",
+      "sha256": "8d51a73768cb59d15302f6b0a4c7147a04b0cce9df743b5bf50e31ab87b2d807"
+    },
+    {
+      "id": "plain_scientific_boundary",
+      "value": 1e-6,
+      "status": "accepted",
+      "canonical": "0.000001",
+      "sha256": "159fb29a827ad04b260aa6c8ab6d8637f8f2b38af5c4f3cb49d6a21205e040f8"
+    },
+    {
+      "id": "nan",
+      "input": "NaN",
+      "status": "rejected",
+      "reason_code": "non_finite_number"
+    },
+    {
+      "id": "positive_infinity",
+      "input": "Infinity",
+      "status": "rejected",
+      "reason_code": "non_finite_number"
+    },
+    {
+      "id": "negative_infinity",
+      "input": "-Infinity",
+      "status": "rejected",
+      "reason_code": "non_finite_number"
+    }
+  ],
   "chain": {
     "payload": {"previous_chain_digest": "", "role": "subject", "artifact_digest": "5525a6315dcc706a78a0143786cf4395229386bdac2409ec60feb9561564c5d3", "artifact_type": "example", "canonicalization": "sclite-json-v0.1", "algorithm": "sha256"},
     "sha256": "b4e54121524fa0c8adc8ac4b23bc1c3ba3929fe8eecf2f6042f1380f556ca172"
