@@ -271,6 +271,64 @@ def test_kernel_guard_uses_constant_time_compare_for_entry_and_root_tags(monkeyp
     assert calls[-1][0] == guard['root_tag']
 
 
+@pytest.mark.parametrize('entry_count', [True, '6'])
+def test_kernel_guard_rejects_non_json_entry_count_without_coercion(entry_count: object) -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    guard['entry_count'] = entry_count
+
+    with pytest.raises(KernelGuardError, match='must be a JSON integer') as exc_info:
+        verify_kernel_guard_manifest(
+            manifest,
+            guard,
+            key=KEY,
+            validate_chain=False,
+            validate_guard_schema=False,
+        )
+    assert exc_info.value.code == 'invalid_json_integer'
+
+
+@pytest.mark.parametrize(
+    ('target', 'value'),
+    [
+        ('entry', 'ą' * 64),
+        ('entry', 'g' * 64),
+        ('root', 'ą' * 64),
+        ('root', 'g' * 64),
+    ],
+)
+def test_kernel_guard_rejects_malformed_hmac_tags_before_compare_digest(
+    target: str,
+    value: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest = _load_manifest()
+    guard = _guard(manifest)
+    if target == 'entry':
+        guard['entry_guards'][0]['tag'] = value
+    else:
+        guard['root_tag'] = value
+    calls: list[tuple[str, str]] = []
+    real_compare_digest = kernel_guard_module.hmac.compare_digest
+
+    def spy_compare_digest(left: str, right: str) -> bool:
+        calls.append((left, right))
+        return real_compare_digest(left, right)
+
+    monkeypatch.setattr(kernel_guard_module.hmac, 'compare_digest', spy_compare_digest)
+
+    with pytest.raises(KernelGuardError, match='lowercase ASCII hexadecimal HMAC tag') as exc_info:
+        verify_kernel_guard_manifest(
+            manifest,
+            guard,
+            key=KEY,
+            validate_chain=False,
+            validate_guard_schema=False,
+        )
+    assert exc_info.value.code == 'invalid_hmac_tag'
+    assert all(value not in pair for pair in calls)
+
+
 def test_kernel_guard_validates_chain_before_tag_comparison(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     bundle = tmp_path / 'bundle'
     shutil.copytree(FIXTURE, bundle)

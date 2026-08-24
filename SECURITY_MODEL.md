@@ -82,6 +82,15 @@ When an external schema is explicitly allowed with a `root`, SCLite resolves
 exactly that root-contained path and rejects `..` or symlink escapes. There is
 no fallback to repository-local schema files for untrusted artifact refs.
 
+Strict scoped-ticket receipt and evidence verification requires each supplied
+artifact to declare a known packaged `schema_ref`; it does not infer a schema
+from a role, filename, or a caller-provided fallback. Invalid JSON integers
+(including Python booleans and numeric strings) and malformed Kernel Guard
+HMAC tags are rejected through typed SCLite validation errors before semantic
+or constant-time comparison. These checks validate local artifact boundaries
+only: they do not admit execution, authorize a policy decision, or add a
+replay ledger.
+
 ## Kernel Guard HMAC v1
 
 `kernel_guard_hmac_v1` is a sidecar profile. It does not mutate artifact

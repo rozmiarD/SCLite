@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Mapping, Sequence
 
-from .artifacts import JsonSchemaValidationError, validate_artifact
+from .artifacts import JsonSchemaValidationError, require_json_integer, validate_artifact
 from .errors import SCLiteValidationError
 from .integrity import artifact_descriptor
 from .json_types import json_array, json_mapping
@@ -153,8 +153,16 @@ def validate_ticket_semantics(
         raise TicketSemanticError('ticket network execution exceeds execution_contract bounds')
 
     _execution_max_commands(execution_bounds)
-    max_runs = int(execution_limits.get('max_runs') or 0)
-    max_uses = int(spend_limits.get('max_uses') or 0)
+    max_runs = require_json_integer(
+        execution_limits.get('max_runs'),
+        label='ticket.execution_limits.max_runs',
+        error_cls=TicketSemanticError,
+    )
+    max_uses = require_json_integer(
+        spend_limits.get('max_uses'),
+        label='ticket.spend_limits.max_uses',
+        error_cls=TicketSemanticError,
+    )
     if bool(spend_limits.get('one_shot')) and max_uses != 1:
         raise TicketSemanticError('one_shot ticket must have max_uses=1')
     if strict_ticket_profile and bool(spend_limits.get('one_shot')) and max_runs != 1:
@@ -264,10 +272,37 @@ def _runtime_matches_ticket(ticket: Mapping[str, Any], receipt: Mapping[str, Any
 
 
 def _as_int(value: Any, label: str) -> int:
+    return require_json_integer(value, label=label, error_cls=TicketUseVerificationError)
+
+
+def _validate_declared_artifact_schema(
+    artifact: Mapping[str, Any],
+    *,
+    label: str,
+    strict: bool,
+    strict_jsonschema: bool,
+) -> None:
+    """Validate a declared receipt/evidence schema without trusting a fallback.
+
+    Strict ticket/evidence verification requires the artifact to name a known
+    packaged schema.  The regular path keeps compatibility for historical
+    artifacts that omitted ``schema_ref``.
+    """
+    schema_ref = artifact.get('schema_ref')
+    if not isinstance(schema_ref, str) or not schema_ref:
+        if strict:
+            raise TicketUseVerificationError(
+                f'{label}.schema_ref must name a known packaged SCLite schema in strict validation',
+                code='missing_schema_ref',
+            )
+        return
     try:
-        return int(value)
-    except (TypeError, ValueError) as exc:
-        raise TicketUseVerificationError(f'{label} must be an integer') from exc
+        validate_artifact(dict(artifact), schema_ref, strict_jsonschema=strict_jsonschema)
+    except JsonSchemaValidationError as exc:
+        raise TicketUseVerificationError(
+            f'{label}.schema_ref is not a known packaged SCLite schema: {exc}',
+            code='unknown_schema_ref',
+        ) from exc
 
 
 def _execution_max_commands(execution_bounds: Mapping[str, Any]) -> int:
@@ -398,9 +433,13 @@ def verify_ticket_use(
         strict_jsonschema=strict_jsonschema,
         strict_ticket_profile=strict_ticket_profile,
     )
-    schema_ref = str(receipt.get('schema_ref') or '')
-    if schema_ref:
-        validate_artifact(dict(receipt), schema_ref, strict_jsonschema=strict_jsonschema)
+    strict_schema_refs = strict_jsonschema or strict_ticket_profile or strict_evidence_claims
+    _validate_declared_artifact_schema(
+        receipt,
+        label='receipt',
+        strict=strict_schema_refs,
+        strict_jsonschema=strict_jsonschema,
+    )
 
     _assert_artifact_link(receipt, 'execution_ticket', ticket, 'receipt', 'receipt-ticket descriptor mismatch')
     _assert_artifact_link(receipt, 'execution_contract', execution_contract, 'receipt', 'receipt-execution_contract descriptor mismatch')
@@ -481,9 +520,12 @@ def verify_ticket_use(
     if bool(spend.get('requires_evidence_contract')) and evidence_contract is None:
         raise TicketUseVerificationError('ticket requires an evidence contract but none was provided')
     if evidence_contract is not None:
-        evidence_schema_ref = str(evidence_contract.get('schema_ref') or '')
-        if evidence_schema_ref:
-            validate_artifact(dict(evidence_contract), evidence_schema_ref, strict_jsonschema=strict_jsonschema)
+        _validate_declared_artifact_schema(
+            evidence_contract,
+            label='evidence_contract',
+            strict=strict_schema_refs,
+            strict_jsonschema=strict_jsonschema,
+        )
         _assert_artifact_link(evidence_contract, 'execution_receipt', receipt, 'evidence_contract', 'evidence-receipt descriptor mismatch')
         _assert_artifact_link(evidence_contract, 'execution_ticket', ticket, 'evidence_contract', 'evidence-ticket descriptor mismatch')
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Mapping
 
 from ._json import load_json_object
-from .errors import SCLiteSchemaValidationError
+from .errors import SCLiteSchemaValidationError, SCLiteValidationError
 from .json_types import json_mapping
 from .schema_resolver import SchemaResolutionError, SchemaResolver
 
@@ -53,6 +53,26 @@ class JsonSchemaValidationError(SCLiteSchemaValidationError):
     """Compatibility name for schema validation failures through SCLite 2.0."""
 
 
+def require_json_integer(
+    value: Any,
+    *,
+    label: str,
+    error_cls: type[SCLiteValidationError] = SCLiteValidationError,
+) -> int:
+    """Return a JSON integer without Python or string coercion.
+
+    JSON booleans are distinct from integers even though ``bool`` subclasses
+    ``int`` in Python.  This boundary is deliberately shared by artifact
+    verifiers so caller-controlled values never reach ``int(...)`` coercion.
+    """
+    if type(value) is not int:
+        raise error_cls(
+            f'{label} must be a JSON integer (boolean and string values are not accepted)',
+            code='invalid_json_integer',
+        )
+    return value
+
+
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -85,6 +105,26 @@ def _json_type_name(value: Any) -> str:
     if value is None:
         return 'null'
     return type(value).__name__
+
+
+def _json_values_equal(left: Any, right: Any) -> bool:
+    """Compare JSON values without Python's bool-as-int equivalence."""
+    left_type = _json_type_name(left)
+    right_type = _json_type_name(right)
+    number_types = {'integer', 'number'}
+    if left_type != right_type and {left_type, right_type} != number_types:
+        return False
+    if isinstance(left, Mapping) and isinstance(right, Mapping):
+        return (
+            set(left) == set(right)
+            and all(_json_values_equal(left[key], right[key]) for key in left)
+        )
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(
+            _json_values_equal(left_item, right_item)
+            for left_item, right_item in zip(left, right)
+        )
+    return bool(left == right)
 
 
 def _assert_json_schema_type(value: Any, expected: Any, path: str) -> None:
@@ -122,9 +162,9 @@ def validate_json_schema_value(
     if '$ref' in schema:
         validate_json_schema_value(_resolve_local_ref(root, str(schema['$ref'])), value, path, root_schema=root)
         return
-    if 'const' in schema and value != schema['const']:
+    if 'const' in schema and not _json_values_equal(value, schema['const']):
         raise JsonSchemaValidationError(f'{path}: expected const {schema["const"]!r}, got {value!r}')
-    if 'enum' in schema and value not in schema['enum']:
+    if 'enum' in schema and not any(_json_values_equal(value, item) for item in schema['enum']):
         raise JsonSchemaValidationError(f'{path}: expected one of {schema["enum"]!r}, got {value!r}')
     if 'type' in schema:
         _assert_json_schema_type(value, schema['type'], path)

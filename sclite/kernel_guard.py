@@ -3,11 +3,12 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import re
 import secrets
 from typing import Any, Dict, Literal, Mapping, Sequence
 
 from ._json import VerificationLimits, validate_json_value
-from .artifacts import validate_artifact
+from .artifacts import require_json_integer, validate_artifact
 from .errors import SCLiteValidationError
 from .integrity.chain import (
     ChainVerificationError,
@@ -30,6 +31,7 @@ _PLACEHOLDER_KEY_MARKERS = (
     b'placeholder',
     b'replace-me',
 )
+_HMAC_SHA256_HEX = re.compile(r'^[0-9a-f]{64}$', re.ASCII)
 
 
 class KernelGuardError(SCLiteValidationError):
@@ -76,6 +78,16 @@ def _sha256_hex(value: Mapping[str, Any]) -> str:
 
 def _hmac_hex(key: bytes, value: Mapping[str, Any]) -> str:
     return hmac.new(key, _canonical_bytes(value), hashlib.sha256).hexdigest()
+
+
+def _validated_hmac_tag(value: Any, *, label: str) -> str:
+    """Reject non-ASCII or malformed tags before constant-time comparison."""
+    if not isinstance(value, str) or not value.isascii() or _HMAC_SHA256_HEX.fullmatch(value) is None:
+        raise KernelGuardError(
+            f'{label} must be a 64-character lowercase ASCII hexadecimal HMAC tag',
+            code='invalid_hmac_tag',
+        )
+    return value
 
 
 def manifest_metadata_digest(manifest: Mapping[str, Any]) -> str:
@@ -289,7 +301,11 @@ def _verify_kernel_guard_manifest_with_snapshot(
         raise KernelGuardError('kernel guard entry_guards is not an array of objects')
     if len(entry_guards) != len(entries):
         raise KernelGuardError('kernel guard entry_count mismatch')
-    if int(guard.get('entry_count') or -1) != len(entries):
+    if require_json_integer(
+        guard.get('entry_count'),
+        label='kernel_guard.entry_count',
+        error_cls=KernelGuardError,
+    ) != len(entries):
         raise KernelGuardError('kernel guard entry_count mismatch')
     _assert_guard_field(guard, 'chain_id', str(manifest.get('chain_id') or ''), label='kernel guard root')
     _assert_guard_field(guard, 'root_chain_digest', str(manifest.get('root_chain_digest') or ''), label='kernel guard root')
@@ -311,7 +327,8 @@ def _verify_kernel_guard_manifest_with_snapshot(
         for field, expected in transcript.items():
             _assert_guard_field(entry_guard, field, expected, label=f'kernel guard entry[{seq}]')
         expected_tag = _hmac_hex(key_bytes, transcript)
-        if not hmac.compare_digest(str(entry_guard.get('tag') or ''), expected_tag):
+        actual_tag = _validated_hmac_tag(entry_guard.get('tag'), label=f'kernel guard entry[{seq}].tag')
+        if not hmac.compare_digest(actual_tag, expected_tag):
             raise KernelGuardError(f'kernel guard entry[{seq}] tag mismatch')
         computed_tags.append(expected_tag)
         previous_tag = expected_tag
@@ -328,7 +345,8 @@ def _verify_kernel_guard_manifest_with_snapshot(
         key_id=key_id,
     )
     expected_root_tag = _hmac_hex(key_bytes, root_transcript)
-    if not hmac.compare_digest(str(guard.get('root_tag') or ''), expected_root_tag):
+    root_tag = _validated_hmac_tag(guard.get('root_tag'), label='kernel guard root_tag')
+    if not hmac.compare_digest(root_tag, expected_root_tag):
         raise KernelGuardError('kernel guard root_tag mismatch')
 
     result = {

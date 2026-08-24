@@ -53,3 +53,25 @@ def test_dependency_free_schema_validator_resolves_local_refs() -> None:
     validate_json_schema_value(schema, {'link': {'digest': 'a' * 64}})
     with pytest.raises(JsonSchemaValidationError, match='pattern'):
         validate_json_schema_value(schema, {'link': {'digest': 'not-a-digest'}})
+
+
+@pytest.mark.parametrize(
+    ('schema', 'value'),
+    [
+        ({'const': 0}, False),
+        ({'const': False}, 0),
+        ({'const': 1}, True),
+        ({'const': True}, 1),
+        ({'enum': [0]}, False),
+        ({'enum': [False]}, 0),
+        ({'enum': [1]}, True),
+        ({'enum': [True]}, 1),
+        ({'const': {'enabled': False}}, {'enabled': 0}),
+    ],
+)
+def test_dependency_free_schema_validator_keeps_boolean_and_integer_values_distinct(
+    schema: dict,
+    value: object,
+) -> None:
+    with pytest.raises(JsonSchemaValidationError, match='expected const|expected one of'):
+        validate_json_schema_value(schema, value)

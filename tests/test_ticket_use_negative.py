@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from sclite.integrity import artifact_descriptor
+from sclite.errors import SCLiteValidationError
 from sclite.tickets import TicketSemanticError, TicketUseVerificationError, validate_ticket_semantics, verify_ticket_use
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -295,6 +296,80 @@ def test_ticket_semantics_rejects_malformed_contract_command_bound(bound: object
 
     with pytest.raises(TicketSemanticError, match=message):
         validate_ticket_semantics(artifacts['execution_ticket'], artifacts['execution_contract'])
+
+
+@pytest.mark.parametrize('value', [True, '2'])
+def test_ticket_semantics_rejects_non_json_run_and_use_limits(value: object) -> None:
+    ticket = _ticket()
+    ticket['execution_limits']['max_runs'] = value
+
+    with pytest.raises(SCLiteValidationError):
+        validate_ticket_semantics(ticket, _contract())
+
+    ticket = _ticket()
+    ticket['spend_limits']['max_uses'] = value
+    with pytest.raises(SCLiteValidationError):
+        validate_ticket_semantics(ticket, _contract())
+
+
+@pytest.mark.parametrize('value', [True, '1'])
+def test_ticket_use_rejects_non_json_receipt_use_count_without_coercion(value: object) -> None:
+    receipt = _receipt()
+    receipt.pop('schema_ref')
+    receipt['ticket_use']['use_count'] = value
+
+    with pytest.raises(TicketUseVerificationError, match='must be a JSON integer') as exc_info:
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence())
+    assert exc_info.value.code == 'invalid_json_integer'
+
+
+@pytest.mark.parametrize(
+    'strict_options',
+    [
+        {'strict_ticket_profile': True},
+        {'strict_jsonschema': True},
+        {'strict_evidence_claims': True},
+    ],
+)
+def test_strict_ticket_use_requires_receipt_schema_ref(strict_options: dict[str, bool]) -> None:
+    receipt = _receipt()
+    receipt.pop('schema_ref')
+
+    with pytest.raises(TicketUseVerificationError, match='receipt.schema_ref must name') as exc_info:
+        verify_ticket_use(_ticket(), _contract(), receipt, _evidence(), **strict_options)
+    assert exc_info.value.code == 'missing_schema_ref'
+
+
+@pytest.mark.parametrize(
+    'strict_options',
+    [
+        {'strict_ticket_profile': True},
+        {'strict_jsonschema': True},
+        {'strict_evidence_claims': True},
+    ],
+)
+def test_strict_ticket_use_requires_evidence_schema_ref(strict_options: dict[str, bool]) -> None:
+    evidence = _evidence()
+    evidence.pop('schema_ref')
+
+    with pytest.raises(TicketUseVerificationError, match='evidence_contract.schema_ref must name') as exc_info:
+        verify_ticket_use(_ticket(), _contract(), _receipt(), evidence, **strict_options)
+    assert exc_info.value.code == 'missing_schema_ref'
+
+
+def test_strict_ticket_use_rejects_unknown_receipt_schema_ref() -> None:
+    receipt = _receipt()
+    receipt['schema_ref'] = 'schemas/not-known.json'
+
+    with pytest.raises(TicketUseVerificationError, match='not a known packaged SCLite schema') as exc_info:
+        verify_ticket_use(
+            _ticket(),
+            _contract(),
+            receipt,
+            _evidence(),
+            strict_ticket_profile=True,
+        )
+    assert exc_info.value.code == 'unknown_schema_ref'
 
 
 def test_ticket_use_rejects_evidence_replay_live_execution_requirement() -> None:
